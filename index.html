@@ -929,93 +929,93 @@
                     <!-- NACIONAL FILTERS CONTAINER -->
                     <div id="nacionalFiltersContainer" style="display: none; width: 100%;">
                         <!-- SECCIÓN A: Filtros sobre el número completo (0-99999) -->
-                        <div style="grid-column: 1 / -1; margin-top: 10px; margin-bottom: 12px; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; color: var(--primary); font-size: 1.05rem;">
+                        <div style="grid-column: 1 / -1; margin-top: 10px; margin-bottom: 12px; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; color: var(--primary); font-size: 1.05rem;" data-i18n="filters.nacional.seccionA">
                             🅰️ Filtros del Número Completo (00000 - 99999)
                         </div>
 
                         <!-- 1. Suma de dígitos -->
-                        <div class="filter-group" title="Suma de los 5 dígitos individuales (rango 0 a 45).">
-                            <div class="filter-title">🎯 Suma de Dígitos (0-45)</div>
+                        <div class="filter-group" title="Suma de los 5 dígitos individuales (rango 0 a 45)." data-i18n-title="filters.nacSumaDigitos.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacSumaDigitos.titulo">🎯 Suma de Dígitos (0-45)</div>
                             <div class="range-control">
                                 <input type="number" id="nacionalSumaDigitosMin" value="15" min="0" max="45" style="width: 70px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="nacionalSumaDigitosMax" value="30" min="0" max="45" style="width: 70px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
                             </div>
-                            <div class="validation-error" id="nacionalSumaDigitosError">El mínimo no puede ser mayor que el máximo</div>
+                            <div class="validation-error" id="nacionalSumaDigitosError" data-i18n="filters.nacSumaDigitos.error">El mínimo no puede ser mayor que el máximo</div>
                         </div>
 
                         <!-- 2. Capicúa -->
-                        <div class="filter-group" title="Filtra si el número leído al revés es igual (ABCBA).">
-                            <div class="filter-title">🔄 Capicúa (Palíndromo)</div>
+                        <div class="filter-group" title="Filtra si el número leído al revés es igual (ABCBA)." data-i18n-title="filters.nacCapicua.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacCapicua.titulo">🔄 Capicúa (Palíndromo)</div>
                             <select id="nacionalCapicua" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="yes">Sí (Ej: 12321)</option>
-                                <option value="no">No (Normal)</option>
+                                <option value="all" data-i18n="filters.nacCapicua.indiferente">Indiferente</option>
+                                <option value="yes" data-i18n="filters.nacCapicua.si">Sí (Ej: 12321)</option>
+                                <option value="no" data-i18n="filters.nacCapicua.no">No (Normal)</option>
                             </select>
                         </div>
 
                         <!-- 3. Primalidad -->
-                        <div class="filter-group" title="Comprueba si el valor entero de 5 cifras es un número primo.">
-                            <div class="filter-title">🔢 Número Completo Primo</div>
+                        <div class="filter-group" title="Comprueba si el valor entero de 5 cifras es un número primo." data-i18n-title="filters.nacPrimo.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacPrimo.titulo">🔢 Número Completo Primo</div>
                             <select id="nacionalPrimo" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="yes">Es Primo</option>
-                                <option value="no">No es Primo</option>
+                                <option value="all" data-i18n="filters.nacCapicua.indiferente">Indiferente</option>
+                                <option value="yes" data-i18n="filters.nacPrimo.esPrimo">Es Primo</option>
+                                <option value="no" data-i18n="filters.nacPrimo.noEsPrimo">No es Primo</option>
                             </select>
                         </div>
 
                         <!-- 4. Cuadrado / Cubo perfecto -->
-                        <div class="filter-group" title="Comprueba si el número es un cuadrado o cubo perfecto.">
-                            <div class="filter-title">📐 Cuadrado / Cubo Perfecto</div>
+                        <div class="filter-group" title="Comprueba si el número es un cuadrado o cubo perfecto." data-i18n-title="filters.nacCuadradoCubo.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacCuadradoCubo.titulo">📐 Cuadrado / Cubo Perfecto</div>
                             <select id="nacionalCuadradoCubo" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="yes">Sí es Cuadrado/Cubo</option>
-                                <option value="no">No lo es</option>
+                                <option value="all" data-i18n="filters.nacCapicua.indiferente">Indiferente</option>
+                                <option value="yes" data-i18n="filters.nacCuadradoCubo.si">Sí es Cuadrado/Cubo</option>
+                                <option value="no" data-i18n="filters.nacCuadradoCubo.no">No lo es</option>
                             </select>
                         </div>
 
                         <!-- 5. Repdigits -->
-                        <div class="filter-group" title="Números con los 5 dígitos iguales (00000, 11111, ..., 99999).">
-                            <div class="filter-title">👯 Repdigits (5 Cifras Iguales)</div>
+                        <div class="filter-group" title="Números con los 5 dígitos iguales (00000, 11111, ..., 99999)." data-i18n-title="filters.nacRepdigits.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacRepdigits.titulo">👯 Repdigits (5 Cifras Iguales)</div>
                             <select id="nacionalRepdigits" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="yes">Sí (Ej: 33333)</option>
-                                <option value="no">No (Evitar repdigits)</option>
+                                <option value="all" data-i18n="filters.nacCapicua.indiferente">Indiferente</option>
+                                <option value="yes" data-i18n="filters.nacRepdigits.si">Sí (Ej: 33333)</option>
+                                <option value="no" data-i18n="filters.nacRepdigits.no">No (Evitar repdigits)</option>
                             </select>
                         </div>
 
                         <!-- 6. Múltiplo de N -->
-                        <div class="filter-group" title="Filtra números divisibles por el divisor N configurado.">
-                            <div class="filter-title">➗ Múltiplo de N (Divisor)</div>
+                        <div class="filter-group" title="Filtra números divisibles por el divisor N configurado." data-i18n-title="filters.nacMultiplo.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacMultiplo.titulo">➗ Múltiplo de N (Divisor)</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 0.85rem; color: #475569;">Múltiplo de:</span>
+                                <span style="font-size: 0.85rem; color: #475569;" data-i18n="filters.nacMultiplo.label">Múltiplo de:</span>
                                 <input type="number" id="nacionalMultiploDe" value="1" min="1" max="999" style="width: 70px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
                             </div>
-                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Utiliza 1 para desactivar este filtro.</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;" data-i18n="filters.nacMultiplo.hint">Utiliza 1 para desactivar este filtro.</div>
                         </div>
 
                         <!-- 7. Rango por franja -->
-                        <div class="filter-group" title="Filtra por franja de decenas de millar/millares (00000-99999).">
-                            <div class="filter-title">📊 Rango por Franja</div>
+                        <div class="filter-group" title="Filtra por franja de decenas de millar/millares (00000-99999)." data-i18n-title="filters.nacFranja.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacFranja.titulo">📊 Rango por Franja</div>
                             <div class="range-control">
                                 <input type="number" id="nacionalFranjaMin" value="0" min="0" max="99999" style="width: 85px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="nacionalFranjaMax" value="99999" min="0" max="99999" style="width: 85px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
                             </div>
-                            <div class="validation-error" id="nacionalFranjaError">Rango inválido (0 - 99999)</div>
+                            <div class="validation-error" id="nacionalFranjaError" data-i18n="filters.nacFranja.error">Rango inválido (0 - 99999)</div>
                         </div>
 
                         <!-- 8. Distancia a número objetivo -->
-                        <div class="filter-group" title="Compara la distancia absoluta (diferencia) respecto a un número marcado.">
-                            <div class="filter-title">🎯 Distancia a Número Objetivo</div>
+                        <div class="filter-group" title="Compara la distancia absoluta (diferencia) respecto a un número marcado." data-i18n-title="filters.nacObjetivo.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacObjetivo.titulo">🎯 Distancia a Número Objetivo</div>
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span style="font-size: 0.8rem; color: #475569;">Objetivo:</span>
+                                    <span style="font-size: 0.8rem; color: #475569;" data-i18n="filters.nacObjetivo.label">Objetivo:</span>
                                     <input type="text" id="nacionalObjetivo" value="00000" maxlength="5" placeholder="Ej: 54321" style="width: 75px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px; font-family: monospace; text-align: center;">
                                 </div>
                                 <div class="range-control" style="margin-top: 4px;">
                                     <input type="number" id="nacionalDistanciaObjetivoMin" value="0" min="0" max="99999" style="width: 85px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
-                                    <span>a</span>
+                                    <span data-i18n="filters.rangoA">a</span>
                                     <input type="number" id="nacionalDistanciaObjetivoMax" value="99999" min="0" max="99999" style="width: 85px; padding: 6px; border: 2px solid #e5e7eb; border-radius: 6px;">
                                 </div>
                             </div>
