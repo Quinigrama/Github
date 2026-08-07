@@ -5155,7 +5155,6 @@ class DataLotto49Advanced {
 
       let infoText = group.getAttribute('data-info') || group.getAttribute('title') || '';
       const headerText = titleEl.textContent || '';
-      const titleKey = group.getAttribute('data-i18n-title');
 
       if (headerText.includes('Predictivos') || group.querySelector('#useMarkovSwitch')) {
         infoText = t('filters.predictivos.dataInfo');
@@ -5180,15 +5179,17 @@ class DataLotto49Advanced {
         infoText = "Filtro estadístico para la optimización y criba de combinaciones.";
       }
 
+      const titleKey = group.getAttribute('data-i18n-title');
+
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'filter-info-btn';
       btn.setAttribute('aria-label', `Información sobre ${headerText.trim()}`);
       btn.title = "Toca para ver explicación del filtro";
+      btn.setAttribute('data-info', infoText);
       if (titleKey) {
         btn.setAttribute('data-i18n-info', titleKey);
       }
-      btn.setAttribute('data-info', infoText);
       btn.textContent = 'ⓘ';
 
       titleEl.appendChild(btn);
