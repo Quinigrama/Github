@@ -5155,6 +5155,7 @@ class DataLotto49Advanced {
 
       let infoText = group.getAttribute('data-info') || group.getAttribute('title') || '';
       const headerText = titleEl.textContent || '';
+      const titleKey = group.getAttribute('data-i18n-title');
 
       if (headerText.includes('Predictivos') || group.querySelector('#useMarkovSwitch')) {
         infoText = t('filters.predictivos.dataInfo');
@@ -5184,6 +5185,9 @@ class DataLotto49Advanced {
       btn.className = 'filter-info-btn';
       btn.setAttribute('aria-label', `Información sobre ${headerText.trim()}`);
       btn.title = "Toca para ver explicación del filtro";
+      if (titleKey) {
+        btn.setAttribute('data-i18n-info', titleKey);
+      }
       btn.setAttribute('data-info', infoText);
       btn.textContent = 'ⓘ';
 
@@ -5218,21 +5222,6 @@ class DataLotto49Advanced {
             popover = document.createElement('div');
             popover.className = 'filter-info-popover';
 
-            const infoKey = filterGroup.getAttribute('data-i18n-info') || infoBtn.getAttribute('data-i18n-info');
-            const text = infoKey ? t(infoKey) : (infoBtn.getAttribute('data-info') || filterGroup.getAttribute('data-info') || filterGroup.getAttribute('title') || 'Explicación del filtro.');
-            const formattedText = text.split('\n').map(line => `<p style="margin: 0 0 4px 0;">${line}</p>`).join('');
-
-            popover.innerHTML = `
-              <button type="button" class="filter-info-popover-close" aria-label="Cerrar">&times;</button>
-              <div>${formattedText}</div>
-            `;
-
-            popover.querySelector('.filter-info-popover-close')?.addEventListener('click', (ev) => {
-              ev.stopPropagation();
-              popover?.classList.remove('active');
-              infoBtn.classList.remove('active');
-            });
-
             const titleEl = filterGroup.querySelector('.filter-title, .dashboard-filter-header');
             if (titleEl) {
               titleEl.insertAdjacentElement('afterend', popover);
@@ -5240,6 +5229,22 @@ class DataLotto49Advanced {
               filterGroup.appendChild(popover);
             }
           }
+
+          const infoKey = filterGroup.getAttribute('data-i18n-info') || infoBtn.getAttribute('data-i18n-info');
+          const text = infoKey ? t(infoKey) : (infoBtn.getAttribute('data-info') || filterGroup.getAttribute('data-info') || filterGroup.getAttribute('title') || 'Explicación del filtro.');
+          const formattedText = text.split('\n').map(line => `<p style="margin: 0 0 4px 0;">${line}</p>`).join('');
+
+          popover.innerHTML = `
+            <button type="button" class="filter-info-popover-close" aria-label="Cerrar">&times;</button>
+            <div>${formattedText}</div>
+          `;
+
+          popover.querySelector('.filter-info-popover-close')?.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            popover?.classList.remove('active');
+            infoBtn.classList.remove('active');
+          });
+
           popover.classList.add('active');
         }
         return;
