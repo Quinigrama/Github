@@ -84,7 +84,11 @@ export function applyTranslations(): void {
           console.warn('[i18n] Error al parsear data-i18n-params:', paramsAttr, e);
         }
       }
+      const infoBtn = el.querySelector('.filter-info-btn');
       el.textContent = t(key, params);
+      if (infoBtn) {
+        el.appendChild(infoBtn);
+      }
     }
   });
 
