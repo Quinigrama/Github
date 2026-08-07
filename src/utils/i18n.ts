@@ -78,6 +78,14 @@ export function applyTranslations(): void {
       el.textContent = t(key);
     }
   });
+
+  const titleElements = document.querySelectorAll('[data-i18n-title]');
+  titleElements.forEach((el) => {
+    const key = el.getAttribute('data-i18n-title');
+    if (key) {
+      el.setAttribute('title', t(key));
+    }
+  });
 }
 
 /**

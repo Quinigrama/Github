@@ -8375,7 +8375,7 @@ CONDICIONES DE USO ACEPTADAS:
   toggleDarkMode() {
     const isCurrentlyDark = document.body.classList.contains('dark-mode');
     this.applyDarkMode(!isCurrentlyDark);
-    this.showToast(`Modo Oscuro ${!isCurrentlyDark ? 'activado 🌙' : 'desactivado ☀️'}`, 'info');
+    this.showToast(!isCurrentlyDark ? t('toast.modoOscuroOn') : t('toast.modoOscuroOff'), 'info');
   }
 
   // =========================================================================

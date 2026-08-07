@@ -3,5 +3,21 @@
   "nav.herramientas": "🛠️ Herramientas",
   "nav.configuracion": "⚙️ Configuración",
   "nav.idioma": "🌐 Idioma (ES)",
-  "toast.peniaEliminada": "🗑️ Peña eliminada con éxito de Firestore."
+  "toast.peniaEliminada": "🗑️ Peña eliminada con éxito de Firestore.",
+  "nav.menuTitle": "🎲 DataLotto Menu",
+  "nav.disclaimer": "Disclaimer Ético",
+  "tools.visualizacion": "📊 Visualización de Datos",
+  "tools.bigdata": "🧠 Big Data Intelligence",
+  "tools.backtesting": "🔬 Backtesting Avanzado",
+  "tools.boletosGuardados": "📂 Boletos Guardados",
+  "tools.sorteosOficiales": "📅 Sorteos Oficiales",
+  "tools.rendimiento": "📈 Rendimiento de Boletos",
+  "tools.alertaBotes": "🔔 Alerta de Botes",
+  "config.recordatorios": "🗓️ Recordatorios de Sorteos",
+  "config.modoOscuro": "🌙 Modo Oscuro",
+  "config.enlaces": "🔗 Enlaces a URLs",
+  "config.contacto": "✉️ Contacto",
+  "config.modoAyuda": "❓ Modo Ayuda",
+  "toast.modoOscuroOn": "Modo Oscuro activado 🌙",
+  "toast.modoOscuroOff": "Modo Oscuro desactivado ☀️"
 }

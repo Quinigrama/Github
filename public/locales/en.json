@@ -3,5 +3,21 @@
   "nav.herramientas": "🛠️ Tools",
   "nav.configuracion": "⚙️ Settings",
   "nav.idioma": "🌐 Language (EN)",
-  "toast.peniaEliminada": "🗑️ Group successfully deleted from Firestore."
+  "toast.peniaEliminada": "🗑️ Group successfully deleted from Firestore.",
+  "nav.menuTitle": "🎲 DataLotto Menu",
+  "nav.disclaimer": "Ethical Disclaimer",
+  "tools.visualizacion": "📊 Data Visualization",
+  "tools.bigdata": "🧠 Big Data Intelligence",
+  "tools.backtesting": "🔬 Advanced Backtesting",
+  "tools.boletosGuardados": "📂 Saved Tickets",
+  "tools.sorteosOficiales": "📅 Official Draws",
+  "tools.rendimiento": "📈 Ticket Performance",
+  "tools.alertaBotes": "🔔 Jackpot Alert",
+  "config.recordatorios": "🗓️ Draw Reminders",
+  "config.modoOscuro": "🌙 Dark Mode",
+  "config.enlaces": "🔗 URL Links",
+  "config.contacto": "✉️ Contact",
+  "config.modoAyuda": "❓ Help Mode",
+  "toast.modoOscuroOn": "Dark Mode activated 🌙",
+  "toast.modoOscuroOff": "Dark Mode deactivated ☀️"
 }
