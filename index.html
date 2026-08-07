@@ -2901,6 +2901,23 @@
     </div>
   </div>
 
+  <!-- ====== MODAL: CONFIRMACIÓN GENÉRICO ====== -->
+  <div class="modal" id="genericConfirmModal" style="display: none; z-index: 9999;">
+    <div class="modal-content" style="max-width: 440px; width: 95%;">
+      <div class="modal-header" style="background: #ef4444; color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 id="genericConfirmTitle" style="margin: 0; font-size: 1.15rem; color: white;">⚠️ Confirmación</h3>
+        <button class="close-btn" id="genericConfirmCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px; text-align: left;">
+        <p id="genericConfirmMessage" style="margin: 0; font-size: 0.95rem; color: #334155; line-height: 1.5;"></p>
+      </div>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="modal-btn cancel" id="genericConfirmCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+        <button class="modal-btn confirm" id="genericConfirmOkBtn" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ====== MODAL: CAMBIAR APODO / ALIAS ====== -->
   <div class="modal" id="changeAliasModal" style="display: none;">
     <div class="modal-content" style="max-width: 420px; width: 95%;">

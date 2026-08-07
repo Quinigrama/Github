@@ -73,6 +73,49 @@ import {
 import firebaseConfig from './firebase-applet-config.json';
 
 const firebaseApp = initializeApp(firebaseConfig);
+export function showConfirmModal(title: string, message: string, confirmText: string = 'Confirmar'): Promise<boolean> {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('genericConfirmModal');
+    const titleEl = document.getElementById('genericConfirmTitle');
+    const messageEl = document.getElementById('genericConfirmMessage');
+    const okBtn = document.getElementById('genericConfirmOkBtn');
+    const cancelBtn = document.getElementById('genericConfirmCancelBtn');
+    const closeBtn = document.getElementById('genericConfirmCloseBtn');
+
+    if (!modal || !titleEl || !messageEl || !okBtn || !cancelBtn || !closeBtn) {
+      resolve(window.confirm(message));
+      return;
+    }
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    okBtn.textContent = confirmText;
+
+    const cleanup = () => {
+      modal.style.display = 'none';
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      closeBtn.removeEventListener('click', onCancel);
+    };
+
+    const onOk = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+
+    modal.style.display = 'block';
+  });
+}
+
 export const firebaseAuth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp, (firebaseConfig as any).firestoreDatabaseId);
 
@@ -11999,11 +12042,11 @@ CONDICIONES DE USO ACEPTADAS:
     this.showToast('🟢 Boleto guardado añadido a la peña.', 'success');
   }
 
-  removePeniaTicket(ticketIndex: number) {
+  async removePeniaTicket(ticketIndex: number) {
     const peña = this.getActivePenia();
     if (!peña) return;
 
-    if (confirm('¿Deseas quitar este boleto de la peña?')) {
+    if (await showConfirmModal('Quitar Boleto', '¿Deseas quitar este boleto de la peña?', 'Quitar')) {
       peña.tickets.splice(ticketIndex, 1);
       this.savePenias();
       this.renderActivePeniaDetails();
@@ -12201,7 +12244,7 @@ contrato legal ni gestiona fondos monetarios.
     const peña = this.getActivePenia();
     if (!peña) return;
 
-    if (confirm(`¿Estás seguro de que deseas eliminar permanentemente la peña "${peña.name}"?`)) {
+    if (await showConfirmModal('Eliminar Peña', `¿Estás seguro de que deseas eliminar permanentemente la peña "${peña.name}"?`, 'Eliminar')) {
       try {
         await deletePeniaFromFirestore(db, peña.id);
         this.activePeniaId = null;
@@ -12217,7 +12260,7 @@ contrato legal ni gestiona fondos monetarios.
     const peña = this.getActivePenia();
     if (!peña) return;
 
-    if (confirm(`¿Deseas salir de la peña "${peña.name}"?`)) {
+    if (await showConfirmModal('Salir de la Peña', `¿Deseas salir de la peña "${peña.name}"?`, 'Salir')) {
       try {
         const updatedMembers = peña.members.filter(m => m !== this.userAlias && !m.startsWith(this.userAlias));
 
