@@ -4765,7 +4765,7 @@ class DataLotto49Advanced {
     }
     const entropyTermHint = document.getElementById('entropyTerminacionesHint');
     if (entropyTermHint) {
-        entropyTermHint.innerHTML = `💡 El valor óptimo suele estar en el rango de <strong>1.000 a ${lims.maxTermEntropy}</strong>. Evaluado con precisión de 3 decimales.`;
+        entropyTermHint.innerHTML = t('filters.entropiaTerm.hint', {max: lims.maxTermEntropy});
     }
 
     // 10. Entropía Intervalos Bounds & Hint
@@ -4778,7 +4778,7 @@ class DataLotto49Advanced {
     }
     const entropyIntHint = document.getElementById('entropyIntervalosHint');
     if (entropyIntHint) {
-        entropyIntHint.innerHTML = `💡 El valor óptimo suele estar en el rango de <strong>1.000 a ${lims.maxIntEntropy}</strong>. Evita simetrías rígidas u ordenadas artificialmente.`;
+        entropyIntHint.innerHTML = t('filters.entropiaInt.hint', {max: lims.maxIntEntropy});
     }
 
     // 11. Desviación Estándar Bounds
@@ -6002,7 +6002,7 @@ CONDICIONES DE USO ACEPTADAS:
     }
 
     if (badge) {
-      badge.textContent = mode === 'simple' ? '🎯 Simple' : '🔬 Experto';
+      badge.textContent = mode === 'simple' ? t('filters.modoSimple') : t('filters.modoExperto');
       (badge as HTMLElement).style.background = mode === 'simple' ? '#e0e7ff' : '#fef3c7';
       (badge as HTMLElement).style.color = mode === 'simple' ? '#3730a3' : '#92400e';
     }

@@ -600,7 +600,7 @@
     <!-- Filtros Avanzados -->
     <div class="collapsible-section">
         <div class="collapsible-header" data-target="filters">
-            <h3>⚙️ Panel de Control de Filtros Avanzados</h3>
+            <h3 data-i18n="filters.panelTitle">⚙️ Panel de Control de Filtros Avanzados</h3>
             <button class="collapse-btn collapsed" id="filtersCollapseBtn">+</button>
         </div>
         <div class="collapsible-content" id="filtersContent">
@@ -612,14 +612,14 @@
                     <!-- INTERRUPTOR DE MODO DE FILTROS (SIMPLE / EXPERTO) -->
                     <div class="filter-mode-toggle-container">
                         <div class="filter-mode-label">
-                            <span>🎛️ Modo de Filtros:</span>
-                            <span id="filterModeBadge" class="filter-mode-badge">🎯 Simple</span>
+                            <span data-i18n="filters.modoLabel">🎛️ Modo de Filtros:</span>
+                            <span id="filterModeBadge" class="filter-mode-badge" data-i18n="filters.modoSimple">🎯 Simple</span>
                         </div>
                         <div class="filter-mode-toggle-buttons">
-                            <button type="button" id="filterModeSimpleBtn" class="filter-mode-btn active" data-mode="simple">
+                            <button type="button" id="filterModeSimpleBtn" class="filter-mode-btn active" data-mode="simple" data-i18n="filters.modoSimple">
                                 🎯 Simple
                             </button>
-                            <button type="button" id="filterModeExpertBtn" class="filter-mode-btn" data-mode="expert">
+                            <button type="button" id="filterModeExpertBtn" class="filter-mode-btn" data-mode="expert" data-i18n="filters.modoExperto">
                                 🔬 Experto
                             </button>
                         </div>
@@ -628,8 +628,8 @@
                     <div id="standardFiltersContainer">
                     
                     <!-- GRUPO: Excluir Terminaciones -->
-                    <div class="filter-group" title="Excluye cualquier combinación que contenga un número terminado en los dígitos seleccionados.">
-                        <div class="filter-title">🚫 Excluir Terminaciones</div>
+                    <div class="filter-group" title="Excluye cualquier combinación que contenga un número terminado en los dígitos seleccionados." data-i18n-title="filters.excluirTerm.tooltip">
+                        <div class="filter-title" data-i18n="filters.excluirTerm.titulo">🚫 Excluir Terminaciones</div>
                         <div class="filter-options" id="terminacionesOptions">
                             <div class="filter-chip" data-value="0">0</div>
                             <div class="filter-chip" data-value="1">1</div>
@@ -645,8 +645,8 @@
                     </div>
 
                     <!-- GRUPO: Variedad de Terminaciones -->
-                    <div class="filter-group" data-filter-level="expert" title="Filtra por el número de terminaciones distintas.">
-                        <div class="filter-title">#️⃣ Variedad de Terminaciones</div>
+                    <div class="filter-group" data-filter-level="expert" title="Filtra por el número de terminaciones distintas." data-i18n-title="filters.variedadTerm.tooltip">
+                        <div class="filter-title" data-i18n="filters.variedadTerm.titulo">#️⃣ Variedad de Terminaciones</div>
                         <div class="filter-options" id="terminacionesDistintasOptions">
                              <div class="filter-chip" data-value="2">2</div>
                              <div class="filter-chip" data-value="3">3</div>
@@ -657,71 +657,71 @@
                     </div>
 
                     <!-- GRUPO: Entropía de Terminaciones -->
-                    <div class="filter-group" data-filter-level="expert" title="Mide la distribución y variedad de las cifras terminales usando la Entropía de Shannon. Un valor más alto indica terminaciones más dispersas y diversas.">
-                        <div class="filter-title">🌀 Entropía (Terminaciones)</div>
+                    <div class="filter-group" data-filter-level="expert" title="Mide la distribución y variedad de las cifras terminales usando la Entropía de Shannon. Un valor más alto indica terminaciones más dispersas y diversas." data-i18n-title="filters.entropiaTerm.tooltip">
+                        <div class="filter-title" data-i18n="filters.entropiaTerm.titulo">🌀 Entropía (Terminaciones)</div>
                         <div class="range-control">
                             <input type="number" id="entropyTerminacionesMin" value="1.000" min="0.000" max="2.600" step="0.001">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="entropyTerminacionesMax" value="2.585" min="0.000" max="2.600" step="0.001">
                         </div>
                         <div id="entropyTerminacionesHint" style="font-size: 0.75rem; color: #64748b; margin-top: 4px; line-height: 1.25;">
                             💡 El valor óptimo suele estar en el rango de <strong>1.000 a 2.585</strong>. Evaluado con precisión de 3 decimales.
                         </div>
-                        <div class="validation-error" id="entropyTerminacionesError">Error en rango</div>
+                        <div class="validation-error" id="entropyTerminacionesError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
 
                     <!-- GRUPO: Filtros de Balance -->
-                    <div class="filter-group" title="La suma de los números principales.">
-                        <div class="filter-title">🎯 Suma Total (Números)</div>
+                    <div class="filter-group" title="La suma de los números principales." data-i18n-title="filters.sumaTotal.tooltip">
+                        <div class="filter-title" data-i18n="filters.sumaTotal.titulo">🎯 Suma Total (Números)</div>
                         <div class="range-control">
                             <input type="number" id="sumMin" value="121" min="21" max="279">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="sumMax" value="190" min="21" max="279">
                         </div>
-                        <div class="validation-error" id="sumError">El valor mínimo no puede ser mayor que el máximo</div>
+                        <div class="validation-error" id="sumError" data-i18n="filters.errorSumaMinMax">El valor mínimo no puede ser mayor que el máximo</div>
                     </div>
 
-                    <div class="filter-group" title="Proporción de números pares e impares.">
-                        <div class="filter-title">⚖️ Par/Impar (Números)</div>
+                    <div class="filter-group" title="Proporción de números pares e impares." data-i18n-title="filters.parImpar.tooltip">
+                        <div class="filter-title" data-i18n="filters.parImpar.titulo">⚖️ Par/Impar (Números)</div>
                         <div class="filter-options" id="parImparOptions">
-                            <div class="filter-chip" data-value="6/0">6P/0I</div>
-                            <div class="filter-chip" data-value="5/1">5P/1I</div>
-                            <div class="filter-chip active" data-value="4/2">4P/2I</div>
-                            <div class="filter-chip active" data-value="3/3">3P/3I</div>
-                            <div class="filter-chip active" data-value="2/4">2P/4I</div>
-                            <div class="filter-chip" data-value="1/5">1P/5I</div>
-                            <div class="filter-chip" data-value="0/6">0P/6I</div>
+                            <div class="filter-chip" data-value="6/0" data-i18n="chip.parImpar.6/0">6P/0I</div>
+                            <div class="filter-chip" data-value="5/1" data-i18n="chip.parImpar.5/1">5P/1I</div>
+                            <div class="filter-chip active" data-value="4/2" data-i18n="chip.parImpar.4/2">4P/2I</div>
+                            <div class="filter-chip active" data-value="3/3" data-i18n="chip.parImpar.3/3">3P/3I</div>
+                            <div class="filter-chip active" data-value="2/4" data-i18n="chip.parImpar.2/4">2P/4I</div>
+                            <div class="filter-chip" data-value="1/5" data-i18n="chip.parImpar.1/5">1P/5I</div>
+                            <div class="filter-chip" data-value="0/6" data-i18n="chip.parImpar.0/6">0P/6I</div>
                         </div>
                     </div>
 
-                    <div class="filter-group" title="Proporción de números bajos y altos.">
-                        <div class="filter-title">📊 Bajos/Altos (Números)</div>
+                    <div class="filter-group" title="Proporción de números bajos y altos." data-i18n-title="filters.bajosAltos.tooltip">
+                        <div class="filter-title" data-i18n="filters.bajosAltos.titulo">📊 Bajos/Altos (Números)</div>
                         <div class="filter-options" id="bajosAltosOptions">
-                             <div class="filter-chip" data-value="6/0">6B/0A</div>
-                             <div class="filter-chip" data-value="5/1">5B/1A</div>
-                             <div class="filter-chip active" data-value="4/2">4B/2A</div>
-                             <div class="filter-chip active" data-value="3/3">3B/3A</div>
-                             <div class="filter-chip active" data-value="2/4">2B/4A</div>
-                             <div class="filter-chip" data-value="1/5">1B/5A</div>
-                             <div class="filter-chip" data-value="0/6">0B/6A</div>
+                             <div class="filter-chip" data-value="6/0" data-i18n="chip.bajosAltos.6/0">6B/0A</div>
+                             <div class="filter-chip" data-value="5/1" data-i18n="chip.bajosAltos.5/1">5B/1A</div>
+                             <div class="filter-chip active" data-value="4/2" data-i18n="chip.bajosAltos.4/2">4B/2A</div>
+                             <div class="filter-chip active" data-value="3/3" data-i18n="chip.bajosAltos.3/3">3B/3A</div>
+                             <div class="filter-chip active" data-value="2/4" data-i18n="chip.bajosAltos.2/4">2B/4A</div>
+                             <div class="filter-chip" data-value="1/5" data-i18n="chip.bajosAltos.1/5">1B/5A</div>
+                             <div class="filter-chip" data-value="0/6" data-i18n="chip.bajosAltos.0/6">0B/6A</div>
                         </div>
                     </div>
 
                     <!-- GRUPO: Filtros Estructurales -->
-                    <div class="filter-group" title="Cantidad de números primos.">
-                        <div class="filter-title">🔢 Números Primos</div>
+                    <div class="filter-group" title="Cantidad de números primos." data-i18n-title="filters.primos.tooltip">
+                        <div class="filter-title" data-i18n="filters.primos.titulo">🔢 Números Primos</div>
                         <div class="range-control">
-                             <span>Entre</span>
+                             <span data-i18n="filters.primos.entre">Entre</span>
                              <input type="number" id="primosMin" value="1" min="0" max="6">
-                             <span>y</span>
+                             <span data-i18n="filters.primos.y">y</span>
                              <input type="number" id="primosMax" value="3" min="0" max="6">
-                             <span>primos</span>
+                             <span data-i18n="filters.primos.sufijo">primos</span>
                         </div>
-                        <div class="validation-error" id="primosError">Error en rango</div>
+                        <div class="validation-error" id="primosError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
 
-                    <div class="filter-group" title="Agrupación de números consecutivos.">
-                        <div class="filter-title">🔗 Números Consecutivos</div>
+                    <div class="filter-group" title="Agrupación de números consecutivos." data-i18n-title="filters.consecutivos.tooltip">
+                        <div class="filter-title" data-i18n="filters.consecutivos.titulo">🔗 Números Consecutivos</div>
                         <div class="filter-options" id="consecutivosOptions">
                             <div class="filter-chip" data-value="6">6</div>
                             <div class="filter-chip" data-value="5/1">5/1</div>
@@ -738,31 +738,31 @@
                     </div>
 
                     <!-- GRUPO: Entropía de Intervalos -->
-                    <div class="filter-group" data-filter-level="expert" title="Mide la variación y desigualdad de los intervalos (distancias) entre números ordenados usando la Entropía de Shannon. Evita que los números estén espaciados de forma sospechosamente regular o irregular.">
-                        <div class="filter-title">🌀 Entropía (Intervalos)</div>
+                    <div class="filter-group" data-filter-level="expert" title="Mide la variación y desigualdad de los intervalos (distancias) entre números ordenados usando la Entropía de Shannon. Evita que los números estén espaciados de forma sospechosamente regular o irregular." data-i18n-title="filters.entropiaInt.tooltip">
+                        <div class="filter-title" data-i18n="filters.entropiaInt.titulo">🌀 Entropía (Intervalos)</div>
                         <div class="range-control">
                             <input type="number" id="entropyIntervalosMin" value="1.000" min="0.000" max="2.400" step="0.001">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="entropyIntervalosMax" value="2.322" min="0.000" max="2.400" step="0.001">
                         </div>
                         <div id="entropyIntervalosHint" style="font-size: 0.75rem; color: #64748b; margin-top: 4px; line-height: 1.25;">
                             💡 El valor óptimo suele estar en el rango de <strong>1.000 a 2.322</strong>. Evita simetrías rígidas u ordenadas artificialmente.
                         </div>
-                        <div class="validation-error" id="entropyIntervalosError">Error en rango</div>
+                        <div class="validation-error" id="entropyIntervalosError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
                     
-                    <div class="filter-group" title="Distancia mínima y máxima entre números adyacentes.">
-                        <div class="filter-title">↔️ Distancia entre Números</div>
+                    <div class="filter-group" title="Distancia mínima y máxima entre números adyacentes." data-i18n-title="filters.distancia.tooltip">
+                        <div class="filter-title" data-i18n="filters.distancia.titulo">↔️ Distancia entre Números</div>
                         <div class="range-control">
                             <input type="number" id="distanciaMin" value="1" min="1" max="44">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="distanciaMax" value="25" min="1" max="44">
                         </div>
-                        <div class="validation-error" id="distanciaError">Error en rango</div>
+                        <div class="validation-error" id="distanciaError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
                     
-                    <div class="filter-group" data-filter-level="expert" title="Distribución de los números en las decenas.">
-                        <div class="filter-title">📦 Agrupación por Decenas</div>
+                    <div class="filter-group" data-filter-level="expert" title="Distribución de los números en las decenas." data-i18n-title="filters.decenas.tooltip">
+                        <div class="filter-title" data-i18n="filters.decenas.titulo">📦 Agrupación por Decenas</div>
                          <div class="filter-options" id="agrupDecenasOptions">
                             <div class="filter-chip active" data-value="6">6</div>
                             <div class="filter-chip active" data-value="5/1">5/1</div>
@@ -777,40 +777,40 @@
                         </div>
                     </div>
 
-                    <div class="filter-group" title="La suma de todos los dígitos individuales.">
-                        <div class="filter-title">∑ Suma de Dígitos</div>
+                    <div class="filter-group" title="La suma de todos los dígitos individuales." data-i18n-title="filters.sumaDigitos.tooltip">
+                        <div class="filter-title" data-i18n="filters.sumaDigitos.titulo">∑ Suma de Dígitos</div>
                         <div class="range-control">
                             <input type="number" id="sumaDigitosMin" value="28" min="21" max="63">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="sumaDigitosMax" value="45" min="21" max="63">
                         </div>
-                        <div class="validation-error" id="sumaDigitosError">Error en rango</div>
+                        <div class="validation-error" id="sumaDigitosError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
 
                     <!-- GRUPO: Filtros Estadísticos Avanzados -->
-                    <div class="filter-group" data-filter-level="expert" title="Mide la dispersión de los números.">
-                        <div class="filter-title">📈 Desviación Estándar</div>
+                    <div class="filter-group" data-filter-level="expert" title="Mide la dispersión de los números." data-i18n-title="filters.desviacion.tooltip">
+                        <div class="filter-title" data-i18n="filters.desviacion.titulo">📈 Desviación Estándar</div>
                         <div class="range-control">
                             <input type="number" id="desviacionMin" value="12.0" min="1" max="24" step="0.1">
-                            <span>a</span>
+                            <span data-i18n="filters.rangoA">a</span>
                             <input type="number" id="desviacionMax" value="18.0" min="1" max="24" step="0.1">
                         </div>
-                        <div class="validation-error" id="desviacionError">Error en rango</div>
+                        <div class="validation-error" id="desviacionError" data-i18n="filters.errorRango">Error en rango</div>
                     </div>
 
                     <!-- GRUPO: Filtros Geométricos -->
-                    <div class="filter-group" data-filter-level="expert" title="Evita o favorece combinaciones que formen visuales.">
-                        <div class="filter-title">🗺️ Filtros Geométricos y Figuras</div>
+                    <div class="filter-group" data-filter-level="expert" title="Evita o favorece combinaciones que formen visuales." data-i18n-title="filters.geometricos.tooltip">
+                        <div class="filter-title" data-i18n="filters.geometricos.titulo">🗺️ Filtros Geométricos y Figuras</div>
                         <div class="filter-options" id="geometricOptions">
-                            <div class="filter-chip" data-value="lineas">🚫 Líneas</div>
-                            <div class="filter-chip" data-value="diagonales">🚫 Diagonales</div>
-                            <div class="filter-chip" data-value="triangulos">🚫 Triángulos</div>
-                            <div class="filter-chip" data-value="circulos">🚫 Círculos</div>
-                            <div class="filter-chip" data-value="cruces">🚫 Cruces</div>
-                            <div class="filter-chip" data-value="espaciados">👍 Espaciados</div>
+                            <div class="filter-chip" data-value="lineas" data-i18n="filters.geometricos.lineas">🚫 Líneas</div>
+                            <div class="filter-chip" data-value="diagonales" data-i18n="filters.geometricos.diagonales">🚫 Diagonales</div>
+                            <div class="filter-chip" data-value="triangulos" data-i18n="filters.geometricos.triangulos">🚫 Triángulos</div>
+                            <div class="filter-chip" data-value="circulos" data-i18n="filters.geometricos.circulos">🚫 Círculos</div>
+                            <div class="filter-chip" data-value="cruces" data-i18n="filters.geometricos.cruces">🚫 Cruces</div>
+                            <div class="filter-chip" data-value="espaciados" data-i18n="filters.geometricos.espaciados">👍 Espaciados</div>
                         </div>
                         <div class="filter-info-text">
-                            <b>Usa el Modo Figura 🗺️</b> en la selección de números para generar combinaciones dentro de un patrón específico.
+                            <b data-i18n="filters.geometricos.infoNegrita">Usa el Modo Figura 🗺️</b> <span data-i18n="filters.geometricos.infoResto">en la selección de números para generar combinaciones dentro de un patrón específico.</span>
                         </div>
                     </div>
 
