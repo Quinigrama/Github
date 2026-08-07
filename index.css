@@ -7,6 +7,7 @@
   --danger-light: #fca5a5;
   --warning: #f59e0b;
   --info: #06b6d4;
+  --info-light: #ecfeff;
   --bigdata: #2563eb;
   --bigdata-light: #dbeafe;
   --dark: #1f2937;
@@ -3305,6 +3306,7 @@ body.dark-mode {
   --light: #0f172a;
   --gray: #94a3b8;
   --bigdata-light: #1e3a8a;
+  --info-light: #164e63;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
   color: #f8fafc !important;
 }
