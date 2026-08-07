@@ -56,6 +56,7 @@ export interface Penia {
   name: string;
   gameId: string;
   creator: string;
+  creatorUid?: string;
   createdAt: string;
   members: string[];
   tickets: Ticket[];

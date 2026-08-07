@@ -12,17 +12,21 @@ service cloud.firestore {
       // Allow read for any authenticated user (including anonymous auth)
       allow read: if request.auth != null;
 
-      // Allow create for authenticated users
+      // Allow create for authenticated users if creatorUid matches request.auth.uid
       allow create: if request.auth != null
         && request.resource.data.code is string
         && request.resource.data.name is string
-        && request.resource.data.creator is string;
+        && request.resource.data.creator is string
+        && request.resource.data.creatorUid is string
+        && request.resource.data.creatorUid == request.auth.uid;
 
-      // Allow update for authenticated users
-      allow update: if request.auth != null;
+      // Allow update only for the creator
+      allow update: if request.auth != null
+        && resource.data.creatorUid == request.auth.uid;
 
-      // Allow delete for authenticated users
-      allow delete: if request.auth != null;
+      // Allow delete only for the creator
+      allow delete: if request.auth != null
+        && resource.data.creatorUid == request.auth.uid;
     }
   }
 }

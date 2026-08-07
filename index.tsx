@@ -12105,6 +12105,20 @@ contrato legal ni gestiona fondos monetarios.
   }
 
   async createNewPeniaFromModal() {
+    if (!firebaseAuth.currentUser) {
+      try {
+        await signInAnonymously(firebaseAuth);
+      } catch (err) {
+        console.error("Error signing in anonymously before creating penia:", err);
+      }
+    }
+
+    const currentUid = firebaseAuth.currentUser?.uid || '';
+    if (!currentUid) {
+      this.showToast('❌ Error de autenticación. Inténtalo de nuevo.', 'danger');
+      return;
+    }
+
     const nameInput = document.getElementById('newPeniaNameInput') as HTMLInputElement;
     const gameSelect = document.getElementById('newPeniaGameSelect') as HTMLSelectElement;
     const creatorInput = document.getElementById('newPeniaCreatorInput') as HTMLInputElement;
@@ -12124,6 +12138,7 @@ contrato legal ni gestiona fondos monetarios.
       name,
       gameId,
       creator,
+      creatorUid: currentUid,
       createdAt: new Date().toISOString(),
       members: [creator],
       tickets: [],
