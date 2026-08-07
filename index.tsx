@@ -12406,7 +12406,7 @@ contrato legal ni gestiona fondos monetarios.
       title: '👥 Nuevo Miembro Integrado',
       message: `Se ha añadido a "${name}" como miembro activo de la peña.`,
       timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-      author: 'Administrador'
+      author: this.userAlias
     });
 
     input.value = '';
