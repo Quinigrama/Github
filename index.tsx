@@ -1363,7 +1363,7 @@ class DataLotto49Advanced {
                 <p>En una lotería clásica 6/49, la menor suma matemática posible es 21 (1+2+3+4+5+6), y la mayor es 279 (44+45+46+47+48+49). Entre estos dos límites hay millones de combinaciones.</p>
                 <p>Si graficamos la cantidad de combinaciones para cada valor de suma, visualizaremos una perfecta <strong>Campana de Gauss</strong> (distribución normal multinomial). Las sumas extremas (como 21 o 279) solo tienen una única combinación posible, por lo que su probabilidad conjunta de ocurrir es virtualmente nula. En contraposición, más del <strong>70% de las combinaciones que salen premiadas en la historia real</strong> acumulan sumatorios centrados en la cima de la campana, entre 121 y 190. Al forzar este intervalo, tu boleto se sitúa exactamente en la zona de mayor densidad probabilística mundial.</p>
             `;
-        } else if (titleText.includes('Par/Impar') && !titleText.includes('Estrellas')) {
+        } else if ((titleText.includes('Par/Impar') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#parImparOptions')) {
             matched = true;
             title = "⚖️ Relación Par / Impar";
             body = `
@@ -1379,7 +1379,7 @@ class DataLotto49Advanced {
                 </ul>
                 <p>Al restringir el generador para que descarte combinaciones planas con proporciones extravagantes, el sistema mejora la sintonía geométrica de tus boletos producidos.</p>
             `;
-        } else if (titleText.includes('Bajos/Altos') && !titleText.includes('Estrellas')) {
+        } else if ((titleText.includes('Bajos/Altos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#bajosAltosOptions')) {
             matched = true;
             title = "📊 Relación Bajos / Altos";
             body = `
@@ -1394,7 +1394,7 @@ class DataLotto49Advanced {
                 <p><strong>Consejos de Configuración:</strong></p>
                 <p>Actvar las opciones <strong>3B/3A</strong> (3 Bajos / 3 Altos), <strong>4B/2A</strong>, o <strong>2B/4A</strong> asegura que la jugada cubra el tablero con un balance vertical perfecto, neutralizando el riesgo de estancamiento sectorial en el boleto.</p>
             `;
-        } else if (titleText.includes('Primos') && !titleText.includes('Estrellas')) {
+        } else if ((titleText.includes('Primos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#primosMin')) {
             matched = true;
             title = "🔢 Filtro de Números Primos";
             body = `
@@ -1405,7 +1405,7 @@ class DataLotto49Advanced {
                 <p><strong>Lógica Probabilística:</strong></p>
                 <p>Matemáticamente, cerca del 30% de los números en la lotería son primos. Los eventos reales de lotería muestran que la inmensa mayoría de las apuestas premiadas (alrededor del 82% de las ocasiones) contienen <strong>entre 1, 2 o 3 números primos</strong>. Raras veces verás un boleto ganador que esté compuesto enteramente por primos (ejemplo: 5, 7, 11, 17, 23, 31) o que carezca por completo de ellos. Ajustar los límites en el generador te mantendrá dentro de la tónica preferente de los sorteos reales.</p>
             `;
-        } else if (titleText.includes('Consecutivos') && !titleText.includes('Estrellas')) {
+        } else if ((titleText.includes('Consecutivos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#consecutivosOptions')) {
             matched = true;
             title = "🔗 Filtro de Números Consecutivos";
             body = `
@@ -1457,7 +1457,7 @@ class DataLotto49Advanced {
                 <p><strong>Utilidad Científica:</strong></p>
                 <p>Evita aberraciones de distribución sectorial. Por ejemplo, tener los 6 números del boleto hacinados exclusivamente dentro de la década de los 30 (como 30, 31, 33, 35, 36, 39) tiene un histórico de ocurrencia inferior al 0.04% en sorteos internacionales. Activar agrupaciones versátiles y balanceadas como "2/2/1/1" o "2/1/1/1/1" distribuye la presión de probabilidad en todo el ancho físico del tablero.</p>
             `;
-        } else if (titleText.includes('Suma de Dígitos') && !titleText.includes('Estrellas')) {
+        } else if ((titleText.includes('Suma de Dígitos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#sumaDigitosMin')) {
             matched = true;
             title = "∑ Suma de Dígitos";
             body = `
