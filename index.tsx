@@ -11658,6 +11658,13 @@ CONDICIONES DE USO ACEPTADAS:
       localStorage.setItem('datalotto_user_alias', this.userAlias);
     }
 
+    const btn = document.getElementById('confirmJoinPeniaBtn') as HTMLButtonElement | null;
+    const originalText = btn?.innerText || 'Unirse al Grupo';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'Uniendo...';
+    }
+
     try {
       const peña = await fetchPeniaByCode(db, code);
 
@@ -11695,6 +11702,11 @@ CONDICIONES DE USO ACEPTADAS:
     } catch (e) {
       this.showToast('❌ Error al unirse a la peña en la base de datos.', 'danger');
       handleFirestoreError(e, OperationType.UPDATE, `penias/${code}`);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
     }
   }
 
@@ -12161,6 +12173,13 @@ contrato legal ni gestiona fondos monetarios.
       totalPrizes: 0
     };
 
+    const btn = document.getElementById('confirmCreatePeniaBtn') as HTMLButtonElement | null;
+    const originalText = btn?.innerText || 'Crear Peña';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'Creando...';
+    }
+
     try {
       await savePeniaToFirestoreService(db, newPenia);
       this.activePeniaId = code;
@@ -12170,6 +12189,11 @@ contrato legal ni gestiona fondos monetarios.
     } catch (e) {
       this.showToast('❌ Error creando la peña en la base de datos.', 'danger');
       handleFirestoreError(e, OperationType.CREATE, `penias/${code}`);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
     }
   }
 
