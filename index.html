@@ -2798,22 +2798,22 @@
   <!-- ====== MODAL: SELECCIONAR BOLETO GUARDADO PARA PEÑA ====== -->
   <div class="modal" id="addTicketToPeniaModal" style="display: none;">
     <div class="modal-content" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
-      <div class="modal-header" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; padding: 16px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--bigdata) 0%, #0369a1 100%); color: white; padding: 16px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 1.5rem;">📂</span>
           <div>
             <h3 style="margin: 0; font-size: 1.2rem; color: white; font-weight: 800;">Seleccionar Boleto desde Boletos Guardados</h3>
-            <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #bae6fd;">Añade combinaciones de tu historial directamente a la peña activa</p>
+            <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.85);">Añade combinaciones de tu historial directamente a la peña activa</p>
           </div>
         </div>
         <button class="close-btn" id="addTicketToPeniaCloseBtn" style="background: none; border: none; font-size: 1.75rem; color: white; cursor: pointer; line-height: 1;">&times;</button>
       </div>
 
       <!-- Quick Filter Bar -->
-      <div style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+      <div style="background: var(--light); border-bottom: 1px solid var(--gray); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 0.85rem; font-weight: 700; color: #334155;">Filtrar por Juego:</label>
-          <select id="peniaSavedTicketsGameFilter" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #0f172a; outline: none; background: white;">
+          <label style="font-size: 0.85rem; font-weight: 700; color: var(--dark);">Filtrar por Juego:</label>
+          <select id="peniaSavedTicketsGameFilter" style="padding: 6px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--dark); outline: none; background: var(--light);">
             <option value="all">🎮 Todos los juegos</option>
             <option value="powerball">🇺🇸 Powerball</option>
             <option value="bonoloto">🇪🇸 Bonoloto</option>
@@ -2824,19 +2824,19 @@
             <option value="nacional">🎟️ Lotería Nacional</option>
           </select>
         </div>
-        <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;" id="peniaSavedTicketsCounter">
+        <div style="font-size: 0.85rem; color: var(--gray); font-weight: 600;" id="peniaSavedTicketsCounter">
           0 boletos guardados en total
         </div>
       </div>
 
-      <div class="modal-body" style="padding: 18px; overflow-y: auto; flex: 1; text-align: left; background: #f1f5f9;">
+      <div class="modal-body" style="padding: 18px; overflow-y: auto; flex: 1; text-align: left; background: var(--light);">
         <div id="addTicketToPeniaList" style="display: flex; flex-direction: column; gap: 14px;">
           <!-- Injected dynamically -->
         </div>
       </div>
 
-      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; flex-shrink: 0;">
-        <button class="modal-btn cancel" id="addTicketToPeniaCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; padding: 8px 20px;">Cerrar</button>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid var(--gray); display: flex; justify-content: flex-end; background: var(--light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; flex-shrink: 0;">
+        <button class="modal-btn cancel" id="addTicketToPeniaCancelBtn" style="background: rgba(99, 102, 241, 0.1); color: var(--dark); border: 1px solid var(--gray); font-weight: 700; padding: 8px 20px;">Cerrar</button>
       </div>
     </div>
   </div>
@@ -2844,18 +2844,18 @@
   <!-- ====== MODAL: CREAR NUEVA PEÑA ====== -->
   <div class="modal" id="createPeniaModal" style="display: none;">
     <div class="modal-content" style="max-width: 500px; width: 95%;">
-      <div class="modal-header" style="background: #10b981; color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="modal-header" style="background: var(--success); color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.15rem; color: white;">🌱 Crear Nueva Peña / Grupo Colectivo</h3>
         <button class="close-btn" id="createPeniaCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
+      <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left; background: var(--light);">
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Nombre de la Peña / Colectivo:</label>
-          <input type="text" id="newPeniaNameInput" placeholder="Ej. Peña Los Afortunados 2026" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 4px;">Nombre de la Peña / Colectivo:</label>
+          <input type="text" id="newPeniaNameInput" placeholder="Ej. Peña Los Afortunados 2026" style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.9rem; outline: none; background: var(--light); color: var(--dark);">
         </div>
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Juego Principal:</label>
-          <select id="newPeniaGameSelect" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; background: white;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 4px;">Juego Principal:</label>
+          <select id="newPeniaGameSelect" style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.9rem; outline: none; background: var(--light); color: var(--dark);">
             <option value="powerball">Powerball (EE. UU.)</option>
             <option value="bonoloto">Bonoloto</option>
             <option value="primitiva">La Primitiva</option>
@@ -2866,13 +2866,13 @@
           </select>
         </div>
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Nombre del Fundador / Creador:</label>
-          <input type="text" id="newPeniaCreatorInput" placeholder="Tu nombre o apodo" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 4px;">Nombre del Fundador / Creador:</label>
+          <input type="text" id="newPeniaCreatorInput" placeholder="Tu nombre o apodo" style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.9rem; outline: none; background: var(--light); color: var(--dark);">
         </div>
       </div>
-      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="modal-btn cancel" id="createPeniaCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">Cancelar</button>
-        <button class="modal-btn confirm" id="confirmCreatePeniaBtn" style="background: #10b981; color: white;">Crear Peña</button>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid var(--gray); display: flex; justify-content: flex-end; gap: 8px; background: var(--light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <button class="modal-btn cancel" id="createPeniaCancelBtn" style="background: rgba(99, 102, 241, 0.1); color: var(--dark); border: 1px solid var(--gray);">Cancelar</button>
+        <button class="modal-btn confirm" id="confirmCreatePeniaBtn" style="background: var(--success); color: white;">Crear Peña</button>
       </div>
     </div>
   </div>
@@ -2880,23 +2880,23 @@
   <!-- ====== MODAL: UNIRSE A PEÑA CON CÓDIGO ====== -->
   <div class="modal" id="joinPeniaModal" style="display: none;">
     <div class="modal-content" style="max-width: 480px; width: 95%;">
-      <div class="modal-header" style="background: #6366f1; color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="modal-header" style="background: var(--primary); color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.15rem; color: white;">🔑 Unirse a una Peña Existente</h3>
         <button class="close-btn" id="joinPeniaCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
+      <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left; background: var(--light);">
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Código de Peña (6 caracteres):</label>
-          <input type="text" id="joinPeniaCodeInput" placeholder="Ej. AZ34Y2" maxlength="6" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: bold; font-family: monospace; text-transform: uppercase; text-align: center; letter-spacing: 2px; outline: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 4px;">Código de Peña (6 caracteres):</label>
+          <input type="text" id="joinPeniaCodeInput" placeholder="Ej. AZ34Y2" maxlength="6" style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 1.1rem; font-weight: bold; font-family: monospace; text-transform: uppercase; text-align: center; letter-spacing: 2px; outline: none; background: var(--light); color: var(--dark);">
         </div>
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Tu Apodo o Nombre:</label>
-          <input type="text" id="joinPeniaAliasInput" placeholder="Ej. Carlos M." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 4px;">Tu Apodo o Nombre:</label>
+          <input type="text" id="joinPeniaAliasInput" placeholder="Ej. Carlos M." style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.9rem; outline: none; background: var(--light); color: var(--dark);">
         </div>
       </div>
-      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="modal-btn cancel" id="joinPeniaCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">Cancelar</button>
-        <button class="modal-btn confirm" id="confirmJoinPeniaBtn" style="background: #6366f1; color: white;">Unirse al Grupo</button>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid var(--gray); display: flex; justify-content: flex-end; gap: 8px; background: var(--light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <button class="modal-btn cancel" id="joinPeniaCancelBtn" style="background: rgba(99, 102, 241, 0.1); color: var(--dark); border: 1px solid var(--gray);">Cancelar</button>
+        <button class="modal-btn confirm" id="confirmJoinPeniaBtn" style="background: var(--primary); color: white;">Unirse al Grupo</button>
       </div>
     </div>
   </div>
@@ -2904,16 +2904,16 @@
   <!-- ====== MODAL: CONFIRMACIÓN GENÉRICO ====== -->
   <div class="modal" id="genericConfirmModal" style="display: none; z-index: 9999;">
     <div class="modal-content" style="max-width: 440px; width: 95%;">
-      <div class="modal-header" style="background: #ef4444; color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="modal-header" style="background: var(--danger); color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
         <h3 id="genericConfirmTitle" style="margin: 0; font-size: 1.15rem; color: white;">⚠️ Confirmación</h3>
         <button class="close-btn" id="genericConfirmCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 20px; text-align: left;">
-        <p id="genericConfirmMessage" style="margin: 0; font-size: 0.95rem; color: #334155; line-height: 1.5;"></p>
+      <div class="modal-body" style="padding: 20px; text-align: left; background: var(--light);">
+        <p id="genericConfirmMessage" style="margin: 0; font-size: 0.95rem; color: var(--dark); line-height: 1.5;"></p>
       </div>
-      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="modal-btn cancel" id="genericConfirmCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
-        <button class="modal-btn confirm" id="genericConfirmOkBtn" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Confirmar</button>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid var(--gray); display: flex; justify-content: flex-end; gap: 8px; background: var(--light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <button class="modal-btn cancel" id="genericConfirmCancelBtn" style="background: rgba(99, 102, 241, 0.1); color: var(--dark); border: 1px solid var(--gray); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+        <button class="modal-btn confirm" id="genericConfirmOkBtn" style="background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Confirmar</button>
       </div>
     </div>
   </div>
@@ -2921,17 +2921,17 @@
   <!-- ====== MODAL: CAMBIAR APODO / ALIAS ====== -->
   <div class="modal" id="changeAliasModal" style="display: none;">
     <div class="modal-content" style="max-width: 420px; width: 95%;">
-      <div class="modal-header" style="background: #0f172a; color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="modal-header" style="background: var(--primary); color: white; padding: 15px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.15rem; color: white;">👤 Configurar tu Nombre / Alias</h3>
         <button class="close-btn" id="changeAliasCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 20px; text-align: left;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;">Nombre visible en el grupo:</label>
-        <input type="text" id="editUserAliasInput" placeholder="Tu apodo" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none;">
+      <div class="modal-body" style="padding: 20px; text-align: left; background: var(--light);">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--dark); margin-bottom: 6px;">Nombre visible en el grupo:</label>
+        <input type="text" id="editUserAliasInput" placeholder="Tu apodo" style="width: 100%; padding: 10px 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 0.95rem; outline: none; background: var(--light); color: var(--dark);">
       </div>
-      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="modal-btn cancel" id="changeAliasCancelBtn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">Cancelar</button>
-        <button class="modal-btn confirm" id="confirmChangeAliasBtn" style="background: #0f172a; color: white;">Guardar Alias</button>
+      <div class="modal-actions" style="padding: 12px 20px; border-top: 1px solid var(--gray); display: flex; justify-content: flex-end; gap: 8px; background: var(--light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <button class="modal-btn cancel" id="changeAliasCancelBtn" style="background: rgba(99, 102, 241, 0.1); color: var(--dark); border: 1px solid var(--gray);">Cancelar</button>
+        <button class="modal-btn confirm" id="confirmChangeAliasBtn" style="background: var(--primary); color: white;">Guardar Alias</button>
       </div>
     </div>
   </div>
