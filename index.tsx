@@ -38,6 +38,7 @@ import {
   generateRandomCombination
 } from './src/utils/geometry';
 import { runFilterAudit } from './src/utils/filterAudit';
+import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
@@ -874,6 +875,8 @@ class DataLotto49Advanced {
   }
 
   async init() {
+    await initI18n();
+
     onAuthStateChanged(firebaseAuth, (user) => {
       this.googleUser = user;
     });
@@ -5482,6 +5485,13 @@ class DataLotto49Advanced {
     document.getElementById('darkModeToggleBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.toggleDarkMode();
+    });
+
+    // Language switch button
+    document.getElementById('sidebarLanguageBtn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const nextLocale = getLocale() === 'es' ? 'en' : 'es';
+      await setLocale(nextLocale);
     });
 
     // Notification Config Modal Events
@@ -12248,7 +12258,7 @@ contrato legal ni gestiona fondos monetarios.
       try {
         await deletePeniaFromFirestore(db, peña.id);
         this.activePeniaId = null;
-        this.showToast('🗑️ Peña eliminada con éxito de Firestore.', 'info');
+        this.showToast(t('toast.peniaEliminada'), 'info');
       } catch (e) {
         this.showToast('❌ Error al eliminar la peña.', 'danger');
         handleFirestoreError(e, OperationType.DELETE, `penias/${peña.id}`);

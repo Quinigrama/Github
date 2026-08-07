@@ -1,0 +1,7 @@
+{
+  "nav.juegos": "🎮 Games",
+  "nav.herramientas": "🛠️ Tools",
+  "nav.configuracion": "⚙️ Settings",
+  "nav.idioma": "🌐 Language (EN)",
+  "toast.peniaEliminada": "🗑️ Group successfully deleted from Firestore."
+}

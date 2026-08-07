@@ -1,0 +1,7 @@
+{
+  "nav.juegos": "🎮 Juegos",
+  "nav.herramientas": "🛠️ Herramientas",
+  "nav.configuracion": "⚙️ Configuración",
+  "nav.idioma": "🌐 Idioma (ES)",
+  "toast.peniaEliminada": "🗑️ Peña eliminada con éxito de Firestore."
+}
