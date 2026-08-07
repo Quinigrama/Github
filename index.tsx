@@ -1955,7 +1955,7 @@ class DataLotto49Advanced {
             badge.style.color = '#10b981';
             badge.style.background = '#f0fdf4';
             badge.style.border = '1px solid #bbf7d0';
-            badge.textContent = '● Plataforma multi-juego: OK ✓';
+            badge.textContent = t('game.platformOk');
         }
 
         badge.onclick = (e) => {
@@ -10959,10 +10959,10 @@ CONDICIONES DE USO ACEPTADAS:
     score = Math.max(0, Math.min(100, score));
 
     // Generar consejo
-    if (score >= 80) advice = "Excelente combinación. Sigue patrones estadísticos muy probables.";
-    else if (score >= 60) advice = "Buena combinación. Tiene un balance sólido de factores.";
-    else if (score >= 40) advice = "Combinación aceptable, pero podrías mejorar el balance par/impar o la suma.";
-    else advice = "Combinación poco probable estadísticamente. Considera revisar el balance de números.";
+    if (score >= 80) advice = t('quality.excelente');
+    else if (score >= 60) advice = t('quality.buena');
+    else if (score >= 40) advice = t('quality.aceptable');
+    else advice = t('quality.pocoProbable');
 
     // Actualizar UI
     if (this.correlationScoreValue) this.correlationScoreValue.textContent = `${score}%`;

@@ -75,7 +75,16 @@ export function applyTranslations(): void {
   elements.forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (key) {
-      el.textContent = t(key);
+      let params: Record<string, string | number> | undefined;
+      const paramsAttr = el.getAttribute('data-i18n-params');
+      if (paramsAttr) {
+        try {
+          params = JSON.parse(paramsAttr);
+        } catch (e) {
+          console.warn('[i18n] Error al parsear data-i18n-params:', paramsAttr, e);
+        }
+      }
+      el.textContent = t(key, params);
     }
   });
 

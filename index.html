@@ -355,18 +355,18 @@
           <span style="display: inline-block; animation: spin 1s linear infinite;">🔄</span> Sincronizando datos...
         </span>
       </div>
-      <p id="mainHeaderDesc" style="margin-top: 6px;">Generador Inteligente con Arquitectura Matemática Avanzada</p>
+      <p id="mainHeaderDesc" style="margin-top: 6px;" data-i18n="game.tagline">Generador Inteligente con Arquitectura Matemática Avanzada</p>
     </header>
 
     <div class="selected-numbers">
-      <h3>🎯 Números Seleccionados</h3>
+      <h3 data-i18n="selection.title">🎯 Números Seleccionados</h3>
       <div class="selected-display" id="selectedDisplay">
-        <div style="color:#666; font-style: italic;">Selecciona hasta 6 números</div>
+        <div style="color:#666; font-style: italic;" data-i18n="selection.placeholder">Selecciona hasta 6 números</div>
       </div>
       <!-- Correlation Score -->
       <div id="correlationScoreContainer" style="margin-top: 15px; display: none; border-top: 1px solid #eee; padding-top: 10px;">
           <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 5px;">
-              <span style="color: var(--gray); font-weight: 500;">Calidad de la Combinación:</span>
+              <span style="color: var(--gray); font-weight: 500;" data-i18n="selection.quality">Calidad de la Combinación:</span>
               <span id="correlationScoreValue" style="font-weight: bold; color: var(--primary);">0%</span>
           </div>
           <div style="width: 100%; height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
@@ -384,55 +384,55 @@
             <button class="selection-mode-btn" data-mode="cold" title="Activar modo para marcar/desmarcar números fríos">
               <span class="icon">❄️</span>
             </button>
-            <span class="selection-mode-label">Frío</span>
+            <span class="selection-mode-label" data-i18n="mode.frio">Frío</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="hot" title="Activar modo para marcar/desmarcar números calientes">
               <span class="icon">🔥</span>
             </button>
-            <span class="selection-mode-label">Caliente</span>
+            <span class="selection-mode-label" data-i18n="mode.caliente">Caliente</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="absent" title="Activar modo para marcar/desmarcar números ausentes">
               <span class="icon">👻</span>
             </button>
-            <span class="selection-mode-label">Ausente</span>
+            <span class="selection-mode-label" data-i18n="mode.ausente">Ausente</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="favorites" title="Activar modo Favoritos (Max 10) ⭐">
               <span class="icon">⭐</span>
             </button>
-            <span class="selection-mode-label">Favorito</span>
+            <span class="selection-mode-label" data-i18n="mode.favorito">Favorito</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="excluded" title="Activar modo para marcar/desmarcar números excluidos">
               <span class="icon">🚫</span>
             </button>
-            <span class="selection-mode-label">Excluir</span>
+            <span class="selection-mode-label" data-i18n="mode.excluir">Excluir</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="figure" id="figureBtn" title="Activar modo para dibujar una figura">
               <span class="icon">🗺️</span>
             </button>
-            <span class="selection-mode-label">Dibujar</span>
+            <span class="selection-mode-label" data-i18n="mode.dibujar">Dibujar</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="data" title="Cargar base de datos" id="dataBtn">
               <span class="icon">📊</span>
             </button>
-            <span class="selection-mode-label">CSV</span>
+            <span class="selection-mode-label" data-i18n="mode.csv">CSV</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" id="urlBtn" title="Seleccionar Base de Datos de Juego" style="border-color: #673ab7; background: #ede7f6; color: #512da8;">
               <span class="icon">🎮</span>
             </button>
-            <span class="selection-mode-label">Juego</span>
+            <span class="selection-mode-label" data-i18n="mode.juego">Juego</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="simulate" title="Simular datos" id="simulateBtn">
               <span class="icon">🎰</span>
             </button>
-            <span class="selection-mode-label">Simular</span>
+            <span class="selection-mode-label" data-i18n="mode.simular">Simular</span>
           </div>
           <div class="selection-mode-item">
             <button class="selection-mode-btn" id="randomBtn" title="Seleccionar números al azar">
@@ -515,24 +515,24 @@
 
     <!-- Estrategias -->
     <div class="strategy-section">
-      <h3>♟ Estrategia de Juego</h3>
+      <h3 data-i18n="strategy.title">♟ Estrategia de Juego</h3>
       <div class="strategy-buttons">
         <div class="strategy-btn active" data-strategy="simple">
           <div style="font-size: 1.5rem; margin-bottom: 5px;">🎲</div>
-          <div>Simple</div>
+          <div data-i18n="strategy.simple">Simple</div>
         </div>
         <div class="strategy-btn" data-strategy="winning">
           <div style="font-size: 1.5rem; margin-bottom: 5px;">🏆</div>
-          <div>Estrategia Ganadora</div>
+          <div data-i18n="strategy.ganadora">Estrategia Ganadora</div>
         </div>
         <div class="strategy-btn" data-strategy="multiple">
           <div style="font-size: 1.5rem; margin-bottom: 5px;">🎰</div>
-          <div>Múltiple</div>
+          <div data-i18n="strategy.multiple">Múltiple</div>
         </div>
         <div class="strategy-btn" data-strategy="reducida">
           <div style="font-size: 1.5rem; margin-bottom: 5px;">🎡</div>
-          <div>Reducida</div>
-          <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 1px;">(Wheeling)</div>
+          <div data-i18n="strategy.reducida">Reducida</div>
+          <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 1px;" data-i18n="strategy.wheeling">(Wheeling)</div>
         </div>
       </div>
 
@@ -540,25 +540,25 @@
 
       <div class="multiple-options" id="winningOptions" style="display: none;">
         <div class="input-row">
-          <label>Generar:</label>
+          <label data-i18n="strategy.generar">Generar:</label>
           <input type="number" id="generateCount" value="100" min="10" max="1000">
-          <span>combinaciones</span>
+          <span data-i18n="strategy.combinaciones">combinaciones</span>
         </div>
         <div class="input-row">
-          <label>Jugar:</label>
+          <label data-i18n="strategy.jugar">Jugar:</label>
           <input type="number" id="playCount" value="10" min="1" max="100">
-          <span>mejores</span>
+          <span data-i18n="strategy.mejores">mejores</span>
         </div>
       </div>
       
       <div class="multiple-numbers-options" id="multipleNumbersOptions" style="display: none;">
         <div class="numbers-select">
-            <label>¿Cuántos números quieres seleccionar?</label>
-            <div class="number-option active" data-numbers="7">7 números</div>
-            <div class="number-option" data-numbers="8">8 números</div>
-            <div class="number-option" data-numbers="9">9 números</div>
-            <div class="number-option" data-numbers="10">10 números</div>
-            <div class="number-option" data-numbers="11">11 números</div>
+            <label data-i18n="strategy.cuantosNumeros">¿Cuántos números quieres seleccionar?</label>
+            <div class="number-option active" data-numbers="7" data-i18n="strategy.numeroOption" data-i18n-params='{"n":"7"}'>7 números</div>
+            <div class="number-option" data-numbers="8" data-i18n="strategy.numeroOption" data-i18n-params='{"n":"8"}'>8 números</div>
+            <div class="number-option" data-numbers="9" data-i18n="strategy.numeroOption" data-i18n-params='{"n":"9"}'>9 números</div>
+            <div class="number-option" data-numbers="10" data-i18n="strategy.numeroOption" data-i18n-params='{"n":"10"}'>10 números</div>
+            <div class="number-option" data-numbers="11" data-i18n="strategy.numeroOption" data-i18n-params='{"n":"11"}'>11 números</div>
         </div>
       </div>
 
@@ -566,7 +566,7 @@
       <div class="multiple-numbers-options" id="reducedOptions" style="display: none; margin-top: 15px;">
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
           <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
-            <label style="font-weight: 600; color: #374151; font-size: 0.95rem;">Seleccionar Sistema Reducido:</label>
+            <label style="font-weight: 600; color: #374151; font-size: 0.95rem;" data-i18n="strategy.seleccionarSistema">Seleccionar Sistema Reducido:</label>
             <select id="reducedSystemSelect" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; background-color: white; color: #1f2937; font-weight: 500; cursor: pointer;">
               <!-- Cargado dinámicamente según el juego activo -->
             </select>
@@ -574,16 +574,16 @@
 
           <!-- Cuadro de Información del Sistema -->
           <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 15px; text-align: left;">
-            <h4 id="reducedSystemInfoTitle" style="margin: 0 0 4px 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;">Sistemas de Reducción</h4>
-            <p id="reducedSystemInfoDesc" style="margin: 0; font-size: 0.8rem; color: #1e3a8a; line-height: 1.4;">Elige un sistema para ver sus garantías de aciertos.</p>
+            <h4 id="reducedSystemInfoTitle" style="margin: 0 0 4px 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;" data-i18n="strategy.sistemasReduccion">Sistemas de Reducción</h4>
+            <p id="reducedSystemInfoDesc" style="margin: 0; font-size: 0.8rem; color: #1e3a8a; line-height: 1.4;" data-i18n="strategy.elegirSistema">Elige un sistema para ver sus garantías de aciertos.</p>
           </div>
 
           <!-- Acciones de Base -->
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button id="reducedAiBaseBtn" class="reduced-base-btn">
+            <button id="reducedAiBaseBtn" class="reduced-base-btn" data-i18n="strategy.seleccionarBase">
               🎯 Seleccionar Números Base
             </button>
-            <button id="reducedClearBaseBtn" class="reduced-clear-btn">
+            <button id="reducedClearBaseBtn" class="reduced-clear-btn" data-i18n="strategy.limpiarBase">
               🗑️ Limpiar Base
             </button>
           </div>
@@ -591,7 +591,7 @@
       </div>
 
       <button class="generate-btn" id="generateBtn">
-        <span>🤞 Generar Combinación</span>
+        <span data-i18n="strategy.generarBtn">🤞 Generar Combinación</span>
       </button>
     </div>
     
