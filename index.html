@@ -1022,84 +1022,84 @@
                         </div>
 
                         <!-- SECCIÓN B: Filtros sobre los dígitos — POR POSICIÓN (orden importa) -->
-                        <div style="grid-column: 1 / -1; margin-top: 20px; margin-bottom: 12px; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; color: var(--primary); font-size: 1.05rem;">
+                        <div style="grid-column: 1 / -1; margin-top: 20px; margin-bottom: 12px; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; color: var(--primary); font-size: 1.05rem;" data-i18n="filters.nacional.seccionB">
                             🅱️ Filtros por Posición de Cifra (D1...D5)
                         </div>
 
                         <!-- 9. Paridad por posición -->
-                        <div class="filter-group" style="grid-column: 1 / -1;" title="Define si cada dígito (D1 a D5) debe ser Par o Impar de forma individual.">
-                            <div class="filter-title">⚖️ Paridad por Posición (D1 a D5)</div>
+                        <div class="filter-group" style="grid-column: 1 / -1;" title="Define si cada dígito (D1 a D5) debe ser Par o Impar de forma individual." data-i18n-title="filters.nacParidad.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacParidad.titulo">⚖️ Paridad por Posición (D1 a D5)</div>
                             <div style="display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; padding: 4px 0;">
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D1</span>
-                                    <select id="nacionalParidadD1" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="par">Par</option><option value="imp">Impar</option></select>
+                                    <select id="nacionalParidadD1" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacParidad.cualquiera">Cualq.</option><option value="par" data-i18n="filters.nacParidad.par">Par</option><option value="imp" data-i18n="filters.nacParidad.impar">Impar</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D2</span>
-                                    <select id="nacionalParidadD2" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="par">Par</option><option value="imp">Impar</option></select>
+                                    <select id="nacionalParidadD2" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacParidad.cualquiera">Cualq.</option><option value="par" data-i18n="filters.nacParidad.par">Par</option><option value="imp" data-i18n="filters.nacParidad.impar">Impar</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D3</span>
-                                    <select id="nacionalParidadD3" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="par">Par</option><option value="imp">Impar</option></select>
+                                    <select id="nacionalParidadD3" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacParidad.cualquiera">Cualq.</option><option value="par" data-i18n="filters.nacParidad.par">Par</option><option value="imp" data-i18n="filters.nacParidad.impar">Impar</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D4</span>
-                                    <select id="nacionalParidadD4" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="par">Par</option><option value="imp">Impar</option></select>
+                                    <select id="nacionalParidadD4" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacParidad.cualquiera">Cualq.</option><option value="par" data-i18n="filters.nacParidad.par">Par</option><option value="imp" data-i18n="filters.nacParidad.impar">Impar</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D5</span>
-                                    <select id="nacionalParidadD5" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="par">Par</option><option value="imp">Impar</option></select>
+                                    <select id="nacionalParidadD5" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacParidad.cualquiera">Cualq.</option><option value="par" data-i18n="filters.nacParidad.par">Par</option><option value="imp" data-i18n="filters.nacParidad.impar">Impar</option></select>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 10. Alto/bajo por posición -->
-                        <div class="filter-group" style="grid-column: 1 / -1;" title="Define si cada dígito (D1 a D5) debe ser Bajo (0-4) o Alto (5-9) de forma individual.">
-                            <div class="filter-title">📈 Alto/Bajo por Posición (D1 a D5)</div>
+                        <div class="filter-group" style="grid-column: 1 / -1;" title="Define si cada dígito (D1 a D5) debe ser Bajo (0-4) o Alto (5-9) de forma individual." data-i18n-title="filters.nacAltoBajo.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacAltoBajo.titulo">📈 Alto/Bajo por Posición (D1 a D5)</div>
                             <div style="display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; padding: 4px 0;">
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D1</span>
-                                    <select id="nacionalAltoBajoD1" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="bajo">Bajo</option><option value="alto">Alto</option></select>
+                                    <select id="nacionalAltoBajoD1" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacAltoBajo.cualquiera">Cualq.</option><option value="bajo" data-i18n="filters.nacAltoBajo.bajo">Bajo</option><option value="alto" data-i18n="filters.nacAltoBajo.alto">Alto</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D2</span>
-                                    <select id="nacionalAltoBajoD2" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="bajo">Bajo</option><option value="alto">Alto</option></select>
+                                    <select id="nacionalAltoBajoD2" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacAltoBajo.cualquiera">Cualq.</option><option value="bajo" data-i18n="filters.nacAltoBajo.bajo">Bajo</option><option value="alto" data-i18n="filters.nacAltoBajo.alto">Alto</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D3</span>
-                                    <select id="nacionalAltoBajoD3" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="bajo">Bajo</option><option value="alto">Alto</option></select>
+                                    <select id="nacionalAltoBajoD3" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacAltoBajo.cualquiera">Cualq.</option><option value="bajo" data-i18n="filters.nacAltoBajo.bajo">Bajo</option><option value="alto" data-i18n="filters.nacAltoBajo.alto">Alto</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D4</span>
-                                    <select id="nacionalAltoBajoD4" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="bajo">Bajo</option><option value="alto">Alto</option></select>
+                                    <select id="nacionalAltoBajoD4" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacAltoBajo.cualquiera">Cualq.</option><option value="bajo" data-i18n="filters.nacAltoBajo.bajo">Bajo</option><option value="alto" data-i18n="filters.nacAltoBajo.alto">Alto</option></select>
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
                                     <span style="font-size: 0.75rem; font-weight: bold; color: #64748b;">D5</span>
-                                    <select id="nacionalAltoBajoD5" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any">Cualq.</option><option value="bajo">Bajo</option><option value="alto">Alto</option></select>
+                                    <select id="nacionalAltoBajoD5" class="form-select" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; width: 100%;"><option value="any" data-i18n="filters.nacAltoBajo.cualquiera">Cualq.</option><option value="bajo" data-i18n="filters.nacAltoBajo.bajo">Bajo</option><option value="alto" data-i18n="filters.nacAltoBajo.alto">Alto</option></select>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 11. Secuencias consecutivas -->
-                        <div class="filter-group" title="Detecta secuencias de dígitos consecutivos de forma ascendente (12345) o descendente (98765).">
-                            <div class="filter-title">🔗 Secuencias Consecutivas</div>
+                        <div class="filter-group" title="Detecta secuencias de dígitos consecutivos de forma ascendente (12345) o descendente (98765)." data-i18n-title="filters.nacConsecutivos.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacConsecutivos.titulo">🔗 Secuencias Consecutivas</div>
                             <select id="nacionalConsecutivos" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="yes_asc">Exigir Ascendente (Ej: 12345)</option>
-                                <option value="yes_desc">Exigir Descendente (Ej: 98765)</option>
-                                <option value="any_consec">Exigir cualquiera de las dos</option>
-                                <option value="no">Evitar números totalmente consecutivos</option>
+                                <option value="all" data-i18n="filters.nacConsecutivos.indiferente">Indiferente</option>
+                                <option value="yes_asc" data-i18n="filters.nacConsecutivos.ascendente">Exigir Ascendente (Ej: 12345)</option>
+                                <option value="yes_desc" data-i18n="filters.nacConsecutivos.descendente">Exigir Descendente (Ej: 98765)</option>
+                                <option value="any_consec" data-i18n="filters.nacConsecutivos.cualquiera">Exigir cualquiera de las dos</option>
+                                <option value="no" data-i18n="filters.nacConsecutivos.evitar">Evitar números totalmente consecutivos</option>
                             </select>
                         </div>
 
                         <!-- 12. Suma de mitades -->
-                        <div class="filter-group" title="Compara la suma de la primera mitad (D1+D2) contra la segunda mitad (D4+D5).">
-                            <div class="filter-title">⚖️ Suma de Mitades (D1+D2 vs D4+D5)</div>
+                        <div class="filter-group" title="Compara la suma de la primera mitad (D1+D2) contra la segunda mitad (D4+D5)." data-i18n-title="filters.nacSumaMitades.tooltip">
+                            <div class="filter-title" data-i18n="filters.nacSumaMitades.titulo">⚖️ Suma de Mitades (D1+D2 vs D4+D5)</div>
                             <select id="nacionalSumaMitades" class="form-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e5e7eb; background: white;">
-                                <option value="all">Indiferente</option>
-                                <option value="equal">Suma Mitad 1 = Suma Mitad 2</option>
-                                <option value="greater">Suma Mitad 1 &gt; Suma Mitad 2</option>
-                                <option value="less">Suma Mitad 1 &lt; Suma Mitad 2</option>
+                                <option value="all" data-i18n="filters.nacSumaMitades.indiferente">Indiferente</option>
+                                <option value="equal" data-i18n="filters.nacSumaMitades.igual">Suma Mitad 1 = Suma Mitad 2</option>
+                                <option value="greater" data-i18n="filters.nacSumaMitades.mayor">Suma Mitad 1 &gt; Suma Mitad 2</option>
+                                <option value="less" data-i18n="filters.nacSumaMitades.menor">Suma Mitad 1 &lt; Suma Mitad 2</option>
                             </select>
                         </div>
 
