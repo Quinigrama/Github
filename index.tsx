@@ -5156,8 +5156,8 @@ class DataLotto49Advanced {
       let infoText = group.getAttribute('data-info') || group.getAttribute('title') || '';
       const headerText = titleEl.textContent || '';
 
-      if (headerText.includes('Predictivos')) {
-        infoText = "Modelos matemáticos avanzados:\n• Cadena de Markov: Analiza las probabilidades de transición entre estados consecutivos de sorteos pasados.\n• Equilibrio de Nash: Modela la estrategia óptima para maximizar la esperanza matemática del boleto considerando la distribución global de combinaciones.\n• Regresión a la Media: Principio estadístico por el cual números con frecuencias extremas (muy fríos o calientes) tienden a estabilizarse hacia su promedio histórico.";
+      if (headerText.includes('Predictivos') || group.querySelector('#useMarkovSwitch')) {
+        infoText = t('filters.predictivos.dataInfo');
         group.setAttribute('data-info', infoText);
       } else if (headerText.includes('Suma Estrellas') || headerText.includes('Suma Soles')) {
         infoText = "Suma total de los números de las estrellas o soles seleccionados en la combinación.";
@@ -5218,7 +5218,8 @@ class DataLotto49Advanced {
             popover = document.createElement('div');
             popover.className = 'filter-info-popover';
 
-            const text = infoBtn.getAttribute('data-info') || filterGroup.getAttribute('data-info') || filterGroup.getAttribute('title') || 'Explicación del filtro.';
+            const infoKey = filterGroup.getAttribute('data-i18n-info') || infoBtn.getAttribute('data-i18n-info');
+            const text = infoKey ? t(infoKey) : (infoBtn.getAttribute('data-info') || filterGroup.getAttribute('data-info') || filterGroup.getAttribute('title') || 'Explicación del filtro.');
             const formattedText = text.split('\n').map(line => `<p style="margin: 0 0 4px 0;">${line}</p>`).join('');
 
             popover.innerHTML = `

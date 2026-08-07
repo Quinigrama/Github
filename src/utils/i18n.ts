@@ -95,6 +95,14 @@ export function applyTranslations(): void {
       el.setAttribute('title', t(key));
     }
   });
+
+  const infoElements = document.querySelectorAll('[data-i18n-info]');
+  infoElements.forEach((el) => {
+    const key = el.getAttribute('data-i18n-info');
+    if (key) {
+      el.setAttribute('data-info', t(key));
+    }
+  });
 }
 
 /**

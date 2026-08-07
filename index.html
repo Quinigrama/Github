@@ -817,82 +817,82 @@
                     <!-- GRUPO: Filtros de Estrellas (Solo Euromillones) -->
                     <div id="starFiltersSection" style="display: none; border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 10px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 15px;">
                         <div style="font-weight: bold; color: #fbbf24; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; justify-content: center; font-size: 1.1rem;">
-                            <span>⭐ Filtros de Estrellas (2/12) ⭐</span>
+                            <span data-i18n="filters.estrellas.titulo">⭐ Filtros de Estrellas (2/12) ⭐</span>
                         </div>
                         
                         <div class="filter-group">
-                            <div class="filter-title">🎯 Suma Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starSuma.titulo">🎯 Suma Estrellas</div>
                             <div class="range-control">
                                 <input type="number" id="starSumMin" value="3" min="3" max="23">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="starSumMax" value="18" min="3" max="23">
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">⚖️ Par/Impar Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starParImpar.titulo">⚖️ Par/Impar Estrellas</div>
                             <div class="filter-options" id="starParImparOptions">
                                 <!-- Dinámico -->
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">📊 Bajos/Altos Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starBajosAltos.titulo">📊 Bajos/Altos Estrellas</div>
                             <div class="filter-options" id="starBajosAltosOptions">
                                 <!-- Dinámico -->
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">∑ Suma Dígitos Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starSumaDigitos.titulo">∑ Suma Dígitos Estrellas</div>
                             <div class="range-control">
                                 <input type="number" id="starSumaDigitosMin" value="2" min="2" max="23">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="starSumaDigitosMax" value="18" min="2" max="23">
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">🔢 Primos Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starPrimos.titulo">🔢 Primos Estrellas</div>
                             <div class="range-control">
                                 <input type="number" id="starPrimosMin" value="0" min="0" max="2">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="starPrimosMax" value="2" min="0" max="2">
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">🔗 Consecutivos Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starConsecutivos.titulo">🔗 Consecutivos Estrellas</div>
                             <div class="filter-options" id="starConsecutivosOptions">
                                 <!-- Dinámico -->
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-title">📏 Distancia Estrellas</div>
+                            <div class="filter-title" data-i18n="filters.starDistancia.titulo">📏 Distancia Estrellas</div>
                             <div class="range-control">
                                 <input type="number" id="starDistanciaMin" value="1" min="1" max="11">
-                                <span>a</span>
+                                <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="starDistanciaMax" value="11" min="1" max="11">
                             </div>
                         </div>
                     </div>
 
                     <!-- GRUPO: Filtros Predictivos -->
-                    <div class="filter-group" data-filter-level="expert" title="Modelos matemáticos avanzados: Cadena de Markov, Equilibrio de Nash y Regresión a la Media." data-info="Modelos matemáticos avanzados:
+                    <div class="filter-group" data-filter-level="expert" title="Modelos matemáticos avanzados: Cadena de Markov, Equilibrio de Nash y Regresión a la Media." data-i18n-title="filters.predictivos.tooltip" data-i18n-info="filters.predictivos.dataInfo" data-info="Modelos matemáticos avanzados:
 • Cadena de Markov: Analiza las probabilidades de transición entre estados consecutivos de sorteos pasados.
 • Equilibrio de Nash: Modela la estrategia óptima para maximizar la esperanza matemática frente a selecciones masivas.
 • Regresión a la Media: Principio estadístico por el cual números con frecuencias extremas (muy fríos o calientes) tienden a estabilizarse hacia su promedio histórico.">
-                        <div class="filter-title">🤖 Filtros Predictivos</div>
+                        <div class="filter-title" data-i18n="filters.predictivos.titulo">🤖 Filtros Predictivos</div>
                         <div class="switch-control" style="margin-top: 0;">
                             <label class="switch">
                                 <input type="checkbox" id="useMarkovSwitch">
                                 <span class="slider"></span>
                             </label>
-                            <span>Cadenas de Markov</span>
+                            <span data-i18n="filters.markov.switch">Cadenas de Markov</span>
                         </div>
                         <div class="ai-config-row">
-                            <label for="markovDepth">Sorteos a considerar: <span id="markovDepthValue">5</span></label>
+                            <label for="markovDepth"><span data-i18n="filters.markov.label">Sorteos a considerar:</span> <span id="markovDepthValue">5</span></label>
                             <input type="range" id="markovDepth" min="1" max="20" value="5">
                         </div>
 
@@ -901,10 +901,10 @@
                                 <input type="checkbox" id="useNashSwitch">
                                 <span class="slider"></span>
                             </label>
-                            <span>Optimización Nash (Anti-Popular)</span>
+                            <span data-i18n="filters.nash.switch">Optimización Nash (Anti-Popular)</span>
                         </div>
                         <div class="ai-config-row">
-                            <label for="nashWeight">Factor Anti-Popularidad: <span id="nashWeightValue">1</span></label>
+                            <label for="nashWeight"><span data-i18n="filters.nash.label">Factor Anti-Popularidad:</span> <span id="nashWeightValue">1</span></label>
                             <input type="range" id="nashWeight" min="0" max="10" value="1">
                         </div>
 
@@ -913,15 +913,15 @@
                                 <input type="checkbox" id="useRegressionSwitch">
                                 <span class="slider"></span>
                             </label>
-                            <span>Regresión a la Media (Pro-Fríos)</span>
+                            <span data-i18n="filters.regresion.switch">Regresión a la Media (Pro-Fríos)</span>
                         </div>
                         <div class="ai-config-row">
-                            <label for="regressionBonus">Bonus por nº Frío: <span id="regressionBonusValue">3</span></label>
+                            <label for="regressionBonus"><span data-i18n="filters.regresion.label">Bonus por nº Frío:</span> <span id="regressionBonusValue">3</span></label>
                             <input type="range" id="regressionBonus" min="0" max="10" value="3">
                         </div>
                         
                         <div class="filter-info-text">
-                            <b>Markov:</b> Analiza secuencias. <b>Nash:</b> Favorece números menos populares. <b>Regresión:</b> Apuesta por números 'atrasados'.
+                            <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoNashLabel">Nash:</b> <span data-i18n="filters.predictivos.infoNashTexto">Favorece números menos populares.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Apuesta por números 'atrasados'.</span>
                         </div>
                     </div>
                     </div> <!-- End of standardFiltersContainer -->
