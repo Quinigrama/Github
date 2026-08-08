@@ -7229,7 +7229,7 @@ CONDICIONES DE USO ACEPTADAS:
     if (!container) return;
     container.innerHTML = '';
     if (this.savedTickets.length === 0) {
-      container.innerHTML = '<div style="color:#666; text-align: center; padding: 20px;">No tienes boletos guardados</div>';
+      container.innerHTML = `<div style="color:#666; text-align: center; padding: 20px;">${t('tickets.sinBoletos')}</div>`;
       this.updateSavedTicketsBadge();
       return;
     }
@@ -7242,15 +7242,15 @@ CONDICIONES DE USO ACEPTADAS:
       : this.savedTickets.filter(t => t.gameId === filterVal);
 
     if (filteredTickets.length === 0) {
-      container.innerHTML = '<div style="color:#666; text-align: center; padding: 20px;">No tienes boletos guardados para este juego</div>';
+      container.innerHTML = `<div style="color:#666; text-align: center; padding: 20px;">${t('tickets.sinBoletosParaJuego')}</div>`;
       this.updateSavedTicketsBadge();
       return;
     }
 
     const strategyMap: { [key: string]: string } = {
-        simple: 'Simple',
-        winning: 'E. Ganadora',
-        multiple: 'Múltiple'
+        simple: t('tickets.strategy.simple'),
+        winning: t('tickets.strategy.ganadora'),
+        multiple: t('tickets.strategy.multiple')
     };
 
     let hasUnreadChanged = false;
@@ -7274,7 +7274,7 @@ CONDICIONES DE USO ACEPTADAS:
           <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; margin-top: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 8px rgba(16,185,129,0.3); border: 1px solid #047857; flex-wrap: wrap; gap: 6px;">
             <span style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 1.1rem;">🏆</span>
-              <span><strong>¡BOLETO VALIDADO CON ACIERTOS PREMIADOS!</strong></span>
+              <span><strong>${t('tickets.boletoConAciertos')}</strong></span>
             </span>
             <span style="background: rgba(255,255,255,0.25); padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; white-space: nowrap;">
               ✨ ${winningInfo.prizeSummary}
@@ -7290,8 +7290,8 @@ CONDICIONES DE USO ACEPTADAS:
 
         prizeBannerHTML = `
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; margin-top: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="display: flex; align-items: center; gap: 6px;">ℹ️ <strong>Boleto Validado</strong> — Sin aciertos en categorías premiadas</span>
-            <span style="color: #475569; font-size: 0.75rem;">✓ Verificado</span>
+            <span style="display: flex; align-items: center; gap: 6px;">ℹ️ <strong>${t('tickets.boletoValidado')}</strong> — ${t('tickets.sinAciertosPremiados')}</span>
+            <span style="color: #475569; font-size: 0.75rem;">${t('tickets.verificadoCheck')}</span>
           </div>
         `;
       } else {
@@ -7306,11 +7306,11 @@ CONDICIONES DE USO ACEPTADAS:
       const strategyName = strategyMap[ticket.strategy] || ticket.strategy;
       const gameName = ticket.gameId && GAMES[ticket.gameId] ? GAMES[ticket.gameId].name : 'DataLotto 6/49';
       const strategyHTML = `<span class="saved-ticket-strategy">${strategyName}</span> <span class="saved-ticket-game" style="font-size: 0.75rem; color: #6b7280; margin-left: 5px;">(${gameName})</span>`;
-      const drawDateHTML = ticket.drawDate ? `<span class="saved-ticket-draw-date">Sorteo: ${new Date(ticket.drawDate + 'T00:00:00').toLocaleDateString()}</span>` : '';
+      const drawDateHTML = ticket.drawDate ? `<span class="saved-ticket-draw-date">${t('tickets.sorteo')} ${new Date(ticket.drawDate + 'T00:00:00').toLocaleDateString()}</span>` : '';
 
       let combosHTML = '';
       let actionsHTML = '';
-      const playOnlineHTML = `<button class="play-online-btn-saved">🔗 Jugar Online</button>`;
+      const playOnlineHTML = `<button class="play-online-btn-saved">${t('tickets.jugarOnline')}</button>`;
 
       // Check if it's a system ticket (Multiple with > 6 numbers)
       const isSystemTicket = ticket.combinations.length > 0 && (
@@ -7345,7 +7345,7 @@ CONDICIONES DE USO ACEPTADAS:
             <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                 <span>🇺🇸 Powerball EE. UU. (${costData.totalBets} apuestas)</span>
-                <span style="background: #be123c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Desglose por Categorías</span>
+                <span style="background: #be123c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
@@ -7359,9 +7359,9 @@ CONDICIONES DE USO ACEPTADAS:
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
                   <tr style="background: #ffe4e6; color: #881337; font-size: 0.8rem;">
-                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: left;">Categoría</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: center;">Aciertos Requeridos</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: center;">Apuestas Ganadoras</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: left;">${t('tickets.categoria')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fecdd3; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -7370,12 +7370,12 @@ CONDICIONES DE USO ACEPTADAS:
               </table>
 
               <div style="padding: 10px 12px; background: #9f1239; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-                <span>🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:</span>
-                <span style="font-size: 1.1rem; color: #fef08a;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} apuesta(s)</span>
+                <span>${t('tickets.totalApuestasPremiadas')}</span>
+                <span style="font-size: 1.1rem; color: #fef08a;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} ${t('tickets.apuestaSufijo')}</span>
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
           combosHTML = `
             <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
@@ -7391,7 +7391,7 @@ CONDICIONES DE USO ACEPTADAS:
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'megamillions') {
         const superset = ticket.combinations[0] || [];
@@ -7420,7 +7420,7 @@ CONDICIONES DE USO ACEPTADAS:
             <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                 <span>🇺🇸 Mega Millions EE. UU. (${costData.totalBets} apuestas)</span>
-                <span style="background: #ca8a04; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Desglose por Categorías</span>
+                <span style="background: #ca8a04; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
@@ -7434,9 +7434,9 @@ CONDICIONES DE USO ACEPTADAS:
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
                   <tr style="background: #fef08a; color: #854d0e; font-size: 0.8rem;">
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: left;">Categoría</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">Aciertos Requeridos</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">Apuestas Ganadoras</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: left;">${t('tickets.categoria')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -7445,12 +7445,12 @@ CONDICIONES DE USO ACEPTADAS:
               </table>
 
               <div style="padding: 10px 12px; background: #a16207; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-                <span>🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:</span>
-                <span style="font-size: 1.1rem; color: #fef08a;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} apuesta(s)</span>
+                <span>${t('tickets.totalApuestasPremiadas')}</span>
+                <span style="font-size: 1.1rem; color: #fef08a;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} ${t('tickets.apuestaSufijo')}</span>
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
           combosHTML = `
             <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
@@ -7466,7 +7466,7 @@ CONDICIONES DE USO ACEPTADAS:
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'euromillones') {
         const superset = ticket.combinations[0] || [];
@@ -7495,7 +7495,7 @@ CONDICIONES DE USO ACEPTADAS:
             <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                 <span>🇪🇺 Euromillones (${costData.totalBets} apuestas)</span>
-                <span style="background: #eab308; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Desglose por Categorías</span>
+                <span style="background: #eab308; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
@@ -7509,9 +7509,9 @@ CONDICIONES DE USO ACEPTADAS:
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
                   <tr style="background: #fef08a; color: #713f12; font-size: 0.8rem;">
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: left;">Categoría</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">Aciertos Requeridos</th>
-                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">Apuestas Ganadoras</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: left;">${t('tickets.categoria')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #fde047; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -7520,12 +7520,12 @@ CONDICIONES DE USO ACEPTADAS:
               </table>
 
               <div style="padding: 10px 12px; background: #ca8a04; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-                <span>🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:</span>
-                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} apuesta(s)</span>
+                <span>${t('tickets.totalApuestasPremiadas')}</span>
+                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} ${t('tickets.apuestaSufijo')}</span>
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
           combosHTML = `
             <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
@@ -7541,7 +7541,7 @@ CONDICIONES DE USO ACEPTADAS:
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'eurodreams') {
         const superset = ticket.combinations[0] || [];
@@ -7570,7 +7570,7 @@ CONDICIONES DE USO ACEPTADAS:
             <div style="background: #f0f9ff; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                 <span>🌙 EuroDreams (${costData.totalBets} apuestas)</span>
-                <span style="background: #38bdf8; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Desglose por Categorías</span>
+                <span style="background: #38bdf8; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
@@ -7584,9 +7584,9 @@ CONDICIONES DE USO ACEPTADAS:
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
                   <tr style="background: #bae6fd; color: #0369a1; font-size: 0.8rem;">
-                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: left;">Categoría</th>
-                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: center;">Aciertos Requeridos</th>
-                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: center;">Apuestas Ganadoras</th>
+                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: left;">${t('tickets.categoria')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #7dd3fc; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -7595,12 +7595,12 @@ CONDICIONES DE USO ACEPTADAS:
               </table>
 
               <div style="padding: 10px 12px; background: #0284c7; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-                <span>🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:</span>
-                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} apuesta(s)</span>
+                <span>${t('tickets.totalApuestasPremiadas')}</span>
+                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} ${t('tickets.apuestaSufijo')}</span>
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
           combosHTML = `
             <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
@@ -7616,7 +7616,7 @@ CONDICIONES DE USO ACEPTADAS:
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'gordo') {
         const superset = ticket.combinations[0] || [];
@@ -7645,7 +7645,7 @@ CONDICIONES DE USO ACEPTADAS:
             <div style="background: #faf5ff; border: 1.5px solid #c084fc; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                 <span>🔑 El Gordo de la Primitiva (${costData.totalBets} apuestas)</span>
-                <span style="background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Desglose por Categorías</span>
+                <span style="background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
@@ -7659,9 +7659,9 @@ CONDICIONES DE USO ACEPTADAS:
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
                   <tr style="background: #e9d5ff; color: #6b21a8; font-size: 0.8rem;">
-                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: left;">Categoría</th>
-                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: center;">Aciertos Requeridos</th>
-                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: center;">Apuestas Ganadoras</th>
+                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: left;">${t('tickets.categoria')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                    <th style="padding: 6px 10px; border: 1px solid #d8b4fe; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -7670,12 +7670,12 @@ CONDICIONES DE USO ACEPTADAS:
               </table>
 
               <div style="padding: 10px 12px; background: #7e22ce; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-                <span>🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:</span>
-                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} apuesta(s)</span>
+                <span>${t('tickets.totalApuestasPremiadas')}</span>
+                <span style="font-size: 1.1rem; color: #fff;">${cascade.tiers.reduce((acc, t) => acc + t.count, 0)} ${t('tickets.apuestaSufijo')}</span>
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
           combosHTML = `
             <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
@@ -7691,20 +7691,20 @@ CONDICIONES DE USO ACEPTADAS:
               </div>
             </div>
           `;
-          actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+          actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (isSystemTicket) {
           // === VISUALIZACIÓN MÚLTIPLE ===
           const superset = ticket.combinations[0];
           let summaryTableHTML = '';
           let validationClass = '';
-          let validationStatusBtn = `<button class="validate">Validar</button>`;
+          let validationStatusBtn = `<button class="validate">${t('tickets.validar')}</button>`;
           let supersetDisplayClass = '';
 
           if (ticket.validation) {
              const winningNumbersSet = new Set(ticket.validation.winningNumbers);
              validationClass = 'verified';
-             validationStatusBtn = `<button class="validate verified" disabled>Verificado</button>`;
+             validationStatusBtn = `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
 
              // Generate breakdown summary
              const explodedCombos = this.getCombinations(superset, 6);
@@ -7796,7 +7796,7 @@ CONDICIONES DE USO ACEPTADAS:
                             <div class="hit-count ${hitClass}">${hits}${starHitsText} aciertos</div>
                         </div>`;
             }).join('');
-            actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>Verificado</button>`;
+            actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
           } else {
             combosHTML = ticket.combinations.map((combo, index) => {
                 let comboHTML = '';
@@ -7816,7 +7816,7 @@ CONDICIONES DE USO ACEPTADAS:
                 }
                 return `<div class="saved-combination"><div class="saved-combination-content">${comboHTML}</div></div>`;
             }).join('');
-            actionsHTML = `${playOnlineHTML}<button class="validate">Validar</button>`;
+            actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
           }
       }
       

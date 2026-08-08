@@ -2366,8 +2366,8 @@
     <div class="modal-content" style="max-width: 800px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">📂 Boletos Guardados</h3>
-            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Administra, filtra y valida tus apuestas sugeridas guardadas</p>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="tickets.modal.titulo">📂 Boletos Guardados</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="tickets.modal.subtitulo">Administra, filtra y valida tus apuestas sugeridas guardadas</p>
         </div>
         <button class="close-btn" id="savedTicketsCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2375,9 +2375,9 @@
       <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1; text-align: left;">
         <div class="saved-tickets-header-controls" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; width: 100%;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">Filtrar por juego:</span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;" data-i18n="tickets.filtrarPorJuego">Filtrar por juego:</span>
                 <select id="savedTicketsGameFilter" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background-color: white; color: #1f2937; font-weight: 500;">
-                    <option value="all">Todos los juegos</option>
+                    <option value="all" data-i18n="tickets.todosLosJuegos">Todos los juegos</option>
                     <option value="powerball">Powerball</option>
                     <option value="bonoloto">Bonoloto</option>
                     <option value="primitiva">Primitiva</option>
@@ -2389,12 +2389,12 @@
             </div>
         </div>
         <div class="saved-tickets" id="savedTickets">
-            <div style="color:#666; text-align: center; padding: 20px;">No tienes boletos guardados</div>
+            <div style="color:#666; text-align: center; padding: 20px;" data-i18n="tickets.sinBoletos">No tienes boletos guardados</div>
         </div>
       </div>
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end; align-items: center;">
-        <button class="modal-btn confirm" id="savedTicketsConfirmCloseBtn" style="background-color: var(--primary);">Cerrar</button>
+        <button class="modal-btn confirm" id="savedTicketsConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>
