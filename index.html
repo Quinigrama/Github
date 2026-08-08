@@ -2174,18 +2174,18 @@
   <div class="modal" id="validationModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>✅ Validar Boleto</h3>
-            <p>Introduce los 6 números ganadores separados por espacios, comas o puntos.</p>
+            <h3 data-i18n="validation.modal.titulo">✅ Validar Boleto</h3>
+            <p data-i18n="validation.modal.subtitulo">Introduce los 6 números ganadores separados por espacios, comas o puntos.</p>
         </div>
         <input type="text" id="winningNumbersInput" class="modal-input" placeholder="7, 12. 23 31,42.49" maxlength="23">
         <div id="winningStarsInputSection" style="display: none; margin-top: 10px;">
-            <p id="winningStarsLabel" style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Introduce las estrellas ganadoras:</p>
+            <p id="winningStarsLabel" style="font-size: 0.8rem; color: #666; margin-bottom: 5px;" data-i18n="validation.estrellasLabel.inicial">Introduce las estrellas ganadoras:</p>
             <input type="text" id="winningStarsInput" class="modal-input" placeholder="2 11" maxlength="10">
         </div>
         <div id="validationResults" class="modal-body"></div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="cancelValidationBtn">Cerrar</button>
-            <button class="modal-btn confirm" id="confirmValidationBtn">Validar</button>
+            <button class="modal-btn cancel" id="cancelValidationBtn" data-i18n="tickets.cerrar">Cerrar</button>
+            <button class="modal-btn confirm" id="confirmValidationBtn" data-i18n="tickets.validar">Validar</button>
         </div>
     </div>
   </div>

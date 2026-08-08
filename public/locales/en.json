@@ -275,5 +275,22 @@
   "tickets.masEstrella": "+ ⭐:",
   "tickets.masLlave": "+ 🔑:",
   "tickets.multipleDe": "Multiple of",
-  "tickets.aciertos": "hits"
+  "tickets.aciertos": "hits",
+  "validation.modal.titulo": "✅ Validate Ticket",
+  "validation.modal.subtitulo": "Enter the 6 winning numbers separated by spaces, commas or periods.",
+  "validation.estrellasLabel.inicial": "Enter the winning stars:",
+  "validation.estrellasLabel.gordo": "🔑 Enter the winning Key Number (0-9):",
+  "validation.estrellasPlaceholder.gordo": "For example: 5",
+  "validation.estrellasLabel.eurodreams": "🌙 Enter the winning Dream (1-5):",
+  "validation.estrellasPlaceholder.eurodreams": "For example: 3",
+  "validation.estrellasLabel.generico": "⭐ Enter the winning stars (1-12):",
+  "validation.estrellasPlaceholder.generico": "For example: 2 11",
+  "toast.validacionFormatoNacional": "Enter a valid 5-digit ticket number (e.g.: 35072 or 3 5 0 7 2).",
+  "toast.validacionNumerosInvalidos": "Enter {count} valid winning numbers.",
+  "validation.estrellasErrorLabel.gordo": "valid key (0-9)",
+  "validation.estrellasErrorLabel.eurodreams": "valid dream (1-5)",
+  "validation.estrellasErrorLabel.generico": "{count} valid winning stars",
+  "toast.validacionEstrellasInvalidas": "Enter a {label}.",
+  "toast.boletoValidadoManualmente": "Ticket manually validated.",
+  "toast.errorBoletoNoEncontrado": "Error finding the ticket to validate."
 }

@@ -7957,14 +7957,14 @@ CONDICIONES DE USO ACEPTADAS:
             winningStarsInputSection.style.display = 'block';
             if (winningStarsLabel && winningStarsInput) {
                 if (gameId === 'gordo') {
-                    winningStarsLabel.innerHTML = '🔑 Introduce el Número Clave ganador (0-9):';
-                    winningStarsInput.placeholder = 'Por ejemplo: 5';
+                    winningStarsLabel.innerHTML = t('validation.estrellasLabel.gordo');
+                    winningStarsInput.placeholder = t('validation.estrellasPlaceholder.gordo');
                 } else if (gameId === 'eurodreams') {
-                    winningStarsLabel.innerHTML = '🌙 Introduce el Sueño ganador (1-5):';
-                    winningStarsInput.placeholder = 'Por ejemplo: 3';
+                    winningStarsLabel.innerHTML = t('validation.estrellasLabel.eurodreams');
+                    winningStarsInput.placeholder = t('validation.estrellasPlaceholder.eurodreams');
                 } else {
-                    winningStarsLabel.innerHTML = '⭐ Introduce las estrellas ganadoras (1-12):';
-                    winningStarsInput.placeholder = 'Por ejemplo: 2 11';
+                    winningStarsLabel.innerHTML = t('validation.estrellasLabel.generico');
+                    winningStarsInput.placeholder = t('validation.estrellasPlaceholder.generico');
                 }
             }
         } else {
@@ -8009,8 +8009,8 @@ CONDICIONES DE USO ACEPTADAS:
 
     if (winningNumbers.length !== maxNumbers) {
       const errorMsg = gameId === 'nacional' ? 
-        'Introduce un décimo de 5 cifras válido (ej: 35072 o 3 5 0 7 2).' : 
-        `Introduce ${maxNumbers} números ganadores válidos.`;
+        t('toast.validacionFormatoNacional') : 
+        t('toast.validacionNumerosInvalidos', { count: maxNumbers });
       this.showToast(errorMsg, 'error');
       return;
     }
@@ -8027,8 +8027,8 @@ CONDICIONES DE USO ACEPTADAS:
             }
         })));
         if (winningStars.length !== maxStars) {
-            const starLabelName = gameId === 'gordo' ? 'clave válida (0-9)' : (gameId === 'eurodreams' ? 'sueño válido (1-5)' : `${maxStars} estrellas ganadoras válidas`);
-            this.showToast(`Introduce una ${starLabelName}.`, 'error');
+            const starLabelName = gameId === 'gordo' ? t('validation.estrellasErrorLabel.gordo') : (gameId === 'eurodreams' ? t('validation.estrellasErrorLabel.eurodreams') : t('validation.estrellasErrorLabel.generico', { count: maxStars }));
+            this.showToast(t('toast.validacionEstrellasInvalidas', { label: starLabelName }), 'error');
             return;
         }
     }
@@ -8067,9 +8067,9 @@ CONDICIONES DE USO ACEPTADAS:
         });
 
         this.toggleModal('validationModal', false);
-        this.showToast('Boleto validado manualmente.', 'success');
+        this.showToast(t('toast.boletoValidadoManualmente'), 'success');
     } else {
-        this.showToast('Error al encontrar el boleto para validar.', 'error');
+        this.showToast(t('toast.errorBoletoNoEncontrado'), 'error');
     }
   }
   shareTicket() {

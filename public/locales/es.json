@@ -275,5 +275,22 @@
   "tickets.masEstrella": "+ ⭐:",
   "tickets.masLlave": "+ 🔑:",
   "tickets.multipleDe": "Múltiple de",
-  "tickets.aciertos": "aciertos"
+  "tickets.aciertos": "aciertos",
+  "validation.modal.titulo": "✅ Validar Boleto",
+  "validation.modal.subtitulo": "Introduce los 6 números ganadores separados por espacios, comas o puntos.",
+  "validation.estrellasLabel.inicial": "Introduce las estrellas ganadoras:",
+  "validation.estrellasLabel.gordo": "🔑 Introduce el Número Clave ganador (0-9):",
+  "validation.estrellasPlaceholder.gordo": "Por ejemplo: 5",
+  "validation.estrellasLabel.eurodreams": "🌙 Introduce el Sueño ganador (1-5):",
+  "validation.estrellasPlaceholder.eurodreams": "Por ejemplo: 3",
+  "validation.estrellasLabel.generico": "⭐ Introduce las estrellas ganadoras (1-12):",
+  "validation.estrellasPlaceholder.generico": "Por ejemplo: 2 11",
+  "toast.validacionFormatoNacional": "Introduce un décimo de 5 cifras válido (ej: 35072 o 3 5 0 7 2).",
+  "toast.validacionNumerosInvalidos": "Introduce {count} números ganadores válidos.",
+  "validation.estrellasErrorLabel.gordo": "clave válida (0-9)",
+  "validation.estrellasErrorLabel.eurodreams": "sueño válido (1-5)",
+  "validation.estrellasErrorLabel.generico": "{count} estrellas ganadoras válidas",
+  "toast.validacionEstrellasInvalidas": "Introduce una {label}.",
+  "toast.boletoValidadoManualmente": "Boleto validado manualmente.",
+  "toast.errorBoletoNoEncontrado": "Error al encontrar el boleto para validar."
 }
