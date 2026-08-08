@@ -7344,14 +7344,14 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇺🇸 Powerball EE. UU. (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
                 <span style="background: #be123c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#e11d48' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">+ PB:</span>
+                  <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">${t('tickets.masPB')}</span>
                   ${redSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningRedSet.has(r) ? '#9f1239' : '#fda4af'}; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7380,12 +7380,12 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇺🇸 Powerball EE. UU. (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
               </div>
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">+ PB:</span>
+                  <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">${t('tickets.masPB')}</span>
                   ${redSuperset.map(r => `<div class="saved-combination-number" style="background: #e11d48; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7419,14 +7419,14 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇺🇸 Mega Millions EE. UU. (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
                 <span style="background: #ca8a04; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#eab308' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">+ MB:</span>
+                  <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">${t('tickets.masMB')}</span>
                   ${goldSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningGoldSet.has(r) ? '#854d0e' : '#fde047'}; color: ${winningGoldSet.has(r) ? '#fff' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7455,12 +7455,12 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇺🇸 Mega Millions EE. UU. (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
               </div>
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">+ MB:</span>
+                  <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">${t('tickets.masMB')}</span>
                   ${goldSuperset.map(r => `<div class="saved-combination-number" style="background: #eab308; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7494,14 +7494,14 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇪🇺 Euromillones (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
                 <span style="background: #eab308; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#2563eb' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">+ ⭐:</span>
+                  <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">${t('tickets.masEstrella')}</span>
                   ${starSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningStarSet.has(r) ? '#eab308' : '#fef08a'}; color: ${winningStarSet.has(r) ? '#000' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7530,12 +7530,12 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🇪🇺 Euromillones (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
               </div>
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">+ ⭐:</span>
+                  <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">${t('tickets.masEstrella')}</span>
                   ${starSuperset.map(r => `<div class="saved-combination-number" style="background: #eab308; color: #000; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7569,7 +7569,7 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #f0f9ff; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🌙 EuroDreams (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
                 <span style="background: #38bdf8; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
@@ -7605,7 +7605,7 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🌙 EuroDreams (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
               </div>
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
@@ -7644,14 +7644,14 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #faf5ff; border: 1.5px solid #c084fc; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🔑 El Gordo de la Primitiva (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
                 <span style="background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
               </div>
 
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#7e22ce' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">+ 🔑:</span>
+                  <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">${t('tickets.masLlave')}</span>
                   ${claveSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningClaveSet.has(r) ? '#a855f7' : '#f3e8ff'}; color: ${winningClaveSet.has(r) ? '#fff' : '#6b21a8'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7680,12 +7680,12 @@ CONDICIONES DE USO ACEPTADAS:
           combosHTML = `
             <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
               <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>🔑 El Gordo de la Primitiva (${costData.totalBets} apuestas)</span>
+                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
               </div>
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
-                  <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">+ 🔑:</span>
+                  <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">${t('tickets.masLlave')}</span>
                   ${claveSuperset.map(r => `<div class="saved-combination-number" style="background: #a855f7; color: #fff; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
@@ -7735,7 +7735,7 @@ CONDICIONES DE USO ACEPTADAS:
              
              // Highlight matching balls in the main display
              combosHTML = `
-                <div class="system-badge">Múltiple de ${superset.length} - ${explodedCombos.length} apuestas</div>
+                <div class="system-badge">${t('tickets.multipleDe')} ${superset.length} - ${explodedCombos.length} ${t('tickets.apuestasParentesis')}</div>
                 <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                     <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center;">
                         ${superset.map(n => `<div class="saved-combination-number ${winningNumbersSet.has(n) ? 'selected' : ''}">${n}</div>`).join('')}
@@ -7747,7 +7747,7 @@ CONDICIONES DE USO ACEPTADAS:
           } else {
              // Not validated yet
               combosHTML = `
-                <div class="system-badge">Múltiple de ${superset.length}</div>
+                <div class="system-badge">${t('tickets.multipleDe')} ${superset.length}</div>
                 <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                     <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center;">
                         ${superset.map(n => `<div class="saved-combination-number">${n}</div>`).join('')}
@@ -7793,7 +7793,7 @@ CONDICIONES DE USO ACEPTADAS:
                 const starHitsText = starHits > 0 ? ` + ${starHits}⭐` : '';
                 return `<div class="saved-combination">
                             <div class="saved-combination-content">${comboHTML}</div>
-                            <div class="hit-count ${hitClass}">${hits}${starHitsText} aciertos</div>
+                            <div class="hit-count ${hitClass}">${hits}${starHitsText} ${t('tickets.aciertos')}</div>
                         </div>`;
             }).join('');
             actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;

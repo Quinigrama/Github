@@ -263,5 +263,17 @@
   "tickets.aciertosRequeridos": "Required Hits",
   "tickets.apuestasGanadoras": "Winning Bets",
   "tickets.totalApuestasPremiadas": "🎯 TOTAL PRIZE WINNING BETS ON THIS TICKET:",
-  "tickets.apuestaSufijo": "bet(s)"
+  "tickets.apuestaSufijo": "bet(s)",
+  "tickets.powerball.nombre": "🇺🇸 Powerball US",
+  "tickets.megamillions.nombre": "🇺🇸 Mega Millions US",
+  "tickets.euromillones.nombre": "🇪🇺 EuroMillions",
+  "tickets.eurodreams.nombre": "🌙 EuroDreams",
+  "tickets.gordo.nombre": "🔑 El Gordo",
+  "tickets.apuestasParentesis": "bets",
+  "tickets.masPB": "+ PB:",
+  "tickets.masMB": "+ MB:",
+  "tickets.masEstrella": "+ ⭐:",
+  "tickets.masLlave": "+ 🔑:",
+  "tickets.multipleDe": "Multiple of",
+  "tickets.aciertos": "hits"
 }

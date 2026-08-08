@@ -263,5 +263,17 @@
   "tickets.aciertosRequeridos": "Aciertos Requeridos",
   "tickets.apuestasGanadoras": "Apuestas Ganadoras",
   "tickets.totalApuestasPremiadas": "🎯 TOTAL APUESTAS PREMIADAS EN ESTE BOLETO:",
-  "tickets.apuestaSufijo": "apuesta(s)"
+  "tickets.apuestaSufijo": "apuesta(s)",
+  "tickets.powerball.nombre": "🇺🇸 Powerball EE. UU.",
+  "tickets.megamillions.nombre": "🇺🇸 Mega Millions EE. UU.",
+  "tickets.euromillones.nombre": "🇪🇺 Euromillones",
+  "tickets.eurodreams.nombre": "🌙 EuroDreams",
+  "tickets.gordo.nombre": "🔑 El Gordo de la Primitiva",
+  "tickets.apuestasParentesis": "apuestas",
+  "tickets.masPB": "+ PB:",
+  "tickets.masMB": "+ MB:",
+  "tickets.masEstrella": "+ ⭐:",
+  "tickets.masLlave": "+ 🔑:",
+  "tickets.multipleDe": "Múltiple de",
+  "tickets.aciertos": "aciertos"
 }
