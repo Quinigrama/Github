@@ -9070,9 +9070,9 @@ CONDICIONES DE USO ACEPTADAS:
     container.innerHTML = '';
 
     if (!this.dataLoaded || this.historicalData.length === 0) {
-        container.innerHTML = '<div style="color:#666; text-align: center; width: 100%; padding-top: 50px;">Carga datos para ver el gráfico.</div>';
+        container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding-top: 50px;">${t('dataviz.cargaGrafico')}</div>`;
         if (summary) {
-            summary.innerHTML = '<div style="color:#666; text-align: center; width: 100%;">Carga datos para ver el resumen estadístico.</div>';
+            summary.innerHTML = `<div style="color:#666; text-align: center; width: 100%;">${t('dataviz.cargaResumen')}</div>`;
         }
         return;
     }
@@ -9085,15 +9085,15 @@ CONDICIONES DE USO ACEPTADAS:
             const starOption = select.querySelector('option[value="star"]') as HTMLOptionElement;
             if (starOption) {
                 if (this.currentGame.id === 'gordo') {
-                    starOption.textContent = '🔑 Clave (0-9)';
+                    starOption.textContent = t('dataviz.estrellaLabel.gordo');
                 } else if (this.currentGame.id === 'eurodreams') {
-                    starOption.textContent = '🌙 Sueños';
+                    starOption.textContent = t('dataviz.estrellaLabel.eurodreams');
                 } else if (this.currentGame.id === 'powerball') {
-                    starOption.textContent = '🔴 Bolas Especiales';
+                    starOption.textContent = t('dataviz.estrellaLabel.powerball');
                 } else if (this.currentGame.id === 'megamillions') {
-                    starOption.textContent = '🟡 Mega Ball';
+                    starOption.textContent = t('dataviz.estrellaLabel.megamillions');
                 } else {
-                    starOption.textContent = '⭐ Estrellas';
+                    starOption.textContent = t('dataviz.estrellaLabel.generico');
                 }
             }
         }
@@ -9186,11 +9186,11 @@ CONDICIONES DE USO ACEPTADAS:
             const colIdx = Math.floor(key / 10);
             const digit = key % 10;
             const columnsLabels = [
-                "1ª Cifra",
-                "2ª Cifra",
-                "3ª Cifra",
-                "4ª Cifra",
-                "5ª Cifra"
+                t('dataviz.cifraCorta.1'),
+                t('dataviz.cifraCorta.2'),
+                t('dataviz.cifraCorta.3'),
+                t('dataviz.cifraCorta.4'),
+                t('dataviz.cifraCorta.5')
             ];
             return `${columnsLabels[colIdx - 1]} (${digit})`;
         }
@@ -9207,14 +9207,14 @@ CONDICIONES DE USO ACEPTADAS:
         summary.innerHTML = `
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; width: 100%;">
                 <div style="flex: 1; min-width: 220px;">
-                    🔥 <strong>Más frecuente:</strong> <span style="color: #ef4444; font-weight: bold;">${maxFreqStr}</span> (${maxActualFreq} veces)
+                    🔥 <strong>${t('dataviz.masFrecuente')}</strong> <span style="color: #ef4444; font-weight: bold;">${maxFreqStr}</span> (${t('backtest.economico.vecesCount', { count: maxActualFreq })})
                 </div>
                 <div style="flex: 1; min-width: 220px;">
-                    ❄️ <strong>Menos frecuente:</strong> <span style="color: #3b82f6; font-weight: bold;">${minFreqStr}</span> (${minActualFreq} veces)
+                    ❄️ <strong>${t('dataviz.menosFrecuente')}</strong> <span style="color: #3b82f6; font-weight: bold;">${minFreqStr}</span> (${t('backtest.economico.vecesCount', { count: minActualFreq })})
                 </div>
                 <div style="flex: 1; min-width: 250px; text-align: right;" class="mean-indicator">
-                    📈 <strong>Media esperada:</strong> <span style="color: #10b981; font-weight: bold;">${mean.toFixed(2)}</span>
-                    <span style="color: #64748b; font-size: 0.85rem; margin-left: 5px;">(±${sd.toFixed(2)} desv. est.)</span>
+                    📈 <strong>${t('dataviz.mediaEsperada')}</strong> <span style="color: #10b981; font-weight: bold;">${mean.toFixed(2)}</span>
+                    <span style="color: #64748b; font-size: 0.85rem; margin-left: 5px;">${t('dataviz.desviacionEst', { sd: sd.toFixed(2) })}</span>
                 </div>
             </div>
         `;

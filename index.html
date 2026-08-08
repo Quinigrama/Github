@@ -1844,8 +1844,8 @@
       <div class="modal-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
           <div>
-              <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">📊 Visualización Avanzada de Datos</h3>
-              <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Mapa de calor y ranking de frecuencias de los datos históricos cargados</p>
+              <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="dataviz.titulo">📊 Visualización Avanzada de Datos</h3>
+              <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="dataviz.subtitulo">Mapa de calor y ranking de frecuencias de los datos históricos cargados</p>
           </div>
           <button class="close-btn" id="dataVizCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
         </div>
@@ -1854,38 +1854,38 @@
           
           <!-- Resumen de Frecuencias -->
           <div id="dataVizSummary" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px; font-size: 0.95rem; color: #334155; line-height: 1.5; display: flex; flex-direction: column; gap: 4px;">
-              <div style="color:#666; text-align: center; width: 100%;">Carga datos para ver el resumen estadístico.</div>
+              <div style="color:#666; text-align: center; width: 100%;" data-i18n="dataviz.cargaResumen">Carga datos para ver el resumen estadístico.</div>
           </div>
 
           <!-- Selectores de Control -->
           <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; justify-content: space-between; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;">
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                  <span style="font-weight: 600; font-size: 0.9rem; color: #475569;">Modo visual:</span>
+                  <span style="font-weight: 600; font-size: 0.9rem; color: #475569;" data-i18n="dataviz.modoVisual">Modo visual:</span>
                   <div style="display: flex; background: #e2e8f0; padding: 3px; border-radius: 8px; gap: 2px;">
-                      <button id="vizModeHeatmapBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: var(--primary); color: white;" class="viz-toggle-btn active">🗺️ Mapa de Calor</button>
-                      <button id="vizModeRankingBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: transparent; color: #475569;" class="viz-toggle-btn">📊 Ranking de Frecuencias</button>
+                      <button id="vizModeHeatmapBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: var(--primary); color: white;" class="viz-toggle-btn active" data-i18n="dataviz.modoMapaCalor">🗺️ Mapa de Calor</button>
+                      <button id="vizModeRankingBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: transparent; color: #475569;" class="viz-toggle-btn" data-i18n="dataviz.modoRanking">📊 Ranking de Frecuencias</button>
                   </div>
               </div>
 
               <!-- Selector de Elemento (Números vs Estrellas) si el juego tiene estrellas -->
               <div id="vizTargetSelectorContainer" style="display: none; align-items: center; gap: 8px;">
-                  <span style="font-weight: 600; font-size: 0.9rem; color: #475569;">Analizar:</span>
+                  <span style="font-weight: 600; font-size: 0.9rem; color: #475569;" data-i18n="dataviz.analizar">Analizar:</span>
                   <select id="vizTargetSelect" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; background: white; color: #334155; font-weight: 500;">
-                      <option value="number">Números principales</option>
-                      <option value="star">Estrellas</option>
+                      <option value="number" data-i18n="dataviz.numerosPrincipales">Números principales</option>
+                      <option value="star" data-i18n="dataviz.estrellasGenerico">Estrellas</option>
                   </select>
               </div>
           </div>
 
           <!-- Contenedor del Gráfico / Mapa de Calor -->
           <div id="frequencyChartContainer" style="min-height: 300px; padding: 15px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow-x: auto;">
-              <div style="color:#666; text-align: center; width: 100%; padding-top: 100px;">Carga datos para ver el gráfico.</div>
+              <div style="color:#666; text-align: center; width: 100%; padding-top: 100px;" data-i18n="dataviz.cargaGrafico">Carga datos para ver el gráfico.</div>
           </div>
 
         </div>
 
         <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end;">
-          <button class="modal-btn confirm" id="dataVizConfirmCloseBtn" style="background-color: var(--primary);">Cerrar</button>
+          <button class="modal-btn confirm" id="dataVizConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
         </div>
       </div>
     </div>
