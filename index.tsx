@@ -3796,26 +3796,26 @@ class DataLotto49Advanced {
     const neutralThreshold = Math.ceil(maxNumbers * 0.7); // 5 for 6, 4 for 5
 
     if (hotCount >= hotThreshold) {
-      trend = "🔥 Muy Caliente";
-      recommendation = "❄️ Toca Enfriar";
+      trend = t('bigdata.trend.muyCaliente');
+      recommendation = t('bigdata.trend.tocaEnfriar');
       suggestedHot = Math.floor(maxNumbers * 0.2);
       suggestedCold = Math.floor(maxNumbers * 0.4);
       suggestedNeutral = maxNumbers - suggestedHot - suggestedCold;
     } else if (coldCount >= coldThreshold) {
-      trend = "❄️ Muy Frío";
-      recommendation = "🔥 Toca Calentar";
+      trend = t('bigdata.trend.muyFrio');
+      recommendation = t('bigdata.trend.tocaCalentar');
       suggestedHot = Math.floor(maxNumbers * 0.5);
       suggestedCold = Math.floor(maxNumbers * 0.1);
       suggestedNeutral = maxNumbers - suggestedHot - suggestedCold;
     } else if (neutralCount >= neutralThreshold) {
-      trend = "⚖️ Muy Neutro";
-      recommendation = "🌡️ Activar Extremos";
+      trend = t('bigdata.trend.muyNeutro');
+      recommendation = t('bigdata.trend.activarExtremos');
       suggestedHot = Math.floor(maxNumbers * 0.4);
       suggestedCold = Math.floor(maxNumbers * 0.4);
       suggestedNeutral = maxNumbers - suggestedHot - suggestedCold;
     } else {
-      trend = "⚖️ Balanceado";
-      recommendation = "🔄 Mantener Ciclo";
+      trend = t('bigdata.trend.balanceado');
+      recommendation = t('bigdata.trend.mantenerCiclo');
     }
 
     // Suggestions for Stars
@@ -3845,20 +3845,20 @@ class DataLotto49Advanced {
     if (this.suggestedProfile) {
       let html = `
         <div style="margin-bottom: 8px;">
-            <div style="font-size: 0.7rem; color: #666; margin-bottom: 4px; font-weight: bold;">NÚMEROS:</div>
-            <span class="profile-tag" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedHot} Calientes</span>
-            <span class="profile-tag" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedNeutral} Neutros</span>
-            <span class="profile-tag" style="background: #e0f2fe; color: #075985; padding: 2px 6px; border-radius: 4px;">${suggestedCold} Fríos</span>
+            <div style="font-size: 0.7rem; color: #666; margin-bottom: 4px; font-weight: bold;">${t('bigdata.perfilNumeros')}</div>
+            <span class="profile-tag" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedHot} ${t('bigdata.calientes')}</span>
+            <span class="profile-tag" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedNeutral} ${t('bigdata.neutros')}</span>
+            <span class="profile-tag" style="background: #e0f2fe; color: #075985; padding: 2px 6px; border-radius: 4px;">${suggestedCold} ${t('bigdata.frios')}</span>
         </div>
       `;
 
       if (maxStars > 0) {
           html += `
             <div>
-                <div style="font-size: 0.7rem; color: #666; margin-bottom: 4px; font-weight: bold;">ESTRELLAS:</div>
-                <span class="profile-tag" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedStarHot} Calientes</span>
-                <span class="profile-tag" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedStarNeutral} Neutros</span>
-                <span class="profile-tag" style="background: #e0f2fe; color: #075985; padding: 2px 6px; border-radius: 4px;">${suggestedStarCold} Fríos</span>
+                <div style="font-size: 0.7rem; color: #666; margin-bottom: 4px; font-weight: bold;">${t('bigdata.perfilEstrellas')}</div>
+                <span class="profile-tag" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedStarHot} ${t('bigdata.calientes')}</span>
+                <span class="profile-tag" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">${suggestedStarNeutral} ${t('bigdata.neutros')}</span>
+                <span class="profile-tag" style="background: #e0f2fe; color: #075985; padding: 2px 6px; border-radius: 4px;">${suggestedStarCold} ${t('bigdata.frios')}</span>
             </div>
           `;
       }
@@ -4618,13 +4618,13 @@ class DataLotto49Advanced {
 
     const allowedDays = this.currentGame.allowedDays || [0, 1, 2, 3, 4, 5, 6];
     const dayNames: { [key: number]: string } = {
-      1: 'Lunes',
-      2: 'Martes',
-      3: 'Miércoles',
-      4: 'Jueves',
-      5: 'Viernes',
-      6: 'Sábado',
-      0: 'Domingo'
+      1: t('common.dias.lunes'),
+      2: t('common.dias.martes'),
+      3: t('common.dias.miercoles'),
+      4: t('common.dias.jueves'),
+      5: t('common.dias.viernes'),
+      6: t('common.dias.sabado'),
+      0: t('common.dias.domingo')
     };
 
     const daysOrder = [1, 2, 3, 4, 5, 6, 0];
@@ -4637,7 +4637,7 @@ class DataLotto49Advanced {
       if (allowedDays.includes(dayNum)) {
         const option = document.createElement('option');
         option.value = String(dayNum);
-        option.textContent = `Próximo sorteo: ${dayNames[dayNum]}`;
+        option.textContent = t('bigdata.proximoSorteo', { dia: dayNames[dayNum] });
         if (dayNum === currentValue) {
           option.selected = true;
           validSelected = true;
@@ -9400,7 +9400,7 @@ CONDICIONES DE USO ACEPTADAS:
       if (!lastDrawsContainer || !dayTopContainer || !alertsContainer) return;
       
       if (this.historicalData.length < 2) {
-          lastDrawsContainer.innerHTML = '<div style="color: #999; font-style: italic;">Datos insuficientes (mínimo 2 sorteos)</div>';
+          lastDrawsContainer.innerHTML = `<div style="color: #999; font-style: italic;">${t('bigdata.datosInsuficientes')}</div>`;
           dayTopContainer.innerHTML = '<span style="font-size: 0.8rem; color: #999;">-</span>';
           return;
       }
@@ -9427,10 +9427,10 @@ CONDICIONES DE USO ACEPTADAS:
           let extraHtml = '';
           if (this.currentGame.id !== 'euromillones') {
               if (draw.complementario !== undefined) {
-                  extraHtml += `<div class="mini-ball complementario-ball" title="Complementario">C${draw.complementario}</div>`;
+                  extraHtml += `<div class="mini-ball complementario-ball" title="${t('common.complementario')}">C${draw.complementario}</div>`;
               }
               if (draw.reintegro !== undefined) {
-                  extraHtml += `<div class="mini-ball reintegro-ball" title="Reintegro">R${draw.reintegro}</div>`;
+                  extraHtml += `<div class="mini-ball reintegro-ball" title="${t('common.reintegro')}">R${draw.reintegro}</div>`;
               }
           }
 
@@ -9450,8 +9450,8 @@ CONDICIONES DE USO ACEPTADAS:
       };
       
       lastDrawsContainer.innerHTML = 
-          renderMiniDraw(drawN, 'Último') + 
-          renderMiniDraw(drawNminus1, 'Anterior');
+          renderMiniDraw(drawN, t('bigdata.ultimo')) + 
+          renderMiniDraw(drawNminus1, t('bigdata.anterior'));
 
       // 2. Patrones Temporales
       this.updateNextDrawDayOptions();
@@ -9487,8 +9487,8 @@ CONDICIONES DE USO ACEPTADAS:
               if (this.hotNumbers.has(n)) className += ' hot';
               else if (this.coldNumbers.has(n)) className += ' cold';
               const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
-              const positionalName = this.currentGame.id === 'nacional' ? ` (Cifra ${Math.floor(n / 10)}ª)` : '';
-              return `<div class="${className}" title="Frecuencia: ${dayFrequencies[n]}${positionalName}">${displayVal}</div>`;
+              const positionalName = this.currentGame.id === 'nacional' ? t('bigdata.cifraPosicional', { n: Math.floor(n / 10) }) : '';
+              return `<div class="${className}" title="${t('bigdata.frecuenciaTooltip', { count: dayFrequencies[n], extra: positionalName })}">${displayVal}</div>`;
           }).join('');
 
           if (this.currentGame.maxStars > 0) {
@@ -9510,7 +9510,7 @@ CONDICIONES DE USO ACEPTADAS:
           
           dayTopContainer.innerHTML = html;
       } else {
-          dayTopContainer.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Sin datos para este día.</span>';
+          dayTopContainer.innerHTML = `<span style="font-size: 0.8rem; color: #999;">${t('bigdata.sinDatosDia')}</span>`;
       }
 
       // 3. Validación del Último Sorteo (NEW)
@@ -9525,7 +9525,7 @@ CONDICIONES DE USO ACEPTADAS:
               
               validationHtml = `
                 <div class="bd-alert ${hits + starHits > 0 ? 'success' : 'info'}" style="margin-bottom: 10px;">
-                    🎯 <strong>Tu Selección vs Último:</strong> ${hits} nº + ${starHits} ⭐
+                    ${t('bigdata.tuSeleccionVsUltimo', { hits, starHits })}
                 </div>
               `;
           }
@@ -9548,7 +9548,7 @@ CONDICIONES DE USO ACEPTADAS:
               
               validationHtml += `
                 <div class="bd-alert success">
-                    🎟️ <strong>Tus Boletos vs Último:</strong> ${totalHits} aciertos + ${totalStarHits} ⭐
+                    ${t('bigdata.tusBoletosVsUltimo', { hits: totalHits, starHits: totalStarHits })}
                 </div>
               `;
           }
@@ -9561,11 +9561,11 @@ CONDICIONES DE USO ACEPTADAS:
       const intersection = drawN.numbers.filter(n => drawNminus1.numbers.includes(n));
       if (intersection.length > 0) {
           const displayIntersection = this.currentGame.id === 'nacional' 
-              ? intersection.map(n => `${n % 10} (Cifra ${Math.floor(n / 10)}ª)`)
+              ? intersection.map(n => `${n % 10}${t('bigdata.cifraPosicional', { n: Math.floor(n / 10) })}`)
               : intersection;
           alertsContainer.innerHTML += `
             <div class="bd-alert warning">
-                ⚠️ Doble repetición detectada (${displayIntersection.join(', ')}). Probabilidad rebote muy baja (0.8%).
+                ${t('bigdata.dobleRepeticion', { numbers: displayIntersection.join(', ') })}
             </div>
           `;
       }
@@ -9575,7 +9575,7 @@ CONDICIONES DE USO ACEPTADAS:
       if (superHot) {
            alertsContainer.innerHTML += `
             <div class="bd-alert info">
-                💡 El "Caliente" ${superHot} lleva tiempo sin salir. ¿Oportunidad?
+                ${t('bigdata.calienteAusente', { num: superHot })}
             </div>
           `;
       }
@@ -9585,7 +9585,7 @@ CONDICIONES DE USO ACEPTADAS:
       if (repeatedInLast > 3) {
            alertsContainer.innerHTML += `
             <div class="bd-alert success">
-                🔥 El último sorteo fue muy "caliente". El próximo tiende a enfriar.
+                ${t('bigdata.ultimoMuyCaliente')}
             </div>
           `;
       }
@@ -9593,7 +9593,7 @@ CONDICIONES DE USO ACEPTADAS:
 
   applyBigDataStrategy(type: string) {
       if (this.historicalData.length < 2) {
-          this.showToast('Datos insuficientes para análisis Big Data.', 'warning');
+          this.showToast(t('toast.bigdataDatosInsuficientes'), 'warning');
           return;
       }
 
@@ -9623,7 +9623,7 @@ CONDICIONES DE USO ACEPTADAS:
           
           // Pick top 6 from remaining
           suggestions = Array.from(candidates).slice(0, 6);
-          this.showToast('Sugerencia Conservadora: 0 repeticiones.', 'info');
+          this.showToast(t('toast.bigdataSugerenciaConservadora'), 'info');
 
       } else if (type === 'balanced') {
           // 1 Repetition (Best one)
@@ -9649,7 +9649,7 @@ CONDICIONES DE USO ACEPTADAS:
 
           // Fill rest
           suggestions.push(...Array.from(candidates).slice(0, 5));
-           this.showToast('Sugerencia Balanceada: 1 repetición óptima.', 'info');
+           this.showToast(t('toast.bigdataSugerenciaBalanceada'), 'info');
 
       } else if (type === 'risk') {
           // 2 Repetitions
@@ -9666,7 +9666,7 @@ CONDICIONES DE USO ACEPTADAS:
 
           // Fill rest
           suggestions.push(...Array.from(candidates).slice(0, 4));
-           this.showToast('Sugerencia Riesgo: 2 repeticiones.', 'warning');
+           this.showToast(t('toast.bigdataSugerenciaRiesgo'), 'warning');
       }
 
       this.suggestedNumbers = new Set(suggestions);

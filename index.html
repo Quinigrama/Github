@@ -2404,8 +2404,8 @@
     <div class="modal-content" style="max-width: 950px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">🧠 Big Data Intelligence</h3>
-            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Análisis avanzado de tendencias, patrones temporales y sugerencias en tiempo real</p>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="bigdata.titulo">🧠 Big Data Intelligence</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="bigdata.subtitulo">Análisis avanzado de tendencias, patrones temporales y sugerencias en tiempo real</p>
         </div>
         <button class="close-btn" id="bigdataCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2415,15 +2415,15 @@
             
             <!-- Panel 1: Immediate Context -->
             <div class="bigdata-panel">
-                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;">📅 Contexto Inmediato (Últimos 2)</h4>
+                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;" data-i18n="bigdata.contextoInmediato">📅 Contexto Inmediato (Últimos 2)</h4>
                 <div id="lastDrawsDisplay" class="draw-history-mini">
-                    <div style="color: #999; font-style: italic;">Carga datos para ver el análisis.</div>
+                    <div style="color: #999; font-style: italic;" data-i18n="bigdata.cargaDatos">Carga datos para ver el análisis.</div>
                 </div>
             </div>
             
             <!-- Panel 2: Temporal Patterns -->
             <div class="bigdata-panel">
-                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;">⏳ Patrones Temporales</h4>
+                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;" data-i18n="bigdata.patronesTemporales">⏳ Patrones Temporales</h4>
                 <select id="nextDrawDay" class="day-selector" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; outline: none;">
                     <option value="1">Próximo sorteo: Lunes</option>
                     <option value="2">Próximo sorteo: Martes</option>
@@ -2433,7 +2433,7 @@
                     <option value="6">Próximo sorteo: Sábado</option>
                     <option value="0">Próximo sorteo: Domingo</option>
                 </select>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Más frecuentes en este día:</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;" data-i18n="bigdata.masFrecuentesDia">Más frecuentes en este día:</div>
                 <div id="bdDayTopNumbers" class="top-day-numbers">
                     <span style="font-size: 0.8rem; color: #999;">-</span>
                 </div>
@@ -2441,23 +2441,23 @@
 
             <!-- Panel 3: Decision Matrix -->
             <div class="bigdata-panel bigdata-matrix">
-                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;">🧠 Matriz de Decisión (Sugerencias)</h4>
-                <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Pulsa para recibir sugerencias visuales en el tablero (borde azul):</p>
+                <h4 style="color: var(--bigdata); font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; font-weight: 600;" data-i18n="bigdata.matrizDecision">🧠 Matriz de Decisión (Sugerencias)</h4>
+                <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;" data-i18n="bigdata.pulsaSugerencias">Pulsa para recibir sugerencias visuales en el tablero (borde azul):</p>
                 <div class="strategy-matrix-buttons">
                     <div class="bd-strat-btn" data-type="conservative">
-                        <strong>Conservadora</strong>
-                        <small>0 Repeticiones</small>
-                        <small>Prob: 39.7%</small>
+                        <strong data-i18n="bigdata.estrategiaConservadora">Conservadora</strong>
+                        <small data-i18n="bigdata.repeticiones0">0 Repeticiones</small>
+                        <small data-i18n="bigdata.probConservadora">Prob: 39.7%</small>
                     </div>
                     <div class="bd-strat-btn" data-type="balanced">
-                        <strong>Balanceada</strong>
-                        <small>1 Repetición</small>
-                        <small>Prob: 42.0%</small>
+                        <strong data-i18n="bigdata.estrategiaBalanceada">Balanceada</strong>
+                        <small data-i18n="bigdata.repeticiones1">1 Repetición</small>
+                        <small data-i18n="bigdata.probBalanceada">Prob: 42.0%</small>
                     </div>
                     <div class="bd-strat-btn" data-type="risk">
-                        <strong>Riesgo</strong>
-                        <small>2 Repeticiones</small>
-                        <small>Prob: 14.8%</small>
+                        <strong data-i18n="bigdata.estrategiaRiesgo">Riesgo</strong>
+                        <small data-i18n="bigdata.repeticiones2">2 Repeticiones</small>
+                        <small data-i18n="bigdata.probRiesgo">Prob: 14.8%</small>
                     </div>
                 </div>
 
@@ -2465,20 +2465,20 @@
                 <div id="drawTrendPanel" class="draw-trend-panel" style="margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: none;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                         <span style="font-size: 1.2rem;">📊</span>
-                        <h5 style="margin: 0; font-size: 0.9rem; color: #1e293b; font-weight: 600;">Estado del Ciclo (Último Sorteo)</h5>
+                        <h5 style="margin: 0; font-size: 0.9rem; color: #1e293b; font-weight: 600;" data-i18n="bigdata.estadoCiclo">Estado del Ciclo (Último Sorteo)</h5>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="trend-stat">
-                            <small style="display: block; color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.025em;">Tendencia Actual</small>
+                            <small style="display: block; color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.025em;" data-i18n="bigdata.tendenciaActual">Tendencia Actual</small>
                             <span id="currentTrendLabel" style="font-weight: 600; color: #334155; font-size: 0.85rem;">-</span>
                         </div>
                         <div class="trend-stat">
-                            <small style="display: block; color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.025em;">Recomendación</small>
+                            <small style="display: block; color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.025em;" data-i18n="bigdata.recomendacion">Recomendación</small>
                             <span id="trendRecommendation" style="font-weight: 600; color: #4f46e5; font-size: 0.85rem;">-</span>
                         </div>
                     </div>
                     <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1;">
-                        <small style="display: block; color: #64748b; font-size: 0.7rem; margin-bottom: 4px;">Perfil de Referencia Sugerido:</small>
+                        <small style="display: block; color: #64748b; font-size: 0.7rem; margin-bottom: 4px;" data-i18n="bigdata.perfilSugerido">Perfil de Referencia Sugerido:</small>
                         <div id="suggestedProfile" style="font-size: 0.8rem; color: #334155; font-weight: 500;">
                             <span class="profile-tag" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">0 Calientes</span>
                             <span class="profile-tag" style="background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">0 Neutros</span>
@@ -2496,7 +2496,7 @@
       </div>
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end;">
-        <button class="modal-btn confirm" id="bigdataConfirmCloseBtn" style="background-color: var(--primary);">Cerrar</button>
+        <button class="modal-btn confirm" id="bigdataConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>
