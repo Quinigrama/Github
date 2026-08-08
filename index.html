@@ -2197,8 +2197,8 @@
     <div class="modal-content" style="max-width: 800px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">🔬 Backtesting Avanzado</h3>
-            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Ejecuta una simulación retrospectiva histórica de tus filtros y selecciones</p>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="backtest.titulo">🔬 Backtesting Avanzado</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="backtest.subtitulo">Ejecuta una simulación retrospectiva histórica de tus filtros y selecciones</p>
         </div>
         <button class="close-btn" id="backtestingCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2206,33 +2206,33 @@
       <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1; text-align: left;">
           <div class="backtesting-controls" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
               <div class="filter-group">
-                  <div class="filter-title">📅 Periodo de Sorteos Históricos</div>
+                  <div class="filter-title" data-i18n="backtest.periodoTitulo">📅 Periodo de Sorteos Históricos</div>
                   <select id="backtestPeriod" class="day-selector" style="width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 6px;">
-                      <option value="10">Últimos 10 sorteos</option>
-                      <option value="50">Últimos 50 sorteos</option>
-                      <option value="100" selected>Últimos 100 sorteos</option>
-                      <option value="200">Últimos 200 sorteos</option>
-                      <option value="all">Todos los sorteos cargados</option>
+                      <option value="10" data-i18n="backtest.periodo.10">Últimos 10 sorteos</option>
+                      <option value="50" data-i18n="backtest.periodo.50">Últimos 50 sorteos</option>
+                      <option value="100" selected data-i18n="backtest.periodo.100">Últimos 100 sorteos</option>
+                      <option value="200" data-i18n="backtest.periodo.200">Últimos 200 sorteos</option>
+                      <option value="all" data-i18n="backtest.periodo.all">Todos los sorteos cargados</option>
                   </select>
               </div>
               <div class="filter-group">
-                  <div class="filter-title">🧭 Modalidad del Test</div>
+                  <div class="filter-title" data-i18n="backtest.modalidadTitulo">🧭 Modalidad del Test</div>
                   <select id="backtestMode" class="day-selector" style="width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 6px;">
-                      <option value="current">Probar combinaciones/selección actual</option>
-                      <option value="generative">Probar algoritmos activos (Generativo paso a paso)</option>
-                      <option value="filters">Filtros Activos (Eficacia del filtrado histórico)</option>
+                      <option value="current" data-i18n="backtest.modalidad.current">Probar combinaciones/selección actual</option>
+                      <option value="generative" data-i18n="backtest.modalidad.generative">Probar algoritmos activos (Generativo paso a paso)</option>
+                      <option value="filters" data-i18n="backtest.modalidad.filters">Filtros Activos (Eficacia del filtrado histórico)</option>
                   </select>
               </div>
           </div>
           
           <div class="backtesting-actions" style="text-align: center; margin-bottom: 25px;">
               <button class="generate-btn" id="runBacktestBtn" style="background: linear-gradient(135deg, var(--secondary) 0%, #7c3aed 100%); width: auto; padding: 12px 30px; display: inline-flex; align-items: center; gap: 8px;">
-                  <span>🚀 Iniciar Backtesting</span>
+                  <span data-i18n="backtest.iniciar">🚀 Iniciar Backtesting</span>
               </button>
               <!-- Progress Bar -->
               <div id="backtestProgressContainer" style="display: none; margin-top: 15px; width: 100%; text-align: left;">
                   <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gray); margin-bottom: 4px;">
-                      <span>Procesando combinaciones...</span>
+                      <span data-i18n="backtest.procesando">Procesando combinaciones...</span>
                       <span id="backtestProgressText">0%</span>
                   </div>
                   <div style="width: 100%; height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden;">
@@ -2245,52 +2245,52 @@
           <div id="backtestResults" style="display: none;">
               <div class="stats-grid" style="margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;">
                   <div class="stat-item">
-                      <div class="stat-label" id="lblTotalDraws">Sorteos Simulados</div>
+                      <div class="stat-label" id="lblTotalDraws" data-i18n="backtest.lbl.sorteosSimulados">Sorteos Simulados</div>
                       <div class="stat-value" id="btTotalDraws">-</div>
                   </div>
                   <div class="stat-item">
-                      <div class="stat-label" id="lblTicketPrice">Precio por Apuesta</div>
+                      <div class="stat-label" id="lblTicketPrice" data-i18n="backtest.lbl.precioApuesta">Precio por Apuesta</div>
                       <div class="stat-value" id="btTicketPrice">-</div>
                   </div>
                   <div class="stat-item">
-                      <div class="stat-label" id="lblTotalSpent">Presupuesto Invertido</div>
+                      <div class="stat-label" id="lblTotalSpent" data-i18n="backtest.lbl.presupuestoInvertido">Presupuesto Invertido</div>
                       <div class="stat-value" style="color: var(--dark);" id="btTotalSpent">-</div>
                   </div>
                   <div class="stat-item">
-                      <div class="stat-label" id="lblTotalWon">Premios Recuperados</div>
+                      <div class="stat-label" id="lblTotalWon" data-i18n="backtest.lbl.premiosRecuperados">Premios Recuperados</div>
                       <div class="stat-value" style="color: var(--success);" id="btTotalWon">-</div>
                   </div>
                   <div class="stat-item">
-                      <div class="stat-label" id="lblBalance">Balance Neto</div>
+                      <div class="stat-label" id="lblBalance" data-i18n="backtest.lbl.balanceNeto">Balance Neto</div>
                       <div class="stat-value" style="font-weight: bold;" id="btBalance">-</div>
                   </div>
                   <div class="stat-item">
-                      <div class="stat-label" id="lblROI">Retorno de Inversión (ROI)</div>
+                      <div class="stat-label" id="lblROI" data-i18n="backtest.lbl.roi">Retorno de Inversión (ROI)</div>
                       <div class="stat-value" style="font-weight: bold;" id="btROI">-</div>
                   </div>
                   <div class="stat-item" style="grid-column: 1 / -1; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px; text-align: left;">
                       <div class="stat-label" style="font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 4px;">
-                          💡 Esperanza Matemática Empírica: <span id="btExpectedValue" style="font-weight: 800;">-</span>
+                          <span data-i18n="backtest.esperanzaLabel">💡 Esperanza Matemática Empírica:</span> <span id="btExpectedValue" style="font-weight: 800;">-</span>
                       </div>
-                      <div class="stat-info" style="font-size: 0.8rem; color: var(--gray); font-style: italic; line-height: 1.4;" id="btExpectedValueAdvice">
+                      <div class="stat-info" style="font-size: 0.8rem; color: var(--gray); font-style: italic; line-height: 1.4;" id="btExpectedValueAdvice" data-i18n="backtest.esperanzaPlaceholder">
                           Carga y corre un análisis para ver detalles del valor esperado por sorteo.
                       </div>
                   </div>
               </div>
 
-              <h4 id="btBreakdownTitle" style="color: var(--primary); margin-bottom: 15px; font-size: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">🏆 Desglose Detallado de Aciertos</h4>
+              <h4 id="btBreakdownTitle" style="color: var(--primary); margin-bottom: 15px; font-size: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;" data-i18n="backtest.lbl.desgloseAciertos">🏆 Desglose Detallado de Aciertos</h4>
               <div id="btHitsBreakdownContainer">
                   <!-- To be dynamically filled -->
               </div>
           </div>
           
-          <div id="backtestNoDataAlert" style="color: var(--gray); font-style: italic; text-align: center; padding: 15px;">
+          <div id="backtestNoDataAlert" style="color: var(--gray); font-style: italic; text-align: center; padding: 15px;" data-i18n="backtest.sinDatos">
                Carga una base de datos o simula sorteos históricos antes de poder realizar pruebas de backtesting.
           </div>
       </div>
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end;">
-        <button class="modal-btn confirm" id="backtestingConfirmCloseBtn" style="background-color: var(--primary);">Cerrar</button>
+        <button class="modal-btn confirm" id="backtestingConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>

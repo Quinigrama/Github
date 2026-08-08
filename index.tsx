@@ -11006,7 +11006,7 @@ CONDICIONES DE USO ACEPTADAS:
   async runBacktest() {
       // Comprobar si hay datos cargados
       if (!this.dataLoaded || this.historicalData.length === 0) {
-          this.showToast('No hay datos históricos cargados para realizar el backtesting.', 'error');
+          this.showToast(t('toast.backtestSinDatos'), 'error');
           return;
       }
 
@@ -11023,7 +11023,7 @@ CONDICIONES DE USO ACEPTADAS:
 
       const totalDraws = drawsToTest.length;
       if (totalDraws === 0) {
-          this.showToast('No hay sorteos seleccionados para evaluar.', 'error');
+          this.showToast(t('toast.backtestSinSorteos'), 'error');
           return;
       }
 
@@ -11047,21 +11047,21 @@ CONDICIONES DE USO ACEPTADAS:
       const btBreakdownTitle = document.getElementById('btBreakdownTitle');
 
       if (modeVal === 'filters') {
-          if (lblTotalDraws) lblTotalDraws.textContent = "Sorteos Históricos";
-          if (lblTicketPrice) lblTicketPrice.textContent = "Ganadores Admitidos";
-          if (lblTotalSpent) lblTotalSpent.textContent = "Ganadores Excluidos";
-          if (lblTotalWon) lblTotalWon.textContent = "Tasa de Aceptación Histórica";
-          if (lblBalance) lblBalance.textContent = "Reducción de Universo";
-          if (lblROI) lblROI.textContent = "Eficiencia de Filtros (Factor)";
-          if (btBreakdownTitle) btBreakdownTitle.textContent = "📋 Registro Histórico de Validez de los Filtros";
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosHistoricos');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.ganadoresAdmitidos');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.ganadoresExcluidos');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.tasaAceptacion');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.reduccionUniverso');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.eficienciaFiltros');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.registroHistorico');
       } else {
-          if (lblTotalDraws) lblTotalDraws.textContent = "Sorteos Simulados";
-          if (lblTicketPrice) lblTicketPrice.textContent = "Precio por Apuesta";
-          if (lblTotalSpent) lblTotalSpent.textContent = "Presupuesto Invertido";
-          if (lblTotalWon) lblTotalWon.textContent = "Premios Recuperados";
-          if (lblBalance) lblBalance.textContent = "Balance Neto";
-          if (lblROI) lblROI.textContent = "Retorno de Inversión (ROI)";
-          if (btBreakdownTitle) btBreakdownTitle.textContent = "🏆 Desglose Detallado de Aciertos";
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosSimulados');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.precioApuesta');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.presupuestoInvertido');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.premiosRecuperados');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.balanceNeto');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.roi');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.desgloseAciertos');
       }
 
       const maxNumbers = this.currentGame.maxNumbers;
