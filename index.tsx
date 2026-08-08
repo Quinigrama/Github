@@ -10039,7 +10039,7 @@ CONDICIONES DE USO ACEPTADAS:
     const elBest = document.getElementById('hrBestCombination');
     if (elBest) {
         if (validatedCombinations > 0) {
-            let bestText = `${maxHit} aciertos`;
+            let bestText = `${maxHit} ${t('tickets.aciertos')}`;
             if (hasStarsInBest && maxHitStars > 0) {
                 bestText += ` + ${maxHitStars} ⭐`;
             }
@@ -10116,11 +10116,11 @@ CONDICIONES DE USO ACEPTADAS:
             };
 
             const tierLabels: { [key: string]: string } = {
-                '6': '🏆 6 Aciertos',
-                '5': '⭐ 5 Aciertos',
-                '4': '✨ 4 Aciertos',
-                '3': '🧩 3 Aciertos',
-                '<=2': '🎯 2 o menos Aciertos'
+                '6': t('history.tier.6'),
+                '5': t('history.tier.5'),
+                '4': t('history.tier.4'),
+                '3': t('history.tier.3'),
+                '<=2': t('history.tier.menos2')
             };
 
             activeTiers.forEach(tier => {
@@ -10130,16 +10130,16 @@ CONDICIONES DE USO ACEPTADAS:
 
                 let perfBadge = '';
                 if (count === 0 && theoreticalFrequency === 0) {
-                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">Sin datos</span>`;
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.sinDatos')}</span>`;
                 } else if (actualFrequency > theoreticalFrequency) {
                     const timesBetter = theoreticalFrequency > 0 ? (actualFrequency / theoreticalFrequency).toFixed(1) : 'N/A';
                     const percentBetter = theoreticalFrequency > 0 ? (((actualFrequency - theoreticalFrequency) / theoreticalFrequency) * 100).toFixed(0) : '0';
-                    perfBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🚀 ${timesBetter}x superior (+${percentBetter}%)</span>`;
+                    perfBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">${t('history.superior', { timesBetter, percentBetter })}</span>`;
                 } else if (actualFrequency === theoreticalFrequency) {
-                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">Esperado</span>`;
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.esperado')}</span>`;
                 } else {
                     const timesWorse = actualFrequency > 0 && theoreticalFrequency > 0 ? (theoreticalFrequency / actualFrequency).toFixed(1) : '∞';
-                    perfBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📉 ${actualFrequency > 0 ? timesWorse + 'x inferior' : '0 aciertos'}</span>`;
+                    perfBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📉 ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
                 }
 
                 tableBody.innerHTML += `
@@ -10157,7 +10157,7 @@ CONDICIONES DE USO ACEPTADAS:
 
     // Strategy Distribution
     const strategyCounts: { [key: string]: { total: number, validated: number, maxHits: number } } = {};
-    const strategyMap: { [key: string]: string } = { simple: 'Simple', winning: 'Estrategia Ganadora', multiple: 'Múltiple' };
+    const strategyMap: { [key: string]: string } = { simple: t('tickets.strategy.simple'), winning: t('history.estrategiaGanadora'), multiple: t('tickets.strategy.multiple') };
 
     filteredTickets.forEach(ticket => {
         const strat = ticket.strategy || 'simple';
@@ -10194,17 +10194,17 @@ CONDICIONES DE USO ACEPTADAS:
                 <div style="background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <span style="font-weight: 600; color: #374151;">${name}</span>
-                        <div style="font-size: 0.8rem; color: #6b7280;">Apuestas generadas: ${data.total} | Validadas: ${data.validated}</div>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${t('history.apuestasGeneradas', { total: data.total, validated: data.validated })}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 0.8rem; color: #4b5563; font-weight: 500;">Mejor resultado:</div>
-                        <span style="background: #eff6ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">${data.validated > 0 ? data.maxHits + ' aciertos' : 'Sin datos'}</span>
+                        <div style="font-size: 0.8rem; color: #4b5563; font-weight: 500;">${t('history.mejorResultado')}</div>
+                        <span style="background: #eff6ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">${data.validated > 0 ? `${data.maxHits} ${t('tickets.aciertos')}` : t('history.sinDatos')}</span>
                     </div>
                 </div>
             `;
         });
         if (!stratHtml) {
-            stratHtml = '<div style="color: #6b7280; font-style: italic; text-align: center; padding: 10px;">No hay combinaciones registradas para este juego</div>';
+            stratHtml = `<div style="color: #6b7280; font-style: italic; text-align: center; padding: 10px;">${t('history.sinCombinaciones')}</div>`;
         }
         elStrategyDist.innerHTML = stratHtml;
     }

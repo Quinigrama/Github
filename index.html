@@ -1895,8 +1895,8 @@
       <div class="modal-content" style="max-width: 800px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
           <div>
-              <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">📈 Historial de Resultados</h3>
-              <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Comparativa Científica de Rendimiento vs Azar Matemático</p>
+              <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="history.titulo">📈 Historial de Resultados</h3>
+              <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="history.subtitulo">Comparativa Científica de Rendimiento vs Azar Matemático</p>
           </div>
           <button class="close-btn" id="hrCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
         </div>
@@ -1907,12 +1907,12 @@
               <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 1.2rem;">🎮</span>
                   <div style="text-align: left;">
-                      <h4 style="margin: 0; font-size: 0.95rem; color: #1f2937; font-weight: 600;">Juego Analizado</h4>
-                      <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Filtra las estadísticas por tipo de juego</p>
+                      <h4 style="margin: 0; font-size: 0.95rem; color: #1f2937; font-weight: 600;" data-i18n="history.juegoAnalizado">Juego Analizado</h4>
+                      <p style="margin: 0; font-size: 0.8rem; color: #6b7280;" data-i18n="history.filtraEstadisticas">Filtra las estadísticas por tipo de juego</p>
                   </div>
               </div>
               <select id="hrGameFilter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; background-color: #white; color: #1f2937; font-weight: 500; cursor: pointer; min-width: 180px;">
-                  <option value="all">Todos los Juegos</option>
+                  <option value="all" data-i18n="history.todosLosJuegos">Todos los Juegos</option>
                   <option value="powerball">🇺🇸 Powerball</option>
                   <option value="bonoloto">🇪🇸 Bonoloto</option>
                   <option value="primitiva">🇪🇸 Primitiva</option>
@@ -1926,15 +1926,15 @@
           <!-- Resumen Métrico de Boletos Guardados y Validados -->
           <div class="stats-grid" style="margin-bottom: 25px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); display: grid; gap: 15px;">
               <div class="stat-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;">Total Apuestas</div>
+                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;" data-i18n="history.totalApuestas">Total Apuestas</div>
                   <div class="stat-value" id="hrTotalCombinations" style="font-size: 1.6rem; font-weight: 700; color: var(--primary);">-</div>
               </div>
               <div class="stat-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;">Apuestas Validadas</div>
+                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;" data-i18n="history.apuestasValidadas">Apuestas Validadas</div>
                   <div class="stat-value" id="hrValidatedCombinations" style="font-size: 1.6rem; font-weight: 700; color: #0284c7;">-</div>
               </div>
               <div class="stat-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;">Mejor Acierto</div>
+                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;" data-i18n="history.mejorAcierto">Mejor Acierto</div>
                   <div class="stat-value" id="hrBestCombination" style="font-size: 1.6rem; font-weight: 700; color: #16a34a;">-</div>
               </div>
           </div>
@@ -1944,8 +1944,8 @@
               <div style="border-bottom: 1px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 1.2rem;">⚖️</span>
                   <div style="text-align: left;">
-                      <h3 style="margin: 0; font-size: 1rem; color: #111827; font-weight: 600;">Rendimiento del Filtrado vs Azar Matemático</h3>
-                      <p style="margin: 0; font-size: 0.75rem; color: #6b7280;">Demostración de efectividad vs probabilidades teóricas del azar</p>
+                      <h3 style="margin: 0; font-size: 1rem; color: #111827; font-weight: 600;" data-i18n="history.rendimientoTitulo">Rendimiento del Filtrado vs Azar Matemático</h3>
+                      <p style="margin: 0; font-size: 0.75rem; color: #6b7280;" data-i18n="history.rendimientoSubtitulo">Demostración de efectividad vs probabilidades teóricas del azar</p>
                   </div>
               </div>
 
@@ -1953,11 +1953,11 @@
                   <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                       <thead>
                           <tr style="border-bottom: 2px solid #e5e7eb; color: #4b5563; font-weight: 600;">
-                              <th style="padding: 10px 6px;">Categoría de Aciertos</th>
-                              <th style="padding: 10px 6px; text-align: center;">Nº de Apuestas</th>
-                              <th style="padding: 10px 6px; text-align: center;">Tu Frecuencia (%)</th>
-                              <th style="padding: 10px 6px; text-align: center;">Frecuencia Azar (%)</th>
-                              <th style="padding: 10px 6px; text-align: right;">Rendimiento vs Azar</th>
+                              <th style="padding: 10px 6px;" data-i18n="history.colCategoria">Categoría de Aciertos</th>
+                              <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colApuestas">Nº de Apuestas</th>
+                              <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colTuFrecuencia">Tu Frecuencia (%)</th>
+                              <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colFrecuenciaAzar">Frecuencia Azar (%)</th>
+                              <th style="padding: 10px 6px; text-align: right;" data-i18n="history.colRendimiento">Rendimiento vs Azar</th>
                           </tr>
                       </thead>
                       <tbody id="hrComparisonTableBody" style="color: #374151;">
@@ -1966,14 +1966,14 @@
                   </table>
               </div>
 
-              <div id="hrNoValidationWarning" style="display: none; padding: 15px; text-align: center; color: #6b7280; font-style: italic; background: #f9fafb; border-radius: 8px; margin-top: 12px; font-size: 0.85rem;">
+              <div id="hrNoValidationWarning" style="display: none; padding: 15px; text-align: center; color: #6b7280; font-style: italic; background: #f9fafb; border-radius: 8px; margin-top: 12px; font-size: 0.85rem;" data-i18n="history.sinValidacion">
                   ⚠️ Aún no has validado ningún boleto del juego seleccionado. Introduce los resultados de un sorteo en tus boletos guardados para calcular el rendimiento científico.
               </div>
           </div>
 
           <!-- Distribución por Estrategias de Generación -->
           <div class="dashboard-panel" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-              <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 0.95rem; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px; text-align: left; font-weight: 600;">📊 Distribución por Métodos de Generación</h4>
+              <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 0.95rem; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px; text-align: left; font-weight: 600;" data-i18n="history.distribucionTitulo">📊 Distribución por Métodos de Generación</h4>
               <div id="hrStrategyDistribution" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                   <!-- Dinámicamente cargado -->
               </div>
@@ -1981,7 +1981,7 @@
         </div>
 
         <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding-top: 15px; flex-shrink: 0; margin-top: auto; display: flex; justify-content: flex-end; align-items: center;">
-          <button class="modal-btn confirm" id="hrCloseBtn2" style="background: var(--primary); color: white;">Entendido</button>
+          <button class="modal-btn confirm" id="hrCloseBtn2" style="background: var(--primary); color: white;" data-i18n="history.entendido">Entendido</button>
         </div>
       </div>
     </div>
@@ -2299,7 +2299,7 @@
     <div class="modal-content" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="officialdraws.titulo">📊 Consulta de Sorteos Oficiales</h3>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="officialdraws.titulo">📅 Consulta de Sorteos Oficiales</h3>
             <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="officialdraws.subtitulo">Histórico de combinaciones ganadoras cargadas para el juego activo</p>
         </div>
         <button class="close-btn" id="officialDrawsCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
