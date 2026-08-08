@@ -11247,7 +11247,7 @@ CONDICIONES DE USO ACEPTADAS:
               combosToTest = [Array.from(this.selectedNumbers).sort((a,b)=>a-b)];
               starsToTest = [Array.from(this.selectedStars).sort((a,b)=>a-b)];
           } else {
-              this.showToast(`Por favor, selecciona exactamente ${maxNumbers} números y ${maxStars} estrellas, o genera un boleto inteligente antes de testear.`, 'warning');
+              this.showToast(t('toast.backtestSeleccionInvalida', { maxNumbers, maxStars }), 'warning');
               if (btn) (btn as HTMLButtonElement).disabled = false;
               if (progressContainer) progressContainer.style.display = 'none';
               return;
@@ -11308,10 +11308,10 @@ CONDICIONES DE USO ACEPTADAS:
               const prize = this.calculateDrawPrize(hits, starHits, draw, combo);
               totalWon += prize;
 
-              let catLabel = `${hits} aciertos`;
+              let catLabel = `${hits} ${t('tickets.aciertos')}`;
               if (maxStars > 0) {
-                  const starName = this.currentGame.id === 'powerball' ? 'bola especial' : (this.currentGame.id === 'megamillions' ? 'mega ball' : (this.currentGame.id === 'eurodreams' ? 'sueño' : (this.currentGame.id === 'gordo' ? 'clave' : 'estrella')));
-                  catLabel = `${hits} nº + ${starHits} ${starName}${starHits !== 1 ? 's' : ''}`;
+                  const starName = this.currentGame.id === 'powerball' ? t('common.nombreEstrella.powerball') : (this.currentGame.id === 'megamillions' ? t('common.nombreEstrella.megamillions') : (this.currentGame.id === 'eurodreams' ? t('common.nombreEstrella.eurodreams') : (this.currentGame.id === 'gordo' ? t('common.nombreEstrella.gordo') : t('common.nombreEstrella.generico'))));
+                  catLabel = t('backtest.economico.catLabelConEstrellas', { hits, starHits, starName, plural: starHits !== 1 ? 's' : '' });
               }
 
               if (prize > 0 || hits >= 2 || (this.currentGame.id === 'gordo' && starHits > 0)) {
@@ -11336,13 +11336,13 @@ CONDICIONES DE USO ACEPTADAS:
       const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
 
       if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
-      if (elTicketPrice) elTicketPrice.textContent = `${ticketPrice.toFixed(2)} €`;
-      if (elSpent) elSpent.textContent = `${totalSpent.toFixed(2)} €`;
-      if (elWon) elWon.textContent = `${totalWon.toFixed(2)} €`;
+      if (elTicketPrice) elTicketPrice.textContent = t('backtest.economico.valorMonetario', { value: ticketPrice.toFixed(2) });
+      if (elSpent) elSpent.textContent = t('backtest.economico.valorMonetario', { value: totalSpent.toFixed(2) });
+      if (elWon) elWon.textContent = t('backtest.economico.valorMonetario', { value: totalWon.toFixed(2) });
 
       const balance = totalWon - totalSpent;
       if (elBalance) {
-          elBalance.textContent = `${balance >= 0 ? '+' : ''}${balance.toFixed(2)} €`;
+          elBalance.textContent = t('backtest.economico.valorMonetario', { value: `${balance >= 0 ? '+' : ''}${balance.toFixed(2)}` });
           elBalance.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
       }
 
@@ -11354,7 +11354,7 @@ CONDICIONES DE USO ACEPTADAS:
 
       const expVal = balance / totalDraws;
       if (elExpVal) {
-          elExpVal.textContent = `${expVal >= 0 ? '+' : ''}${expVal.toFixed(2)} € / sorteo`;
+          elExpVal.textContent = t('backtest.economico.valorPorSorteo', { value: `${expVal >= 0 ? '+' : ''}${expVal.toFixed(2)}` });
           elExpVal.style.color = expVal >= 0 ? 'var(--success)' : 'var(--danger)';
       }
 
@@ -11362,9 +11362,9 @@ CONDICIONES DE USO ACEPTADAS:
           let adviceText = '';
           const randomPlayExp = -ticketPrice * 0.45;
           if (expVal > randomPlayExp) {
-              adviceText = `✅ ¡Filtro Ganador! Tu esperanza matemática empírica (${expVal.toFixed(2)} €) es superior al promedio teórico de una jugada aleatoria (${randomPlayExp.toFixed(2)} €). Los filtros han recortado la ventaja de la casa.`;
+              adviceText = t('backtest.economico.adviceGanador', { expVal: expVal.toFixed(2), randomExp: randomPlayExp.toFixed(2) });
           } else {
-              adviceText = `⚠️ Tu nivel de retorno está por debajo de lo esperado. Intenta ajustar los filtros (como Markov, Sumas o Desviación) para optimizar la esperanza matemática empirica.`;
+              adviceText = t('backtest.economico.adviceBajoRetorno');
           }
           elExpValAdvice.textContent = adviceText;
       }
@@ -11379,13 +11379,13 @@ CONDICIONES DE USO ACEPTADAS:
               });
 
           if (sortedBreakdown.length === 0) {
-              elHitsBreakdown.innerHTML = `<div style="color: var(--gray); font-style: italic; text-align: center; padding: 10px;">No se obtuvieron aciertos computables en este test con premio.</div>`;
+              elHitsBreakdown.innerHTML = `<div style="color: var(--gray); font-style: italic; text-align: center; padding: 10px;">${t('backtest.economico.sinAciertos')}</div>`;
           } else {
               let breakdownHTML = `<table class="validation-summary-table">
                   <tr>
-                      <th>Categoría de Aciertos</th>
-                      <th>Sorteos de Coincidencia</th>
-                      <th>Probabilidad Empírica</th>
+                      <th>${t('backtest.economico.colCategoria')}</th>
+                      <th>${t('backtest.economico.colSorteos')}</th>
+                      <th>${t('backtest.economico.colProbabilidad')}</th>
                   </tr>`;
               
               sortedBreakdown.forEach(([label, count]) => {
@@ -11394,7 +11394,7 @@ CONDICIONES DE USO ACEPTADAS:
                   breakdownHTML += `
                       <tr class="${isHighlight ? 'row-highlight' : ''}">
                           <td><strong>${label}</strong></td>
-                          <td>${count} veces</td>
+                          <td>${t('backtest.economico.vecesCount', { count })}</td>
                           <td>${prob}%</td>
                       </tr>`;
               });
@@ -11403,7 +11403,7 @@ CONDICIONES DE USO ACEPTADAS:
           }
       }
 
-      this.showToast('✅ ¡Backtesting completado con éxito!', 'success');
+      this.showToast(t('toast.backtestEconomicoExito'), 'success');
   }
 
   // ===== MODO PEÑA IMPLEMENTATION =====

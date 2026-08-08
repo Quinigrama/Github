@@ -400,5 +400,22 @@
   "backtest.filtros.enFiltro": "✅ IN FILTER (Admitted)",
   "backtest.filtros.excluido": "❌ EXCLUDED",
   "backtest.filtros.notaUltimos50": "* Showing the last 50 historical draws for smooth table rendering.",
-  "toast.backtestFiltrosExito": "✅ Filter efficacy successfully evaluated!"
+  "toast.backtestFiltrosExito": "✅ Filter efficacy successfully evaluated!",
+  "toast.backtestSeleccionInvalida": "Please select exactly {maxNumbers} numbers and {maxStars} stars, or generate a smart ticket before testing.",
+  "common.nombreEstrella.powerball": "special ball",
+  "common.nombreEstrella.megamillions": "mega ball",
+  "common.nombreEstrella.eurodreams": "dream",
+  "common.nombreEstrella.gordo": "key",
+  "common.nombreEstrella.generico": "star",
+  "backtest.economico.catLabelConEstrellas": "{hits} no. + {starHits} {starName}{plural}",
+  "backtest.economico.valorMonetario": "{value} €",
+  "backtest.economico.valorPorSorteo": "{value} € / draw",
+  "backtest.economico.adviceGanador": "✅ Winning Filter! Your empirical mathematical expectation ({expVal} €) is higher than the theoretical average of a random play ({randomExp} €). The filters have cut the house edge.",
+  "backtest.economico.adviceBajoRetorno": "⚠️ Your return level is below expectations. Try adjusting the filters (such as Markov, Sums, or Deviation) to optimize the empirical mathematical expectation.",
+  "backtest.economico.colCategoria": "Hit Category",
+  "backtest.economico.colSorteos": "Matching Draws",
+  "backtest.economico.colProbabilidad": "Empirical Probability",
+  "backtest.economico.sinAciertos": "No computable prize-winning hits were obtained in this test.",
+  "backtest.economico.vecesCount": "{count} times",
+  "toast.backtestEconomicoExito": "✅ Backtesting completed successfully!"
 }

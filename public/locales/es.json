@@ -400,5 +400,22 @@
   "backtest.filtros.enFiltro": "✅ EN FILTRO (Admitido)",
   "backtest.filtros.excluido": "❌ EXCLUIDO",
   "backtest.filtros.notaUltimos50": "* Mostrando últimos 50 sorteos históricos para un renderizado ágil de tablas.",
-  "toast.backtestFiltrosExito": "✅ ¡Eficacia de filtros evaluada con éxito!"
+  "toast.backtestFiltrosExito": "✅ ¡Eficacia de filtros evaluada con éxito!",
+  "toast.backtestSeleccionInvalida": "Por favor, selecciona exactamente {maxNumbers} números y {maxStars} estrellas, o genera un boleto inteligente antes de testear.",
+  "common.nombreEstrella.powerball": "bola especial",
+  "common.nombreEstrella.megamillions": "mega ball",
+  "common.nombreEstrella.eurodreams": "sueño",
+  "common.nombreEstrella.gordo": "clave",
+  "common.nombreEstrella.generico": "estrella",
+  "backtest.economico.catLabelConEstrellas": "{hits} nº + {starHits} {starName}{plural}",
+  "backtest.economico.valorMonetario": "{value} €",
+  "backtest.economico.valorPorSorteo": "{value} € / sorteo",
+  "backtest.economico.adviceGanador": "✅ ¡Filtro Ganador! Tu esperanza matemática empírica ({expVal} €) es superior al promedio teórico de una jugada aleatoria ({randomExp} €). Los filtros han recortado la ventaja de la casa.",
+  "backtest.economico.adviceBajoRetorno": "⚠️ Tu nivel de retorno está por debajo de lo esperado. Intenta ajustar los filtros (como Markov, Sumas o Desviación) para optimizar la esperanza matemática empírica.",
+  "backtest.economico.colCategoria": "Categoría de Aciertos",
+  "backtest.economico.colSorteos": "Sorteos de Coincidencia",
+  "backtest.economico.colProbabilidad": "Probabilidad Empírica",
+  "backtest.economico.sinAciertos": "No se obtuvieron aciertos computables en este test con premio.",
+  "backtest.economico.vecesCount": "{count} veces",
+  "toast.backtestEconomicoExito": "✅ ¡Backtesting completado con éxito!"
 }
