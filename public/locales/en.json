@@ -384,5 +384,21 @@
   "backtest.lbl.tasaAceptacion": "Historical Acceptance Rate",
   "backtest.lbl.reduccionUniverso": "Universe Reduction",
   "backtest.lbl.eficienciaFiltros": "Filter Efficiency (Factor)",
-  "backtest.lbl.registroHistorico": "📋 Historical Filter Validity Log"
+  "backtest.lbl.registroHistorico": "📋 Historical Filter Validity Log",
+  "backtest.filtros.sorteosCount": "{count} draws",
+  "backtest.filtros.poderFiltro": "Filter Power: {nivel}",
+  "backtest.filtros.nivel.excelente": "Excellent",
+  "backtest.filtros.nivel.bueno": "Good",
+  "backtest.filtros.nivel.neutro": "Neutral",
+  "backtest.filtros.nivel.bajo": "Low / Not very representative",
+  "backtest.filtros.adviceAlto": "📊 High-Performance Filters! Your efficiency factor ({efficiency}x) mathematically shows that the configuration effectively reduces random noise ({reduction}% discarded) without hurting the hit rate ({passRate}% captured). Excellent design!",
+  "backtest.filtros.adviceMedio": "⚖️ Standard Balance Level ({efficiency}x). The filters discard {reduction}% of the possible combination universe while retaining {passRate}% of correct historical draws. You can fine-tune the ranges to push efficiency above 1.20x.",
+  "backtest.filtros.adviceBajo": "⚠️ Adjust your configuration. Your filters discard too many real winners relative to the reduction they offer (Efficiency of just {efficiency}x). Adjust the range limits to avoid biasing the result.",
+  "backtest.filtros.colFecha": "Draw Date",
+  "backtest.filtros.colCombinacion": "Historical Winning Combination",
+  "backtest.filtros.colEstado": "Filter Status",
+  "backtest.filtros.enFiltro": "✅ IN FILTER (Admitted)",
+  "backtest.filtros.excluido": "❌ EXCLUDED",
+  "backtest.filtros.notaUltimos50": "* Showing the last 50 historical draws for smooth table rendering.",
+  "toast.backtestFiltrosExito": "✅ Filter efficacy successfully evaluated!"
 }

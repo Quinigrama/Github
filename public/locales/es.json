@@ -384,5 +384,21 @@
   "backtest.lbl.tasaAceptacion": "Tasa de Aceptación Histórica",
   "backtest.lbl.reduccionUniverso": "Reducción de Universo",
   "backtest.lbl.eficienciaFiltros": "Eficiencia de Filtros (Factor)",
-  "backtest.lbl.registroHistorico": "📋 Registro Histórico de Validez de los Filtros"
+  "backtest.lbl.registroHistorico": "📋 Registro Histórico de Validez de los Filtros",
+  "backtest.filtros.sorteosCount": "{count} sorteos",
+  "backtest.filtros.poderFiltro": "Poder del Filtro: {nivel}",
+  "backtest.filtros.nivel.excelente": "Excelente",
+  "backtest.filtros.nivel.bueno": "Bueno",
+  "backtest.filtros.nivel.neutro": "Neutro",
+  "backtest.filtros.nivel.bajo": "Bajo / Poco representativo",
+  "backtest.filtros.adviceAlto": "📊 ¡Filtros de Alto Rendimiento! Tu factor de eficiencia ({efficiency}x) demuestra matemáticamente que la configuración reduce eficazmente el ruido aleatorio ({reduction}% descartado) sin perjudicar la tasa de aciertos ({passRate}% capturados). ¡Excelente diseño!",
+  "backtest.filtros.adviceMedio": "⚖️ Nivel de Equilibrio Estándar ({efficiency}x). Los filtros descartan el {reduction}% del universo de combinaciones posibles reteniendo el {passRate}% de sorteos históricos correctos. Puedes afinar mejor los rangos para aumentar la eficiencia sobre 1.20x.",
+  "backtest.filtros.adviceBajo": "⚠️ Ajusta tu configuración. Tus filtros descartan demasiados ganadores reales en relación a la reducción que ofrecen (Eficiencia de apenas {efficiency}x). Modula los rangos límites para evitar sesgar el resultado.",
+  "backtest.filtros.colFecha": "Fecha del Sorteo",
+  "backtest.filtros.colCombinacion": "Combinación Ganadora Histórica",
+  "backtest.filtros.colEstado": "Estado del Filtro",
+  "backtest.filtros.enFiltro": "✅ EN FILTRO (Admitido)",
+  "backtest.filtros.excluido": "❌ EXCLUIDO",
+  "backtest.filtros.notaUltimos50": "* Mostrando últimos 50 sorteos históricos para un renderizado ágil de tablas.",
+  "toast.backtestFiltrosExito": "✅ ¡Eficacia de filtros evaluada con éxito!"
 }

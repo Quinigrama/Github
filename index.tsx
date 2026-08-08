@@ -11131,8 +11131,8 @@ CONDICIONES DE USO ACEPTADAS:
           const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
 
           if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
-          if (elTicketPrice) elTicketPrice.textContent = `${passedDrawsCount} sorteos`;
-          if (elSpent) elSpent.textContent = `${totalDraws - passedDrawsCount} sorteos`;
+          if (elTicketPrice) elTicketPrice.textContent = t('backtest.filtros.sorteosCount', { count: passedDrawsCount });
+          if (elSpent) elSpent.textContent = t('backtest.filtros.sorteosCount', { count: totalDraws - passedDrawsCount });
           
           const passRateWinning = (passedDrawsCount / totalDraws) * 100;
           if (elWon) elWon.textContent = `${passRateWinning.toFixed(1)} %`;
@@ -11148,18 +11148,19 @@ CONDICIONES DE USO ACEPTADAS:
           }
 
           if (elExpVal) {
-              elExpVal.textContent = `Poder del Filtro: ${efficiency >= 1.4 ? 'Excelente' : efficiency >= 1.1 ? 'Bueno' : efficiency >= 0.8 ? 'Neutro' : 'Bajo / Poco representativo'}`;
+              const nivelFiltro = efficiency >= 1.4 ? t('backtest.filtros.nivel.excelente') : efficiency >= 1.1 ? t('backtest.filtros.nivel.bueno') : efficiency >= 0.8 ? t('backtest.filtros.nivel.neutro') : t('backtest.filtros.nivel.bajo');
+              elExpVal.textContent = t('backtest.filtros.poderFiltro', { nivel: nivelFiltro });
               elExpVal.style.color = efficiency >= 1.1 ? 'var(--success)' : efficiency >= 0.8 ? '#d97706' : 'var(--danger)';
           }
 
           if (elExpValAdvice) {
               let adviceText = '';
               if (efficiency > 1.25) {
-                  adviceText = `📊 ¡Filtros de Alto Rendimiento! Tu factor de eficiencia (${efficiency.toFixed(2)}x) demuestra matemáticamente que la configuración reduce eficazmente el ruido aleatorio (${reductionRate.toFixed(1)}% descartado) sin perjudicar la tasa de aciertos (${passRateWinning.toFixed(1)}% capturados). ¡Excelente diseño!`;
+                  adviceText = t('backtest.filtros.adviceAlto', { efficiency: efficiency.toFixed(2), reduction: reductionRate.toFixed(1), passRate: passRateWinning.toFixed(1) });
               } else if (efficiency >= 0.8) {
-                  adviceText = `⚖️ Nivel de Equilibrio Estándar (${efficiency.toFixed(2)}x). Los filtros descartan el ${reductionRate.toFixed(1)}% del universo de combinaciones posibles reteniendo el ${passRateWinning.toFixed(1)}% de sorteos históricos correctos. Puedes afinar mejor los rangos para aumentar la eficiencia sobre 1.20x.`;
+                  adviceText = t('backtest.filtros.adviceMedio', { efficiency: efficiency.toFixed(2), reduction: reductionRate.toFixed(1), passRate: passRateWinning.toFixed(1) });
               } else {
-                  adviceText = `⚠️ Ajusta tu configuración. Tus filtros descartan demasiados ganadores reales en relación a la reducción que ofrecen (Eficiencia de apenas ${efficiency.toFixed(2)}x). Modula los rangos límites para evitar sesgar el resultado.`;
+                  adviceText = t('backtest.filtros.adviceBajo', { efficiency: efficiency.toFixed(2) });
               }
               elExpValAdvice.textContent = adviceText;
           }
@@ -11168,9 +11169,9 @@ CONDICIONES DE USO ACEPTADAS:
               elHitsBreakdown.innerHTML = '';
               let breakdownHTML = `<table class="validation-summary-table">
                   <tr>
-                      <th>Fecha del Sorteo</th>
-                      <th>Combinación Ganadora Histórica</th>
-                      <th>Estado del Filtro</th>
+                      <th>${t('backtest.filtros.colFecha')}</th>
+                      <th>${t('backtest.filtros.colCombinacion')}</th>
+                      <th>${t('backtest.filtros.colEstado')}</th>
                   </tr>`;
 
               // Mostrar solo los últimos 50 sorteos para mantener óptimo el renderizado del DOM
@@ -11184,8 +11185,8 @@ CONDICIONES DE USO ACEPTADAS:
                   }
 
                   const badgeHTML = passed 
-                      ? `<span style="background: rgba(16,185,129,0.15); color: var(--success); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">✅ EN FILTRO (Admitido)</span>`
-                      : `<span style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">❌ EXCLUIDO</span>`;
+                      ? `<span style="background: rgba(16,185,129,0.15); color: var(--success); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.enFiltro')}</span>`
+                      : `<span style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.excluido')}</span>`;
 
                   breakdownHTML += `
                       <tr>
@@ -11198,7 +11199,7 @@ CONDICIONES DE USO ACEPTADAS:
 
               if (drawDetails.length > 50) {
                   breakdownHTML += `<div style="text-align: center; color: var(--gray); font-size: 0.8rem; font-style: italic; margin-top: 10px;">
-                      * Mostrando últimos 50 sorteos históricos para un renderizado ágil de tablas.
+                      ${t('backtest.filtros.notaUltimos50')}
                   </div>`;
               }
               elHitsBreakdown.innerHTML = breakdownHTML;
@@ -11208,7 +11209,7 @@ CONDICIONES DE USO ACEPTADAS:
           if (progressContainer) progressContainer.style.display = 'none';
           if (resultsDiv) resultsDiv.style.display = 'block';
 
-          this.showToast('✅ ¡Eficacia de filtros evaluada con éxito!', 'success');
+          this.showToast(t('toast.backtestFiltrosExito'), 'success');
           return;
       }
 
