@@ -9757,25 +9757,25 @@ CONDICIONES DE USO ACEPTADAS:
     const extraHeader = document.getElementById('officialDrawsExtraHeader');
     if (extraHeader) {
         if (this.currentGame.id === 'euromillones') {
-            extraHeader.textContent = 'Estrellas ⭐';
+            extraHeader.textContent = t('officialdraws.extraHeader.estrellas');
             extraHeader.style.display = '';
         } else if (this.currentGame.id === 'eurodreams') {
-            extraHeader.textContent = 'Sueño 🌙';
+            extraHeader.textContent = t('officialdraws.extraHeader.sueno');
             extraHeader.style.display = '';
         } else if (this.currentGame.id === 'gordo') {
-            extraHeader.textContent = 'Clave 🔑';
+            extraHeader.textContent = t('officialdraws.extraHeader.clave');
             extraHeader.style.display = '';
         } else if (this.currentGame.id === 'powerball') {
-            extraHeader.textContent = 'Bola Especial 🔴';
+            extraHeader.textContent = t('officialdraws.extraHeader.bolaEspecial');
             extraHeader.style.display = '';
         } else if (this.currentGame.id === 'megamillions') {
-            extraHeader.textContent = 'Mega Ball 🟡';
+            extraHeader.textContent = t('officialdraws.extraHeader.megaBall');
             extraHeader.style.display = '';
         } else if (this.currentGame.id === 'bonoloto' || this.currentGame.id === 'primitiva') {
-            extraHeader.textContent = 'Comp. / Reint.';
+            extraHeader.textContent = t('officialdraws.extraHeader.compReint');
             extraHeader.style.display = '';
         } else {
-            extraHeader.textContent = 'Reintegro R';
+            extraHeader.textContent = t('officialdraws.extraHeader.reintegro');
             extraHeader.style.display = '';
         }
     }
@@ -9806,7 +9806,7 @@ CONDICIONES DE USO ACEPTADAS:
                     const numInReintegro = draw.reintegro === numVal;
                     return numInNumbers || numInStars || numInComplementario || numInReintegro;
                 } else {
-                    const dateStr = draw.date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toLowerCase();
+                    const dateStr = draw.date.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toLowerCase();
                     const drawTypeStr = draw.drawType ? draw.drawType.toLowerCase() : '';
                     return dateStr.includes(part) || drawTypeStr.includes(part);
                 }
@@ -9821,9 +9821,9 @@ CONDICIONES DE USO ACEPTADAS:
     if (totalItems === 0) {
         if (noDataEl) noDataEl.style.display = 'block';
         const infoEl = document.getElementById('officialDrawsPaginationInfo');
-        if (infoEl) infoEl.textContent = 'Mostrando 0 sorteos';
+        if (infoEl) infoEl.textContent = t('officialdraws.sinSorteos');
         const pageEl = document.getElementById('officialDrawsCurrentPage');
-        if (pageEl) pageEl.textContent = 'Pág. 1 de 1';
+        if (pageEl) pageEl.textContent = t('officialdraws.paginaUnica');
         
         // Disable pagination
         const prevBtn = document.getElementById('officialDrawsPrevBtn') as HTMLButtonElement;
@@ -9858,11 +9858,11 @@ CONDICIONES DE USO ACEPTADAS:
     // Update pagination info
     const infoEl = document.getElementById('officialDrawsPaginationInfo');
     if (infoEl) {
-        infoEl.textContent = `Mostrando sorteos ${startIndex + 1} a ${endIndex} de ${totalItems}`;
+        infoEl.textContent = t('officialdraws.mostrandoRango', { start: startIndex + 1, end: endIndex, total: totalItems });
     }
     const pageEl = document.getElementById('officialDrawsCurrentPage');
     if (pageEl) {
-        pageEl.textContent = `Pág. ${this.officialDrawsPage} de ${totalPages}`;
+        pageEl.textContent = t('officialdraws.paginaDe', { page: this.officialDrawsPage, total: totalPages });
     }
 
     // Prev/Next Button states
@@ -9895,7 +9895,7 @@ CONDICIONES DE USO ACEPTADAS:
         // 2. Fecha
         const tdDate = document.createElement('td');
         tdDate.style.padding = '12px 15px';
-        const rawDateStr = draw.date.toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        const rawDateStr = draw.date.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
         const capitalizedDate = rawDateStr.charAt(0).toUpperCase() + rawDateStr.slice(1);
         tdDate.textContent = capitalizedDate;
         row.appendChild(tdDate);
@@ -9939,14 +9939,14 @@ CONDICIONES DE USO ACEPTADAS:
             if (draw.complementario !== undefined) {
                 const compDiv = document.createElement('div');
                 compDiv.className = 'mini-ball complementario-ball';
-                compDiv.title = 'Complementario';
+                compDiv.title = t('common.complementario');
                 compDiv.textContent = `C${draw.complementario}`;
                 extraContainer.appendChild(compDiv);
             }
             if (draw.reintegro !== undefined) {
                 const reDiv = document.createElement('div');
                 reDiv.className = 'mini-ball reintegro-ball';
-                reDiv.title = 'Reintegro';
+                reDiv.title = t('common.reintegro');
                 reDiv.textContent = `R${draw.reintegro}`;
                 extraContainer.appendChild(reDiv);
             }
@@ -9954,7 +9954,7 @@ CONDICIONES DE USO ACEPTADAS:
             if (draw.reintegro !== undefined) {
                 const reDiv = document.createElement('div');
                 reDiv.className = 'mini-ball reintegro-ball';
-                reDiv.title = 'Reintegro';
+                reDiv.title = t('common.reintegro');
                 reDiv.textContent = `R${draw.reintegro}`;
                 extraContainer.appendChild(reDiv);
             } else {

@@ -2299,8 +2299,8 @@
     <div class="modal-content" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);">📅 Consulta de Sorteos Oficiales</h3>
-            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Histórico de combinaciones ganadoras cargadas para el juego activo</p>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary);" data-i18n="officialdraws.titulo">📊 Consulta de Sorteos Oficiales</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="officialdraws.subtitulo">Histórico de combinaciones ganadoras cargadas para el juego activo</p>
         </div>
         <button class="close-btn" id="officialDrawsCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2310,14 +2310,14 @@
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%;">
             <!-- Selector de Juego en modal -->
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">Juego Activo:</span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;" data-i18n="officialdraws.juegoActivo">Juego Activo:</span>
                 <span id="officialDrawsGameName" style="font-size: 0.95rem; font-weight: bold; color: var(--primary); background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 6px;">-</span>
             </div>
             
             <!-- Buscador por número o fecha -->
             <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; flex: 1; justify-content: flex-end;">
-                <input type="text" id="officialDrawsSearchInput" placeholder="🔍 Buscar nº o fecha (ej. 15, o 2026)..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; width: 250px; outline: none; transition: border 0.2s;">
-                <button class="modal-btn confirm" id="officialDrawsSearchClearBtn" style="background-color: #f1f5f9; color: #475569; padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Limpiar</button>
+                <input type="text" id="officialDrawsSearchInput" placeholder="🔍 Buscar nº o fecha (ej. 15, o 2026)..." data-i18n-placeholder="officialdraws.buscarPlaceholder" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; width: 250px; outline: none; transition: border 0.2s;">
+                <button class="modal-btn confirm" id="officialDrawsSearchClearBtn" style="background-color: #f1f5f9; color: #475569; padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;" data-i18n="officialdraws.limpiar">Limpiar</button>
             </div>
         </div>
 
@@ -2327,10 +2327,10 @@
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                     <thead>
                         <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600;">
-                            <th style="padding: 12px 15px; width: 100px;">Sorteo #</th>
-                            <th style="padding: 12px 15px; width: 150px;">Fecha</th>
-                            <th style="padding: 12px 15px;">Combinación Ganadora</th>
-                            <th style="padding: 12px 15px; width: 125px;" id="officialDrawsExtraHeader">Adicional / ⭐</th>
+                            <th style="padding: 12px 15px; width: 100px;" data-i18n="officialdraws.colSorteo">Sorteo #</th>
+                            <th style="padding: 12px 15px; width: 150px;" data-i18n="officialdraws.colFecha">Fecha</th>
+                            <th style="padding: 12px 15px;" data-i18n="officialdraws.colCombinacion">Combinación Ganadora</th>
+                            <th style="padding: 12px 15px; width: 125px;" id="officialDrawsExtraHeader" data-i18n="officialdraws.colAdicionalDefault">Adicional / ⭐</th>
                         </tr>
                     </thead>
                     <tbody id="officialDrawsTableBody">
@@ -2338,26 +2338,26 @@
                     </tbody>
                 </table>
             </div>
-            <div id="officialDrawsNoData" style="display: none; padding: 40px; text-align: center; color: #94a3b8; font-style: italic;">
+            <div id="officialDrawsNoData" style="display: none; padding: 40px; text-align: center; color: #94a3b8; font-style: italic;" data-i18n="officialdraws.sinResultados">
                 No se encontraron sorteos que coincidan con la búsqueda.
             </div>
         </div>
 
         <!-- Paginación Interactiva -->
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px; flex-wrap: wrap; gap: 10px;">
-            <div style="font-size: 0.85rem; color: #64748b;" id="officialDrawsPaginationInfo">
+            <div style="font-size: 0.85rem; color: #64748b;" id="officialDrawsPaginationInfo" data-i18n="officialdraws.paginacionInicial">
                 Mostrando sorteos 0-0 de 0
             </div>
             <div style="display: flex; gap: 8px; align-items: center;" id="officialDrawsPaginationControls">
-                <button id="officialDrawsPrevBtn" class="modal-btn confirm" style="padding: 6px 12px; font-size: 0.85rem; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; border-radius: 6px;">« Ant.</button>
-                <span id="officialDrawsCurrentPage" style="font-size: 0.85rem; font-weight: bold; color: #334155; padding: 0 5px;">Pág. 1</span>
-                <button id="officialDrawsNextBtn" class="modal-btn confirm" style="padding: 6px 12px; font-size: 0.85rem; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; border-radius: 6px;">Sig. »</button>
+                <button id="officialDrawsPrevBtn" class="modal-btn confirm" style="padding: 6px 12px; font-size: 0.85rem; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; border-radius: 6px;" data-i18n="officialdraws.antBtn">« Ant.</button>
+                <span id="officialDrawsCurrentPage" style="font-size: 0.85rem; font-weight: bold; color: #334155; padding: 0 5px;" data-i18n="officialdraws.paginaInicialLabel">Pág. 1</span>
+                <button id="officialDrawsNextBtn" class="modal-btn confirm" style="padding: 6px 12px; font-size: 0.85rem; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; border-radius: 6px;" data-i18n="officialdraws.sigBtn">Sig. »</button>
             </div>
         </div>
       </div>
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end;">
-        <button class="modal-btn confirm" id="officialDrawsConfirmCloseBtn" style="background-color: var(--primary);">Cerrar</button>
+        <button class="modal-btn confirm" id="officialDrawsConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>

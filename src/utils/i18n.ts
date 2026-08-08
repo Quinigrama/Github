@@ -107,6 +107,14 @@ export function applyTranslations(): void {
       el.setAttribute('data-info', t(key));
     }
   });
+
+  const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+  placeholderElements.forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) {
+      el.setAttribute('placeholder', t(key));
+    }
+  });
 }
 
 /**
