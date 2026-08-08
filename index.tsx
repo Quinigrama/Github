@@ -9223,11 +9223,11 @@ CONDICIONES DE USO ACEPTADAS:
     if (this.vizMode === 'heatmap') {
         if (isNacional) {
             const columnsLabels = [
-                "1ª Cifra (Decena de millar)",
-                "2ª Cifra (Unidad de millar)",
-                "3ª Cifra (Centena)",
-                "4ª Cifra (Decena)",
-                "5ª Cifra (Unidad)"
+                t('dataviz.cifraLarga.1'),
+                t('dataviz.cifraLarga.2'),
+                t('dataviz.cifraLarga.3'),
+                t('dataviz.cifraLarga.4'),
+                t('dataviz.cifraLarga.5')
             ];
             
             let html = `<div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">`;
@@ -9262,9 +9262,9 @@ CONDICIONES DE USO ACEPTADAS:
                     }
                     
                     html += `
-                        <div style="background: ${bg}; color: ${color}; border: ${border}; border-radius: 8px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; min-height: 55px;" title="Cifra ${digit}: ${freq} veces (z-score: ${z.toFixed(2)})">
+                        <div style="background: ${bg}; color: ${color}; border: ${border}; border-radius: 8px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; min-height: 55px;" title="${t('dataviz.tooltipCifra', { digit, freq, z: z.toFixed(2) })}">
                             <span style="font-size: 1.1rem; font-weight: bold;">${digit}</span>
-                            <span style="font-size: 0.7rem; font-weight: 500; opacity: 0.95;">${freq}v</span>
+                            <span style="font-size: 0.7rem; font-weight: 500; opacity: 0.95;">${t('dataviz.freqAbbrev', { freq })}</span>
                         </div>
                     `;
                 }
@@ -9303,12 +9303,12 @@ CONDICIONES DE USO ACEPTADAS:
                 }
                 
                 const labelStr = this.vizTarget === 'star' ? (isGordo ? `🔑 ${i}` : `★${i}`) : `${i}`;
-                const titleTypeName = this.vizTarget === 'star' ? (isGordo ? 'Clave' : 'Estrella') : 'Número';
+                const titleTypeName = this.vizTarget === 'star' ? (isGordo ? t('dataviz.tipoClave') : t('dataviz.tipoEstrella')) : t('dataviz.tipoNumero');
                 
                 html += `
-                    <div style="background: ${bg}; color: ${color}; border: ${border}; border-radius: 8px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; min-height: 55px;" title="${titleTypeName} ${i}: ${freq} veces (z-score: ${z.toFixed(2)})">
+                    <div style="background: ${bg}; color: ${color}; border: ${border}; border-radius: 8px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; min-height: 55px;" title="${t('dataviz.tooltipGenerico', { tipo: titleTypeName, i, freq, z: z.toFixed(2) })}">
                         <span style="font-size: 1.1rem; font-weight: bold;">${labelStr}</span>
-                        <span style="font-size: 0.7rem; font-weight: 500; opacity: 0.95;">${freq}v</span>
+                        <span style="font-size: 0.7rem; font-weight: 500; opacity: 0.95;">${t('dataviz.freqAbbrev', { freq })}</span>
                     </div>
                 `;
             }
@@ -9319,15 +9319,15 @@ CONDICIONES DE USO ACEPTADAS:
                 <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #f1f5f9; font-size: 0.8rem; color: #64748b; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <div style="width: 14px; height: 14px; background: rgba(59, 130, 246, 0.4); border: 1px solid rgba(37, 99, 235, 0.4); border-radius: 3px;"></div>
-                        <span>Frío (Por debajo de la media)</span>
+                        <span>${t('dataviz.leyendaFrio')}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <div style="width: 14px; height: 14px; background: rgba(226, 232, 240, 0.4); border: 1px solid #cbd5e1; border-radius: 3px;"></div>
-                        <span>Neutro / En la media</span>
+                        <span>${t('dataviz.leyendaNeutro')}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <div style="width: 14px; height: 14px; background: rgba(239, 68, 68, 0.4); border: 1px solid rgba(220, 38, 38, 0.4); border-radius: 3px;"></div>
-                        <span>Caliente (Por encima de la media)</span>
+                        <span>${t('dataviz.leyendaCaliente')}</span>
                     </div>
                 </div>
             `;
@@ -9351,7 +9351,7 @@ CONDICIONES DE USO ACEPTADAS:
                 <div style="position: absolute; top: 25px; bottom: 10px; left: 125px; right: 0; pointer-events: none; z-index: 10;">
                     <!-- Línea vertical para la Media Esperada dentro del contenedor alineado -->
                     <div style="position: absolute; top: 0; bottom: 0; left: ${meanLeftPercent}%; border-left: 2px dashed #10b981; height: 100%;">
-                        <span style="position: absolute; top: -20px; transform: translateX(-50%); font-size: 0.7rem; font-weight: bold; color: #10b981; background: #ffffff; padding: 0 4px; border-radius: 4px; border: 1px solid #10b981; white-space: nowrap;">Media: ${mean.toFixed(1)}</span>
+                        <span style="position: absolute; top: -20px; transform: translateX(-50%); font-size: 0.7rem; font-weight: bold; color: #10b981; background: #ffffff; padding: 0 4px; border-radius: 4px; border: 1px solid #10b981; white-space: nowrap;">${t('dataviz.mediaLinea', { mean: mean.toFixed(1) })}</span>
                     </div>
                 </div>
                 ` : ''}
@@ -9376,7 +9376,7 @@ CONDICIONES DE USO ACEPTADAS:
                     <div style="width: 75px; font-size: 0.8rem; font-weight: bold; color: var(--dark); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${formatted}">${formatted}</div>
                     <div style="flex: 1; height: 26px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; display: flex; align-items: center;">
                         <div style="width: ${barWidth}%; height: 100%; background: ${barColor}; border-radius: 6px 0 0 6px; transition: width 0.5s ease-out;"></div>
-                        <span style="position: absolute; left: 8px; font-size: 0.8rem; font-weight: 700; color: ${barWidth > 12 ? '#ffffff' : 'var(--dark)'}; text-shadow: ${barWidth > 12 ? '0 1px 2px rgba(0,0,0,0.4)' : 'none'};">${item.freq} veces</span>
+                        <span style="position: absolute; left: 8px; font-size: 0.8rem; font-weight: 700; color: ${barWidth > 12 ? '#ffffff' : 'var(--dark)'}; text-shadow: ${barWidth > 12 ? '0 1px 2px rgba(0,0,0,0.4)' : 'none'};">${t('backtest.economico.vecesCount', { count: item.freq })}</span>
                     </div>
                 </div>
             `;

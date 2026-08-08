@@ -441,5 +441,20 @@
   "dataviz.masFrecuente": "🔥 Most frequent:",
   "dataviz.menosFrecuente": "❄️ Least frequent:",
   "dataviz.mediaEsperada": "📈 Expected mean:",
-  "dataviz.desviacionEst": "(±{sd} std. dev.)"
+  "dataviz.desviacionEst": "(±{sd} std. dev.)",
+  "dataviz.cifraLarga.1": "1st Digit (Ten-thousands)",
+  "dataviz.cifraLarga.2": "2nd Digit (Thousands)",
+  "dataviz.cifraLarga.3": "3rd Digit (Hundreds)",
+  "dataviz.cifraLarga.4": "4th Digit (Tens)",
+  "dataviz.cifraLarga.5": "5th Digit (Units)",
+  "dataviz.tooltipCifra": "Digit {digit}: {freq} times (z-score: {z})",
+  "dataviz.freqAbbrev": "{freq}x",
+  "dataviz.tipoClave": "Key",
+  "dataviz.tipoEstrella": "Star",
+  "dataviz.tipoNumero": "Number",
+  "dataviz.tooltipGenerico": "{tipo} {i}: {freq} times (z-score: {z})",
+  "dataviz.leyendaFrio": "Cold (Below average)",
+  "dataviz.leyendaNeutro": "Neutral / At average",
+  "dataviz.leyendaCaliente": "Hot (Above average)",
+  "dataviz.mediaLinea": "Mean: {mean}"
 }
