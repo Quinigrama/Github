@@ -4462,11 +4462,11 @@ class DataLotto49Advanced {
   renderDrawDateCalendarGrid() {
     const title = document.getElementById('drawCalendarModalTitle');
     if (title) {
-      title.innerHTML = `🗓️ Calendario de Sorteos (${this.currentGame.name})`;
+      title.innerHTML = t('calendar.tituloConJuego', { game: this.currentGame.name });
     }
 
     const monthLabel = document.getElementById('drawCalMonthLabel');
-    const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const MONTH_NAMES = [t('common.meses.enero'), t('common.meses.febrero'), t('common.meses.marzo'), t('common.meses.abril'), t('common.meses.mayo'), t('common.meses.junio'), t('common.meses.julio'), t('common.meses.agosto'), t('common.meses.septiembre'), t('common.meses.octubre'), t('common.meses.noviembre'), t('common.meses.diciembre')];
     if (monthLabel) {
       monthLabel.textContent = `${MONTH_NAMES[this.drawCalMonth]} ${this.drawCalYear}`;
     }
@@ -4541,7 +4541,7 @@ class DataLotto49Advanced {
 
         dayCell.innerHTML = `
           <span style="font-size: 0.95rem; font-weight: 800;">${d}</span>
-          <span style="font-size: 0.65rem; margin-top: 2px; ${isSelected ? 'color: #fef08a;' : 'color: #047857;'} font-weight: 700;">${starIcon} SORTEO</span>
+          <span style="font-size: 0.65rem; margin-top: 2px; ${isSelected ? 'color: #fef08a;' : 'color: #047857;'} font-weight: 700;">${starIcon} ${t('calendar.sorteoBadge')}</span>
         `;
 
         dayCell.addEventListener('click', () => {
@@ -4550,8 +4550,8 @@ class DataLotto49Advanced {
             this.validateAndWarnTicketDate(dateStr);
           }
           this.toggleModal('drawDateCalendarModal', false);
-          const dateFormatted = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-          this.showToast(`📅 Sorteo oficial fijado para: ${dateFormatted}`, 'success');
+          const dateFormatted = dateObj.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+          this.showToast(t('calendar.fechaFijada', { date: dateFormatted }), 'success');
         });
 
         dayCell.addEventListener('mouseenter', () => {
@@ -4577,12 +4577,12 @@ class DataLotto49Advanced {
 
         dayCell.innerHTML = `
           <span style="font-size: 0.9rem; text-decoration: line-through;">${d}</span>
-          <span style="font-size: 0.6rem; color: #94a3b8; margin-top: 2px;">Sin sorteo</span>
+          <span style="font-size: 0.6rem; color: #94a3b8; margin-top: 2px;">${t('calendar.sinSorteoCelda')}</span>
         `;
 
         dayCell.addEventListener('click', () => {
-          const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-          this.showToast(`🚫 No hay sorteo de ${this.currentGame.name} los ${DAY_NAMES[dayOfWeek]}s. Elige un día marked en verde.`, 'warning');
+          const DAY_NAMES = [t('common.dias.domingo'), t('common.dias.lunes'), t('common.dias.martes'), t('common.dias.miercoles'), t('common.dias.jueves'), t('common.dias.viernes'), t('common.dias.sabado')];
+          this.showToast(t('calendar.noHaySorteoDia', { game: this.currentGame.name, day: DAY_NAMES[dayOfWeek] }), 'warning');
         });
       }
 
@@ -4605,7 +4605,7 @@ class DataLotto49Advanced {
     if (selectedInfo) {
       if (currentSelectedDateStr) {
         const selObj = new Date(currentSelectedDateStr + 'T00:00:00');
-        selectedInfo.textContent = `Fecha seleccionada: ${selObj.toLocaleDateString('es-ES')}`;
+        selectedInfo.textContent = t('calendar.fechaSeleccionada', { date: selObj.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES') });
       } else {
         selectedInfo.textContent = '';
       }
@@ -9010,14 +9010,14 @@ CONDICIONES DE USO ACEPTADAS:
     const email = emailInput?.value.trim();
 
     if (!message) {
-      this.showToast('Por favor, escribe un mensaje.', 'warning');
+      this.showToast(t('toast.contactoSinMensaje'), 'warning');
       return;
     }
 
     const sendBtn = document.getElementById('sendContactBtn') as HTMLButtonElement;
     if (sendBtn) {
       sendBtn.disabled = true;
-      sendBtn.textContent = 'Enviando...';
+      sendBtn.textContent = t('contact.enviando');
     }
 
     try {
@@ -9030,19 +9030,19 @@ CONDICIONES DE USO ACEPTADAS:
       const data = await response.json();
 
       if (response.ok) {
-        this.showToast('✅ Mensaje enviado correctamente.', 'success');
+        this.showToast(t('toast.contactoEnviado'), 'success');
         this.toggleModal('contactModal', false);
       } else {
-        throw new Error(data.error || 'Error al enviar');
+        throw new Error(data.error || t('contact.errorEnviarDefault'));
       }
     } catch (error: any) {
       console.error('Error enviando contacto:', error);
-      const errMsg = error?.message || 'Error al enviar el mensaje. Inténtalo de nuevo.';
+      const errMsg = error?.message || t('contact.errorEnviarReintentar');
       this.showToast(`❌ ${errMsg}`, 'error');
     } finally {
       if (sendBtn) {
         sendBtn.disabled = false;
-        sendBtn.textContent = 'Enviar';
+        sendBtn.textContent = t('contact.enviar');
       }
     }
   }
