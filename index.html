@@ -337,12 +337,12 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 1.6rem;">🔥</span>
           <div>
-            <strong id="highJackpotTitle" style="display: block; font-size: 0.95rem; text-align: left;">¡BOTE DE ALTO IMPACTO DISPONIBLE!</strong>
-            <span id="highJackpotDesc" style="font-size: 0.85rem; opacity: 0.95; display: block; text-align: left;">Euromillones supera los 100M€ con alta esperanza matemática.</span>
+            <strong id="highJackpotTitle" style="display: block; font-size: 0.95rem; text-align: left;" data-i18n="jackpots.bannerTitulo">¡BOTE DE ALTO IMPACTO DISPONIBLE!</strong>
+            <span id="highJackpotDesc" style="font-size: 0.85rem; opacity: 0.95; display: block; text-align: left;" data-i18n="jackpots.bannerDescDefault">Euromillones supera los 100M€ con alta esperanza matemática.</span>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button id="highJackpotPlayBtn" style="background: white; color: #ef4444; font-weight: bold; border: none; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: transform 0.2s;">Jugar Este Sorteo 🎯</button>
+          <button id="highJackpotPlayBtn" style="background: white; color: #ef4444; font-weight: bold; border: none; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: transform 0.2s;" data-i18n="jackpots.bannerJugarBtn">Jugar Este Sorteo 🎯</button>
           <button id="highJackpotCloseBtn" style="background: rgba(255,255,255,0.25); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
         </div>
       </div>
@@ -2506,8 +2506,8 @@
     <div class="modal-content" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;">🔔 Alerta de Botes y Esperanza Matemática</h3>
-            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;">Monitorea los botes acumulados y calcula el juego óptimo según probabilidad matemática</p>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" data-i18n="jackpots.titulo">🔔 Alerta de Botes y Esperanza Matemática</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="jackpots.subtitulo">Monitorea los botes acumulados y calcula el juego óptimo según probabilidad matemática</p>
         </div>
         <button class="close-btn" id="jackpotsCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2517,18 +2517,18 @@
         <div id="jackpotsRecommendCard" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; position: relative; overflow: hidden;">
             <div style="font-size: 2.5rem; background: #white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-shrink: 0;">🔥</div>
             <div style="flex: 1; z-index: 1;">
-                <span style="font-size: 0.75rem; background: #2563eb; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; text-transform: uppercase;">Mayor Esperanza Matemática</span>
-                <h4 id="bestExpectationGameName" style="margin: 5px 0 2px 0; font-size: 1.2rem; color: #1e3a8a;">Cargando recomendación...</h4>
-                <p id="bestExpectationReasoning" style="margin: 0; font-size: 0.85rem; color: #1e40af;">Calculando el retorno esperado para los próximos sorteos...</p>
+                <span style="font-size: 0.75rem; background: #2563eb; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; text-transform: uppercase;" data-i18n="jackpots.badgeMayorEsperanza">Mayor Esperanza Matemática</span>
+                <h4 id="bestExpectationGameName" style="margin: 5px 0 2px 0; font-size: 1.2rem; color: #1e3a8a;" data-i18n="jackpots.cargandoRecomendacion">Cargando recomendación...</h4>
+                <p id="bestExpectationReasoning" style="margin: 0; font-size: 0.85rem; color: #1e40af;" data-i18n="jackpots.calculandoRetorno">Calculando el retorno esperado para los próximos sorteos...</p>
             </div>
         </div>
 
         <!-- Metric Explanation Accordion -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #334155;">
-                <span>💡</span> ¿Qué es la Esperanza Matemática de un Sorteo?
+                <span>💡</span> <span data-i18n="jackpots.queEsTitulo">¿Qué es la Esperanza Matemática de un Sorteo?</span>
             </div>
-            <p style="margin: 0; font-size: 0.8rem; color: #475569; line-height: 1.4;">
+            <p style="margin: 0; font-size: 0.8rem; color: #475569; line-height: 1.4;" data-i18n="jackpots.queEsTexto">
                 Es un coeficiente que mide la rentabilidad teórica de jugar a un sorteo. Se calcula dividiendo el <strong>Bote Acumulado</strong> entre la dificultad matemática de acertar (número de combinaciones posibles) multiplicada por el precio del boleto. Cuanto más alto sea este índice, <strong>mayor retorno teórico</strong> tiene cada euro que inviertes en ese juego.
             </p>
         </div>
@@ -2538,18 +2538,18 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                 <thead>
                     <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
-                        <th style="padding: 10px 15px;">Juego</th>
-                        <th style="padding: 10px 15px;">Bote Estimado</th>
-                        <th style="padding: 10px 15px;">Próximo Sorteo</th>
-                        <th style="padding: 10px 15px; text-align: right;">Índice Esperanza</th>
-                        <th style="padding: 10px 15px; text-align: center;">Calificación</th>
+                        <th style="padding: 10px 15px;" data-i18n="jackpots.colJuego">Juego</th>
+                        <th style="padding: 10px 15px;" data-i18n="jackpots.colBoteEstimado">Bote Estimado</th>
+                        <th style="padding: 10px 15px;" data-i18n="jackpots.colProximoSorteo">Próximo Sorteo</th>
+                        <th style="padding: 10px 15px; text-align: right;" data-i18n="jackpots.colIndiceEsperanza">Índice Esperanza</th>
+                        <th style="padding: 10px 15px; text-align: center;" data-i18n="jackpots.colCalificacion">Calificación</th>
                     </tr>
                 </thead>
                 <tbody id="jackpotsTableBody">
                     <tr>
                         <td colspan="5" style="padding: 30px; text-align: center; color: #94a3b8;">
                             <div class="loading-spinner" style="margin: 0 auto 10px auto; width: 24px; height: 24px;"></div>
-                            Cargando datos de botes oficiales...
+                            <span data-i18n="jackpots.cargandoInicial">Cargando datos de botes oficiales...</span>
                         </td>
                     </tr>
                 </tbody>
@@ -2560,7 +2560,7 @@
       </div>
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="modal-btn confirm" id="jackpotsConfirmCloseBtn" style="background-color: var(--primary);">Entendido</button>
+        <button class="modal-btn confirm" id="jackpotsConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="history.entendido">Entendido</button>
       </div>
     </div>
   </div>

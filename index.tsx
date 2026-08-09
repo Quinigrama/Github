@@ -8203,7 +8203,7 @@ CONDICIONES DE USO ACEPTADAS:
       <tr>
         <td colspan="5" style="padding: 30px; text-align: center; color: #94a3b8;">
           <div class="loading-spinner" style="margin: 0 auto 10px auto; width: 24px; height: 24px;"></div>
-          Conectando con Google Sheets y calculando esperanza matemática...
+          ${t('jackpots.conectando')}
         </td>
       </tr>
     `;
@@ -8258,30 +8258,30 @@ CONDICIONES DE USO ACEPTADAS:
         const score = (jk.bote * prob) / price;
         const scoreFriendly = Math.round(score * 1000) / 1000;
         
-        let rating = '⚠️ Estándar';
+        let rating = t('jackpots.ratingEstandar');
         let badgeClass = 'background-color: #f1f5f9; color: #475569;';
         
         if (gameId === 'powerball' || gameId === 'megamillions') {
-          if (jk.bote >= 200000000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 100000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 200000000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 100000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else if (gameId === 'bonoloto') {
-          if (jk.bote >= 2000000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 1000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 2000000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 1000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else if (gameId === 'primitiva') {
-          if (jk.bote >= 25000000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 10000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 25000000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 10000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else if (gameId === 'gordo') {
-          if (jk.bote >= 12000000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 7000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 12000000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 7000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else if (gameId === 'euromillones') {
-          if (jk.bote >= 100000000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 50000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 100000000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 50000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else if (gameId === 'eurodreams') {
-          if (jk.bote >= 7200000) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (jk.bote >= 4000000) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (jk.bote >= 7200000) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (jk.bote >= 4000000) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         } else {
-          if (scoreFriendly >= 0.5) { rating = '🌟 Excelente'; badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
-          else if (scoreFriendly >= 0.2) { rating = '✅ Buena'; badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
+          if (scoreFriendly >= 0.5) { rating = t('jackpots.ratingExcelente'); badgeClass = 'background-color: #fef3c7; color: #d97706; font-weight: bold;'; }
+          else if (scoreFriendly >= 0.2) { rating = t('jackpots.ratingBuena'); badgeClass = 'background-color: #dcfce7; color: #15803d;'; }
         }
         
         return {
@@ -8302,7 +8302,7 @@ CONDICIONES DE USO ACEPTADAS:
           : jk.bote.toLocaleString('es-ES') + ' €';
         const isCurrentGame = jk.id === this.currentGame.id;
         const highlightStyle = isCurrentGame ? 'background: #f0f9ff; font-weight: 600;' : '';
-        const currentTag = isCurrentGame ? ' <span style="font-size: 0.7rem; background: #0284c7; color: white; padding: 1px 4px; border-radius: 4px; margin-left: 4px;">Activo</span>' : '';
+        const currentTag = isCurrentGame ? ` <span style="font-size: 0.7rem; background: #0284c7; color: white; padding: 1px 4px; border-radius: 4px; margin-left: 4px;">${t('jackpots.activo')}</span>` : '';
         
         return `
           <tr style="border-bottom: 1px solid #e2e8f0; ${highlightStyle}">
@@ -8324,12 +8324,12 @@ CONDICIONES DE USO ACEPTADAS:
         const bestNameEl = document.getElementById('bestExpectationGameName');
         const bestReasonEl = document.getElementById('bestExpectationReasoning');
         
-        if (bestNameEl) bestNameEl.innerHTML = `${this.getGameFlag(best.id)} ¡Jugar a ${best.juego}!`;
+        if (bestNameEl) bestNameEl.innerHTML = `${this.getGameFlag(best.id)} ${t('jackpots.jugarA', { juego: best.juego })}`;
         if (bestReasonEl) {
           const bestBoteFormatted = best.id === 'powerball'
             ? '$' + best.bote.toLocaleString('en-US')
             : best.bote.toLocaleString('es-ES') + ' €';
-          bestReasonEl.innerHTML = `Con un bote de <strong>${bestBoteFormatted}</strong>, es el sorteo con mayor esperanza matemática de retorno actual (Índice de Retorno de <strong>${best.score}</strong>). ¡Prepara tus combinaciones optimizadas para el <strong>${best.fecha}</strong>!`;
+          bestReasonEl.innerHTML = t('jackpots.recomendacionTexto', { bote: bestBoteFormatted, score: best.score, fecha: best.fecha });
         }
       }
 
@@ -8337,9 +8337,9 @@ CONDICIONES DE USO ACEPTADAS:
       this.checkHighJackpotAlert(ratedJackpots);
       
       if (isFallback) {
-        this.showToast('ℹ️ Mostrando botes estimados por defecto.', 'info');
+        this.showToast(t('toast.jackpotsFallback'), 'info');
       } else {
-        this.showToast('📈 Botes actualizados de los juegos de Lotería.', 'success');
+        this.showToast(t('toast.jackpotsActualizado'), 'success');
       }
       
     } catch (err: any) {
@@ -8347,8 +8347,8 @@ CONDICIONES DE USO ACEPTADAS:
       tableBody.innerHTML = `
         <tr>
           <td colspan="5" style="padding: 30px; text-align: center; color: #ef4444;">
-            ❌ Error de conexión al leer los botes: ${err.message || err}<br>
-            <button class="modal-btn" id="jackpotsRetryBtn" style="margin-top:10px; background: #ef4444; color:white; border:none; padding: 4px 10px; border-radius:4px; cursor:pointer;">Reintentar</button>
+            ${t('jackpots.errorConexion', { message: err.message || err })}<br>
+            <button class="modal-btn" id="jackpotsRetryBtn" style="margin-top:10px; background: #ef4444; color:white; border:none; padding: 4px 10px; border-radius:4px; cursor:pointer;">${t('jackpots.reintentar')}</button>
           </td>
         </tr>
       `;
@@ -8522,9 +8522,9 @@ CONDICIONES DE USO ACEPTADAS:
   checkHighJackpotAlert(jackpots: any[]) {
     if (!jackpots || jackpots.length === 0) return;
 
-    const highJk = jackpots.find((j: any) => j.bote >= 100000000 || j.rating === '🌟 Excelente') || jackpots[0];
+    const highJk = jackpots.find((j: any) => j.bote >= 100000000 || j.rating === t('jackpots.ratingExcelente') || j.rating === '🌟 Excelente') || jackpots[0];
 
-    if (highJk && (highJk.bote >= 50000000 || highJk.rating === '🌟 Excelente')) {
+    if (highJk && (highJk.bote >= 50000000 || highJk.rating === t('jackpots.ratingExcelente') || highJk.rating === '🌟 Excelente')) {
       const banner = document.getElementById('highJackpotBannerContainer');
       const titleEl = document.getElementById('highJackpotTitle');
       const descEl = document.getElementById('highJackpotDesc');
@@ -8533,8 +8533,8 @@ CONDICIONES DE USO ACEPTADAS:
 
       if (banner && titleEl && descEl && playBtn) {
         const formattedBote = (highJk.bote / 1000000).toFixed(0) + 'M€';
-        titleEl.textContent = `🔥 ¡BOTE DESTACADO EN ${highJk.juego.toUpperCase()}! (${formattedBote})`;
-        descEl.textContent = `Bote acumulado de ${highJk.bote.toLocaleString('es-ES')} €. Indicador de Esperanza Matemática: ${highJk.rating} (${highJk.score}).`;
+        titleEl.textContent = t('jackpots.bannerTituloDinamico', { game: highJk.juego.toUpperCase(), bote: formattedBote });
+        descEl.textContent = t('jackpots.bannerDescDinamico', { bote: highJk.bote.toLocaleString('es-ES'), rating: highJk.rating, score: highJk.score });
         banner.style.display = 'block';
 
         if ((this as any).highJackpotTimer) {
@@ -8571,8 +8571,8 @@ CONDICIONES DE USO ACEPTADAS:
       const todayStr = new Date().toISOString().split('T')[0];
       if (config.enabled && config.lastJackpotAlertDate !== todayStr && highJk.bote >= 100000000) {
         if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification(`🔥 ¡Bote Alto en ${highJk.juego}: ${(highJk.bote/1e6).toFixed(0)}M€!`, {
-            body: 'DataLotto ha detectado una alta esperanza matemática. ¡Genera tu combinación inteligente!',
+          new Notification(t('jackpots.notifTitulo', { game: highJk.juego, amount: (highJk.bote/1e6).toFixed(0) }), {
+            body: t('jackpots.notifBody'),
             icon: '/pwa-192x192.png'
           });
         }
