@@ -8166,7 +8166,7 @@ class DataLotto49Advanced {
         id,
         juego: gameNames[id] || id,
         bote: jackpotsMap[id]?.bote || fallbackBotes[id] || 0,
-        fecha: jackpotsMap[id]?.fecha || "Próximo sorteo"
+        fecha: jackpotsMap[id]?.fecha || t('jackpots.proximoSorteoFallback')
       };
     });
   }

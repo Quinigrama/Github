@@ -656,5 +656,18 @@
   "analyzer.starTopTemplate": "{label} top: {nums}",
   "analyzer.sesgoSi": "Sí (Significativo al 95%)",
   "analyzer.sesgoNo": "No (Distribución Normal)",
-  "analyzer.datosInsuficientes": "Datos insuficientes"
+  "analyzer.datosInsuficientes": "Datos insuficientes",
+  "realtimestats.titulo": "📊 Estadísticas en Tiempo Real",
+  "realtimestats.suma": "Suma Total",
+  "realtimestats.parImpar": "Par/Impar",
+  "realtimestats.bajosAltos": "Bajos/Altos",
+  "realtimestats.decenas": "Decenas",
+  "realtimestats.agrupDecenas": "Agrup. Decenas",
+  "realtimestats.consecutivos": "Consecutivos",
+  "realtimestats.sumaDigitos": "Suma Dígitos",
+  "realtimestats.primos": "Números Primos",
+  "realtimestats.desviacion": "Desviación",
+  "realtimestats.entropiaTerm": "Entropía (Term.)",
+  "realtimestats.entropiaInt": "Entropía (Int.)",
+  "jackpots.proximoSorteoFallback": "Próximo sorteo"
 }
