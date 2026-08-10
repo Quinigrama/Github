@@ -20,7 +20,7 @@
   "config.modoAyuda": "❓ Modo Ayuda",
   "toast.modoOscuroOn": "Modo Oscuro activado 🌙",
   "toast.modoOscuroOff": "Modo Oscuro desactivado ☀️",
-  "game.tagline": "Generador Inteligente con Arquitectura Matemática Avanzada",
+  "game.tagline": "Análisis estadístico visual para tus combinaciones",
   "game.platformOk": "● Plataforma multi-juego: OK ✓",
   "selection.title": "🎯 Números Seleccionados",
   "selection.placeholder": "Selecciona hasta 6 números",
@@ -683,5 +683,15 @@
   "notif.dias.gordo": "Domingo",
   "notif.dias.nacional": "Jueves, Sábado",
   "notif.guardarBtn": "Guardar Preferencias",
-  "toast.recordatoriosGuardados": "✅ Preferencias de Recordatorios guardadas correctamente"
+  "toast.recordatoriosGuardados": "✅ Preferencias de Recordatorios guardadas correctamente",
+  "main.modoAyudaDesactivarBtn": "❌ Desactivar Modo Ayuda",
+  "main.modoAyudaActivarBtn": "❓ Modo Ayuda",
+  "toast.modoAyudaActivado": "ℹ️ Modo Ayuda Activado. Pulsa en cualquier botón o filtro para ver qué hace.",
+  "toast.modoAyudaDesactivado": "✅ Modo Ayuda Desactivado.",
+  "main.estadoAppRequiereAtencion": "Requiere atención",
+  "main.estadoAppPerfecto": "Perfecto y listo para lanzar!",
+  "toast.estadoApp": "Estado de la app: {status}. Revisa la consola de depuración.",
+  "toast.filtrosRestablecidos": "✅ Filtros de {game} restablecidos a valores recomendados.",
+  "toast.errorGuardarEstado": "Error al guardar el estado de la app",
+  "toast.errorCargarEstadoAnterior": "No se pudo cargar el estado anterior"
 }

@@ -1291,11 +1291,11 @@ class DataLotto49Advanced {
     const btn = document.getElementById('helpModeBtn');
     if (btn) {
         if (this.helpModeActive) {
-            btn.innerHTML = '❌ Desactivar Modo Ayuda';
-            this.showToast('ℹ️ Modo Ayuda Activado. Pulsa en cualquier botón o filtro para ver qué hace.', 'info');
+            btn.innerHTML = t('main.modoAyudaDesactivarBtn');
+            this.showToast(t('toast.modoAyudaActivado'), 'info');
         } else {
-            btn.innerHTML = '❓ Modo Ayuda';
-            this.showToast('✅ Modo Ayuda Desactivado.', 'success');
+            btn.innerHTML = t('main.modoAyudaActivarBtn');
+            this.showToast(t('toast.modoAyudaDesactivado'), 'success');
         }
     }
   }
@@ -1960,7 +1960,7 @@ class DataLotto49Advanced {
 
         badge.onclick = (e) => {
             e.stopPropagation();
-            this.showToast(`Estado de la app: ${hasFailures ? 'Requiere atención' : 'Perfecto y listo para lanzar!'}. Revisa la consola de depuración.`, hasFailures ? 'error' : 'success');
+            this.showToast(t('toast.estadoApp', { status: hasFailures ? t('main.estadoAppRequiereAtencion') : t('main.estadoAppPerfecto') }), hasFailures ? 'error' : 'success');
         };
 
         brandElement.appendChild(badge);
@@ -2097,7 +2097,7 @@ class DataLotto49Advanced {
       resetBtn.addEventListener('click', () => {
         try {
           this.resetFiltersToDefault();
-          this.showToast(`✅ Filtros de ${this.currentGame.name} restablecidos a valores recomendados.`, 'success');
+          this.showToast(t('toast.filtrosRestablecidos', { game: this.currentGame.name }), 'success');
           ticketDiv.classList.remove('show', 'conflict');
         } catch (err: any) {
           console.error("Fallo al resetear filtros:", err);
@@ -2244,7 +2244,7 @@ class DataLotto49Advanced {
           saveAppStateToStorage(state);
       } catch (error) {
           console.error("Error guardando el estado:", error);
-          this.showToast('Error al guardar el estado de la app', 'error');
+          this.showToast(t('toast.errorGuardarEstado'), 'error');
       }
   }
 
@@ -2422,7 +2422,7 @@ class DataLotto49Advanced {
 
       } catch (error) {
           console.error("Error cargando el estado:", error);
-          this.showToast('No se pudo cargar el estado anterior', 'warning');
+          this.showToast(t('toast.errorCargarEstadoAnterior'), 'warning');
       }
   }
 

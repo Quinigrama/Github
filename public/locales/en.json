@@ -20,7 +20,7 @@
   "config.modoAyuda": "❓ Help Mode",
   "toast.modoOscuroOn": "Dark Mode activated 🌙",
   "toast.modoOscuroOff": "Dark Mode deactivated ☀️",
-  "game.tagline": "Smart Generator with Advanced Mathematical Architecture",
+  "game.tagline": "Visual statistical analysis for your combinations",
   "game.platformOk": "● Multi-game platform: OK ✓",
   "selection.title": "🎯 Selected Numbers",
   "selection.placeholder": "Select up to 6 numbers",
@@ -683,5 +683,15 @@
   "notif.dias.gordo": "Sunday",
   "notif.dias.nacional": "Thursday, Saturday",
   "notif.guardarBtn": "Save Preferences",
-  "toast.recordatoriosGuardados": "✅ Reminder preferences saved successfully"
+  "toast.recordatoriosGuardados": "✅ Reminder preferences saved successfully",
+  "main.modoAyudaDesactivarBtn": "❌ Disable Help Mode",
+  "main.modoAyudaActivarBtn": "❓ Help Mode",
+  "toast.modoAyudaActivado": "ℹ️ Help Mode Activated. Tap any button or filter to see what it does.",
+  "toast.modoAyudaDesactivado": "✅ Help Mode Disabled.",
+  "main.estadoAppRequiereAtencion": "Needs attention",
+  "main.estadoAppPerfecto": "Perfect and ready to launch!",
+  "toast.estadoApp": "App status: {status}. Check the debug console.",
+  "toast.filtrosRestablecidos": "✅ {game} filters reset to recommended values.",
+  "toast.errorGuardarEstado": "Error saving app state",
+  "toast.errorCargarEstadoAnterior": "Could not load previous state"
 }

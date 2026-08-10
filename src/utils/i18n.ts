@@ -85,7 +85,12 @@ export function applyTranslations(): void {
         }
       }
       const infoBtn = el.querySelector('.filter-info-btn');
-      el.textContent = t(key, params);
+      const text = t(key, params);
+      if (text.includes('<') && text.includes('>')) {
+        el.innerHTML = text;
+      } else {
+        el.textContent = text;
+      }
       if (infoBtn) {
         el.appendChild(infoBtn);
       }
