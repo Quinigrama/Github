@@ -777,6 +777,14 @@
                         </div>
                     </div>
 
+                    <!-- GRUPO: Excluir Decenas -->
+                    <div class="filter-group" title="Excluye todos los números de la decena seleccionada." data-i18n-title="filters.excluirDecenas.tooltip">
+                        <div class="filter-title" data-i18n="filters.excluirDecenas.titulo">🚫 Excluir Decenas</div>
+                        <div class="filter-options" id="excluirDecenasOptions">
+                            <!-- Chips generados dinámicamente por juego en renderFilterOptions() -->
+                        </div>
+                    </div>
+
                     <div class="filter-group" title="La suma de todos los dígitos individuales." data-i18n-title="filters.sumaDigitos.tooltip">
                         <div class="filter-title" data-i18n="filters.sumaDigitos.titulo">∑ Suma de Dígitos</div>
                         <div class="range-control">
@@ -874,6 +882,14 @@
                                 <input type="number" id="starDistanciaMin" value="1" min="1" max="11">
                                 <span data-i18n="filters.rangoA">a</span>
                                 <input type="number" id="starDistanciaMax" value="11" min="1" max="11">
+                            </div>
+                        </div>
+
+                        <!-- GRUPO: Excluir Decenas (Estrellas) -->
+                        <div class="filter-group" id="excluirDecenasEstrellasGroup" title="Excluye todos los números de la decena seleccionada en la matriz secundaria." data-i18n-title="filters.excluirDecenasEstrellas.tooltip">
+                            <div class="filter-title" data-i18n="filters.excluirDecenasEstrellas.titulo">🚫 Excluir Decenas (Estrellas)</div>
+                            <div class="filter-options" id="excluirDecenasEstrellasOptions">
+                                <!-- Chips generados dinámicamente por juego en renderFilterOptions() -->
                             </div>
                         </div>
                     </div>

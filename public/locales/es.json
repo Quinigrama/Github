@@ -775,5 +775,10 @@
   "ticket.verCalendarioTitle": "Ver calendario visual interactivo con días no válidos tachados",
   "ticket.corregirProximoSorteoBtn": "👉 Corregir a próximo sorteo",
   "ticket.guardarBoletoBtn": "💾 Guardar Boleto",
-  "ticket.compartirBtn": "📤 Compartir"
+  "ticket.compartirBtn": "📤 Compartir",
+  "filters.excluirDecenas.titulo": "🚫 Excluir Decenas",
+  "filters.excluirDecenas.tooltip": "Excluye todos los números de la decena seleccionada. Mientras el chip esté activo, esos números quedan bloqueados y no se pueden modificar uno a uno.",
+  "filters.excluirDecenasEstrellas.titulo": "🚫 Excluir Decenas (Estrellas)",
+  "filters.excluirDecenasEstrellas.tooltip": "Excluye todos los números de la decena seleccionada dentro de la segunda matriz (Powerball/Mega Ball). Mientras el chip esté activo, esos números quedan bloqueados.",
+  "toast.decenaBloqueada": "🔒 Esta decena está excluida en bloque. Desactiva su chip en \"Excluir Decenas\" para modificar números sueltos."
 }

@@ -775,5 +775,10 @@
   "ticket.verCalendarioTitle": "View interactive visual calendar with invalid days crossed out",
   "ticket.corregirProximoSorteoBtn": "👉 Correct to next draw",
   "ticket.guardarBoletoBtn": "💾 Save Ticket",
-  "ticket.compartirBtn": "📤 Share"
+  "ticket.compartirBtn": "📤 Share",
+  "filters.excluirDecenas.titulo": "🚫 Exclude Tens",
+  "filters.excluirDecenas.tooltip": "Excludes all numbers in the selected tens group. While the chip is active, those numbers stay locked and cannot be changed individually.",
+  "filters.excluirDecenasEstrellas.titulo": "🚫 Exclude Tens (Stars)",
+  "filters.excluirDecenasEstrellas.tooltip": "Excludes all numbers in the selected tens group within the secondary matrix (Powerball/Mega Ball). While the chip is active, those numbers stay locked.",
+  "toast.decenaBloqueada": "🔒 This tens group is excluded as a block. Deactivate its chip in \"Exclude Tens\" to change individual numbers."
 }

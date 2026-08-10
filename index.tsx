@@ -666,6 +666,10 @@ class DataLotto49Advanced {
     suggestedStars: Set<number>; // New for Euromillones Big Data
     excludedNumbers: Set<number>;
     excludedStars: Set<number>; // New for Euromillones
+    excludedDecades: Set<number>;
+    excludedDecadesSnapshot: Map<number, number[]>;
+    excludedStarDecades: Set<number>;
+    excludedStarDecadesSnapshot: Map<number, number[]>;
     hotNumbers: Set<number>;
     hotStars: Set<number>; // New for Euromillones
     coldNumbers: Set<number>;
@@ -799,6 +803,10 @@ class DataLotto49Advanced {
     this.suggestedStars = new Set();
     this.excludedNumbers = new Set();
     this.excludedStars = new Set();
+    this.excludedDecades = new Set();
+    this.excludedDecadesSnapshot = new Map();
+    this.excludedStarDecades = new Set();
+    this.excludedStarDecadesSnapshot = new Map();
     this.hotNumbers = new Set();
     this.hotStars = new Set();
     this.coldNumbers = new Set();
@@ -2238,6 +2246,10 @@ class DataLotto49Advanced {
               dataLoaded: this.dataLoaded,
               favoriteNumbers: Array.from(this.favoriteNumbers), // Persist favorites
               favoriteGames: Array.from(this.favoriteGames), // Persist game favorites
+              excludedDecades: Array.from(this.excludedDecades),
+              excludedDecadesSnapshot: Array.from(this.excludedDecadesSnapshot.entries()),
+              excludedStarDecades: Array.from(this.excludedStarDecades),
+              excludedStarDecadesSnapshot: Array.from(this.excludedStarDecadesSnapshot.entries()),
               customGameUrls: this.customGameUrls, // Persist custom URLs
               filterPresets: this.filterPresets, // Persist filter presets
           };
@@ -2386,6 +2398,10 @@ class DataLotto49Advanced {
               this.dataLoaded = savedState.dataLoaded || false;
               this.favoriteNumbers = new Set(savedState.favoriteNumbers || []);
               this.favoriteGames = new Set(savedState.favoriteGames || []);
+              this.excludedDecades = new Set(savedState.excludedDecades || []);
+              this.excludedDecadesSnapshot = new Map(savedState.excludedDecadesSnapshot || []);
+              this.excludedStarDecades = new Set(savedState.excludedStarDecades || []);
+              this.excludedStarDecadesSnapshot = new Map(savedState.excludedStarDecadesSnapshot || []);
               if (savedState.gameDataTypes) {
                   this.gameDataTypes = savedState.gameDataTypes;
               }
@@ -2504,6 +2520,18 @@ class DataLotto49Advanced {
         if (this.filters.geometric.exclude.includes(value) || this.filters.geometric.favor.includes(value)) {
             chipEl.classList.add('active');
         }
+    });
+
+    document.querySelectorAll('#excluirDecenasOptions .filter-chip').forEach(chip => {
+      const chipEl = chip as HTMLElement;
+      const dec = parseInt(chipEl.dataset.decade || '-1', 10);
+      chipEl.classList.toggle('active', this.excludedDecades.has(dec));
+    });
+
+    document.querySelectorAll('#excluirDecenasEstrellasOptions .filter-chip').forEach(chip => {
+      const chipEl = chip as HTMLElement;
+      const dec = parseInt(chipEl.dataset.decade || '-1', 10);
+      chipEl.classList.toggle('active', this.excludedStarDecades.has(dec));
     });
 
     // Switches
@@ -4354,6 +4382,11 @@ class DataLotto49Advanced {
         entropiaTerminacionesGroup.style.display = gameId === 'nacional' ? 'none' : '';
     }
 
+    const excluirDecenasGroup = document.getElementById('excluirDecenasOptions')?.closest('.filter-group') as HTMLElement;
+    if (excluirDecenasGroup) {
+        excluirDecenasGroup.style.display = gameId === 'nacional' ? 'none' : '';
+    }
+
     this.updateNextDrawDayOptions();
     this.updateTicketDrawDateBadge();
     this.initFilterInfoButtons();
@@ -4730,6 +4763,26 @@ class DataLotto49Advanced {
         });
     }
 
+    // 5b. Update Excluir Decenas Options
+    const excluirDecenasOptions = document.getElementById('excluirDecenasOptions');
+    if (excluirDecenasOptions) {
+        excluirDecenasOptions.innerHTML = '';
+        if (this.currentGame.id !== 'nacional') {
+            const maxDecade = Math.floor((this.currentGame.numberRange - 1) / 10);
+            for (let d = 0; d <= maxDecade; d++) {
+                const start = d === 0 ? 1 : d * 10;
+                const end = Math.min(d * 10 + 9, this.currentGame.numberRange);
+                const label = d === 0 ? "1-9" : `${start}-${end}`;
+                
+                const chip = document.createElement('div');
+                chip.className = 'filter-chip' + (this.excludedDecades.has(d) ? ' active' : '');
+                chip.dataset.decade = String(d);
+                chip.textContent = label;
+                excluirDecenasOptions.appendChild(chip);
+            }
+        }
+    }
+
     // 6. Update Range Inputs Max/Min for Numbers (Suma Total)
     const sumMin = document.getElementById('sumMin') as HTMLInputElement;
     const sumMax = document.getElementById('sumMax') as HTMLInputElement;
@@ -4807,6 +4860,31 @@ class DataLotto49Advanced {
             this.renderStarFilterOptions();
         } else {
             starSection.style.display = 'none';
+        }
+    }
+
+    // 13b. Update Excluir Decenas Estrellas Options
+    const excluirDecenasEstrellasOptions = document.getElementById('excluirDecenasEstrellasOptions');
+    const excluirDecenasEstrellasGroup = document.getElementById('excluirDecenasEstrellasGroup');
+    if (excluirDecenasEstrellasOptions) {
+        excluirDecenasEstrellasOptions.innerHTML = '';
+        const starDecadesCount = this.currentGame.maxStars > 0 ? Math.floor((this.currentGame.starRange - 1) / 10) + 1 : 0;
+        if (this.currentGame.maxStars > 0 && starDecadesCount >= 3) {
+            if (excluirDecenasEstrellasGroup) excluirDecenasEstrellasGroup.style.display = '';
+            const maxDecade = Math.floor((this.currentGame.starRange - 1) / 10);
+            for (let d = 0; d <= maxDecade; d++) {
+                const start = d === 0 ? 1 : d * 10;
+                const end = Math.min(d * 10 + 9, this.currentGame.starRange);
+                const label = d === 0 ? "1-9" : `${start}-${end}`;
+                
+                const chip = document.createElement('div');
+                chip.className = 'filter-chip' + (this.excludedStarDecades.has(d) ? ' active' : '');
+                chip.dataset.decade = String(d);
+                chip.textContent = label;
+                excluirDecenasEstrellasOptions.appendChild(chip);
+            }
+        } else {
+            if (excluirDecenasEstrellasGroup) excluirDecenasEstrellasGroup.style.display = 'none';
         }
     }
 
@@ -5318,6 +5396,22 @@ class DataLotto49Advanced {
       if (target.classList.contains('number-ball')) this.handleNumberClick(target);
     });
 
+    document.getElementById('excluirDecenasOptions')?.addEventListener('click', e => {
+      const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
+      if (!chip || chip.dataset.decade === undefined) return;
+      e.stopPropagation();
+      const decadeIndex = parseInt(chip.dataset.decade, 10);
+      this.toggleDecadeExclusion(decadeIndex);
+    });
+
+    document.getElementById('excluirDecenasEstrellasOptions')?.addEventListener('click', e => {
+      const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
+      if (!chip || chip.dataset.decade === undefined) return;
+      e.stopPropagation();
+      const decadeIndex = parseInt(chip.dataset.decade, 10);
+      this.toggleStarDecadeExclusion(decadeIndex);
+    });
+
     document.querySelectorAll('[data-action="switch-game"]').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -5456,10 +5550,10 @@ class DataLotto49Advanced {
         this.updateFilterBadgesFromAudit();
     });
     document.querySelector('.filters-panel')?.addEventListener('click', e => {
-        // FIX: Cast to HTMLElement to access classList
-       const target = e.target as HTMLElement;
-       if(target.classList.contains('filter-chip')) {
-           target.classList.toggle('active');
+       const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
+       if (chip) {
+           if (chip.closest('#excluirDecenasOptions, #excluirDecenasEstrellasOptions')) return;
+           chip.classList.toggle('active');
            this.updateFilterBadgesFromAudit();
        }
     });
@@ -6090,6 +6184,17 @@ class DataLotto49Advanced {
     const icon = ball.querySelector('.number-icon');
     if (!icon) return;
     
+    // Check if decade is excluded as a block
+    const decadeIndex = Math.floor((number - 1) / 10);
+    if (type === 'number' && this.excludedDecades.has(decadeIndex)) {
+        this.showToast(t('toast.decenaBloqueada'), 'warning');
+        return;
+    }
+    if (type === 'star' && this.excludedStarDecades.has(decadeIndex)) {
+        this.showToast(t('toast.decenaBloqueada'), 'warning');
+        return;
+    }
+    
     const excludedSet = type === 'number' ? this.excludedNumbers : this.excludedStars;
     const selectedSet = type === 'number' ? this.selectedNumbers : this.selectedStars;
     const favoriteSet = type === 'number' ? this.favoriteNumbers : this.favoriteStars;
@@ -6177,6 +6282,88 @@ class DataLotto49Advanced {
     }
   }
 
+  toggleDecadeExclusion(decadeIndex: number) {
+    const start = decadeIndex === 0 ? 1 : decadeIndex * 10;
+    const end = Math.min(decadeIndex * 10 + 9, this.currentGame.numberRange);
+    const numbersInDecade: number[] = [];
+    for (let n = start; n <= end; n++) {
+      numbersInDecade.push(n);
+    }
+
+    if (this.excludedDecades.has(decadeIndex)) {
+      // Deactivate
+      this.excludedDecades.delete(decadeIndex);
+      const snapshot = this.excludedDecadesSnapshot.get(decadeIndex) || [];
+      const snapshotSet = new Set(snapshot);
+      numbersInDecade.forEach(n => {
+        if (!snapshotSet.has(n)) {
+          this.excludedNumbers.delete(n);
+        }
+      });
+      this.excludedDecadesSnapshot.delete(decadeIndex);
+    } else {
+      // Activate
+      const snapshot = numbersInDecade.filter(n => this.excludedNumbers.has(n));
+      this.excludedDecadesSnapshot.set(decadeIndex, snapshot);
+      this.excludedDecades.add(decadeIndex);
+      numbersInDecade.forEach(n => {
+        this.excludedNumbers.add(n);
+        this.selectedNumbers.delete(n);
+        this.favoriteNumbers.delete(n);
+      });
+    }
+
+    const chip = document.querySelector(`#excluirDecenasOptions .filter-chip[data-decade="${decadeIndex}"]`);
+    if (chip) {
+      chip.classList.toggle('active', this.excludedDecades.has(decadeIndex));
+    }
+
+    this.updateGridNumberStates();
+    this.updateSelectedDisplay();
+    this.saveState();
+  }
+
+  toggleStarDecadeExclusion(decadeIndex: number) {
+    const start = decadeIndex === 0 ? 1 : decadeIndex * 10;
+    const end = Math.min(decadeIndex * 10 + 9, this.currentGame.starRange);
+    const numbersInDecade: number[] = [];
+    for (let n = start; n <= end; n++) {
+      numbersInDecade.push(n);
+    }
+
+    if (this.excludedStarDecades.has(decadeIndex)) {
+      // Deactivate
+      this.excludedStarDecades.delete(decadeIndex);
+      const snapshot = this.excludedStarDecadesSnapshot.get(decadeIndex) || [];
+      const snapshotSet = new Set(snapshot);
+      numbersInDecade.forEach(n => {
+        if (!snapshotSet.has(n)) {
+          this.excludedStars.delete(n);
+        }
+      });
+      this.excludedStarDecadesSnapshot.delete(decadeIndex);
+    } else {
+      // Activate
+      const snapshot = numbersInDecade.filter(n => this.excludedStars.has(n));
+      this.excludedStarDecadesSnapshot.set(decadeIndex, snapshot);
+      this.excludedStarDecades.add(decadeIndex);
+      numbersInDecade.forEach(n => {
+        this.excludedStars.add(n);
+        this.selectedStars.delete(n);
+        this.favoriteStars.delete(n);
+      });
+    }
+
+    const chip = document.querySelector(`#excluirDecenasEstrellasOptions .filter-chip[data-decade="${decadeIndex}"]`);
+    if (chip) {
+      chip.classList.toggle('active', this.excludedStarDecades.has(decadeIndex));
+    }
+
+    this.updateGridNumberStates();
+    this.updateSelectedDisplay();
+    this.saveState();
+  }
+
   addNumber(number: number, type: 'number' | 'star' = 'number') {
     const strategy = (document.querySelector('.strategy-buttons .strategy-btn.active') as HTMLElement)?.dataset.strategy || 'simple';
     const isMultiple = strategy === 'multiple';
@@ -6248,6 +6435,11 @@ class DataLotto49Advanced {
     if (fullClear) {
       this.excludedNumbers.clear();
       this.excludedStars.clear();
+      this.excludedDecades.clear();
+      this.excludedDecadesSnapshot.clear();
+      this.excludedStarDecades.clear();
+      this.excludedStarDecadesSnapshot.clear();
+      document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip').forEach(c => c.classList.remove('active'));
       this.hotNumbers.clear();
       this.hotStars.clear();
       this.coldNumbers.clear();
@@ -10372,6 +10564,25 @@ class DataLotto49Advanced {
           excludedRecentStars.push(star);
         }
       }
+    }
+
+    // Re-apply decade exclusions if active
+    this.excludedDecades.forEach(dec => {
+      const start = dec === 0 ? 1 : dec * 10;
+      const end = Math.min(dec * 10 + 9, game.numberRange);
+      for (let n = start; n <= end; n++) {
+        this.excludedNumbers.add(n);
+      }
+    });
+
+    if (game.maxStars > 0) {
+      this.excludedStarDecades.forEach(dec => {
+        const start = dec === 0 ? 1 : dec * 10;
+        const end = Math.min(dec * 10 + 9, game.starRange);
+        for (let s = start; s <= end; s++) {
+          this.excludedStars.add(s);
+        }
+      });
     }
 
     // Actualizar la cuadrícula del tablero con las exclusiones (ícono 🚫)
