@@ -1559,18 +1559,18 @@ class DataLotto49Advanced {
             `;
         } else if (titleText.includes('Predictivos') || filterGroup.querySelector('#useMarkovSwitch') || filterGroup.querySelector('#useNashSwitch') || filterGroup.querySelector('#useRegressionSwitch')) {
             matched = true;
-            title = "🤖 Modelos Estadísticos y Filtros Predictivos Avanzados";
+            title = "📊 Modelos Estadísticos Avanzados (No Predictivos)";
             body = `
-                <p>Este módulo representa el cerebro predictivo de alto rendimiento de DataLotto, agrupando tres de las filosofías de toma de decisiones estocásticas de mayor prestigio mundial:</p>
+                <p>Este módulo agrupa tres herramientas de análisis estadístico sobre datos históricos. Ninguna aumenta la probabilidad de acertar el próximo sorteo: cada sorteo de lotería es un evento independiente.</p>
                 
                 <p><strong>1. Cadenas de Markov y Probabilidades de Transición:</strong></p>
-                <p>Estudian transiciones secuenciales. El sistema analiza la base de datos completa e investiga qué número tiende a salir con mayor probabilidad como consecuencia del grupo de números extraídos en el sorteo inmediatamente anterior. Configurar "Sorteos a considerar" incrementa retrospectivamente el calado histórico evaluado.</p>
+                <p>Analiza, sobre el histórico de sorteos, la frecuencia con la que ciertos números han coincidido en sorteos consecutivos pasados. Es un análisis descriptivo de patrones históricos; no implica una relación causal entre un sorteo y el siguiente. Configurar "Sorteos a considerar" amplía el rango histórico evaluado.</p>
               
                 <p><strong>2. Teoría de Juegos de John Nash (Equilibrio de Nash):</strong></p>
                 <p>Utilizada para predecir el comportamiento del resto del público. Analiza los sesgos estéticos humanos tradicionales (jugar fechas, patrones rectos, simetrías) y aplica un algoritmo teorético que penaliza combinaciones que el público juega a gran escala. El resultado es que, si aciertas el premio gordo, no tendrás que diluirlo ni compartirlo entre cientos de personas, maximizando tu Valor Esperado de Retorno (EV).</p>
               
                 <p><strong>3. Regresión Lineal de Ajuste Mínimo-Cuadrado:</strong></p>
-                <p>Analiza el corrimiento y la inercia cíclica de la mediana del juego para estimar si la tendencia inmediata del sorteo en curso favorecerá números de mayor magnitud o menor magnitud. El Bono de Regresión prioriza combinaciones candidatas que naveguen a favor de esta corriente vectorial.</p>
+                <p>Analiza cómo ha variado la media de los números ganadores a lo largo del histórico, como referencia estadística descriptiva. No predice si el próximo sorteo tendrá números más altos o más bajos, ya que cada sorteo es independiente del anterior. El Bono de Regresión pondera combinaciones cuyo perfil se acerca a esa media histórica.</p>
             `;
         }
 
@@ -1595,7 +1595,7 @@ class DataLotto49Advanced {
                 <p><strong>¿Qué son los Números Fríos?</strong></p>
                 <p>Son los dígitos que han aparecido con menor frecuencia en la base de datos de los últimos sorteos históricos analizados.</p>
                 <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Su importancia radica en la <em>Teoría de Regresión a la Media</em> del cálculo probabilístico. Esta teoría postula que en sucesos independientes a largo plazo, todos los números del bombo deben equilibrar su frecuencia de salida. De este modo, los números fríos acumulan teóricamente una mayor presión de probabilidad latente para salir en los próximos sorteos.</p>
+                <p>Es un dato puramente descriptivo del histórico analizado. No implica que un número frío tenga más probabilidad de salir en el próximo sorteo: cada sorteo es independiente y la probabilidad de cada número permanece constante.</p>
                 <p><strong>Cómo usarlos:</strong></p>
                 <p>Al activar este modo, la cuadrícula física se coloreará señalando los números fríos, facilitándote hacer clic para marcarlos obligatoriamente o dejárselos al algoritmo generador para que balancee la jugada.</p>
             `;
@@ -1605,9 +1605,9 @@ class DataLotto49Advanced {
                 <p><strong>¿Qué son los Números Calientes?</strong></p>
                 <p>Son los números líderes en frecuencia que más veces han sido extraídos del bombo en el período analizado.</p>
                 <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Se asocian con la <em>Teoría de Tendencia Intensa (Hot Hand)</em>. En lotería, debido a sutiles micro-imperfecciones en el peso o el diámetro de las bolas físicas, o por dinámicas de rachas de caos local, ciertos números muestran una predisposición estadística a seguir repitiéndose a corto plazo. Es una racha que los matemáticos llaman desviación de autocorrelación.</p>
+                <p>Es un dato descriptivo: son los números que más veces han salido en el periodo analizado. No hay evidencia de sesgos físicos en las bolas de sorteos oficiales certificados, y cada sorteo es independiente del anterior, por lo que un número "caliente" no tiene mayor probabilidad de repetirse en el siguiente sorteo.</p>
                 <p><strong>Cómo usarlos:</strong></p>
-                <p>Te permite identificar los números "en racha" en la cuadrícula para integrarlos en tu apuesta combinada antes de que finalice su ciclo activo de alta probabilidad.</p>
+                <p>Te permite identificar visualmente estos números en la cuadrícula para incluirlos en tu boleto si lo deseas, como referencia estadística.</p>
             `;
         } else if (mode === 'absent') {
             title = "⏱️ Números Ausentes";
@@ -1615,7 +1615,7 @@ class DataLotto49Advanced {
                 <p><strong>¿Qué son los Números Ausentes?</strong></p>
                 <p>Son los números que llevan una mayor cantidad acumulada de sorteos sin salir (el mayor índice de "delay" u holgura temporal).</p>
                 <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Consiste en identificar las llamadas <em>Ciclos de Saturación de Retraso</em>. Cuando un número supera de manera extrema la cantidad estándar esperada de sorteos sin salir, se aproxima a lo que los analistas denominan "punto crítico de quiebre". Introducir números ausentes selectivamente aumenta la robustez matemática de tu combinación.</p>
+                <p>Es un dato descriptivo del histórico: cuánto tiempo lleva cada número sin aparecer. No indica que esté "a punto" de salir, ya que cada sorteo es independiente y la probabilidad de cada número no cambia por su ausencia previa.</p>
                 <p><strong>Cómo usarlos:</strong></p>
                 <p>Activa este modo para aislar en el tablero aquellos números con retraso extremo y seleccionarlos de manera prioritaria.</p>
             `;
@@ -1800,7 +1800,7 @@ class DataLotto49Advanced {
         title = "📈 Regresión Lineal y Tendencia Histórica";
         body = `
             <p><strong>¿Qué hace la Regresión Lineal?</strong></p>
-            <p>Es un modelo de análisis predictivo clásico en estadística e inteligencia de negocios. Traza una línea matemática recta ajustada óptimamente entre una nube de puntos retrospectivos históricos de sorteos pasados.</p>
+            <p>Es un modelo estadístico descriptivo clásico en análisis de datos. Traza una línea matemática ajustada a los puntos históricos de sorteos pasados, como referencia de tendencia; no predice sorteos futuros, que son independientes entre sí.</p>
             <p><strong>Aplicación:</strong></p>
             <p>El sistema proyecta sobre la recta de tiempo el comportamiento ondulatorio de los números, evaluando si el promedio de la combinación ganadora tiende de manera general hacia números más altos o más bajos en los sorteos vigentes. Al asignarle un peso de <strong>Bono de Regresión</strong>, se incentiva la generación de boletos que se ajusten y acompañen este vector de tendencia calculado continuamente.</p>
         `;
@@ -1808,7 +1808,7 @@ class DataLotto49Advanced {
 
     // 5. Filtros Predictivos / Preajustes / Backtesting / Base de datos / Dashboard
     else if (target.closest('#aiFiltersBtn') || (target.innerText && target.innerText.includes('Filtros Predictivos'))) {
-        title = "🤖 Filtros Predictivos Avanzados";
+        title = "📊 Filtros Estadísticos Avanzados";
         body = `
             <p><strong>¿Qué son los Filtros Predictivos?</strong></p>
             <p>Utilizan algoritmos estadísticos avanzados (percentiles, entropía de Shannon, rachas de frecuencia y análisis de ciclos) sobre el historial de sorteos.</p>
