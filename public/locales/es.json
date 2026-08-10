@@ -693,5 +693,16 @@
   "toast.estadoApp": "Estado de la app: {status}. Revisa la consola de depuración.",
   "toast.filtrosRestablecidos": "✅ Filtros de {game} restablecidos a valores recomendados.",
   "toast.errorGuardarEstado": "Error al guardar el estado de la app",
-  "toast.errorCargarEstadoAnterior": "No se pudo cargar el estado anterior"
+  "toast.errorCargarEstadoAnterior": "No se pudo cargar el estado anterior",
+  "toast.limiteSorteos": "⚠️ Límite de 10.000 sorteos alcanzado para mantener un alto rendimiento.",
+  "toast.sorteosSumados": "✅ Se han sumado {count} sorteos más. Total: {total} sorteos.",
+  "toast.datosSimuladosGenerados": "✅ Datos simulados generados correctamente: {count} sorteos",
+  "toast.datosRealesCargados": "✅ Datos reales cargados: {count} sorteos",
+  "toast.errorCargandoDatos": "Error cargando datos: {message}",
+  "main.bgBadgeSorteos": "✅ {count} sorteos",
+  "toast.baseDatosActualizada": "✅ Base de datos de {game} actualizada ({count} sorteos)",
+  "toast.seleccionaSistemaReducido": "Selecciona un sistema reducido válido primero.",
+  "toast.mejoresNumerosBase": "✨ Seleccionados los {count} mejores números base según estadísticas históricas.",
+  "toast.numerosBaseEquilibrados": "✨ Generados {count} números base equilibrados (Carga datos para un análisis estadístico real).",
+  "toast.cambiadoA": "Cambiado a {game}"
 }

@@ -2611,7 +2611,7 @@ class DataLotto49Advanced {
 
     const currentCount = this.historicalData.length;
     if (currentCount >= 10000) {
-      this.showToast('⚠️ Límite de 10.000 sorteos alcanzado para mantener un alto rendimiento.', 'warning');
+      this.showToast(t('toast.limiteSorteos'), 'warning');
       this.hideFilterSpinner();
       return;
     }
@@ -2652,9 +2652,9 @@ class DataLotto49Advanced {
     this.saveState();
     
     if (append) {
-      this.showToast(`✅ Se han sumado ${actualDrawsToSimulate} sorteos más. Total: ${this.historicalData.length} sorteos.`, 'success');
+      this.showToast(t('toast.sorteosSumados', { count: actualDrawsToSimulate, total: this.historicalData.length }), 'success');
     } else {
-      this.showToast(`✅ Datos simulados generados correctamente: ${actualDrawsToSimulate} sorteos`, 'success');
+      this.showToast(t('toast.datosSimuladosGenerados', { count: actualDrawsToSimulate }), 'success');
     }
     this.hideFilterSpinner();
   }
@@ -2732,11 +2732,11 @@ class DataLotto49Advanced {
       this.updateBigDataPanel(); // NEW
       this.saveState();
       
-      this.showToast(`✅ Datos reales cargados: ${totalDraws} sorteos`, 'success');
+      this.showToast(t('toast.datosRealesCargados', { count: totalDraws }), 'success');
       this.autoValidateSavedTickets();
       
     } catch (error: any) {
-      this.showToast(`Error cargando datos: ${error.message}`, 'error');
+      this.showToast(t('toast.errorCargandoDatos', { message: error.message }), 'error');
     } finally {
         this.hideFilterSpinner();
     }
@@ -3079,14 +3079,14 @@ class DataLotto49Advanced {
         }
 
         if (bgBadge) {
-          bgBadge.innerHTML = `✅ ${freshData.length} sorteos`;
+          bgBadge.innerHTML = t('main.bgBadgeSorteos', { count: freshData.length });
           setTimeout(() => {
             if (bgBadge) bgBadge.style.display = 'none';
           }, 2500);
         }
 
         if (!isAutoLoad) {
-          this.showToast(`✅ Base de datos de ${gameName.toUpperCase()} actualizada (${freshData.length} sorteos)`, 'success');
+          this.showToast(t('toast.baseDatosActualizada', { game: gameName.toUpperCase(), count: freshData.length }), 'success');
         }
       })
       .catch((error) => {
@@ -4176,7 +4176,7 @@ class DataLotto49Advanced {
     const system = systems.find(s => s.id === selectedId);
     
     if (!system) {
-      this.showToast('Selecciona un sistema reducido válido primero.', 'warning');
+      this.showToast(t('toast.seleccionaSistemaReducido'), 'warning');
       return;
     }
     
@@ -4197,7 +4197,7 @@ class DataLotto49Advanced {
           return (scoreB + freqB) - (scoreA + freqA);
         });
       selectedList = sortedNumbers.slice(0, countNeeded);
-      this.showToast(`✨ Seleccionados los ${countNeeded} mejores números base según estadísticas históricas.`, 'success');
+      this.showToast(t('toast.mejoresNumerosBase', { count: countNeeded }), 'success');
     } else {
       const range = this.currentGame.numberRange;
       const isNacional = this.currentGame.id === 'nacional';
@@ -4212,7 +4212,7 @@ class DataLotto49Advanced {
       }
       
       selectedList = pool.slice(0, countNeeded);
-      this.showToast(`✨ Generados ${countNeeded} números base equilibrados (Carga datos para un análisis estadístico real).`, 'info');
+      this.showToast(t('toast.numerosBaseEquilibrados', { count: countNeeded }), 'info');
     }
     
     selectedList.forEach(num => {
@@ -4275,7 +4275,7 @@ class DataLotto49Advanced {
     // Save state to persist game choice
     this.saveState();
     
-    this.showToast(`Cambiado a ${this.currentGame.name}`, 'success');
+    this.showToast(t('toast.cambiadoA', { game: this.currentGame.name }), 'success');
   }
 
   updateGameSpecificUI() {
