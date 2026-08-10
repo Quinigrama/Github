@@ -1996,7 +1996,7 @@
             <!-- Dinámicamente cargado -->
         </div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="closeGameSelectionBtn">Cancelar</button>
+            <button class="modal-btn cancel" id="closeGameSelectionBtn" data-i18n="contact.cancelar">Cancelar</button>
         </div>
     </div>
   </div>
@@ -2037,15 +2037,15 @@
   <div class="modal" id="saveFilterModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>💾 Guardar Configuración de Filtros</h3>
-            <p>Asigna un nombre a esta configuración:</p>
+            <h3 data-i18n="filters.guardarTitulo">💾 Guardar Configuración de Filtros</h3>
+            <p data-i18n="filters.guardarSubtitulo">Asigna un nombre a esta configuración:</p>
         </div>
         <div class="modal-body">
-            <input type="text" id="filterPresetName" class="modal-input" style="width: 100%;" placeholder="Ej: Filtros Conservadores">
+            <input type="text" id="filterPresetName" class="modal-input" style="width: 100%;" placeholder="Ej: Filtros Conservadores" data-i18n-placeholder="filters.nombrePlaceholder">
         </div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="closeSaveFilterBtn">Cancelar</button>
-            <button class="modal-btn confirm" id="confirmSaveFilterBtn">Guardar</button>
+            <button class="modal-btn cancel" id="closeSaveFilterBtn" data-i18n="contact.cancelar">Cancelar</button>
+            <button class="modal-btn confirm" id="confirmSaveFilterBtn" data-i18n="filters.guardarBtn">Guardar</button>
         </div>
     </div>
   </div>
@@ -2053,14 +2053,14 @@
   <div class="modal" id="loadFilterModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>📂 Mis Configuraciones de Filtros</h3>
-            <p>Selecciona una configuración para cargar:</p>
+            <h3 data-i18n="filters.cargarTitulo">📂 Mis Configuraciones de Filtros</h3>
+            <p data-i18n="filters.cargarSubtitulo">Selecciona una configuración para cargar:</p>
         </div>
         <div id="filterPresetsList" class="modal-body" style="display: flex; flex-direction: column; gap: 10px;">
             <!-- Presets injected here -->
         </div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="closeLoadFilterBtn">Cerrar</button>
+            <button class="modal-btn cancel" id="closeLoadFilterBtn" data-i18n="tickets.cerrar">Cerrar</button>
         </div>
     </div>
   </div>

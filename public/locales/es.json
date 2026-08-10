@@ -608,5 +608,18 @@
   "disclaimer.parrafo3": "Si tienes problemas con el juego, busca ayuda profesional. En España: <strong>900 200 225</strong> (Línea de ayuda contra la ludopatía)",
   "disclaimer.avisoLegalLabel": "AVISO LEGAL:",
   "disclaimer.avisoLegalTexto": "Esta aplicación es solo para entretenimiento. Los desarrolladores no se responsabilizan por pérdidas económicas derivadas del uso de esta herramienta. Recuerda que ninguna estrategia a largo plazo vence al azar.",
-  "disclaimer.registroBtn": "📜 Registro de Aceptación"
+  "disclaimer.registroBtn": "📜 Registro de Aceptación",
+  "filters.guardarTitulo": "💾 Guardar Configuración de Filtros",
+  "filters.guardarSubtitulo": "Asigna un nombre a esta configuración:",
+  "filters.nombrePlaceholder": "Ej: Filtros Conservadores",
+  "filters.guardarBtn": "Guardar",
+  "filters.cargarTitulo": "📂 Mis Configuraciones de Filtros",
+  "filters.cargarSubtitulo": "Selecciona una configuración para cargar:",
+  "filters.sinFiltrosGuardados": "No tienes filtros guardados.",
+  "filters.nombrePorDefecto": "Filtro {date}",
+  "toast.filtroGuardado": "✅ Filtro \"{name}\" guardado correctamente.",
+  "toast.filtroCargado": "📂 Filtro \"{name}\" cargado.",
+  "toast.filtroEliminado": "Filtro eliminado.",
+  "gameselect.baseDatosReal": "Base de Datos Real",
+  "gameselect.cargarResultados": "Cargar resultados oficiales para {game}:"
 }

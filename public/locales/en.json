@@ -608,5 +608,18 @@
   "disclaimer.parrafo3": "If you have a gambling problem, seek professional help. In Spain: <strong>900 200 225</strong> (Gambling addiction helpline)",
   "disclaimer.avisoLegalLabel": "LEGAL NOTICE:",
   "disclaimer.avisoLegalTexto": "This application is for entertainment purposes only. The developers are not liable for financial losses resulting from the use of this tool. Remember that no long-term strategy beats chance.",
-  "disclaimer.registroBtn": "📜 Acceptance Record"
+  "disclaimer.registroBtn": "📜 Acceptance Record",
+  "filters.guardarTitulo": "💾 Save Filter Configuration",
+  "filters.guardarSubtitulo": "Give this configuration a name:",
+  "filters.nombrePlaceholder": "E.g.: Conservative Filters",
+  "filters.guardarBtn": "Save",
+  "filters.cargarTitulo": "📂 My Filter Configurations",
+  "filters.cargarSubtitulo": "Select a configuration to load:",
+  "filters.sinFiltrosGuardados": "You have no saved filters.",
+  "filters.nombrePorDefecto": "Filter {date}",
+  "toast.filtroGuardado": "✅ Filter \"{name}\" saved successfully.",
+  "toast.filtroCargado": "📂 Filter \"{name}\" loaded.",
+  "toast.filtroEliminado": "Filter deleted.",
+  "gameselect.baseDatosReal": "Real Database",
+  "gameselect.cargarResultados": "Load official results for {game}:"
 }

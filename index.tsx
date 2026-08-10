@@ -2256,7 +2256,7 @@ class DataLotto49Advanced {
 
   confirmSaveFilter() {
       const input = document.getElementById('filterPresetName') as HTMLInputElement;
-      const name = input?.value.trim() || `Filtro ${new Date().toLocaleDateString()}`;
+      const name = input?.value.trim() || t('filters.nombrePorDefecto', { date: new Date().toLocaleDateString() });
       
       const newPreset: FilterPreset = {
           id: Date.now().toString(),
@@ -2269,7 +2269,7 @@ class DataLotto49Advanced {
       this.saveState();
       this.sendTelemetry('save_filter', { name: name });
       this.toggleModal('saveFilterModal', false);
-      this.showToast(`✅ Filtro "${name}" guardado correctamente.`, 'success');
+      this.showToast(t('toast.filtroGuardado', { name }), 'success');
   }
 
   openLoadFilterModal() {
@@ -2283,7 +2283,7 @@ class DataLotto49Advanced {
       container.innerHTML = '';
 
       if (this.filterPresets.length === 0) {
-          container.innerHTML = '<div style="color:#666; text-align: center; padding: 10px;">No tienes filtros guardados.</div>';
+          container.innerHTML = `<div style="color:#666; text-align: center; padding: 10px;">${t('filters.sinFiltrosGuardados')}</div>`;
           return;
       }
 
@@ -2320,14 +2320,14 @@ class DataLotto49Advanced {
       this.filters = JSON.parse(JSON.stringify(preset.filters));
       this.updateUIFromFilterState();
       this.toggleModal('loadFilterModal', false);
-      this.showToast(`📂 Filtro "${preset.name}" cargado.`, 'success');
+      this.showToast(t('toast.filtroCargado', { name: preset.name }), 'success');
   }
 
   deleteFilterPreset(id: string) {
       this.filterPresets = this.filterPresets.filter(p => p.id !== id);
       this.saveState();
       this.renderFilterPresetsList();
-      this.showToast('Filtro eliminado.', 'info');
+      this.showToast(t('toast.filtroEliminado'), 'info');
   }
 
   saveFilterPreset() {
@@ -2755,8 +2755,8 @@ class DataLotto49Advanced {
 
     const modalHeaderTitle = document.querySelector('#gameSelectionModal .modal-header h3');
     const modalHeaderDesc = document.querySelector('#gameSelectionModal .modal-header p');
-    if (modalHeaderTitle) modalHeaderTitle.textContent = `Base de Datos Real`;
-    if (modalHeaderDesc) modalHeaderDesc.textContent = `Cargar resultados oficiales para ${currentGame.fullName}:`;
+    if (modalHeaderTitle) modalHeaderTitle.textContent = t('gameselect.baseDatosReal');
+    if (modalHeaderDesc) modalHeaderDesc.textContent = t('gameselect.cargarResultados', { game: currentGame.fullName });
 
     const GAMES_LIST = getAllGames()
       .filter(g => g.id === currentGameId)
