@@ -8432,7 +8432,7 @@ class DataLotto49Advanced {
 
     this.saveNotificationSettings(config);
     this.toggleModal('notificationsModal', false);
-    this.showToast('✅ Preferencias de Recordatorios guardadas correctamente', 'success');
+    this.showToast(t('toast.recordatoriosGuardados'), 'success');
 
     if (config.enabled && 'Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();

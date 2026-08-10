@@ -669,5 +669,19 @@
   "realtimestats.desviacion": "Deviation",
   "realtimestats.entropiaTerm": "Entropy (Term.)",
   "realtimestats.entropiaInt": "Entropy (Int.)",
-  "jackpots.proximoSorteoFallback": "Next draw"
+  "jackpots.proximoSorteoFallback": "Next draw",
+  "notif.titulo": "🗓️ Active Draw Reminders",
+  "notif.masterLabel": "Active Draw Reminders",
+  "notif.masterDesc": "Get a notice when you open the app on days when your selected games have a draw",
+  "notif.juegosANotificar": "🎯 Games to Notify (with real draw days):",
+  "notif.dias.powerball": "Monday, Wednesday, Saturday",
+  "notif.dias.megamillions": "Tuesday, Friday",
+  "notif.dias.bonoloto": "Every day (Mon-Sun)",
+  "notif.dias.primitiva": "Monday, Thursday, Saturday",
+  "notif.dias.euromillones": "Tuesday, Friday",
+  "notif.dias.eurodreams": "Monday, Thursday",
+  "notif.dias.gordo": "Sunday",
+  "notif.dias.nacional": "Thursday, Saturday",
+  "notif.guardarBtn": "Save Preferences",
+  "toast.recordatoriosGuardados": "✅ Reminder preferences saved successfully"
 }

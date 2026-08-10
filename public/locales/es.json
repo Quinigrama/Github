@@ -669,5 +669,19 @@
   "realtimestats.desviacion": "Desviación",
   "realtimestats.entropiaTerm": "Entropía (Term.)",
   "realtimestats.entropiaInt": "Entropía (Int.)",
-  "jackpots.proximoSorteoFallback": "Próximo sorteo"
+  "jackpots.proximoSorteoFallback": "Próximo sorteo",
+  "notif.titulo": "🗓️ Recordatorios de Sorteos Activos",
+  "notif.masterLabel": "Recordatorios de Sorteos Activos",
+  "notif.masterDesc": "Recibe un aviso al abrir la app los días que haya sorteos de tus juegos seleccionados",
+  "notif.juegosANotificar": "🎯 Juegos a Notificar (con días de sorteo reales):",
+  "notif.dias.powerball": "Lunes, Miércoles, Sábado",
+  "notif.dias.megamillions": "Martes, Viernes",
+  "notif.dias.bonoloto": "Todos los días (L-D)",
+  "notif.dias.primitiva": "Lunes, Jueves, Sábado",
+  "notif.dias.euromillones": "Martes, Viernes",
+  "notif.dias.eurodreams": "Lunes, Jueves",
+  "notif.dias.gordo": "Domingo",
+  "notif.dias.nacional": "Jueves, Sábado",
+  "notif.guardarBtn": "Guardar Preferencias",
+  "toast.recordatoriosGuardados": "✅ Preferencias de Recordatorios guardadas correctamente"
 }

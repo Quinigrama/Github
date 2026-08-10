@@ -2940,7 +2940,7 @@
   <div class="modal" id="notificationsModal" style="display: none;">
     <div class="modal-content" style="max-width: 580px; width: 95%;">
       <div class="modal-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 18px 20px; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; font-size: 1.15rem; color: white; display: flex; align-items: center; gap: 8px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: white; display: flex; align-items: center; gap: 8px;" data-i18n="notif.titulo">
           🗓️ Recordatorios de Sorteos Activos
         </h3>
         <button class="close-btn" id="notificationsCloseBtn" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">&times;</button>
@@ -2951,8 +2951,8 @@
         <!-- Toggle Master -->
         <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; box-sizing: border-box;" class="control-group">
           <div>
-            <strong style="display: block; font-size: 0.95rem; color: #1e293b;">Recordatorios de Sorteos Activos</strong>
-            <small style="color: #64748b; font-size: 0.8rem;">Recibe un aviso al abrir la app los días que haya sorteos de tus juegos seleccionados</small>
+            <strong style="display: block; font-size: 0.95rem; color: #1e293b;" data-i18n="notif.masterLabel">Recordatorios de Sorteos Activos</strong>
+            <small style="color: #64748b; font-size: 0.8rem;" data-i18n="notif.masterDesc">Recibe un aviso al abrir la app los días que haya sorteos de tus juegos seleccionados</small>
           </div>
           <label class="switch">
             <input type="checkbox" id="notifMasterSwitch" checked>
@@ -2962,7 +2962,7 @@
 
         <!-- Selección de Juegos -->
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 8px;" data-i18n="notif.juegosANotificar">
             🎯 Juegos a Notificar (con días de sorteo reales):
           </label>
 
@@ -2971,56 +2971,56 @@
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_powerball" checked> 🇺🇸 Powerball
               </span>
-              <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Lunes, Miércoles, Sábado</span>
+              <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.powerball">Lunes, Miércoles, Sábado</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_megamillions" checked> 🇺🇸 Mega Millions
               </span>
-              <span style="font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Martes, Viernes</span>
+              <span style="font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.megamillions">Martes, Viernes</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_bonoloto" checked> 🟢 Bonoloto
               </span>
-              <span style="font-size: 0.75rem; background: #dcfce7; color: #166534; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Todos los días (L-D)</span>
+              <span style="font-size: 0.75rem; background: #dcfce7; color: #166534; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.bonoloto">Todos los días (L-D)</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_primitiva" checked> 🔴 La Primitiva
               </span>
-              <span style="font-size: 0.75rem; background: #fee2e2; color: #991b1b; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Lunes, Jueves, Sábado</span>
+              <span style="font-size: 0.75rem; background: #fee2e2; color: #991b1b; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.primitiva">Lunes, Jueves, Sábado</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_euromillones" checked> 🇪🇺 Euromillones
               </span>
-              <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Martes, Viernes</span>
+              <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.euromillones">Martes, Viernes</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_eurodreams" checked> 🌙 EuroDreams
               </span>
-              <span style="font-size: 0.75rem; background: #f3e8ff; color: #6b21a8; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Lunes, Jueves</span>
+              <span style="font-size: 0.75rem; background: #f3e8ff; color: #6b21a8; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.eurodreams">Lunes, Jueves</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_gordo" checked> 🏆 El Gordo de la Primitiva
               </span>
-              <span style="font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Domingo</span>
+              <span style="font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.gordo">Domingo</span>
             </label>
 
             <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; flex-wrap: wrap; gap: 6px; box-sizing: border-box;" class="control-group">
               <span style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
                 <input type="checkbox" id="notifGame_nacional" checked> 🇪🇸 Lotería Nacional
               </span>
-              <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 2px 8px; border-radius: 12px;">Jueves, Sábado</span>
+              <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 2px 8px; border-radius: 12px;" data-i18n="notif.dias.nacional">Jueves, Sábado</span>
             </label>
           </div>
         </div>
@@ -3028,8 +3028,8 @@
       </div>
 
       <div class="modal-actions" style="padding: 14px 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; flex-wrap: wrap; gap: 8px; box-sizing: border-box;">
-        <button class="modal-btn cancel" id="notifCancelBtn">Cancelar</button>
-        <button class="modal-btn confirm" id="notifSaveBtn" style="background: #4f46e5; color: white;">Guardar Preferencias</button>
+        <button class="modal-btn cancel" id="notifCancelBtn" data-i18n="contact.cancelar">Cancelar</button>
+        <button class="modal-btn confirm" id="notifSaveBtn" style="background: #4f46e5; color: white;" data-i18n="notif.guardarBtn">Guardar Preferencias</button>
       </div>
     </div>
   </div>
