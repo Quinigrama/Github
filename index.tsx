@@ -6099,7 +6099,7 @@ class DataLotto49Advanced {
     const suggestedSet = type === 'number' ? this.suggestedNumbers : this.suggestedStars;
 
     if (excludedSet.has(number) && this.currentSelectionMode !== 'excluded') {
-        this.showToast('Este número está excluido.', 'warning');
+        this.showToast(t('toast.numeroExcluido'), 'warning');
         return;
     }
 
@@ -6121,7 +6121,7 @@ class DataLotto49Advanced {
                 this.updateGridNumberStates();
             } else {
                 if (favoriteSet.size >= 10) {
-                    this.showToast('Máximo 10 favoritos permitidos.', 'warning');
+                    this.showToast(t('toast.maximoFavoritos'), 'warning');
                     return;
                 }
                 favoriteSet.add(number);
@@ -6133,7 +6133,7 @@ class DataLotto49Advanced {
 
         case 'excluded':
             if (selectedSet.has(number)) {
-                this.showToast('No puedes excluir un número ya seleccionado.', 'warning');
+                this.showToast(t('toast.noExcluirSeleccionado'), 'warning');
                 return;
             }
             excludedSet.has(number) ? excludedSet.delete(number) : excludedSet.add(number);
@@ -6209,7 +6209,7 @@ class DataLotto49Advanced {
         this.selectedNumbers.add(number);
         document.querySelector(`.number-ball[data-number="${number}"][data-type="number"]`)?.classList.add('selected');
       } else {
-        this.showToast(`Límite de ${limit} números alcanzado.`, 'warning');
+        this.showToast(t('toast.limiteNumeros', { limit }), 'warning');
       }
     } else {
       const limit = isMultiple ? 5 : this.currentGame.maxStars;
@@ -6217,7 +6217,7 @@ class DataLotto49Advanced {
         this.selectedStars.add(number);
         document.querySelector(`.number-ball[data-number="${number}"][data-type="star"]`)?.classList.add('selected');
       } else {
-        this.showToast(`Límite de ${limit} estrellas alcanzado.`, 'warning');
+        this.showToast(t('toast.limiteEstrellas', { limit }), 'warning');
       }
     }
     this.updateSelectedDisplay();
@@ -6277,11 +6277,11 @@ class DataLotto49Advanced {
     const availableStars = this.getAvailableUniverse('star');
     
     if (availableNumbers.length < this.currentGame.maxNumbers) {
-      this.showToast(`No hay suficientes números para seleccionar ${this.currentGame.maxNumbers} al azar.`, 'warning');
+      this.showToast(t('toast.noSuficientesNumeros', { count: this.currentGame.maxNumbers }), 'warning');
       return;
     }
     if (this.currentGame.maxStars > 0 && availableStars.length < this.currentGame.maxStars) {
-        this.showToast(`No hay suficientes estrellas para seleccionar ${this.currentGame.maxStars} al azar.`, 'warning');
+        this.showToast(t('toast.noSuficientesEstrellas', { count: this.currentGame.maxStars }), 'warning');
         return;
     }
     
@@ -6360,19 +6360,19 @@ class DataLotto49Advanced {
     });
 
     if (isTogglingOff) {
-        this.showToast('Modo de selección normal activado', 'info');
+        this.showToast(t('toast.modoSeleccionNormal'), 'info');
     } else {
         this.currentSelectionMode = mode;
         document.querySelector(`.selection-mode-btn[data-mode="${mode}"]`)?.classList.add('active');
         const modeText = {
-            excluded: 'marcar números excluidos',
-            hot: 'marcar números Calientes',
-            cold: 'marcar números Fríos',
-            figure: 'dibujar una Figura',
-            absent: 'marcar números Ausentes',
-            favorites: 'marcar números Favoritos'
+            excluded: t('selection.modeText.excluded'),
+            hot: t('selection.modeText.hot'),
+            cold: t('selection.modeText.cold'),
+            figure: t('selection.modeText.figure'),
+            absent: t('selection.modeText.absent'),
+            favorites: t('selection.modeText.favorites')
         };
-        this.showToast(`Modo para ${modeText[mode]} activado`, 'info');
+        this.showToast(t('toast.modoActivado', { mode: modeText[mode] }), 'info');
         if (mode === 'figure') {
             this.clearSelections(false);
         }
@@ -6498,7 +6498,7 @@ class DataLotto49Advanced {
     }
 
     this.isGenerating = true;
-    this.showLoading('Iniciando...');
+    this.showLoading(t('main.iniciandoLoading'));
     
     this.updateFilterStateFromUI();
     const availableUniverse = this.getAvailableUniverse('number');
@@ -6507,7 +6507,7 @@ class DataLotto49Advanced {
     const maxStars = this.currentGame.maxStars;
 
     if (availableUniverse.length < maxNumbers) {
-      this.showToast(`Imposible generar. Menos de ${maxNumbers} números disponibles con los filtros actuales.`, 'error');
+      this.showToast(t('toast.imposibleGenerar', { count: maxNumbers }), 'error');
       this.hideLoading();
       this.isGenerating = false;
       this.hideFilterSpinner();
@@ -6636,21 +6636,21 @@ class DataLotto49Advanced {
         let triggerMsg = '';
         let toastMsg = '';
         if (strategy === 'simple') {
-            triggerMsg = 'Combinación inteligente encontrada!';
-            toastMsg = '✅ Combinación inteligente encontrada!';
+            triggerMsg = t('generation.triggerSimple');
+            toastMsg = t('toast.combinacionEncontrada');
         } else if (strategy === 'winning') {
             const generateCount = (document.getElementById('generateCount') as HTMLInputElement)?.value || '100';
             const playCount = combinations.length;
-            triggerMsg = `Generadas ${generateCount} combinaciones. Mostrando las ${playCount} mejores`;
-            toastMsg = `✅ Generadas ${generateCount} combinaciones. Mostrando las ${playCount} mejores`;
+            triggerMsg = t('generation.triggerGanadora', { count: generateCount, best: playCount });
+            toastMsg = t('toast.combinacionesGanadora', { count: generateCount, best: playCount });
         } else if (strategy === 'multiple' && this.lastMultipleStats) {
             const { validCount, totalCount } = this.lastMultipleStats;
             const percentage = ((validCount / totalCount) * 100).toFixed(1);
-            triggerMsg = `Múltiple encontrada! ${validCount}/${totalCount} combinaciones internas cumplen los filtros (${percentage}%)`;
-            toastMsg = `✅ Múltiple encontrada! ${validCount}/${totalCount} combinaciones internas cumplen los filtros (${percentage}%)`;
+            triggerMsg = t('generation.triggerMultiple', { valid: validCount, total: totalCount, pct: percentage });
+            toastMsg = t('toast.multipleEncontrada', { valid: validCount, total: totalCount, pct: percentage });
         } else if (strategy === 'reducida') {
-            triggerMsg = `Boleto Reducido de ${combinations.length} apuestas generado con el sistema: ${selectedSystemName}`;
-            toastMsg = `✅ Boleto Reducido generado con éxito!`;
+            triggerMsg = t('generation.triggerReducida', { count: combinations.length, system: selectedSystemName });
+            toastMsg = t('toast.reducidaGenerada');
         }
 
         if (triggerMsg) {
@@ -6658,12 +6658,12 @@ class DataLotto49Advanced {
             this.showUITrigger(triggerMsg);
         }
       } else {
-         this.showToast('No se encontró ninguna combinación que cumpla todos los filtros. Prueba a flexibilizarlos.', 'warning');
+         this.showToast(t('toast.sinCombinacion'), 'warning');
          this.displayFilterFailureDiagnostics();
       }
 
     } catch (error: any) {
-        this.showToast(`Error: ${error.message}`, 'error');
+        this.showToast(t('toast.errorGenerico', { message: error.message }), 'error');
         if (error.message && error.message.includes('No se encontró ninguna combinación')) {
             try {
                 this.displayFilterFailureDiagnostics();
