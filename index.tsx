@@ -4060,16 +4060,16 @@ class DataLotto49Advanced {
       if (starsGridIcon && starsGridText) {
           if (this.currentGame.id === 'gordo') {
               starsGridIcon.textContent = '🔑';
-              starsGridText.textContent = 'Selección de Clave (Llave)';
+              starsGridText.textContent = t('selection.claveTitulo');
           } else if (this.currentGame.id === 'eurodreams') {
               starsGridIcon.textContent = '🌙';
-              starsGridText.textContent = 'Selección de Sueños';
+              starsGridText.textContent = t('selection.suenosTitulo');
           } else if (this.currentGame.id === 'powerball') {
               starsGridIcon.textContent = '🔴';
-              starsGridText.textContent = 'Selección de Bolas Especiales';
+              starsGridText.textContent = t('selection.bolasEspecialesTitulo');
           } else {
               starsGridIcon.textContent = '⭐';
-              starsGridText.textContent = 'Selección de Estrellas';
+              starsGridText.textContent = t('selection.estrellasTitulo');
           }
       }
 
@@ -6811,35 +6811,35 @@ class DataLotto49Advanced {
         ticketDiv.classList.remove('conflict');
         ticketDiv.innerHTML = `
           <div class="ticket-header">
-            <h4>🎫 Tu Boleto Ganador</h4>
+            <h4>${t('ticket.tituloBoleto')}</h4>
             <p id="ticketDate"></p>
           </div>
           <div class="ticket-draw-date-selector">
               <label for="ticketDrawDate" style="display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 0.9rem; color: var(--dark); margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-                <span>📅 Fecha del Sorteo (Opcional):</span>
-                <span id="ticketDrawDaysBadge" class="ticket-draw-days-badge" style="background: #e0e7ff; color: #3730a3; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #c7d2fe;">📅 Días de Sorteo</span>
+                <span>${t('ticket.fechaSorteoLabel')}</span>
+                <span id="ticketDrawDaysBadge" class="ticket-draw-days-badge" style="background: #e0e7ff; color: #3730a3; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #c7d2fe;">${t('ticket.diasDeSorteoDefault')}</span>
               </label>
               <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <input type="date" id="ticketDrawDate" style="flex: 1; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
-                <button type="button" id="nextValidDrawDateBtn" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Establecer automáticamente la fecha del próximo sorteo oficial">
-                  ⚡ Próximo Sorteo
+                <button type="button" id="nextValidDrawDateBtn" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="${t('ticket.proximoSorteoTitle')}">
+                  ${t('ticket.proximoSorteoBtn')}
                 </button>
-                <button type="button" id="openDrawCalendarBtn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Ver calendario visual interactivo con días no válidos tachados">
-                  🗓️ Ver Calendario
+                <button type="button" id="openDrawCalendarBtn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="${t('ticket.verCalendarioTitle')}">
+                  ${t('ticket.verCalendarioBtn')}
                 </button>
               </div>
               <div id="ticketDateWarning" style="display: none; margin-top: 8px; padding: 8px 12px; background: #fffbe3; border: 1px solid #fef08a; border-radius: 6px; font-size: 0.82rem; color: #713f12; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
                 <span id="ticketDateWarningText"></span>
-                <button type="button" id="fixTicketDateBtn" style="background: #d97706; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; cursor: pointer;">👉 Corregir a próximo sorteo</button>
+                <button type="button" id="fixTicketDateBtn" style="background: #d97706; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; cursor: pointer;">${t('ticket.corregirProximoSorteoBtn')}</button>
               </div>
           </div>
           <div id="ticketCombinations"></div>
           <div class="ticket-actions">
             <button class="ticket-btn save-btn" id="saveBtn">
-              💾 Guardar Boleto
+              ${t('ticket.guardarBoletoBtn')}
             </button>
             <button class="ticket-btn share-btn" id="shareBtn">
-              📤 Compartir
+              ${t('ticket.compartirBtn')}
             </button>
           </div>
         `;

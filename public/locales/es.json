@@ -761,5 +761,19 @@
   "toast.boletosExportados": "✅ Boletos exportados correctamente.",
   "toast.errorExportarBoletos": "Error al exportar los boletos.",
   "toast.cargaPrimeroDatos": "Carga primero datos históricos para optimizar los filtros matemáticamente.",
-  "toast.filtrosOptimizados": "✅ Filtros y chips optimizados según masa de probabilidad y repeticiones recientes."
+  "toast.filtrosOptimizados": "✅ Filtros y chips optimizados según masa de probabilidad y repeticiones recientes.",
+  "selection.estrellasTitulo": "Selección de Estrellas",
+  "selection.claveTitulo": "Selección de Clave (Llave)",
+  "selection.suenosTitulo": "Selección de Sueños",
+  "selection.bolasEspecialesTitulo": "Selección de Bolas Especiales",
+  "ticket.tituloBoleto": "🎫 Tu Boleto Ganador",
+  "ticket.fechaSorteoLabel": "📅 Fecha del Sorteo (Opcional):",
+  "ticket.diasDeSorteoDefault": "📅 Días de Sorteo",
+  "ticket.proximoSorteoBtn": "⚡ Próximo Sorteo",
+  "ticket.proximoSorteoTitle": "Establecer automáticamente la fecha del próximo sorteo oficial",
+  "ticket.verCalendarioBtn": "🗓️ Ver Calendario",
+  "ticket.verCalendarioTitle": "Ver calendario visual interactivo con días no válidos tachados",
+  "ticket.corregirProximoSorteoBtn": "👉 Corregir a próximo sorteo",
+  "ticket.guardarBoletoBtn": "💾 Guardar Boleto",
+  "ticket.compartirBtn": "📤 Compartir"
 }

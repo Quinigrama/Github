@@ -452,7 +452,7 @@
       <!-- Stars Grid for Euromillones -->
       <div id="starsGridContainer" style="display: none; margin-top: 25px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
         <h3 class="secondary-grid-title" style="margin-bottom: 15px; color: #1e293b; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;">
-            <span id="starsGridIcon" style="font-size: 1.2rem;">⭐</span> <span id="starsGridText">Selección de Estrellas</span>
+            <span id="starsGridIcon" style="font-size: 1.2rem;">⭐</span> <span id="starsGridText" data-i18n="selection.estrellasTitulo">Selección de Estrellas</span>
         </h3>
         <div id="starsGrid" class="stars-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;"></div>
       </div>
@@ -1302,34 +1302,34 @@
 
     <div id="ticket" class="ticket">
       <div class="ticket-header">
-        <h4>🎫 Tu Boleto Ganador</h4>
+        <h4 data-i18n="ticket.tituloBoleto">🎫 Tu Boleto Ganador</h4>
         <p id="ticketDate"></p>
       </div>
       <div class="ticket-draw-date-selector">
           <label for="ticketDrawDate" style="display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 0.9rem; color: var(--dark); margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-            <span>📅 Fecha del Sorteo (Opcional):</span>
-            <span id="ticketDrawDaysBadge" class="ticket-draw-days-badge" style="background: #e0e7ff; color: #3730a3; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #c7d2fe;">📅 Días de Sorteo</span>
+            <span data-i18n="ticket.fechaSorteoLabel">📅 Fecha del Sorteo (Opcional):</span>
+            <span id="ticketDrawDaysBadge" class="ticket-draw-days-badge" style="background: #e0e7ff; color: #3730a3; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid #c7d2fe;" data-i18n="ticket.diasDeSorteoDefault">📅 Días de Sorteo</span>
           </label>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <input type="date" id="ticketDrawDate" style="flex: 1; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
-            <button type="button" id="nextValidDrawDateBtn" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Establecer automáticamente la fecha del próximo sorteo oficial">
-              ⚡ Próximo Sorteo
+            <button type="button" id="nextValidDrawDateBtn" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Establecer automáticamente la fecha del próximo sorteo oficial" data-i18n-title="ticket.proximoSorteoTitle">
+              <span data-i18n="ticket.proximoSorteoBtn">⚡ Próximo Sorteo</span>
             </button>
-            <button type="button" id="openDrawCalendarBtn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Ver calendario visual interactivo con días no válidos tachados">
-              🗓️ Ver Calendario
+            <button type="button" id="openDrawCalendarBtn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Ver calendario visual interactivo con días no válidos tachados" data-i18n-title="ticket.verCalendarioTitle">
+              <span data-i18n="ticket.verCalendarioBtn">🗓️ Ver Calendario</span>
             </button>
           </div>
           <div id="ticketDateWarning" style="display: none; margin-top: 8px; padding: 8px 12px; background: #fffbe3; border: 1px solid #fef08a; border-radius: 6px; font-size: 0.82rem; color: #713f12; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
             <span id="ticketDateWarningText"></span>
-            <button type="button" id="fixTicketDateBtn" style="background: #d97706; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; cursor: pointer;">👉 Corregir a próximo sorteo</button>
+            <button type="button" id="fixTicketDateBtn" style="background: #d97706; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; cursor: pointer;" data-i18n="ticket.corregirProximoSorteoBtn">👉 Corregir a próximo sorteo</button>
           </div>
       </div>
       <div id="ticketCombinations"></div>
       <div class="ticket-actions">
-        <button class="ticket-btn save-btn" id="saveBtn">
+        <button class="ticket-btn save-btn" id="saveBtn" data-i18n="ticket.guardarBoletoBtn">
           💾 Guardar Boleto
         </button>
-        <button class="ticket-btn share-btn" id="shareBtn">
+        <button class="ticket-btn share-btn" id="shareBtn" data-i18n="ticket.compartirBtn">
           📤 Compartir
         </button>
       </div>

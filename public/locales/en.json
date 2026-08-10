@@ -761,5 +761,19 @@
   "toast.boletosExportados": "✅ Tickets exported successfully.",
   "toast.errorExportarBoletos": "Error exporting tickets.",
   "toast.cargaPrimeroDatos": "Load historical data first to mathematically optimize the filters.",
-  "toast.filtrosOptimizados": "✅ Filters and chips optimized based on probability mass and recent repetitions."
+  "toast.filtrosOptimizados": "✅ Filters and chips optimized based on probability mass and recent repetitions.",
+  "selection.estrellasTitulo": "Star Selection",
+  "selection.claveTitulo": "Key Selection",
+  "selection.suenosTitulo": "Dream Selection",
+  "selection.bolasEspecialesTitulo": "Special Ball Selection",
+  "ticket.tituloBoleto": "🎫 Your Winning Ticket",
+  "ticket.fechaSorteoLabel": "📅 Draw Date (Optional):",
+  "ticket.diasDeSorteoDefault": "📅 Draw Days",
+  "ticket.proximoSorteoBtn": "⚡ Next Draw",
+  "ticket.proximoSorteoTitle": "Automatically set the date of the next official draw",
+  "ticket.verCalendarioBtn": "🗓️ View Calendar",
+  "ticket.verCalendarioTitle": "View interactive visual calendar with invalid days crossed out",
+  "ticket.corregirProximoSorteoBtn": "👉 Correct to next draw",
+  "ticket.guardarBoletoBtn": "💾 Save Ticket",
+  "ticket.compartirBtn": "📤 Share"
 }
