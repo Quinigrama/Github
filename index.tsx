@@ -1557,7 +1557,7 @@ class DataLotto49Advanced {
                 <p>Mide la diferencia matemática absoluta entre las dos estrellas seleccionadas (ej: si juegas las estrellas 2 y 9, la distancia es 7).</p>
                 <p>Regula la dispersión de las estrellas secundarias en el boleto de Euromillones, evitando agrupamientos drásticos o separaciones imposibles.</p>
             `;
-        } else if (titleText.includes('Predictivos') || filterGroup.querySelector('#useMarkovSwitch') || filterGroup.querySelector('#useNashSwitch') || filterGroup.querySelector('#useRegressionSwitch')) {
+        } else if (filterGroup.querySelector('#useMarkovSwitch') || filterGroup.querySelector('#useNashSwitch') || filterGroup.querySelector('#useRegressionSwitch')) {
             matched = true;
             title = "📊 Modelos Estadísticos Avanzados (No Predictivos)";
             body = `
@@ -1807,7 +1807,7 @@ class DataLotto49Advanced {
     }
 
     // 5. Filtros Predictivos / Preajustes / Backtesting / Base de datos / Dashboard
-    else if (target.closest('#aiFiltersBtn') || (target.innerText && target.innerText.includes('Filtros Predictivos'))) {
+    else if (target.closest('#aiFiltersBtn')) {
         title = "📊 Filtros Estadísticos Avanzados";
         body = `
             <p><strong>¿Qué son los Filtros Predictivos?</strong></p>
@@ -5156,7 +5156,7 @@ class DataLotto49Advanced {
       let infoText = group.getAttribute('data-info') || group.getAttribute('title') || '';
       const headerText = titleEl.textContent || '';
 
-      if (headerText.includes('Predictivos') || group.querySelector('#useMarkovSwitch')) {
+      if (group.querySelector('#useMarkovSwitch')) {
         infoText = t('filters.predictivos.dataInfo');
         group.setAttribute('data-info', infoText);
       } else if (headerText.includes('Suma Estrellas') || headerText.includes('Suma Soles')) {
