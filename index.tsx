@@ -4362,23 +4362,23 @@ class DataLotto49Advanced {
   getGameAllowedDaysText(): string {
     const allowedDays = this.currentGame.allowedDays || [0, 1, 2, 3, 4, 5, 6];
     const dayNames: { [key: number]: string } = {
-      1: 'Lunes',
-      2: 'Martes',
-      3: 'Miércoles',
-      4: 'Jueves',
-      5: 'Viernes',
-      6: 'Sábado',
-      0: 'Domingo'
+      1: t('common.dias.lunes'),
+      2: t('common.dias.martes'),
+      3: t('common.dias.miercoles'),
+      4: t('common.dias.jueves'),
+      5: t('common.dias.viernes'),
+      6: t('common.dias.sabado'),
+      0: t('common.dias.domingo')
     };
 
     if (allowedDays.length === 7) {
-      return 'todos los días de la semana';
+      return t('ticket.todosLosDias');
     }
 
     const names = allowedDays.map(d => dayNames[d]);
     if (names.length === 1) return names[0];
-    if (names.length === 2) return `${names[0]} y ${names[1]}`;
-    return names.slice(0, -1).join(', ') + ' y ' + names[names.length - 1];
+    if (names.length === 2) return `${names[0]} ${t('common.conjuncionY')} ${names[1]}`;
+    return names.slice(0, -1).join(', ') + ` ${t('common.conjuncionY')} ` + names[names.length - 1];
   }
 
   getNextValidDrawDateStr(startDate: Date = new Date()): string {
@@ -4412,14 +4412,14 @@ class DataLotto49Advanced {
     const allowedDays = this.currentGame.allowedDays || [0, 1, 2, 3, 4, 5, 6];
 
     if (!allowedDays.includes(dayOfWeek)) {
-      const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const DAY_NAMES = [t('common.dias.domingo'), t('common.dias.lunes'), t('common.dias.martes'), t('common.dias.miercoles'), t('common.dias.jueves'), t('common.dias.viernes'), t('common.dias.sabado')];
       const dayName = DAY_NAMES[dayOfWeek];
       const nextValidStr = this.getNextValidDrawDateStr(selectedDate);
       const nextValidObj = new Date(nextValidStr + 'T00:00:00');
-      const nextValidFormatted = nextValidObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const nextValidFormatted = nextValidObj.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
       if (warningText) {
-        warningText.innerHTML = `⚠️ <strong>${this.currentGame.name}</strong> no se celebra los <strong>${dayName}s</strong>.<br>Días oficiales de sorteo: <strong>${this.getGameAllowedDaysText()}</strong>.<br>Próximo sorteo más cercano: <strong>${nextValidFormatted}</strong>.`;
+        warningText.innerHTML = t('ticket.warningNoSeCelebra', { game: this.currentGame.name, day: dayName, days: this.getGameAllowedDaysText(), nextDate: nextValidFormatted });
       }
       if (warningDiv) warningDiv.style.display = 'flex';
     } else {
@@ -4430,7 +4430,7 @@ class DataLotto49Advanced {
   updateTicketDrawDateBadge() {
     const badge = document.getElementById('ticketDrawDaysBadge');
     if (badge) {
-      badge.textContent = `📅 Sorteos: ${this.getGameAllowedDaysText()}`;
+      badge.textContent = t('ticket.badgeSorteos', { days: this.getGameAllowedDaysText() });
     }
     const input = document.getElementById('ticketDrawDate') as HTMLInputElement;
     if (input && !input.value) {
@@ -7020,8 +7020,8 @@ class DataLotto49Advanced {
       const dayOfWeek = selectedDate.getDay();
       const allowedDays = this.currentGame.allowedDays || [0, 1, 2, 3, 4, 5, 6];
       if (!allowedDays.includes(dayOfWeek)) {
-        const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        this.showToast(`⚠️ ${this.currentGame.name} no se juega los ${DAY_NAMES[dayOfWeek]}s. Días de sorteo: ${this.getGameAllowedDaysText()}.`, 'warning');
+        const DAY_NAMES = [t('common.dias.domingo'), t('common.dias.lunes'), t('common.dias.martes'), t('common.dias.miercoles'), t('common.dias.jueves'), t('common.dias.viernes'), t('common.dias.sabado')];
+        this.showToast(t('toast.juegoNoSeJuegaEsteDia', { game: this.currentGame.name, day: DAY_NAMES[dayOfWeek], days: this.getGameAllowedDaysText() }), 'warning');
         return;
       }
       this.currentTicket.drawDate = drawDateEl.value;
@@ -7046,14 +7046,14 @@ class DataLotto49Advanced {
     this.currentTicket = null;
     const ticketDiv = document.getElementById('ticket');
     if(ticketDiv) ticketDiv.classList.remove('show');
-    this.showToast('✅ Boleto guardado', 'success');
+    this.showToast(t('toast.boletoGuardado'), 'success');
   }
 
   deleteTicket(date: string) {
     this.savedTickets = this.savedTickets.filter(t => t.date !== date);
     this.saveState();
     this.updateSavedTickets();
-    this.showToast('Boleto eliminado', 'info');
+    this.showToast(t('toast.boletoEliminado'), 'info');
   }
 
   updateSavedTicketsStats() {
@@ -7910,7 +7910,7 @@ class DataLotto49Advanced {
         this.saveState();
         this.updateSavedTickets();
         this.updateSavedTicketsBadge();
-        this.showToast(`✅ ${validatedCount} boleto(s) han sido validados automáticamente.`, 'success');
+        this.showToast(t('toast.boletosValidadosAuto', { count: validatedCount }), 'success');
     } else {
         this.updateSavedTicketsBadge();
     }
@@ -8050,11 +8050,11 @@ class DataLotto49Advanced {
   }
   shareTicket() {
       if (!this.currentTicket) return;
-      const text = `Mi boleto DataLotto:\n${this.currentTicket.combinations.map(c => c.join(' - ')).join('\n')}`;
+      const text = t('ticket.shareTextTemplate', { combos: this.currentTicket.combinations.map(c => c.join(' - ')).join('\n') });
       if (navigator.share) {
           navigator.share({ title: 'Mi Boleto DataLotto', text }).catch(console.error);
       } else {
-          navigator.clipboard.writeText(text).then(() => this.showToast('Boleto copiado al portapapeles', 'success'));
+          navigator.clipboard.writeText(text).then(() => this.showToast(t('toast.boletoCopiado'), 'success'));
       }
   }
 
@@ -8467,13 +8467,13 @@ class DataLotto49Advanced {
     });
 
     if (activeGamesToday.length > 0) {
-      const dayNamesInSpanish = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const dayNamesInSpanish = [t('common.dias.domingo'), t('common.dias.lunes'), t('common.dias.martes'), t('common.dias.miercoles'), t('common.dias.jueves'), t('common.dias.viernes'), t('common.dias.sabado')];
       const currentDayName = dayNamesInSpanish[currentDay];
 
       const drawLines = activeGamesToday.map(g => `• ${g.flag} ${g.fullName}`).join('\n');
 
-      const notifTitle = `🗓️ ¡Sorteos que se celebran hoy (${currentDayName} ${day}/${month})!`;
-      const notifBody = `${drawLines}\n\nPrepara y valida tus combinaciones en DataLotto.`;
+      const notifTitle = t('notif.tituloSorteosHoy', { day: currentDayName, date: `${day}/${month}` });
+      const notifBody = t('notif.cuerpoSorteosHoy', { lines: drawLines });
 
       // System notification if permission granted
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -8564,7 +8564,7 @@ class DataLotto49Advanced {
 
   playTicketOnline(ticket: Ticket) {
     if (!ticket || ticket.combinations.length === 0) {
-        this.showToast('No hay combinaciones para jugar.', 'warning');
+        this.showToast(t('toast.noHayCombinacionesJugar'), 'warning');
         return;
     }
 
@@ -8620,17 +8620,17 @@ class DataLotto49Advanced {
         .then(() => {
             window.open(lotteryUrl, '_blank');
             this.toggleModal('playOnlineModal', false);
-            this.showToast('🌐 Web abierta. ¡Combinaciones copiadas!', 'success');
+            this.showToast(t('toast.webAbierta'), 'success');
         })
         .catch(err => {
             console.error('Error al copiar al portapapeles:', err);
-            this.showToast('Error al copiar las combinaciones.', 'error');
+            this.showToast(t('toast.errorCopiarCombinaciones'), 'error');
         });
   }
 
   exportTickets() {
     if (this.savedTickets.length === 0) {
-        this.showToast('No hay boletos para exportar.', 'warning');
+        this.showToast(t('toast.noHayBoletosExportar'), 'warning');
         return;
     }
     try {
@@ -8644,9 +8644,9 @@ class DataLotto49Advanced {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        this.showToast('✅ Boletos exportados correctamente.', 'success');
+        this.showToast(t('toast.boletosExportados'), 'success');
     } catch (error) {
-        this.showToast('Error al exportar los boletos.', 'error');
+        this.showToast(t('toast.errorExportarBoletos'), 'error');
         console.error('Export error:', error);
     }
   }
@@ -10319,7 +10319,7 @@ class DataLotto49Advanced {
   // ===== OPTIMIZACIÓN MATEMÁTICA DE FILTROS =====
   applyAiFilters() {
     if (!this.dataLoaded || this.historicalData.length === 0) {
-      this.showToast('Carga primero datos históricos para optimizar los filtros matemáticamente.', 'warning');
+      this.showToast(t('toast.cargaPrimeroDatos'), 'warning');
       return;
     }
 
@@ -10845,7 +10845,7 @@ class DataLotto49Advanced {
     }
 
     this.saveState();
-    this.showToast(`✅ Filtros y chips optimizados según masa de probabilidad y repeticiones recientes.`, 'success');
+    this.showToast(t('toast.filtrosOptimizados'), 'success');
   }
 
   updateCorrelationScore() {
