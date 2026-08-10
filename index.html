@@ -2091,15 +2091,15 @@
   <div class="modal" id="configUrlsModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🔗 Configurar Enlaces</h3>
-            <p>Modifica las URLs de acceso a los juegos:</p>
+            <h3 data-i18n="configurls.titulo">🔗 Configurar Enlaces</h3>
+            <p data-i18n="configurls.subtitulo">Modifica las URLs de acceso a los juegos:</p>
         </div>
         <div class="config-urls-form modal-body" id="configUrlsContainer" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
             <!-- Dinámicamente cargado -->
         </div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="closeConfigUrlsBtn">Cancelar</button>
-            <button class="modal-btn confirm" id="saveConfigUrlsBtn">Guardar</button>
+            <button class="modal-btn cancel" id="closeConfigUrlsBtn" data-i18n="contact.cancelar">Cancelar</button>
+            <button class="modal-btn confirm" id="saveConfigUrlsBtn" data-i18n="filters.guardarBtn">Guardar</button>
         </div>
     </div>
   </div>
@@ -2620,22 +2620,22 @@
   <div class="modal" id="signedContractModal" style="display: none;">
     <div class="modal-content" style="max-width: 600px;">
       <div class="modal-header" style="background: #0f172a; color: white;">
-        <h3 style="margin: 0; color: white;">🛡️ Condiciones de Uso Aceptadas y Registro</h3>
+        <h3 style="margin: 0; color: white;" data-i18n="contract.titulo">🛡️ Condiciones de Uso Aceptadas y Registro</h3>
       </div>
       <div class="modal-body" style="line-height: 1.6; color: var(--dark); padding: 20px; max-height: 70vh; overflow-y: auto;">
-        <p>A continuación se detalla la exención de responsabilidad aceptada digitalmente y el registro del log de conformidad almacenado de forma segura:</p>
+        <p data-i18n="contract.subtitulo">A continuación se detalla la exención de responsabilidad aceptada digitalmente y el registro del log de conformidad almacenado de forma segura:</p>
         
         <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 0.85rem; margin-bottom: 20px; color: #0f172a; white-space: pre-wrap;" id="signedContractLogContent">
           Cargando registro de conformidad...
         </div>
 
         <div style="background: #fef2f2; border-left: 4px solid var(--danger); padding: 10px 15px; border-radius: 4px; margin-top: 15px; font-size: 0.85rem;">
-          <strong>Aviso de Juego Responsable:</strong> Si crees que tienes problemas con el juego, por favor contacta con ayuda especializada inmediatamente. Ninguna estrategia a largo plazo vence al azar.
+          <strong data-i18n="contract.avisoJuegoResponsable">Aviso de Juego Responsable:</strong> <span data-i18n="contract.avisoJuegoTexto">Si crees que tienes problemas con el juego, por favor contacta con ayuda especializada inmediatamente. Ninguna estrategia a largo plazo vence al azar.</span>
         </div>
       </div>
       <div class="modal-actions" style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #e2e8f0;">
-        <button class="modal-btn cancel" id="downloadSignedContractBtn" style="background: #3b82f6; color: white; border: none;">📥 Descargar Registro (.txt)</button>
-        <button class="modal-btn confirm" id="closeSignedContractBtn">Cerrar</button>
+        <button class="modal-btn cancel" id="downloadSignedContractBtn" style="background: #3b82f6; color: white; border: none;" data-i18n="contract.descargarBtn">📥 Descargar Registro (.txt)</button>
+        <button class="modal-btn confirm" id="closeSignedContractBtn" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>

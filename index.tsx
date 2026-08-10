@@ -5539,37 +5539,13 @@ class DataLotto49Advanced {
         e.preventDefault();
         this.closeSidebar();
         
-        const sigDate = localStorage.getItem('datalotto_contract_signature_date') || new Date().toLocaleString('es-ES');
+        const sigDate = localStorage.getItem('datalotto_contract_signature_date') || new Date().toLocaleString(getLocale() === 'en' ? 'en-US' : 'es-ES');
         const sigId = localStorage.getItem('datalotto_contract_signature_id') || 'REG-PRE-ACCEPT';
         const anonId = this.anonymousUserId;
         
         const logContainer = document.getElementById('signedContractLogContent');
         if (logContainer) {
-            logContainer.textContent = `========================================================================
-             REGISTRO DE CONFORMIDAD - DATALOTTO           
-========================================================================
-
-ID DE REGISTRO:      ${sigId}
-FECHA Y HORA:        ${sigDate}
-ESTADO DE REGISTRO:  ACEPTADO Y VERIFICADO DIGITALMENTE
-ID DE DISPOSITIVO:   ${anonId}
-
-------------------------------------------------------------------------
-CONDICIONES DE USO ACEPTADAS:
-------------------------------------------------------------------------
-1. El usuario acepta y declara comprender que DataLotto es 
-   una aplicación exclusivamente de entretenimiento y análisis estadístico.
-2. NINGUNA ESTRATEGIA A LARGO PLAZO VENCE AL AZAR. Cada sorteo es un 
-   evento de probabilidad pura, independiente de los anteriores.
-3. Esta aplicación NO fomenta las apuestas ni el juego compulsivo.
-4. El usuario declara ser mayor de edad y asume el 100% de la 
-   responsabilidad por cualquier uso que haga de esta herramienta.
-5. El desarrollador queda totalmente exonerado de cualquier pérdida 
-   económica o reclamación de daños directos o indirectos.
-
-------------------------------------------------------------------------
-            ESTE LOG CONSTITUYE PRUEBA DE CONFORMIDAD DIGITAL           
-========================================================================`;
+            logContainer.textContent = t('contract.logTemplate', { sigId, sigDate, anonId });
         }
         this.toggleModal('signedContractModal', true);
     });
@@ -8961,7 +8937,7 @@ CONDICIONES DE USO ACEPTADAS:
             
             const label = document.createElement('label');
             label.style.cssText = 'display: block; font-size: 0.85rem; color: var(--gray); font-weight: 600;';
-            label.textContent = `URL ${gameName}:`;
+            label.textContent = t('configurls.urlLabel', { game: gameName });
             
             const input = document.createElement('input');
             input.type = 'text';
@@ -8991,7 +8967,7 @@ CONDICIONES DE USO ACEPTADAS:
     
     this.saveState();
     this.toggleModal('configUrlsModal', false);
-    this.showToast('✅ Enlaces guardados correctamente.', 'success');
+    this.showToast(t('toast.enlacesGuardados'), 'success');
   }
 
   openContactModal() {

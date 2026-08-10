@@ -621,5 +621,15 @@
   "toast.filtroCargado": "📂 Filtro \"{name}\" cargado.",
   "toast.filtroEliminado": "Filtro eliminado.",
   "gameselect.baseDatosReal": "Base de Datos Real",
-  "gameselect.cargarResultados": "Cargar resultados oficiales para {game}:"
+  "gameselect.cargarResultados": "Cargar resultados oficiales para {game}:",
+  "configurls.titulo": "🔗 Configurar Enlaces",
+  "configurls.subtitulo": "Modifica las URLs de acceso a los juegos:",
+  "configurls.urlLabel": "URL {game}:",
+  "toast.enlacesGuardados": "✅ Enlaces guardados correctamente.",
+  "contract.titulo": "🛡️ Condiciones de Uso Aceptadas y Registro",
+  "contract.subtitulo": "A continuación se detalla la exención de responsabilidad aceptada digitalmente y el registro del log de conformidad almacenado de forma segura:",
+  "contract.avisoJuegoResponsable": "Aviso de Juego Responsable:",
+  "contract.avisoJuegoTexto": "Si crees que tienes problemas con el juego, por favor contacta con ayuda especializada inmediatamente. Ninguna estrategia a largo plazo vence al azar.",
+  "contract.descargarBtn": "📥 Descargar Registro (.txt)",
+  "contract.logTemplate": "========================================================================\n             REGISTRO DE CONFORMIDAD - DATALOTTO           \n========================================================================\n\nID DE REGISTRO:      {sigId}\nFECHA Y HORA:        {sigDate}\nESTADO DE REGISTRO:  ACEPTADO Y VERIFICADO DIGITALMENTE\nID DE DISPOSITIVO:   {anonId}\n\n------------------------------------------------------------------------\nCONDICIONES DE USO ACEPTADAS:\n------------------------------------------------------------------------\n1. El usuario acepta y declara comprender que DataLotto es \n   una aplicación exclusivamente de entretenimiento y análisis estadístico.\n2. NINGUNA ESTRATEGIA A LARGO PLAZO VENCE AL AZAR. Cada sorteo es un \n   evento de probabilidad pura, independiente de los anteriores.\n3. Esta aplicación NO fomenta las apuestas ni el juego compulsivo.\n4. El usuario declara ser mayor de edad y asume el 100% de la \n   responsabilidad por cualquier uso que haga de esta herramienta.\n5. El desarrollador queda totalmente exonerado de cualquier pérdida \n   económica o reclamación de daños directos o indirectos.\n\n------------------------------------------------------------------------\n            ESTE LOG CONSTITUYE PRUEBA DE CONFORMIDAD DIGITAL           \n========================================================================"
 }

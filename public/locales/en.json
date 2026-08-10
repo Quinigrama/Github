@@ -621,5 +621,15 @@
   "toast.filtroCargado": "📂 Filter \"{name}\" loaded.",
   "toast.filtroEliminado": "Filter deleted.",
   "gameselect.baseDatosReal": "Real Database",
-  "gameselect.cargarResultados": "Load official results for {game}:"
+  "gameselect.cargarResultados": "Load official results for {game}:",
+  "configurls.titulo": "🔗 Configure Links",
+  "configurls.subtitulo": "Modify the access URLs for the games:",
+  "configurls.urlLabel": "URL {game}:",
+  "toast.enlacesGuardados": "✅ Links saved successfully.",
+  "contract.titulo": "🛡️ Terms of Use Accepted & Record",
+  "contract.subtitulo": "Below is the digitally accepted liability waiver and the securely stored conformity log record:",
+  "contract.avisoJuegoResponsable": "Responsible Gambling Notice:",
+  "contract.avisoJuegoTexto": "If you believe you have a gambling problem, please contact specialized help immediately. No long-term strategy beats chance.",
+  "contract.descargarBtn": "📥 Download Record (.txt)",
+  "contract.logTemplate": "========================================================================\n              CONFORMITY RECORD - DATALOTTO           \n========================================================================\n\nRECORD ID:           {sigId}\nDATE AND TIME:       {sigDate}\nRECORD STATUS:       ACCEPTED AND DIGITALLY VERIFIED\nDEVICE ID:            {anonId}\n\n------------------------------------------------------------------------\nTERMS OF USE ACCEPTED:\n------------------------------------------------------------------------\n1. The user accepts and declares understanding that DataLotto is \n   an application exclusively for entertainment and statistical analysis.\n2. NO LONG-TERM STRATEGY BEATS CHANCE. Each draw is a \n   pure probability event, independent of previous ones.\n3. This application does NOT encourage betting or compulsive gambling.\n4. The user declares being of legal age and assumes 100% of the \n   responsibility for any use made of this tool.\n5. The developer is fully exonerated from any financial loss \n   or claim for direct or indirect damages.\n\n------------------------------------------------------------------------\n           THIS LOG CONSTITUTES PROOF OF DIGITAL CONFORMITY           \n========================================================================"
 }
