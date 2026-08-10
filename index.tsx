@@ -3594,7 +3594,7 @@ class DataLotto49Advanced {
     if (!dataInfo || !dataStatsGrid) return;
     
     if (!this.dataLoaded || this.historicalData.length === 0) {
-      dataInfo.textContent = 'No hay datos cargados. Carga una base de datos CSV/DB o simula datos históricos.';
+      dataInfo.textContent = t('analyzer.sinDatos');
       dataInfo.className = 'data-info';
       dataStatsGrid.style.display = 'none';
       this.renderFrequencyChart(); // Clear chart
@@ -3625,11 +3625,11 @@ class DataLotto49Advanced {
             }
         });
         const sortedStarFreq = Object.entries(starFrequencies).sort((a, b) => b[1] - a[1]);
-        const starLabelName = this.currentGame.id === 'powerball' ? '🔴 Bolas Especiales' : (this.currentGame.id === 'megamillions' ? '🟡 Mega Ball' : (isGordo ? '🔑 Claves' : (this.currentGame.id === 'eurodreams' ? '🌙 Sueños' : '⭐ Estrellas')));
-        starStatsText = `<br><span style="color: #d97706; font-size: 0.8rem;">${starLabelName} top: ${sortedStarFreq.slice(0, 2).map(([num]) => num).join(', ')}</span>`;
+        const starLabelName = this.currentGame.id === 'powerball' ? t('analyzer.starLabel.powerball') : (this.currentGame.id === 'megamillions' ? t('analyzer.starLabel.megamillions') : (isGordo ? t('analyzer.starLabel.gordo') : (this.currentGame.id === 'eurodreams' ? t('analyzer.starLabel.eurodreams') : t('analyzer.starLabel.generico'))));
+        starStatsText = `<br><span style="color: #d97706; font-size: 0.8rem;">${t('analyzer.starTopTemplate', { label: starLabelName, nums: sortedStarFreq.slice(0, 2).map(([num]) => num).join(', ') })}</span>`;
     }
 
-    dataInfo.innerHTML = `📊 ${this.historicalData.length} sorteos cargados (${this.dataType.toUpperCase()})${starStatsText}`;
+    dataInfo.innerHTML = t('analyzer.datosCargados', { count: this.historicalData.length, type: this.dataType.toUpperCase() }) + starStatsText;
     dataInfo.className = 'data-info has-data';
     
     const safeSetText = (id: string, text: string | number) => {
@@ -3646,7 +3646,7 @@ class DataLotto49Advanced {
     if (lastDraw && lastDraw.date) {
       const d = lastDraw.date instanceof Date ? lastDraw.date : new Date(lastDraw.date);
       if (!isNaN(d.getTime())) {
-        const formattedDate = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formattedDate = d.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         safeSetText('lastUpdateDate', formattedDate);
       } else {
         safeSetText('lastUpdateDate', '-');
@@ -3687,12 +3687,12 @@ class DataLotto49Advanced {
         const biasDetected = chiSquareStat > criticalValue;
         
         chiSquareEl.textContent = chiSquareStat.toFixed(2);
-        biasEl.textContent = biasDetected ? 'Sí (Significativo al 95%)' : 'No (Distribución Normal)';
+        biasEl.textContent = biasDetected ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
         biasEl.classList.toggle('invalid', biasDetected);
         biasEl.classList.toggle('valid', !biasDetected);
     } else if(chiSquareEl && biasEl) {
         chiSquareEl.textContent = 'N/A';
-        biasEl.textContent = 'Datos insuficientes';
+        biasEl.textContent = t('analyzer.datosInsuficientes');
         biasEl.classList.remove('valid', 'invalid');
     }
     
@@ -4009,7 +4009,7 @@ class DataLotto49Advanced {
     grid.innerHTML = '';
     
     if (selectionTitle) {
-      selectionTitle.textContent = `Selección de números (${this.currentGame.name})`;
+      selectionTitle.textContent = t('main.seleccionNumeros', { game: this.currentGame.name });
     }
 
     grid.style.gridTemplateColumns = `repeat(${this.currentGame.gridCols}, 1fr)`;
@@ -4160,12 +4160,12 @@ class DataLotto49Advanced {
       const selectedId = select?.value;
       const system = systems.find(s => s.id === selectedId);
       if (system) {
-        selectionTitle.textContent = `Marca exactamente ${system.baseNumbersCount} números base (Sistema Reducido)`;
+        selectionTitle.textContent = t('main.seleccionSistemaReducido', { count: system.baseNumbersCount });
         return;
       }
     }
     
-    selectionTitle.textContent = `Selección de números (${this.currentGame.name})`;
+    selectionTitle.textContent = t('main.seleccionNumeros', { game: this.currentGame.name });
   }
 
   selectAiBase() {

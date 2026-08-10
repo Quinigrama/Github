@@ -460,50 +460,50 @@
 
     <!-- Analizador Estadístico -->
     <div class="data-analysis-section">
-      <h3>📊 Analizador Estadístico Base</h3>
+      <h3 data-i18n="analyzer.titulo">📊 Analizador Estadístico Base</h3>
       
       <!-- Selector de Tipo de Sorteo para Lotería Nacional -->
       <div id="nacionalDrawFilterContainer" style="display: none; margin-bottom: 15px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
         <span style="font-weight: 600; font-size: 0.9rem; color: #1e3a8a; display: flex; align-items: center; gap: 6px;">
-          <span>🗳️</span> Sorteos a estudiar:
+          <span>🗳️</span> <span data-i18n="analyzer.sorteosEstudiar">Sorteos a estudiar:</span>
         </span>
         <select id="nacionalDrawFilterSelect" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #93c5fd; background: #ffffff; color: #1e3a8a; font-weight: 600; font-size: 0.85rem; outline: none; cursor: pointer;">
-          <option value="all">🌐 Todos los Sorteos (Completo)</option>
-          <option value="navidad">🎄 Sorteo Extraordinario de Navidad (22 Dic)</option>
-          <option value="nino">👶 Sorteo Extraordinario de El Niño (6 Ene)</option>
+          <option value="all" data-i18n="analyzer.opcionTodos">🌐 Todos los Sorteos (Completo)</option>
+          <option value="navidad" data-i18n="analyzer.opcionNavidad">🎄 Sorteo Extraordinario de Navidad (22 Dic)</option>
+          <option value="nino" data-i18n="analyzer.opcionNino">👶 Sorteo Extraordinario de El Niño (6 Ene)</option>
         </select>
       </div>
 
-      <div class="data-info" id="dataInfo">
+      <div class="data-info" id="dataInfo" data-i18n="analyzer.sinDatos">
         No hay datos cargados. Carga una base de datos CSV/DB o simula datos históricos.
       </div>
       <div class="stats-grid" id="dataStatsGrid" style="display: none;">
         <div class="stat-item">
-          <div class="stat-label">Total Sorteos</div>
+          <div class="stat-label" data-i18n="analyzer.totalSorteos">Total Sorteos</div>
           <div class="stat-value" id="totalDraws">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Tipo de Datos</div>
+          <div class="stat-label" data-i18n="analyzer.tipoDatos">Tipo de Datos</div>
           <div class="stat-value" id="dataType">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Números Más Frecuentes</div>
+          <div class="stat-label" data-i18n="analyzer.masFrecuentes">Números Más Frecuentes</div>
           <div class="stat-value" id="mostFrequent">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Números Menos Frecuentes</div>
+          <div class="stat-label" data-i18n="analyzer.menosFrecuentes">Números Menos Frecuentes</div>
           <div class="stat-value" id="leastFrequent">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Chi-cuadrado (Estadístico)</div>
+          <div class="stat-label" data-i18n="analyzer.chiCuadrado">Chi-cuadrado (Estadístico)</div>
           <div class="stat-value" id="chiSquare">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Sesgo Detectado</div>
+          <div class="stat-label" data-i18n="analyzer.sesgoDetectado">Sesgo Detectado</div>
           <div class="stat-value" id="biasDetected">-</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Último Sorteo Registrado</div>
+          <div class="stat-label" data-i18n="analyzer.ultimoSorteo">Último Sorteo Registrado</div>
           <div class="stat-value" id="lastUpdateDate" style="color: #0284c7; font-weight: 700;">-</div>
         </div>
       </div>
