@@ -5137,7 +5137,7 @@ class DataLotto49Advanced {
           
           modal.style.display = 'none';
           document.body.style.overflow = '';
-          this.showToast('🛡️ Condiciones de uso aceptadas correctamente. ¡Bienvenido a DataLotto!', 'success');
+          this.showToast(t('toast.disclaimerAceptado'), 'success');
           
           this.sendTelemetry('CONTRACT_SIGNED', { signer: "Usuario Aceptante", sigId: sigId });
         }
@@ -5304,7 +5304,7 @@ class DataLotto49Advanced {
             this.updateBigDataPanel();
             this.saveState();
             
-            this.showToast(`📊 Estudiando ahora: ${filterSelect.options[filterSelect.selectedIndex].text}`, 'info');
+            this.showToast(t('toast.estudiandoAhora', { option: filterSelect.options[filterSelect.selectedIndex].text }), 'info');
         });
     }
 
@@ -5352,7 +5352,7 @@ class DataLotto49Advanced {
               clearBtn.classList.add('shake');
               setTimeout(() => clearBtn.classList.remove('shake'), 500);
             }
-            this.showToast('🗑️ Se han borrado todos los datos históricos y las selecciones.', 'info');
+            this.showToast(t('toast.datosHistoricosBorrados'), 'info');
         } else if (btn.id === 'dataBtn') {
             document.getElementById('fileInput')?.click();
         } else if (btn.id === 'simulateBtn') {
@@ -5389,8 +5389,8 @@ class DataLotto49Advanced {
         input.value = nextDate;
         this.validateAndWarnTicketDate(nextDate);
         const dateObj = new Date(nextDate + 'T00:00:00');
-        const formatted = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        this.showToast(`⚡ Próximo sorteo fijado: ${formatted}`, 'info');
+        const formatted = dateObj.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        this.showToast(t('toast.proximoSorteoFijado', { date: formatted }), 'info');
       }
     });
     document.getElementById('openDrawCalendarBtn')?.addEventListener('click', () => {
@@ -5426,8 +5426,8 @@ class DataLotto49Advanced {
         input.value = nextValid;
         this.validateAndWarnTicketDate(nextValid);
         const dateObj = new Date(nextValid + 'T00:00:00');
-        const formatted = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        this.showToast(`✅ Fecha corregida al próximo sorteo: ${formatted}`, 'success');
+        const formatted = dateObj.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        this.showToast(t('toast.fechaCorregida', { date: formatted }), 'success');
       }
     });
     document.getElementById('shareBtn')?.addEventListener('click', () => this.shareTicket());
@@ -5440,7 +5440,7 @@ class DataLotto49Advanced {
     });
     document.getElementById('reducedClearBaseBtn')?.addEventListener('click', () => {
         this.clearSelections(false);
-        this.showToast('🗑️ Se han borrado las selecciones de base del sistema reducido.', 'info');
+        this.showToast(t('toast.seleccionesBaseBorradas'), 'info');
     });
     document.querySelector('.filters-panel')?.addEventListener('input', (e) => {
         const target = e.target as HTMLInputElement;
@@ -5465,11 +5465,11 @@ class DataLotto49Advanced {
     });
     document.getElementById('filterModeSimpleBtn')?.addEventListener('click', () => {
         this.setFilterPanelMode('simple');
-        this.showToast('🎯 Modo de Filtros Simple activado (filtros intuitivos visibles).', 'info');
+        this.showToast(t('toast.modoFiltrosSimple'), 'info');
     });
     document.getElementById('filterModeExpertBtn')?.addEventListener('click', () => {
         this.setFilterPanelMode('expert');
-        this.showToast('🔬 Modo de Filtros Experto activado (todos los filtros visibles).', 'info');
+        this.showToast(t('toast.modoFiltrosExperto'), 'info');
     });
 
     document.getElementById('disclaimerBtn')?.addEventListener('click', () => this.toggleModal('disclaimerModal', true));
@@ -5578,7 +5578,7 @@ class DataLotto49Advanced {
         
         let val = input.value.trim();
         if (!val) {
-            this.showToast('Por favor, escribe un enlace válido.', 'warning');
+            this.showToast(t('toast.enlaceInvalido'), 'warning');
             return;
         }
         
@@ -5589,7 +5589,7 @@ class DataLotto49Advanced {
         this.customGameUrls[gameKey] = val;
         this.saveState();
         this.toggleModal('setUrlPromptModal', false);
-        this.showToast('✅ Enlace configurado correctamente.', 'success');
+        this.showToast(t('toast.enlaceConfigurado'), 'success');
         
         // Retry playing online with the new URL!
         this.confirmPlayOnline(gameKey);

@@ -704,5 +704,15 @@
   "toast.seleccionaSistemaReducido": "Select a valid reduced system first.",
   "toast.mejoresNumerosBase": "✨ Selected the {count} best base numbers based on historical statistics.",
   "toast.numerosBaseEquilibrados": "✨ Generated {count} balanced base numbers (Load data for real statistical analysis).",
-  "toast.cambiadoA": "Switched to {game}"
+  "toast.cambiadoA": "Switched to {game}",
+  "toast.disclaimerAceptado": "🛡️ Terms of use accepted successfully. Welcome to DataLotto!",
+  "toast.estudiandoAhora": "📊 Now studying: {option}",
+  "toast.datosHistoricosBorrados": "🗑️ All historical data and selections have been cleared.",
+  "toast.proximoSorteoFijado": "⚡ Next draw set: {date}",
+  "toast.fechaCorregida": "✅ Date corrected to the next draw: {date}",
+  "toast.seleccionesBaseBorradas": "🗑️ Reduced system base selections have been cleared.",
+  "toast.modoFiltrosSimple": "🎯 Simple Filter Mode activated (intuitive filters visible).",
+  "toast.modoFiltrosExperto": "🔬 Expert Filter Mode activated (all filters visible).",
+  "toast.enlaceInvalido": "Please enter a valid link.",
+  "toast.enlaceConfigurado": "✅ Link configured successfully."
 }
