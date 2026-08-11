@@ -1717,6 +1717,14 @@ class DataLotto49Advanced {
             <p><strong>¿Qué hace este botón?</strong></p>
             <p>Genera una versión en texto estructurado de la jugada lista para copiar al portapapeles y compartirla rápido por WhatsApp o chat, facilitando el juego conjunto o peñas.</p>
         `;
+    } else if (target.closest('#downloadTxtBtn') || target.id === 'downloadTxtBtn') {
+        title = "📄 Descargar Boleto en .txt";
+        body = `
+            <p><strong>¿Qué hace este botón?</strong></p>
+            <p>Descarga un archivo de texto plano (.txt) con tus apuestas estructuradas en el formato estándar de administraciones (dos dígitos por número separados por comas y '+' para estrellas).</p>
+            <p><strong>Para qué utilizarlo:</strong></p>
+            <p>Puedes subir directamente este archivo en la web de tu administración de loterías online para validar tus apuestas automáticamente.</p>
+        `;
     } else if (target.closest('#playOnlineBtn') || target.id === 'playOnlineBtn') {
         title = "📲 Jugar Online Registrado";
         body = `
@@ -4387,6 +4395,11 @@ class DataLotto49Advanced {
         excluirDecenasGroup.style.display = gameId === 'nacional' ? 'none' : '';
     }
 
+    const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+    if (downloadTxtBtn) {
+        downloadTxtBtn.style.display = gameId === 'nacional' ? 'none' : '';
+    }
+
     this.updateNextDrawDayOptions();
     this.updateTicketDrawDateBadge();
     this.initFilterInfoButtons();
@@ -5525,6 +5538,7 @@ class DataLotto49Advanced {
       }
     });
     document.getElementById('shareBtn')?.addEventListener('click', () => this.shareTicket());
+    document.getElementById('downloadTxtBtn')?.addEventListener('click', () => this.downloadTicketAsTxt());
     document.getElementById('playOnlineBtn')?.addEventListener('click', () => this.playTicketOnline(this.currentTicket!));
     document.getElementById('reducedSystemSelect')?.addEventListener('change', () => {
         this.updateReducedSystemInfo();
@@ -7033,12 +7047,16 @@ class DataLotto49Advanced {
             <button class="ticket-btn share-btn" id="shareBtn">
               ${t('ticket.compartirBtn')}
             </button>
+            <button class="ticket-btn download-btn" id="downloadTxtBtn">
+              ${t('ticket.descargarTxtBtn')}
+            </button>
           </div>
         `;
         
         // Re-attach listeners to the reconstructed buttons
         document.getElementById('saveBtn')?.addEventListener('click', () => this.saveTicket());
         document.getElementById('shareBtn')?.addEventListener('click', () => this.shareTicket());
+        document.getElementById('downloadTxtBtn')?.addEventListener('click', () => this.downloadTicketAsTxt());
         document.getElementById('nextValidDrawDateBtn')?.addEventListener('click', () => {
           const input = document.getElementById('ticketDrawDate') as HTMLInputElement;
           if (input) {
@@ -7239,6 +7257,73 @@ class DataLotto49Advanced {
     const ticketDiv = document.getElementById('ticket');
     if(ticketDiv) ticketDiv.classList.remove('show');
     this.showToast(t('toast.boletoGuardado'), 'success');
+  }
+
+  downloadTicketAsTxt() {
+    if (!this.currentTicket) return;
+    const game = this.currentGame;
+    const maxNumbers = game.maxNumbers;
+
+    let combosToPlay: number[][] = this.currentTicket.combinations;
+    let starsToPlay: number[][] = [];
+
+    const isSuperset = this.currentTicket.combinations.length === 1 && this.currentTicket.combinations[0].length > maxNumbers;
+
+    if (isSuperset) {
+      combosToPlay = this.getCombinations(this.currentTicket.combinations[0], maxNumbers);
+
+      if (game.maxStars > 0 && this.currentTicket.stars && this.currentTicket.stars[0]) {
+        const starSuperset = this.currentTicket.stars[0];
+        const isStarSuperset = starSuperset.length > game.maxStars;
+        const starCombos = isStarSuperset
+          ? this.getCombinations(starSuperset, game.maxStars)
+          : [starSuperset];
+
+        // Emparejamiento "al directo": cada combo de números x cada combo de estrellas,
+        // igual que calculateTicketCost() en src/utils/combinatorial.ts
+        const pairedCombos: number[][] = [];
+        const pairedStars: number[][] = [];
+        combosToPlay.forEach(c => {
+          starCombos.forEach(s => {
+            pairedCombos.push(c);
+            pairedStars.push(s);
+          });
+        });
+        combosToPlay = pairedCombos;
+        starsToPlay = pairedStars;
+      }
+    } else if (game.maxStars > 0 && this.currentTicket.stars) {
+      starsToPlay = this.currentTicket.stars;
+    }
+
+    const lines = combosToPlay.map((combo, idx) => {
+      const numsStr = [...combo].sort((a, b) => a - b).map(n => String(n).padStart(2, '0')).join(',');
+      const stars = starsToPlay[idx];
+      if (game.maxStars > 0 && stars && stars.length > 0) {
+        const starsStr = [...stars].sort((a, b) => a - b).map(n => String(n).padStart(2, '0')).join(',');
+        return `${numsStr}+${starsStr}`;
+      }
+      return numsStr;
+    });
+
+    const txtContent = lines.join('\n');
+
+    try {
+      const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const dateStr = this.currentTicket.drawDate || new Date().toISOString().slice(0, 10);
+      a.download = `datalotto_${game.id}_${dateStr}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.showToast(t('toast.boletoDescargadoTxt'), 'success');
+    } catch (error) {
+      this.showToast(t('toast.errorDescargarTxt'), 'error');
+      console.error('Download txt error:', error);
+    }
   }
 
   deleteTicket(date: string) {
