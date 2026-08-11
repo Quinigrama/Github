@@ -9739,7 +9739,8 @@ class DataLotto49Advanced {
       return;
     }
 
-    const { points, slope, intercept } = getSumSeriesWithRegression(this.historicalData);
+    const locale = getLocale() === 'en' ? 'en-US' : 'es-ES';
+    const { points, slope, intercept } = getSumSeriesWithRegression(this.historicalData, locale);
     if (points.length === 0) return;
 
     const ys = points.map(p => p.y);
@@ -9777,7 +9778,7 @@ class DataLotto49Advanced {
     const circlesHTML = points.map(p => {
       const cx = scaleX(p.x);
       const cy = scaleY(p.y);
-      const titleText = `${p.date ? p.date + ' | ' : ''}Sorteo #${p.x + 1}: Suma = ${p.y}`;
+      const titleText = `${p.date ? p.date + ' | ' : ''}${t('dataviz.tooltipPunto', { n: p.x + 1, sum: p.y })}`;
       return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#64748b" opacity="0.65"><title>${titleText}</title></circle>`;
     }).join('');
 
@@ -9821,7 +9822,7 @@ class DataLotto49Advanced {
         <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
           <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
             <span>📈 ${t('dataviz.tendenciaResumen', { slope: formattedSlope })}</span>
-            <span style="font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">Pendiente m = ${formattedSlope}</span>
+            <span style="font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">${t('dataviz.pendienteLabel', { slope: formattedSlope })}</span>
           </div>
           <div style="font-size: 0.82rem; color: #64748b; font-style: italic; line-height: 1.4;">
             ${t('dataviz.tendenciaAviso')}
@@ -9859,7 +9860,7 @@ class DataLotto49Advanced {
             🔬 <strong>${t('dataviz.chiTitulo')}</strong>
           </div>
           <div style="font-size: 0.85rem; color: #475569;">
-            ${t('dataviz.analizar')}: <strong>${this.vizTarget === 'star' ? t('dataviz.estrellasGenerico') : t('dataviz.numerosPrincipales')}</strong> | N = ${N} sorteos
+            ${t('dataviz.analizar')}: <strong>${this.vizTarget === 'star' ? t('dataviz.estrellasGenerico') : t('dataviz.numerosPrincipales')}</strong> | ${t('dataviz.nSorteos', { n: N })}
           </div>
         </div>
       `;

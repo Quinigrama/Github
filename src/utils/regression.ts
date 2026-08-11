@@ -19,16 +19,30 @@ export interface ScatterPoint {
   date?: string;
 }
 
-export function getSumSeriesWithRegression(historicalData: any[]): {
+export function getSumSeriesWithRegression(historicalData: any[], locale: string = 'es-ES'): {
   points: ScatterPoint[];
   slope: number;
   intercept: number;
 } {
-  const points: ScatterPoint[] = (historicalData || []).map((d, i) => ({
-    x: i,
-    y: (d.numbers || []).reduce((a: number, b: number) => a + b, 0),
-    date: d.date || d.fecha
-  }));
+  const points: ScatterPoint[] = (historicalData || []).map((d, i) => {
+    const rawDate = d.date || d.fecha;
+    let dateStr = '';
+    if (rawDate instanceof Date) {
+      dateStr = rawDate.toLocaleDateString(locale);
+    } else if (typeof rawDate === 'string' && rawDate) {
+      const parsed = new Date(rawDate);
+      if (!isNaN(parsed.getTime()) && (rawDate.includes('T') || rawDate.includes('-'))) {
+        dateStr = parsed.toLocaleDateString(locale);
+      } else {
+        dateStr = rawDate;
+      }
+    }
+    return {
+      x: i,
+      y: (d.numbers || []).reduce((a: number, b: number) => a + b, 0),
+      date: dateStr
+    };
+  });
   const xs = points.map(p => p.x);
   const ys = points.map(p => p.y);
   const { slope, intercept } = linearRegression(xs, ys);
