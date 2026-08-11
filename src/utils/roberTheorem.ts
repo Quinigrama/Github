@@ -1,3 +1,5 @@
+import { percentile } from './orderStatistics';
+
 export function binomialTailProbability(k: number, n: number, p: number): number {
   if (k > n) return 0;
   if (k <= 0) return 1;
@@ -130,3 +132,79 @@ export function getChipExclusions(
 
   return { excludedKeys, details };
 }
+
+/**
+ * Excluye categorías cuyo valor numérico subyacente cae fuera del percentil [pLow, pHigh]
+ * calculado sobre TODO el histórico disponible (sin ventana de recencia).
+ * Ejemplo: para par/impar, el valor subyacente es "número de pares" (0..n).
+ */
+export function orderedPercentileExclusion(
+  historicalValues: number[],
+  allCategoryValues: number[],
+  pLow: number = 0.05,
+  pHigh: number = 0.95
+): { excludedValues: number[]; p5: number; p95: number } {
+  if (historicalValues.length < 10) {
+    return { excludedValues: [], p5: Math.min(...allCategoryValues), p95: Math.max(...allCategoryValues) };
+  }
+  const sorted = [...historicalValues].sort((a, b) => a - b);
+  const p5 = percentile(sorted, pLow);
+  const p95 = percentile(sorted, pHigh);
+  const excludedValues = allCategoryValues.filter(v => v < p5 || v > p95);
+  return { excludedValues, p5, p95 };
+}
+
+/**
+ * Excluye las categorías menos frecuentes cuya masa de probabilidad acumulada
+ * (sumando desde la más rara hacia arriba) no supera tailMass del total.
+ * Es la versión para categorías sin orden numérico del mismo concepto de "cola del 5%-95%".
+ */
+export function nominalTailExclusion(
+  categoryCounts: Record<string, number>,
+  tailMass: number = 0.10
+): { excludedKeys: string[] } {
+  const entries = Object.entries(categoryCounts).sort((a, b) => a[1] - b[1]);
+  const total = entries.reduce((s, [, c]) => s + c, 0);
+  if (total === 0) return { excludedKeys: [] };
+
+  const excludedKeys: string[] = [];
+  let cumulative = 0;
+  for (const [key, count] of entries) {
+    cumulative += count;
+    if (cumulative / total <= tailMass) {
+      excludedKeys.push(key);
+    } else {
+      break;
+    }
+  }
+  // Failsafe: si excluiría todas las categorías, no excluir ninguna
+  if (excludedKeys.length === entries.length) return { excludedKeys: [] };
+  return { excludedKeys };
+}
+
+/**
+ * Dado un conjunto de frecuencias de categorías nominales (p.ej. agrupaciones o consecutivos)
+ * y una masa de cobertura objetivo (p.ej. 0.90, 0.95, 1.0), devuelve las categorías que
+ * están activas (las de mayor frecuencia acumulada hasta alcanzar esa masa).
+ */
+export function nominalActivationSet(
+  categoryCounts: Record<string, number>,
+  targetMass: number = 0.90
+): Set<string> {
+  const entries = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((s, [, c]) => s + c, 0);
+  if (total === 0 || targetMass >= 1.0) {
+    return new Set(entries.map(([k]) => k));
+  }
+  const active = new Set<string>();
+  let cumulative = 0;
+  for (const [key, count] of entries) {
+    active.add(key);
+    cumulative += count;
+    if (cumulative / total >= targetMass) {
+      break;
+    }
+  }
+  return active;
+}
+

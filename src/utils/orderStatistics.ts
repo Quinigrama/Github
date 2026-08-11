@@ -63,6 +63,19 @@ export function theoreticalRange(
 }
 
 /**
+ * Calculates a percentile value p (0 <= p <= 1) from a pre-sorted array of numbers.
+ */
+export function percentile(sortedValues: number[], p: number): number {
+  if (!sortedValues || sortedValues.length === 0) return 0;
+  const idx = p * (sortedValues.length - 1);
+  const lower = Math.floor(idx);
+  const upper = Math.ceil(idx);
+  const weight = idx - lower;
+  if (lower === upper) return sortedValues[lower];
+  return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+}
+
+/**
  * Calculates empirical range (5th and 95th percentiles) from historical draws at position k (1-indexed).
  * Returns null if fewer than 10 historical draws are available.
  */
@@ -90,19 +103,9 @@ export function empiricalRange(
   }
 
   values.sort((a, b) => a - b);
-  const M = values.length;
 
-  const getPercentile = (p: number): number => {
-    const idx = p * (M - 1);
-    const lower = Math.floor(idx);
-    const upper = Math.ceil(idx);
-    const weight = idx - lower;
-    if (lower === upper) return values[lower];
-    return values[lower] * (1 - weight) + values[upper] * weight;
-  };
-
-  const min = getPercentile(0.05);
-  const max = getPercentile(0.95);
+  const min = percentile(values, 0.05);
+  const max = percentile(values, 0.95);
 
   return { min, max };
 }

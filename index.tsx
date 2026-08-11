@@ -50,7 +50,10 @@ import {
   ChipCategory,
   getChipExclusions,
   layer1Threshold,
-  findCriticalK
+  findCriticalK,
+  orderedPercentileExclusion,
+  nominalTailExclusion,
+  nominalActivationSet
 } from './src/utils/roberTheorem';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
 import {
@@ -58,7 +61,7 @@ import {
   findValidSuperset as runFindValidSuperset,
   findAndRankWinningCombinations as runFindAndRankWinningCombinations
 } from './src/utils/combinationFinder';
-import { calculateAllPositionRanges } from './src/utils/orderStatistics';
+import { calculateAllPositionRanges, percentile } from './src/utils/orderStatistics';
 import {
   saveAppStateToStorage,
   loadAppStateFromStorage,
@@ -1825,16 +1828,8 @@ class DataLotto49Advanced {
         body = t('filters.regresion.helpBody');
     }
 
-    // 5. Filtros Predictivos / Preajustes / Backtesting / Base de datos / Dashboard
-    else if (target.closest('#aiFiltersBtn')) {
-        title = "📊 Filtros Estadísticos Avanzados";
-        body = `
-            <p><strong>¿Qué son los Filtros Predictivos?</strong></p>
-            <p>Utilizan algoritmos estadísticos avanzados (percentiles, entropía de Shannon, rachas de frecuencia y análisis de ciclos) sobre el historial de sorteos.</p>
-            <p><strong>¿Cómo funcionan?</strong></p>
-            <p>El sistema examina la distribución histórica del juego seleccionado, identifica desviaciones y patrones estadísticos significativos, y sugiere configuraciones optimizadas para los filtros del panel de control (como rangos de entropía, sumas o distribución de terminaciones) basándose en tendencias cuantitativas reales.</p>
-        `;
-    } else if (target.closest('#roberTheoremBtn')) {
+    // 5. Preajustes / Backtesting / Base de datos / Dashboard
+    else if (target.closest('#roberTheoremBtn')) {
         title = t('rober.helpTitle');
         body = t('rober.helpBody');
     } else if (target.closest('#saveFiltersBtn')) {
@@ -2118,11 +2113,9 @@ class DataLotto49Advanced {
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
         try {
-          this.resetFiltersToDefault();
-          this.showToast(t('toast.filtrosRestablecidos', { game: this.currentGame.name }), 'success');
-          ticketDiv.classList.remove('show', 'conflict');
+          this.resolveFilterConflict();
         } catch (err: any) {
-          console.error("Fallo al resetear filtros:", err);
+          console.error("Fallo al resolver conflicto de filtros:", err);
         }
       });
     }
@@ -2143,6 +2136,258 @@ class DataLotto49Advanced {
     this.gameFilters[this.currentGame.id] = this.filters;
     this.saveState();
     this.updateUIFromFilterState();
+  }
+
+  resolveFilterConflict() {
+    const numUniv = this.getAvailableUniverse('number');
+    const starUniv = this.currentGame.maxStars > 0 ? this.getAvailableUniverse('star') : [];
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars || 0;
+
+    if (numUniv.length < maxNumbers || (maxStars > 0 && starUniv.length < maxStars)) {
+      this.showToast(t('conflict.universoInsuficiente'), 'warning');
+      return;
+    }
+
+    if (!this.historicalData || this.historicalData.length === 0) {
+      this.resetFiltersToDefault();
+      this.showToast(t('conflict.resolutorExito', { level: 1 }), 'success');
+      const ticketDiv = document.getElementById('ticket');
+      if (ticketDiv) ticketDiv.classList.remove('show', 'conflict');
+      return;
+    }
+
+    const levels = [
+      { pLow: 0.05, pHigh: 0.95, z: 1.645, levelNum: 1 },
+      { pLow: 0.025, pHigh: 0.975, z: 1.960, levelNum: 2 },
+      { pLow: 0, pHigh: 1, z: 2.576, levelNum: 3 }
+    ];
+
+    const getDecadePatternKey = (nums: number[]) => {
+      const tens: Record<number, number> = {};
+      nums.forEach(n => {
+        const ten = Math.floor((n - 1) / 10);
+        tens[ten] = (tens[ten] || 0) + 1;
+      });
+      return Object.values(tens).sort((a, b) => b - a).join('/');
+    };
+
+    const getConsecutivePatternKey = (nums: number[]) => {
+      const sorted = [...nums].sort((a, b) => a - b);
+      let pattern = '';
+      let count = 1;
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === sorted[i - 1] + 1) {
+          count++;
+        } else {
+          pattern += count;
+          count = 1;
+        }
+      }
+      pattern += count;
+      return pattern.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+    };
+
+    const calculateEndingsEntropy = (nums: number[]) => {
+      const endingCounts: Record<number, number> = {};
+      nums.forEach(n => {
+        const ending = n % 10;
+        endingCounts[ending] = (endingCounts[ending] || 0) + 1;
+      });
+      return -Object.values(endingCounts).reduce((s, countVal) => {
+        const p = countVal / nums.length;
+        return s + p * Math.log2(p);
+      }, 0);
+    };
+
+    const calculateIntervalsEntropy = (nums: number[]) => {
+      const sorted = [...nums].sort((a, b) => a - b);
+      const intervalCounts: Record<number, number> = {};
+      for (let idx = 0; idx < sorted.length - 1; idx++) {
+        const diff = sorted[idx + 1] - sorted[idx];
+        intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
+      }
+      const numIntervals = nums.length - 1;
+      if (numIntervals <= 0) return 0;
+      return -Object.values(intervalCounts).reduce((s, countVal) => {
+        const p = countVal / numIntervals;
+        return s + p * Math.log2(p);
+      }, 0);
+    };
+
+    const histSums = this.historicalData.map((d: any) => d.numbers.reduce((a: number, b: number) => a + b, 0)).sort((a: number, b: number) => a - b);
+    const histPrimes = this.historicalData.map((d: any) => d.numbers.filter((n: number) => this.primes.has(n)).length).sort((a: number, b: number) => a - b);
+    const histDistances = this.historicalData.map((d: any) => {
+      const s = [...d.numbers].sort((a: number, b: number) => a - b);
+      let minD = Infinity;
+      for (let i = 0; i < s.length - 1; i++) {
+        const diff = s[i + 1] - s[i];
+        if (diff < minD) minD = diff;
+      }
+      return minD === Infinity ? 1 : minD;
+    }).sort((a: number, b: number) => a - b);
+
+    const histDigitSums = this.historicalData.map((d: any) => d.numbers.reduce((s: number, n: number) => s + (n < 10 ? n : Math.floor(n / 10) + (n % 10)), 0)).sort((a: number, b: number) => a - b);
+
+    const histStdDevs = this.historicalData.map((d: any) => {
+      const mean = d.numbers.reduce((a: number, b: number) => a + b, 0) / d.numbers.length;
+      const variance = d.numbers.reduce((s: number, n: number) => s + Math.pow(n - mean, 2), 0) / d.numbers.length;
+      return Math.sqrt(variance);
+    }).sort((a: number, b: number) => a - b);
+
+    const histTermEntropies = this.historicalData.map((d: any) => calculateEndingsEntropy(d.numbers)).sort((a: number, b: number) => a - b);
+    const histIntEntropies = this.historicalData.map((d: any) => calculateIntervalsEntropy(d.numbers)).sort((a: number, b: number) => a - b);
+
+    const histEvens = this.historicalData.map((d: any) => d.numbers.filter((n: number) => n % 2 === 0).length);
+    const midPoint = Math.floor(this.currentGame.numberRange / 2);
+    const histLows = this.historicalData.map((d: any) => d.numbers.filter((n: number) => n <= midPoint).length);
+
+    const decadeCounts: Record<string, number> = {};
+    const consecCounts: Record<string, number> = {};
+    this.historicalData.forEach((d: any) => {
+      const dk = getDecadePatternKey(d.numbers);
+      decadeCounts[dk] = (decadeCounts[dk] || 0) + 1;
+      const ck = getConsecutivePatternKey(d.numbers);
+      consecCounts[ck] = (consecCounts[ck] || 0) + 1;
+    });
+
+    let starSums: number[] = [];
+    let starPrimes: number[] = [];
+    let starDistances: number[] = [];
+    let starDigitSums: number[] = [];
+    let starEvens: number[] = [];
+    let starLows: number[] = [];
+    let starConsecCounts: Record<string, number> = {};
+
+    if (maxStars > 1) {
+      starSums = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars.reduce((a: number, b: number) => a + b, 0)).sort((a: number, b: number) => a - b);
+      starPrimes = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars.filter((n: number) => this.primes.has(n)).length).sort((a: number, b: number) => a - b);
+      starDistances = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => {
+        const s = [...d.stars].sort((a: number, b: number) => a - b);
+        let minD = Infinity;
+        for (let i = 0; i < s.length - 1; i++) {
+          const diff = s[i + 1] - s[i];
+          if (diff < minD) minD = diff;
+        }
+        return minD === Infinity ? 1 : minD;
+      }).sort((a: number, b: number) => a - b);
+      starDigitSums = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars.reduce((s: number, n: number) => s + (n < 10 ? n : Math.floor(n / 10) + (n % 10)), 0)).sort((a: number, b: number) => a - b);
+      starEvens = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars.filter((n: number) => n % 2 === 0).length);
+      const starMid = Math.floor(this.currentGame.starRange / 2);
+      starLows = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars.filter((n: number) => n <= starMid).length);
+
+      this.historicalData.forEach((d: any) => {
+        if (d.stars && d.stars.length === maxStars) {
+          const ck = getConsecutivePatternKey(d.stars);
+          starConsecCounts[ck] = (starConsecCounts[ck] || 0) + 1;
+        }
+      });
+    }
+
+    const allPossibleEvens = Array.from({ length: maxNumbers + 1 }, (_, i) => i);
+    const allPossibleLows = Array.from({ length: maxNumbers + 1 }, (_, i) => i);
+
+    for (const level of levels) {
+      if (level.pLow === 0 && level.pHigh === 1) {
+        this.filters.sum = { min: (maxNumbers * (maxNumbers + 1)) / 2, max: this.currentGame.numberRange * maxNumbers };
+        this.filters.primos = { min: 0, max: maxNumbers };
+        this.filters.distancia = { min: 1, max: this.currentGame.numberRange };
+        this.filters.sumaDigitos = { min: 1, max: maxNumbers * 18 };
+        this.filters.desviacion = { min: 0, max: 99 };
+        this.filters.entropyTerminaciones = { min: 0, max: 5 };
+        this.filters.entropyIntervalos = { min: 0, max: 5 };
+        this.filters.parImpar = allPossibleEvens.map(e => `${e}/${maxNumbers - e}`);
+        this.filters.bajosAltos = allPossibleLows.map(l => `${l}/${maxNumbers - l}`);
+        this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, 1.0));
+        this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, 1.0));
+        this.filters.terminacionesDistintas = Array.from({ length: maxNumbers }, (_, i) => i + 1);
+        if (this.filters.geometric && this.filters.geometric.exclude) this.filters.geometric.exclude = [];
+        this.filters.nashStrictMode = false;
+      } else {
+        this.filters.sum = { min: percentile(histSums, level.pLow), max: percentile(histSums, level.pHigh) };
+        this.filters.primos = { min: percentile(histPrimes, level.pLow), max: percentile(histPrimes, level.pHigh) };
+        this.filters.distancia = { min: percentile(histDistances, level.pLow), max: percentile(histDistances, level.pHigh) };
+        this.filters.sumaDigitos = { min: percentile(histDigitSums, level.pLow), max: percentile(histDigitSums, level.pHigh) };
+        this.filters.desviacion = { min: Number(percentile(histStdDevs, level.pLow).toFixed(1)), max: Number(percentile(histStdDevs, level.pHigh).toFixed(1)) };
+        this.filters.entropyTerminaciones = { min: Number(percentile(histTermEntropies, level.pLow).toFixed(3)), max: Number(percentile(histTermEntropies, level.pHigh).toFixed(3)) };
+        this.filters.entropyIntervalos = { min: Number(percentile(histIntEntropies, level.pLow).toFixed(3)), max: Number(percentile(histIntEntropies, level.pHigh).toFixed(3)) };
+
+        const { excludedValues: excludedEvens } = orderedPercentileExclusion(histEvens, allPossibleEvens, level.pLow, level.pHigh);
+        this.filters.parImpar = allPossibleEvens.filter(e => !excludedEvens.includes(e)).map(e => `${e}/${maxNumbers - e}`);
+
+        const { excludedValues: excludedLows } = orderedPercentileExclusion(histLows, allPossibleLows, level.pLow, level.pHigh);
+        this.filters.bajosAltos = allPossibleLows.filter(l => !excludedLows.includes(l)).map(l => `${l}/${maxNumbers - l}`);
+
+        const targetMass = 1.0 - level.pLow * 2;
+        this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, targetMass));
+        this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, targetMass));
+      }
+
+      if (this.filters.positionRange && this.filters.positionRange.enabled) {
+        const ranges = calculateAllPositionRanges(this.currentGame.numberRange, maxNumbers, this.historicalData.map((d: any) => d.numbers), level.z);
+        this.filters.positionRange.confidenceLevel = level.z;
+        this.filters.positionRange.ranges = ranges;
+      }
+
+      if (maxStars > 0 && this.filters.starPositionRange && this.filters.starPositionRange.enabled) {
+        const starRanges = calculateAllPositionRanges(this.currentGame.starRange, maxStars, this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars), level.z);
+        this.filters.starPositionRange.confidenceLevel = level.z;
+        this.filters.starPositionRange.ranges = starRanges;
+      }
+
+      if (maxStars > 1 && starSums.length > 0) {
+        if (level.pLow === 0 && level.pHigh === 1) {
+          if (this.filters.starSum) this.filters.starSum = { min: 1, max: this.currentGame.starRange * maxStars };
+          if (this.filters.starPrimos) this.filters.starPrimos = { min: 0, max: maxStars };
+          if (this.filters.starDistancia) this.filters.starDistancia = { min: 1, max: this.currentGame.starRange };
+          if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: 1, max: maxStars * 18 };
+          const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
+          const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
+          if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.map(e => `${e}/${maxStars - e}`);
+          if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.map(l => `${l}/${maxStars - l}`);
+          if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, 1.0));
+        } else {
+          if (this.filters.starSum) this.filters.starSum = { min: percentile(starSums, level.pLow), max: percentile(starSums, level.pHigh) };
+          if (this.filters.starPrimos) this.filters.starPrimos = { min: percentile(starPrimes, level.pLow), max: percentile(starPrimes, level.pHigh) };
+          if (this.filters.starDistancia) this.filters.starDistancia = { min: percentile(starDistances, level.pLow), max: percentile(starDistances, level.pHigh) };
+          if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: percentile(starDigitSums, level.pLow), max: percentile(starDigitSums, level.pHigh) };
+
+          const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
+          const { excludedValues: exStarEvens } = orderedPercentileExclusion(starEvens, allPossibleStarEvens, level.pLow, level.pHigh);
+          if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.filter(e => !exStarEvens.includes(e)).map(e => `${e}/${maxStars - e}`);
+
+          const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
+          const { excludedValues: exStarLows } = orderedPercentileExclusion(starLows, allPossibleStarLows, level.pLow, level.pHigh);
+          if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.filter(l => !exStarLows.includes(l)).map(l => `${l}/${maxStars - l}`);
+
+          const targetMass = 1.0 - level.pLow * 2;
+          if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, targetMass));
+        }
+      }
+
+      let validFound = false;
+      for (let attempt = 0; attempt < 500; attempt++) {
+        const combo = generateRandomCombination(numUniv, maxNumbers);
+        const stars = maxStars > 0 ? generateRandomCombination(starUniv, maxStars) : [];
+        if (validateCombination(combo, stars, this.currentGame, this.filters, this.primes)) {
+          validFound = true;
+          break;
+        }
+      }
+
+      if (validFound) {
+        this.saveState();
+        this.updateUIFromFilterState();
+        const ticketDiv = document.getElementById('ticket');
+        if (ticketDiv) {
+          ticketDiv.classList.remove('show', 'conflict');
+        }
+        this.showToast(t('conflict.resolutorExito', { level: level.levelNum }), 'success');
+        return;
+      }
+    }
+
+    this.showToast(t('conflict.resolutorAgotado'), 'error');
   }
 
   updateFilterBadgesFromAudit() {
@@ -2630,18 +2875,6 @@ class DataLotto49Advanced {
       setVal('nacionalEntropiaDigitosMax', this.filters.nacionalEntropiaDigitos?.max ?? 2.322);
     }
 
-    // Update AI reasoning block based on current filter state
-    const block = document.getElementById('aiReasoningBlock');
-    const text = document.getElementById('aiReasoningText');
-    if (block && text) {
-      if (this.filters.aiReasoning) {
-        text.textContent = this.filters.aiReasoning;
-        block.style.display = 'block';
-      } else {
-        text.textContent = '';
-        block.style.display = 'none';
-      }
-    }
   }
 
   // ===== DATOS HISTÓRICOS (Sin cambios) =====
@@ -6300,7 +6533,6 @@ class DataLotto49Advanced {
     // Filter Presets Events
     document.getElementById('loadFiltersBtn')?.addEventListener('click', () => this.openLoadFilterModal());
     document.getElementById('saveFiltersBtn')?.addEventListener('click', () => this.openSaveFilterModal());
-    document.getElementById('aiFiltersBtn')?.addEventListener('click', () => this.applyAiFilters());
     document.getElementById('roberTheoremBtn')?.addEventListener('click', () => this.applyRoberTheorem());
     document.getElementById('closeSaveFilterBtn')?.addEventListener('click', () => this.toggleModal('saveFilterModal', false));
     document.getElementById('confirmSaveFilterBtn')?.addEventListener('click', () => this.confirmSaveFilter());
@@ -11482,10 +11714,11 @@ class DataLotto49Advanced {
 
   // ===== OPTIMIZACIÓN MATEMÁTICA DE FILTROS =====
   applyAiFilters() {
-    if (!this.dataLoaded || this.historicalData.length === 0) {
-      this.showToast(t('toast.cargaPrimeroDatos'), 'warning');
-      return;
-    }
+    this.applyRoberTheorem();
+    return;
+  }
+
+  _oldApplyAiFiltersDisabled() {
 
     const sampleSize = Math.min(100, this.historicalData.length);
     const sampleDraws = this.historicalData.slice(-sampleSize);
@@ -12075,21 +12308,20 @@ class DataLotto49Advanced {
       });
     }
 
-    // 2. Suma Total (Intervalo de confianza al 90% con z_alpha = 1.2816)
-    const sampleSize100 = Math.min(100, this.historicalData.length);
-    const sampleDraws100 = this.historicalData.slice(-sampleSize100);
-    const sums = sampleDraws100.map(d => (d.numbers || []).reduce((a: number, b: number) => a + b, 0));
-    const meanSum = sums.reduce((a, b) => a + b, 0) / sampleSize100;
-    const stdSum = Math.sqrt(sums.reduce((sq, n) => sq + Math.pow(n - meanSum, 2), 0) / sampleSize100);
-    const calcSumMin = Math.max(1, Math.floor(meanSum - 1.2816 * stdSum));
-    const calcSumMax = Math.ceil(meanSum + 1.2816 * stdSum);
+    // 2. Suma Total (Percentil empírico 5%-95% sobre el histórico completo)
+    const allSums = this.historicalData.map(d => (d.numbers || []).reduce((a: number, b: number) => a + b, 0));
+    const sortedSums = [...allSums].sort((a, b) => a - b);
+    const meanSum = allSums.reduce((a, b) => a + b, 0) / (allSums.length || 1);
+    const stdSum = Math.sqrt(allSums.reduce((sq, n) => sq + Math.pow(n - meanSum, 2), 0) / (allSums.length || 1));
+    const calcSumMin = Math.max(1, Math.floor(percentile(sortedSums, 0.05)));
+    const calcSumMax = Math.ceil(percentile(sortedSums, 0.95));
 
     const sumMinEl = document.getElementById('sumMin') as HTMLInputElement;
     const sumMaxEl = document.getElementById('sumMax') as HTMLInputElement;
     if (sumMinEl) sumMinEl.value = String(calcSumMin);
     if (sumMaxEl) sumMaxEl.value = String(calcSumMax);
 
-    // 3. Excluir Terminaciones (Dígitos 0-9) mediante evaluación de Capa 1 y Capa 2
+    // 3. Excluir Terminaciones (Dígitos 0-9) mediante Capa Reciente + Capa Percentil
     const M = game.numberRange;
     const m = game.maxNumbers;
     const totalStartN = game.id === 'nacional' ? 10 : 1;
@@ -12116,7 +12348,7 @@ class DataLotto49Advanced {
     sampleC.forEach(d => (d.numbers || []).forEach((n: number) => { termCountsC[n % 10] = (termCountsC[n % 10] || 0) + 1; }));
 
     const termDetails: Record<string, { p: number; countL: number; countC: number; layer1Cutoff: number; kStar: number }> = {};
-    const excludedTermKeys: string[] = [];
+    const excludedTermKeysRecency: string[] = [];
 
     termCategories.forEach(cat => {
       const digit = Number(cat.key);
@@ -12127,9 +12359,18 @@ class DataLotto49Advanced {
       const countC = termCountsC[digit] || 0;
       termDetails[cat.key] = { p: pNum, countL, countC, layer1Cutoff, kStar };
       if (countL >= layer1Cutoff || countC >= kStar) {
-        excludedTermKeys.push(cat.key);
+        excludedTermKeysRecency.push(cat.key);
       }
     });
+
+    const allTermCounts: Record<string, number> = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0 };
+    this.historicalData.forEach(d => (d.numbers || []).forEach((n: number) => {
+      const digitStr = String(n % 10);
+      allTermCounts[digitStr] = (allTermCounts[digitStr] || 0) + 1;
+    }));
+    const termPercentileRes = nominalTailExclusion(allTermCounts, 0.10);
+    const excludedTermKeysPercentile = termPercentileRes.excludedKeys;
+    const excludedTermKeys = Array.from(new Set([...excludedTermKeysRecency, ...excludedTermKeysPercentile]));
 
     document.querySelectorAll('#terminacionesOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
@@ -12154,14 +12395,24 @@ class DataLotto49Advanced {
       (d: any) => String(new Set((d.numbers || []).map((n: number) => n % 10)).size)
     );
 
+    const allDistinctValues = this.historicalData.map(d => new Set((d.numbers || []).map((n: number) => n % 10)).size);
+    const allDistinctCatValues = Array.from({ length: m }, (_, i) => i + 1);
+    const distPercentileRes = orderedPercentileExclusion(allDistinctValues, allDistinctCatValues, 0.05, 0.95);
+    const distExcludedPercentileKeys = distPercentileRes.excludedValues.map(v => String(v));
+    const distinctExcludedKeys = Array.from(new Set([...distinctTermResult.excludedKeys, ...distExcludedPercentileKeys]));
+
     document.querySelectorAll('#terminacionesDistintasOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !distinctTermResult.excludedKeys.includes(val));
+      chip.classList.toggle('active', !distinctExcludedKeys.includes(val));
     });
 
     // 5. Par/Impar y Bajos/Altos
     let parImparResult: ReturnType<typeof getChipExclusions> | null = null;
     let bajosAltosResult: ReturnType<typeof getChipExclusions> | null = null;
+    let parImparExcludedKeys: string[] = [];
+    let parImparPercentileKeys: string[] = [];
+    let bajosAltosExcludedKeys: string[] = [];
+    let bajosAltosPercentileKeys: string[] = [];
 
     if (game.id !== 'nacional') {
       const K_pares = Math.floor(M / 2);
@@ -12178,6 +12429,12 @@ class DataLotto49Advanced {
         }
       );
 
+      const allEvenCounts = this.historicalData.map(d => (d.numbers || []).filter((n: number) => n % 2 === 0).length);
+      const allParCatValues = Array.from({ length: m + 1 }, (_, i) => i);
+      const parPercentileRes = orderedPercentileExclusion(allEvenCounts, allParCatValues, 0.05, 0.95);
+      parImparPercentileKeys = parPercentileRes.excludedValues.map(j => `${j}/${m - j}`);
+      parImparExcludedKeys = Array.from(new Set([...parImparResult.excludedKeys, ...parImparPercentileKeys]));
+
       const midPoint = Math.floor(M / 2);
       const K_bajos = midPoint;
       const bajosAltosCategories: ChipCategory[] = [];
@@ -12193,13 +12450,19 @@ class DataLotto49Advanced {
         }
       );
 
+      const allLowCounts = this.historicalData.map(d => (d.numbers || []).filter((n: number) => n <= midPoint).length);
+      const allLowCatValues = Array.from({ length: m + 1 }, (_, i) => i);
+      const lowPercentileRes = orderedPercentileExclusion(allLowCounts, allLowCatValues, 0.05, 0.95);
+      bajosAltosPercentileKeys = lowPercentileRes.excludedValues.map(j => `${j}/${m - j}`);
+      bajosAltosExcludedKeys = Array.from(new Set([...bajosAltosResult.excludedKeys, ...bajosAltosPercentileKeys]));
+
       document.querySelectorAll('#parImparOptions .filter-chip').forEach(chip => {
         const val = (chip as HTMLElement).dataset.value || '';
-        chip.classList.toggle('active', !parImparResult!.excludedKeys.includes(val));
+        chip.classList.toggle('active', !parImparExcludedKeys.includes(val));
       });
       document.querySelectorAll('#bajosAltosOptions .filter-chip').forEach(chip => {
         const val = (chip as HTMLElement).dataset.value || '';
-        chip.classList.toggle('active', !bajosAltosResult!.excludedKeys.includes(val));
+        chip.classList.toggle('active', !bajosAltosExcludedKeys.includes(val));
       });
     }
 
@@ -12233,9 +12496,24 @@ class DataLotto49Advanced {
       }
     );
 
+    const allAgrupCounts: Record<string, number> = {};
+    this.historicalData.forEach(d => {
+      const tens: Record<number, number> = {};
+      (d.numbers || []).forEach((n: number) => {
+        const ten = Math.floor((n - 1) / 10);
+        tens[ten] = (tens[ten] || 0) + 1;
+      });
+      const pattern = Object.values(tens).sort((a, b) => b - a).join('/');
+      allAgrupCounts[pattern] = (allAgrupCounts[pattern] || 0) + 1;
+    });
+
+    const agrupPercentileRes = nominalTailExclusion(allAgrupCounts, 0.10);
+    const agrupExcludedPercentileKeys = agrupPercentileRes.excludedKeys;
+    const agrupExcludedKeys = Array.from(new Set([...agrupResult.excludedKeys, ...agrupExcludedPercentileKeys]));
+
     document.querySelectorAll('#agrupDecenasOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !agrupResult.excludedKeys.includes(val));
+      chip.classList.toggle('active', !agrupExcludedKeys.includes(val));
     });
 
     // 7. Números Consecutivos
@@ -12282,12 +12560,34 @@ class DataLotto49Advanced {
       }
     );
 
-    document.querySelectorAll('#consecutivosOptions .filter-chip').forEach(chip => {
-      const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !consecResult.excludedKeys.includes(val));
+    const allConsecCounts: Record<string, number> = {};
+    this.historicalData.forEach(d => {
+      const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
+      let consecStr = '';
+      let cCount = 1;
+      for (let j = 1; j < sorted.length; j++) {
+        if (sorted[j] === sorted[j - 1] + 1) {
+          cCount++;
+        } else {
+          consecStr += cCount;
+          cCount = 1;
+        }
+      }
+      consecStr += cCount;
+      const pattern = consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+      allConsecCounts[pattern] = (allConsecCounts[pattern] || 0) + 1;
     });
 
-    // 8. Entropía de Terminaciones (Rango percentil 5%-95%)
+    const consecPercentileRes = nominalTailExclusion(allConsecCounts, 0.10);
+    const consecExcludedPercentileKeys = consecPercentileRes.excludedKeys;
+    const consecExcludedKeys = Array.from(new Set([...consecResult.excludedKeys, ...consecExcludedPercentileKeys]));
+
+    document.querySelectorAll('#consecutivosOptions .filter-chip').forEach(chip => {
+      const val = (chip as HTMLElement).dataset.value || '';
+      chip.classList.toggle('active', !consecExcludedKeys.includes(val));
+    });
+
+    // 8. Entropía de Terminaciones (Rango percentil 5%-95% en N=100)
     const termEntropies = sampleL.map(d => {
       const endingCounts: Record<number, number> = {};
       (d.numbers || []).forEach((n: number) => {
@@ -12300,15 +12600,15 @@ class DataLotto49Advanced {
       }, 0);
     }).sort((a, b) => a - b);
 
-    const minEntropyTerm = termEntropies[Math.floor(effectiveNL * 0.05)] ?? termEntropies[0];
-    const maxEntropyTerm = termEntropies[Math.floor(effectiveNL * 0.95)] ?? termEntropies[termEntropies.length - 1];
+    const minEntropyTerm = percentile(termEntropies, 0.05);
+    const maxEntropyTerm = percentile(termEntropies, 0.95);
 
     const entTermMinEl = document.getElementById('entropyTerminacionesMin') as HTMLInputElement;
     const entTermMaxEl = document.getElementById('entropyTerminacionesMax') as HTMLInputElement;
     if (entTermMinEl) entTermMinEl.value = minEntropyTerm.toFixed(3);
     if (entTermMaxEl) entTermMaxEl.value = maxEntropyTerm.toFixed(3);
 
-    // 9. Entropía de Intervalos (Rango percentil 5%-95%)
+    // 9. Entropía de Intervalos (Rango percentil 5%-95% en N=100)
     const intervalEntropies = sampleL.map(d => {
       const sortedCombo = [...(d.numbers || [])].sort((a, b) => a - b);
       const intervalCounts: Record<number, number> = {};
@@ -12324,8 +12624,8 @@ class DataLotto49Advanced {
       }, 0);
     }).sort((a, b) => a - b);
 
-    const minEntropyInt = intervalEntropies[Math.floor(effectiveNL * 0.05)] ?? intervalEntropies[0];
-    const maxEntropyInt = intervalEntropies[Math.floor(effectiveNL * 0.95)] ?? intervalEntropies[intervalEntropies.length - 1];
+    const minEntropyInt = percentile(intervalEntropies, 0.05);
+    const maxEntropyInt = percentile(intervalEntropies, 0.95);
 
     const entIntMinEl = document.getElementById('entropyIntervalosMin') as HTMLInputElement;
     const entIntMaxEl = document.getElementById('entropyIntervalosMax') as HTMLInputElement;
@@ -12339,13 +12639,25 @@ class DataLotto49Advanced {
       numResult: numbersResult,
       starResult: starsResult,
       parImparResult,
+      parImparPercentileKeys,
+      parImparExcludedKeys,
       bajosAltosResult,
+      bajosAltosPercentileKeys,
+      bajosAltosExcludedKeys,
       sumRange: { min: calcSumMin, max: calcSumMax, mean: meanSum, std: stdSum },
+      excludedTermKeysRecency,
+      excludedTermKeysPercentile,
       excludedTermKeys,
       termDetails,
       distinctTermResult,
+      distExcludedPercentileKeys,
+      distinctExcludedKeys,
       agrupResult,
+      agrupExcludedPercentileKeys,
+      agrupExcludedKeys,
       consecResult,
+      consecExcludedPercentileKeys,
+      consecExcludedKeys,
       entTermRange: { min: minEntropyTerm, max: maxEntropyTerm },
       entIntRange: { min: minEntropyInt, max: maxEntropyInt }
     });
@@ -12356,13 +12668,25 @@ class DataLotto49Advanced {
     numResult: RoberResult;
     starResult: RoberResult | null;
     parImparResult: ReturnType<typeof getChipExclusions> | null;
+    parImparPercentileKeys: string[];
+    parImparExcludedKeys: string[];
     bajosAltosResult: ReturnType<typeof getChipExclusions> | null;
+    bajosAltosPercentileKeys: string[];
+    bajosAltosExcludedKeys: string[];
     sumRange: { min: number; max: number; mean: number; std: number };
+    excludedTermKeysRecency: string[];
+    excludedTermKeysPercentile: string[];
     excludedTermKeys: string[];
     termDetails: Record<string, { p: number; countL: number; countC: number; layer1Cutoff: number; kStar: number }>;
     distinctTermResult: ReturnType<typeof getChipExclusions>;
+    distExcludedPercentileKeys: string[];
+    distinctExcludedKeys: string[];
     agrupResult: ReturnType<typeof getChipExclusions>;
+    agrupExcludedPercentileKeys: string[];
+    agrupExcludedKeys: string[];
     consecResult: ReturnType<typeof getChipExclusions>;
+    consecExcludedPercentileKeys: string[];
+    consecExcludedKeys: string[];
     entTermRange: { min: number; max: number };
     entIntRange: { min: number; max: number };
   }) {
@@ -12373,9 +12697,14 @@ class DataLotto49Advanced {
     container.style.display = 'block';
 
     const {
-      numResult, starResult, parImparResult, bajosAltosResult,
-      sumRange, excludedTermKeys, termDetails, distinctTermResult,
-      agrupResult, consecResult, entTermRange, entIntRange
+      numResult, starResult,
+      parImparResult, parImparPercentileKeys, parImparExcludedKeys,
+      bajosAltosResult, bajosAltosPercentileKeys, bajosAltosExcludedKeys,
+      sumRange, excludedTermKeysRecency, excludedTermKeysPercentile, excludedTermKeys, termDetails,
+      distinctTermResult, distExcludedPercentileKeys, distinctExcludedKeys,
+      agrupResult, agrupExcludedPercentileKeys, agrupExcludedKeys,
+      consecResult, consecExcludedPercentileKeys, consecExcludedKeys,
+      entTermRange, entIntRange
     } = payload;
 
     let html = '';
@@ -12411,19 +12740,15 @@ class DataLotto49Advanced {
     // 3. Suma Total
     html += `<div style="margin-bottom: 8px;">`;
     html += `<strong>➕ ${t('rober.sumaTitulo')}:</strong> `;
-    html += `<span>${t('rober.sumaDetalle', { mean: sumRange.mean.toFixed(1), std: sumRange.std.toFixed(1), min: sumRange.min, max: sumRange.max })}</span>`;
+    html += `<span>${t('rober.sumaDetalle', { min: sumRange.min, max: sumRange.max })}</span>`;
     html += `</div>`;
 
     // 4. Excluir Terminaciones
     html += `<div style="margin-bottom: 8px;">`;
     html += `<strong>🚫 ${t('rober.terminacionesTitulo')}:</strong>`;
     html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-    Object.entries(termDetails).forEach(([key, d]) => {
-      const pPercent = (d.p * 100).toFixed(2);
-      const isEx = excludedTermKeys.includes(key);
-      const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-      html += `<li>${t('rober.chipDetalle', { key: `Dígito ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-    });
+    html += `<li><strong>${t('rober.capa12Label')}:</strong> ${excludedTermKeysRecency.length > 0 ? excludedTermKeysRecency.sort((a,b)=>Number(a)-Number(b)).map(k => `Dígito ${k}`).join(', ') : t('rober.ninguno')}</li>`;
+    html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${excludedTermKeysPercentile.length > 0 ? excludedTermKeysPercentile.sort((a,b)=>Number(a)-Number(b)).map(k => `Dígito ${k}`).join(', ') : t('rober.ninguno')}</li>`;
     html += `</ul>`;
     html += `</div>`;
 
@@ -12432,12 +12757,8 @@ class DataLotto49Advanced {
       html += `<div style="margin-bottom: 8px;">`;
       html += `<strong>🔀 ${t('rober.variedadTitulo')}:</strong>`;
       html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-      Object.entries(distinctTermResult.details).forEach(([key, d]) => {
-        const pPercent = (d.p * 100).toFixed(2);
-        const isEx = distinctTermResult.excludedKeys.includes(key);
-        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-        html += `<li>${t('rober.chipDetalle', { key: `${key} distintas`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-      });
+      html += `<li><strong>${t('rober.capa12Label')}:</strong> ${distinctTermResult.excludedKeys.length > 0 ? distinctTermResult.excludedKeys.sort((a,b)=>Number(a)-Number(b)).join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${distExcludedPercentileKeys.length > 0 ? distExcludedPercentileKeys.sort((a,b)=>Number(a)-Number(b)).join(', ') : t('rober.ninguno')}</li>`;
       html += `</ul>`;
       html += `</div>`;
     }
@@ -12447,12 +12768,8 @@ class DataLotto49Advanced {
       html += `<div style="margin-bottom: 8px;">`;
       html += `<strong>⚖️ ${t('rober.parImparTitulo')}:</strong>`;
       html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-      Object.entries(parImparResult.details).forEach(([key, d]) => {
-        const pPercent = (d.p * 100).toFixed(2);
-        const isEx = parImparResult.excludedKeys.includes(key);
-        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-        html += `<li>${t('rober.chipDetalle', { key, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-      });
+      html += `<li><strong>${t('rober.capa12Label')}:</strong> ${parImparResult.excludedKeys.length > 0 ? parImparResult.excludedKeys.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${parImparPercentileKeys.length > 0 ? parImparPercentileKeys.join(', ') : t('rober.ninguno')}</li>`;
       html += `</ul>`;
       html += `</div>`;
     }
@@ -12462,12 +12779,8 @@ class DataLotto49Advanced {
       html += `<div style="margin-bottom: 8px;">`;
       html += `<strong>📊 ${t('rober.bajosAltosTitulo')}:</strong>`;
       html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-      Object.entries(bajosAltosResult.details).forEach(([key, d]) => {
-        const pPercent = (d.p * 100).toFixed(2);
-        const isEx = bajosAltosResult.excludedKeys.includes(key);
-        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-        html += `<li>${t('rober.chipDetalle', { key, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-      });
+      html += `<li><strong>${t('rober.capa12Label')}:</strong> ${bajosAltosResult.excludedKeys.length > 0 ? bajosAltosResult.excludedKeys.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${bajosAltosPercentileKeys.length > 0 ? bajosAltosPercentileKeys.join(', ') : t('rober.ninguno')}</li>`;
       html += `</ul>`;
       html += `</div>`;
     }
@@ -12477,12 +12790,8 @@ class DataLotto49Advanced {
       html += `<div style="margin-bottom: 8px;">`;
       html += `<strong>🏢 ${t('rober.agrupTitulo')}:</strong>`;
       html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-      Object.entries(agrupResult.details).forEach(([key, d]) => {
-        const pPercent = (d.p * 100).toFixed(2);
-        const isEx = agrupResult.excludedKeys.includes(key);
-        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-        html += `<li>${t('rober.chipDetalle', { key: `Patrón ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-      });
+      html += `<li><strong>${t('rober.capa12Label')}:</strong> ${agrupResult.excludedKeys.length > 0 ? agrupResult.excludedKeys.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${agrupExcludedPercentileKeys.length > 0 ? agrupExcludedPercentileKeys.join(', ') : t('rober.ninguno')}</li>`;
       html += `</ul>`;
       html += `</div>`;
     }
@@ -12492,12 +12801,8 @@ class DataLotto49Advanced {
       html += `<div style="margin-bottom: 8px;">`;
       html += `<strong>🔗 ${t('rober.consecTitulo')}:</strong>`;
       html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
-      Object.entries(consecResult.details).forEach(([key, d]) => {
-        const pPercent = (d.p * 100).toFixed(2);
-        const isEx = consecResult.excludedKeys.includes(key);
-        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
-        html += `<li>${t('rober.chipDetalle', { key: `Patrón ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
-      });
+      html += `<li><strong>${t('rober.capa12Label')}:</strong> ${consecResult.excludedKeys.length > 0 ? consecResult.excludedKeys.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capaPercentilLabel')}:</strong> ${consecExcludedPercentileKeys.length > 0 ? consecExcludedPercentileKeys.join(', ') : t('rober.ninguno')}</li>`;
       html += `</ul>`;
       html += `</div>`;
     }
