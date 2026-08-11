@@ -2317,6 +2317,10 @@ body.dark-mode .filter-actions-footer-container #aiFiltersBtn {
   gap: 8px;
 }
 
+#btHitsBreakdownContainer {
+    overflow-x: auto;
+}
+
 .validation-summary-table {
     width: 100%;
     border-collapse: collapse;
@@ -3133,8 +3137,10 @@ textarea.modal-input {
 }
 
 /* Responsive Stat Grid layout for Analizador Estadístico */
-.stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+@media (min-width: 481px) {
+  .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  }
 }
 
 /* Elegant and polished styles for Reduced Systems Base Buttons */

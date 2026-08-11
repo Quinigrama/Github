@@ -2231,6 +2231,7 @@
                       <option value="50" data-i18n="backtest.periodo.50">Últimos 50 sorteos</option>
                       <option value="100" selected data-i18n="backtest.periodo.100">Últimos 100 sorteos</option>
                       <option value="200" data-i18n="backtest.periodo.200">Últimos 200 sorteos</option>
+                      <option value="outside_calibration" data-i18n="backtest.periodo.fueraCalibracion">Fuera de calibración (excluye últimos 100 sorteos)</option>
                       <option value="all" data-i18n="backtest.periodo.all">Todos los sorteos cargados</option>
                   </select>
               </div>
@@ -2262,7 +2263,10 @@
 
           <!-- Backtesting Results Module (initially hidden or template) -->
           <div id="backtestResults" style="display: none;">
-              <div class="stats-grid" style="margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;">
+              <div id="backtestCalibrationWarning" style="display: none; background: #fffbe3; border: 1px solid #fef08a; border-radius: 8px; padding: 10px 14px; margin-bottom: 15px; font-size: 0.85rem; color: #713f12;" data-i18n="backtest.avisoCalibracion">
+                  ⚠️ Este periodo se solapa con los últimos 100 sorteos, los mismos que usa "Optimizar Filtros" para calibrar. El resultado puede estar sobreajustado. Prueba con "Fuera de calibración" para una validación más honesta.
+              </div>
+              <div class="stats-grid" style="margin-bottom: 20px;">
                   <div class="stat-item">
                       <div class="stat-label" id="lblTotalDraws" data-i18n="backtest.lbl.sorteosSimulados">Sorteos Simulados</div>
                       <div class="stat-value" id="btTotalDraws">-</div>

@@ -11288,7 +11288,10 @@ class DataLotto49Advanced {
       const modeVal = (document.getElementById('backtestMode') as HTMLSelectElement).value;
 
       let drawsToTest = [...this.historicalData];
-      if (periodVal !== 'all') {
+      if (periodVal === 'outside_calibration') {
+          const calibrationWindow = 100;
+          drawsToTest = drawsToTest.slice(0, Math.max(0, drawsToTest.length - calibrationWindow));
+      } else if (periodVal !== 'all') {
           const limit = parseInt(periodVal);
           drawsToTest = drawsToTest.slice(-limit);
       }
@@ -11391,7 +11394,27 @@ class DataLotto49Advanced {
           const p_univ = Math.max(passedSample, 1) / sampleCount;
           const efficiency = p_win / p_univ;
 
+          // Test de permutación: ¿el resultado real se distingue de lo que daría el azar
+          // con un filtro que solo redujera el universo en la misma proporción?
+          const M = 100;
+          const simulatedCounts: number[] = [];
+          for (let sim = 0; sim < M; sim++) {
+              let simulatedPassed = 0;
+              for (let i = 0; i < totalDraws; i++) {
+                  if (Math.random() < p_univ) simulatedPassed++;
+              }
+              simulatedCounts.push(simulatedPassed);
+          }
+          simulatedCounts.sort((a, b) => a - b);
+          const countBelowOrEqual = simulatedCounts.filter(c => c <= passedDrawsCount).length;
+          const percentile = Math.round((countBelowOrEqual / M) * 100);
+
           // Renderizar métricas en la interfaz
+          const calibrationWarningEl = document.getElementById('backtestCalibrationWarning');
+          if (calibrationWarningEl) {
+              calibrationWarningEl.style.display = (periodVal !== 'outside_calibration') ? 'block' : 'none';
+          }
+
           const elTotalDraws = document.getElementById('btTotalDraws');
           const elTicketPrice = document.getElementById('btTicketPrice');
           const elSpent = document.getElementById('btTotalSpent');
@@ -11420,21 +11443,33 @@ class DataLotto49Advanced {
           }
 
           if (elExpVal) {
-              const nivelFiltro = efficiency >= 1.4 ? t('backtest.filtros.nivel.excelente') : efficiency >= 1.1 ? t('backtest.filtros.nivel.bueno') : efficiency >= 0.8 ? t('backtest.filtros.nivel.neutro') : t('backtest.filtros.nivel.bajo');
-              elExpVal.textContent = t('backtest.filtros.poderFiltro', { nivel: nivelFiltro });
-              elExpVal.style.color = efficiency >= 1.1 ? 'var(--success)' : efficiency >= 0.8 ? '#d97706' : 'var(--danger)';
+              let nivelFiltro: string;
+              let nivelColor: string;
+              if (percentile >= 95) {
+                  nivelFiltro = t('backtest.filtros.nivel.muyAlto', { percentile });
+                  nivelColor = 'var(--success)';
+              } else if (percentile >= 75) {
+                  nivelFiltro = t('backtest.filtros.nivel.alto', { percentile });
+                  nivelColor = '#d97706';
+              } else if (percentile > 25) {
+                  nivelFiltro = t('backtest.filtros.nivel.esperado', { percentile });
+                  nivelColor = 'var(--gray)';
+              } else {
+                  nivelFiltro = t('backtest.filtros.nivel.bajoPercentil', { percentile });
+                  nivelColor = 'var(--danger)';
+              }
+              elExpVal.textContent = t('backtest.filtros.poderFiltroPercentil', { nivel: nivelFiltro });
+              elExpVal.style.color = nivelColor;
           }
 
           if (elExpValAdvice) {
-              let adviceText = '';
-              if (efficiency > 1.25) {
-                  adviceText = t('backtest.filtros.adviceAlto', { efficiency: efficiency.toFixed(2), reduction: reductionRate.toFixed(1), passRate: passRateWinning.toFixed(1) });
-              } else if (efficiency >= 0.8) {
-                  adviceText = t('backtest.filtros.adviceMedio', { efficiency: efficiency.toFixed(2), reduction: reductionRate.toFixed(1), passRate: passRateWinning.toFixed(1) });
-              } else {
-                  adviceText = t('backtest.filtros.adviceBajo', { efficiency: efficiency.toFixed(2) });
-              }
-              elExpValAdvice.textContent = adviceText;
+              elExpValAdvice.textContent = t('backtest.filtros.advicePercentil', {
+                  efficiency: efficiency.toFixed(2),
+                  percentile,
+                  M,
+                  passed: passedDrawsCount,
+                  total: totalDraws
+              });
           }
 
           if (elHitsBreakdown) {
