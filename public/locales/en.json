@@ -671,6 +671,7 @@
   "calculator.simple": "🎲 Simple",
   "calculator.multiple": "🎰 Multiple",
   "calculator.numerosMarcados": "Numbers marked:",
+  "calculator.cantidadApuestas": "Number of simple bets:",
   "calculator.estrellasMarcadas": "Extra numbers marked:",
   "calculator.boteActual": "Current jackpot (€):",
   "calculator.numCombinaciones": "Combinations",

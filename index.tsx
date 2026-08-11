@@ -3651,26 +3651,94 @@ class DataLotto49Advanced {
     }
   }
 
+  // Devuelve las opciones oficiales de números/estrellas por juego, igual que renderMultipleStrategyOptions
+  getCalculatorGameOptions() {
+    const id = this.currentGame.id;
+    const isEuromillones = id === 'euromillones';
+    const isEurodreams = id === 'eurodreams';
+    const isGordo = id === 'gordo';
+    const isPowerball = id === 'powerball';
+    const isMegaMillions = id === 'megamillions';
+    const isPrimitiva = id === 'primitiva';
+    const isBonoloto = id === 'bonoloto';
+    const maxStars = this.currentGame.maxStars;
+
+    let numOptions: number[] = [];
+    if (isEurodreams) numOptions = [6, 7, 8, 9, 10];
+    else if (isGordo) numOptions = [6, 7, 8, 9, 10, 11];
+    else if (isEuromillones || isPowerball || isMegaMillions) numOptions = [5, 6, 7, 8, 9, 10];
+    else if (isPrimitiva || isBonoloto) numOptions = [5, 7, 8, 9, 10, 11];
+    else {
+      const isMain5 = this.currentGame.maxNumbers === 5;
+      numOptions = isMain5 ? [5, 6, 7, 8, 9, 10] : [7, 8, 9, 10, 11];
+    }
+    const defaultNum = (isPrimitiva || isBonoloto) ? 7 : (isEurodreams ? 7 : (isGordo ? 6 : (this.currentGame.maxNumbers === 5 ? 6 : 7)));
+
+    let starOptions: number[] = [];
+    if (maxStars > 0) {
+      if (isEuromillones) starOptions = [2, 3, 4, 5];
+      else if (isEurodreams) starOptions = [1, 2, 3, 4, 5];
+      else if (isGordo) starOptions = [1];
+      else starOptions = [maxStars, maxStars + 1, maxStars + 2];
+    }
+    const defaultStar = isEurodreams ? 1 : (isGordo ? 1 : maxStars);
+
+    return { numOptions, defaultNum, starOptions, defaultStar };
+  }
+
+  // Combinaciones oficiales por juego, igual que updateCostBadge (incluye caso especial 5→44 Bonoloto/Primitiva)
+  calcMultipleCombos(n: number, s: number): number {
+    const id = this.currentGame.id;
+    if (id === 'euromillones') {
+      return this.nCr(n, 5) * this.nCr(s, 2);
+    } else if (id === 'eurodreams') {
+      return this.nCr(n, 6) * s;
+    } else if (id === 'gordo') {
+      return this.nCr(n, 5) * s;
+    } else if (id === 'powerball' || id === 'megamillions') {
+      return this.nCr(n, 5) * s;
+    } else if (id === 'primitiva' || id === 'bonoloto') {
+      return n === 5 ? 44 : this.nCr(n, 6);
+    } else {
+      return this.nCr(n, this.currentGame.maxNumbers);
+    }
+  }
+
+  populateCalculatorSelects() {
+    const { numOptions, defaultNum, starOptions, defaultStar } = this.getCalculatorGameOptions();
+    const numSelect = document.getElementById('calcNumbersSelect') as HTMLSelectElement;
+    if (numSelect) {
+      numSelect.innerHTML = numOptions.map(n => `<option value="${n}" ${n === defaultNum ? 'selected' : ''}>${n} números</option>`).join('');
+    }
+    const starSelect = document.getElementById('calcStarsSelect') as HTMLSelectElement;
+    if (starSelect) {
+      starSelect.innerHTML = starOptions.map(s => `<option value="${s}" ${s === defaultStar ? 'selected' : ''}>${s}</option>`).join('');
+    }
+  }
+
   initCalculator() {
     this.updateCalculatorJackpotValue();
+    this.populateCalculatorSelects();
+    this.updateCalculatorStarsWrapper();
 
     document.querySelectorAll('.calculator-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.calculator-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+        const isMultiple = (tab as HTMLElement).dataset.betType === 'multiple';
         const multipleInputs = document.getElementById('calculatorMultipleInputs');
-        if (multipleInputs) {
-          multipleInputs.style.display = (tab as HTMLElement).dataset.betType === 'multiple' ? 'flex' : 'none';
-        }
+        const simpleInputs = document.getElementById('calculatorSimpleInputs');
+        if (multipleInputs) multipleInputs.style.display = isMultiple ? 'flex' : 'none';
+        if (simpleInputs) simpleInputs.style.display = isMultiple ? 'none' : 'flex';
         this.updateCalculatorResults();
       });
     });
 
-    ['calcNumbersInput', 'calcStarsInput', 'calcJackpotInput'].forEach(id => {
+    ['calcSimpleQtyInput', 'calcNumbersSelect', 'calcStarsSelect', 'calcJackpotInput'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', () => this.updateCalculatorResults());
+      document.getElementById(id)?.addEventListener('change', () => this.updateCalculatorResults());
     });
 
-    this.updateCalculatorStarsWrapper();
     this.updateCalculatorResults();
   }
 
@@ -3686,16 +3754,12 @@ class DataLotto49Advanced {
 
     let nCombos = 1;
     if (isMultiple) {
-      const n = parseInt((document.getElementById('calcNumbersInput') as HTMLInputElement)?.value || String(maxNumbers));
-      const nSafe = Math.max(n, maxNumbers);
-      const numCombos = this.nCr(nSafe, maxNumbers);
-      let starCombos = 1;
-      if (maxStars > 0) {
-        const s = parseInt((document.getElementById('calcStarsInput') as HTMLInputElement)?.value || String(maxStars));
-        const sSafe = Math.max(s, maxStars);
-        starCombos = this.nCr(sSafe, maxStars);
-      }
-      nCombos = numCombos * starCombos;
+      const n = parseInt((document.getElementById('calcNumbersSelect') as HTMLSelectElement)?.value || String(maxNumbers));
+      const s = maxStars > 0 ? parseInt((document.getElementById('calcStarsSelect') as HTMLSelectElement)?.value || String(maxStars)) : 1;
+      nCombos = this.calcMultipleCombos(n, s);
+    } else {
+      const qty = parseInt((document.getElementById('calcSimpleQtyInput') as HTMLInputElement)?.value || '1');
+      nCombos = Math.max(qty, 1);
     }
 
     const cost = nCombos * costPerBet;
@@ -4397,6 +4461,9 @@ class DataLotto49Advanced {
     this.renderFilterOptions();
     this.updateUIFromFilterState(); // Ensure UI reflects the loaded filters for this game
     this.updateGameSpecificUI();
+    this.populateCalculatorSelects();
+    this.updateCalculatorStarsWrapper();
+    this.updateCalculatorJackpotValue();
 
     // Re-create grid and reset stats for the new game
     this.createNumbersGrid();

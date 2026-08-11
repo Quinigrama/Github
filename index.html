@@ -2607,14 +2607,19 @@
             <button type="button" class="calculator-tab" data-bet-type="multiple" data-i18n="calculator.multiple">🎰 Múltiple</button>
           </div>
 
-          <div id="calculatorMultipleInputs" class="calculator-multiple-inputs" style="display: none;">
-            <label for="calcNumbersInput" data-i18n="calculator.numerosMarcados">Números marcados:</label>
-            <input type="number" id="calcNumbersInput" class="calculator-input" min="1" value="6" />
-            <div id="calcStarsInputWrapper" style="display: none;">
-              <label for="calcStarsInput" id="calcStarsLabel" data-i18n="calculator.estrellasMarcadas">Estrellas marcadas:</label>
-              <input type="number" id="calcStarsInput" class="calculator-input" min="1" value="2" />
-            </div>
+        <div id="calculatorSimpleInputs" class="calculator-multiple-inputs">
+          <label for="calcSimpleQtyInput" data-i18n="calculator.cantidadApuestas">Cantidad de apuestas simples:</label>
+          <input type="number" id="calcSimpleQtyInput" class="calculator-input" min="1" value="1" />
+        </div>
+
+        <div id="calculatorMultipleInputs" class="calculator-multiple-inputs" style="display: none;">
+          <label for="calcNumbersSelect" data-i18n="calculator.numerosMarcados">Números marcados:</label>
+          <select id="calcNumbersSelect" class="calculator-input"></select>
+          <div id="calcStarsInputWrapper" style="display: none;">
+            <label for="calcStarsSelect" id="calcStarsLabel" data-i18n="calculator.estrellasMarcadas">Estrellas marcadas:</label>
+            <select id="calcStarsSelect" class="calculator-input"></select>
           </div>
+        </div>
 
           <div class="calculator-jackpot-row">
             <label for="calcJackpotInput" data-i18n="calculator.boteActual">Bote actual (€):</label>
