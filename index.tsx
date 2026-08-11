@@ -3624,6 +3624,107 @@ class DataLotto49Advanced {
 
     return parsedResults;
   }
+
+  updateCalculatorJackpotValue() {
+    const jackpotInput = document.getElementById('calcJackpotInput') as HTMLInputElement;
+    if (!jackpotInput) return;
+    const fallbackBotes: { [id: string]: number } = {
+      powerball: 95000000, megamillions: 110000000, euromillones: 89000000,
+      primitiva: 47000000, gordo: 11900000, eurodreams: 7200000,
+      bonoloto: 2800000, nacional: 30000
+    };
+    const cached = (this as any).lastJackpotsData?.find((j: any) => j.id === this.currentGame.id);
+    const boteVal = cached?.bote !== undefined ? cached.bote : (fallbackBotes[this.currentGame.id] || 0);
+    jackpotInput.value = String(boteVal);
+  }
+
+  updateCalculatorStarsWrapper() {
+    const starsWrapper = document.getElementById('calcStarsInputWrapper');
+    const starsLabel = document.getElementById('calcStarsLabel');
+    if (starsWrapper && starsLabel) {
+      if (this.currentGame.maxStars > 0) {
+        starsWrapper.style.display = 'block';
+        starsLabel.textContent = this.currentGame.starName ? `${this.currentGame.starName}:` : t('calculator.estrellasMarcadas');
+      } else {
+        starsWrapper.style.display = 'none';
+      }
+    }
+  }
+
+  initCalculator() {
+    this.updateCalculatorJackpotValue();
+
+    document.querySelectorAll('.calculator-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.calculator-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const multipleInputs = document.getElementById('calculatorMultipleInputs');
+        if (multipleInputs) {
+          multipleInputs.style.display = (tab as HTMLElement).dataset.betType === 'multiple' ? 'flex' : 'none';
+        }
+        this.updateCalculatorResults();
+      });
+    });
+
+    ['calcNumbersInput', 'calcStarsInput', 'calcJackpotInput'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => this.updateCalculatorResults());
+    });
+
+    this.updateCalculatorStarsWrapper();
+    this.updateCalculatorResults();
+  }
+
+  updateCalculatorResults() {
+    const activeTab = document.querySelector('.calculator-tab.active') as HTMLElement;
+    const betType = activeTab?.dataset.betType || 'simple';
+    const isMultiple = betType === 'multiple';
+
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars || 0;
+    const costPerBet = this.currentGame.costPerBet;
+    const currency = this.currentGame.currency || '€';
+
+    let nCombos = 1;
+    if (isMultiple) {
+      const n = parseInt((document.getElementById('calcNumbersInput') as HTMLInputElement)?.value || String(maxNumbers));
+      const nSafe = Math.max(n, maxNumbers);
+      const numCombos = this.nCr(nSafe, maxNumbers);
+      let starCombos = 1;
+      if (maxStars > 0) {
+        const s = parseInt((document.getElementById('calcStarsInput') as HTMLInputElement)?.value || String(maxStars));
+        const sSafe = Math.max(s, maxStars);
+        starCombos = this.nCr(sSafe, maxStars);
+      }
+      nCombos = numCombos * starCombos;
+    }
+
+    const cost = nCombos * costPerBet;
+    const probPct = (this.currentGame.theoreticalProbabilities[String(maxNumbers)] || 0) * nCombos;
+
+    const safeSetText = (id: string, text: string) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    safeSetText('calcNumCombos', String(nCombos));
+    safeSetText('calcCosteTotal', `${currency}${cost.toFixed(2)}`);
+    safeSetText('calcProbabilidad', `${probPct.toFixed(7)}%`);
+
+    const jackpotInput = document.getElementById('calcJackpotInput') as HTMLInputElement;
+    const bote = parseFloat(jackpotInput?.value || '0');
+    const esperanzaWrapper = document.getElementById('calcEsperanzaWrapper');
+    const esperanzaEl = document.getElementById('calcEsperanzaNeta');
+    if (bote > 0 && esperanzaWrapper && esperanzaEl) {
+      esperanzaWrapper.style.display = 'block';
+      const esperanza = (bote * (probPct / 100)) - cost;
+      esperanzaEl.textContent = `${esperanza >= 0 ? '+' : ''}${currency}${esperanza.toFixed(4)}`;
+      esperanzaEl.classList.toggle('positive', esperanza >= 0);
+      esperanzaEl.classList.toggle('negative', esperanza < 0);
+    } else if (esperanzaWrapper) {
+      esperanzaWrapper.style.display = 'none';
+    }
+  }
+
   updateDataAnalysis() {
     const dataInfo = document.getElementById('dataInfo');
     const dataStatsGrid = document.getElementById('dataStatsGrid');
@@ -4403,6 +4504,10 @@ class DataLotto49Advanced {
     this.updateNextDrawDayOptions();
     this.updateTicketDrawDateBadge();
     this.initFilterInfoButtons();
+
+    this.updateCalculatorJackpotValue();
+    this.updateCalculatorStarsWrapper();
+    this.updateCalculatorResults();
   }
 
   getGameAllowedDaysText(): string {
@@ -5857,6 +5962,23 @@ class DataLotto49Advanced {
         this.toggleModal('jackpotsModal', false);
     });
 
+    document.getElementById('sidebarCalculatorBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeSidebar();
+        this.updateCalculatorJackpotValue();
+        this.updateCalculatorStarsWrapper();
+        this.updateCalculatorResults();
+        this.toggleModal('calculatorModal', true);
+    });
+
+    document.getElementById('calculatorCloseBtn')?.addEventListener('click', () => {
+        this.toggleModal('calculatorModal', false);
+    });
+
+    document.getElementById('calculatorConfirmCloseBtn')?.addEventListener('click', () => {
+        this.toggleModal('calculatorModal', false);
+    });
+
 
 
     document.getElementById('vizModeHeatmapBtn')?.addEventListener('click', () => {
@@ -6048,6 +6170,8 @@ class DataLotto49Advanced {
     document.getElementById('confirmChangeAliasBtn')?.addEventListener('click', () => {
         this.saveUserAlias();
     });
+
+    this.initCalculator();
   }
 
   // ===== MODO SIMPLE / EXPERTO DE FILTROS =====
@@ -8470,6 +8594,7 @@ class DataLotto49Advanced {
         const result = await response.json();
         if (result.success && result.data && Array.isArray(result.data)) {
           jackpots = result.data;
+          (this as any).lastJackpotsData = jackpots;
           isFallback = result.isFallback || false;
         } else {
           throw new Error('API return structure invalid');
@@ -8477,7 +8602,11 @@ class DataLotto49Advanced {
       } catch (apiErr) {
         console.warn('API jackpots endpoint unreachable, attempting direct Google Sheets fetch:', apiErr);
         jackpots = await this.parseJackpotsCsvDirectly();
+        (this as any).lastJackpotsData = jackpots;
       }
+      
+      this.updateCalculatorJackpotValue();
+      this.updateCalculatorResults();
       
       // Probabilities of first-tier prizes
       const probabilities: { [key: string]: number } = {
