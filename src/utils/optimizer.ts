@@ -1,5 +1,7 @@
 import { getCombinationStats } from './combinatorial';
 import { isSpaced, getNumberCoords, isLine } from './geometry';
+import { getPopularityWeight, getNashScoreAverage } from './popularity';
+import { getSumTrendScore, getNumberTrendScore } from './regression';
 
 export interface OptimizationContext {
   hotNumbers: Set<number>;
@@ -29,18 +31,29 @@ export function getMarkovScore(
   return score;
 }
 
-export function getPopularityPenalty(
+export function getNashPenalty(
   combination: number[],
+  numberRange: number,
   gridCols: number = 10
 ): number {
   let penalty = 0;
   combination.forEach(n => {
-    if (n <= 31) penalty += 2; // Penalize numbers in the "date range"
+    penalty += getPopularityWeight(n, numberRange) / 10; // 0-10 en vez de 0/2 binario
     const { row, col } = getNumberCoords(n, gridCols);
-    if (row === 0 || row === 6 || col === 0 || col === 6) penalty += 1; // Penalize edge numbers
+    if (row === 0 || row === 6 || col === 0 || col === 6) penalty += 1;
   });
   if (isLine(combination.map(n => getNumberCoords(n, gridCols)))) penalty += 10;
   return penalty;
+}
+
+export function passesNashStrictFilter(
+  combination: number[],
+  numberRange: number,
+  minScore: number,
+  maxScore: number
+): boolean {
+  const score = getNashScoreAverage(combination, numberRange);
+  return score >= minScore && score <= maxScore;
 }
 
 export function calculateOptimizationScore(
@@ -77,16 +90,20 @@ export function calculateOptimizationScore(
     score += getMarkovScore(combination, context.filters, context.historicalData);
   }
   if (context.filters?.useNash) {
-    score -= getPopularityPenalty(combination, context.currentGame?.gridCols || 10) * (context.filters?.ai?.nashWeight || 1);
+    score -= getNashPenalty(combination, context.currentGame?.numberRange || 49, context.currentGame?.gridCols || 10) * (context.filters?.ai?.nashWeight || 1);
   }
   if (context.filters?.useRegression) {
-    combination.forEach(n => {
-      if (context.absentNumbers.has(n)) {
-        score += (context.filters?.ai?.regressionBonus || 0) * 1.5; // Mayor bonus para ausentes
-      } else if (context.coldNumbers.has(n)) {
-        score += (context.filters?.ai?.regressionBonus || 0); // Bonus normal para fríos
-      }
-    });
+    score += getSumTrendScore(
+      combination.reduce((a, b) => a + b, 0),
+      context.historicalData,
+      context.filters?.ai?.regressionBonus || 0
+    );
+    score += getNumberTrendScore(
+      combination,
+      context.historicalData,
+      context.filters?.ai?.regressionWindow || 20,
+      context.filters?.ai?.regressionBonus || 0
+    );
   }
   return score;
 }

@@ -900,7 +900,7 @@
 • Cadena de Markov: Analiza las probabilidades de transición entre estados consecutivos de sorteos pasados.
 • Equilibrio de Nash: Modela la estrategia óptima para maximizar la esperanza matemática frente a selecciones masivas.
 • Regresión a la Media: Principio estadístico por el cual números con frecuencias extremas (muy fríos o calientes) tienden a estabilizarse hacia su promedio histórico.">
-                        <div class="filter-title" data-i18n="filters.predictivos.titulo">🤖 Filtros Predictivos</div>
+                        <div class="filter-title" data-i18n="filters.predictivos.titulo">🤖 Estrategias IA de Generación</div>
                         <div class="switch-control" style="margin-top: 0;">
                             <label class="switch">
                                 <input type="checkbox" id="useMarkovSwitch">
@@ -915,6 +915,26 @@
 
                         <div class="switch-control">
                             <label class="switch">
+                                <input type="checkbox" id="useRegressionSwitch">
+                                <span class="slider"></span>
+                            </label>
+                            <span data-i18n="filters.regresion.switch">Regresión Lineal a la Media</span>
+                        </div>
+                        <div class="ai-config-row">
+                            <label for="regressionBonus"><span data-i18n="filters.regresion.label">Bonus de Regresión:</span> <span id="regressionBonusValue">3</span></label>
+                            <input type="range" id="regressionBonus" min="0" max="10" value="3">
+                        </div>
+                        
+                        <div class="filter-info-text">
+                            <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Ajusta por tendencia.</span>
+                        </div>
+                    </div>
+
+                    <!-- GRUPO: Filtro Nash y Popularidad -->
+                    <div class="filter-group" data-filter-level="expert" title="Optimización por Teoría de Juegos y Popularidad Estimada." data-i18n-title="filters.nash.tooltip" id="nashFilterGroup">
+                        <div class="filter-title" data-i18n="filters.nash.titulo">🎯 Equilibrio de Nash y Popularidad</div>
+                        <div class="switch-control" style="margin-top: 0;">
+                            <label class="switch">
                                 <input type="checkbox" id="useNashSwitch">
                                 <span class="slider"></span>
                             </label>
@@ -925,21 +945,27 @@
                             <input type="range" id="nashWeight" min="0" max="10" value="1">
                         </div>
 
-                        <div class="switch-control">
+                        <div class="switch-control" style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
                             <label class="switch">
-                                <input type="checkbox" id="useRegressionSwitch">
+                                <input type="checkbox" id="nashStrictModeSwitch">
                                 <span class="slider"></span>
                             </label>
-                            <span data-i18n="filters.regresion.switch">Regresión a la Media (Pro-Fríos)</span>
+                            <span data-i18n="filters.nash.strictModeSwitch">Modo estricto (Filtro duro)</span>
                         </div>
-                        <div class="ai-config-row">
-                            <label for="regressionBonus"><span data-i18n="filters.regresion.label">Bonus por nº Frío:</span> <span id="regressionBonusValue">3</span></label>
-                            <input type="range" id="regressionBonus" min="0" max="10" value="3">
+                        <div id="nashStrictSliders" style="display: none; margin-top: 8px;">
+                            <div class="ai-config-row">
+                                <label for="nashMinScore"><span data-i18n="filters.nash.minLabel">CR Mínimo:</span> <span id="nashMinScoreValue">0.0</span></label>
+                                <input type="range" id="nashMinScore" min="0" max="10" step="0.5" value="0.0">
+                            </div>
+                            <div class="ai-config-row">
+                                <label for="nashMaxScore"><span data-i18n="filters.nash.maxLabel">CR Máximo:</span> <span id="nashMaxScoreValue">10.0</span></label>
+                                <input type="range" id="nashMaxScore" min="0" max="10" step="0.5" value="10.0">
+                            </div>
                         </div>
-                        
-                        <div class="filter-info-text">
-                            <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoNashLabel">Nash:</b> <span data-i18n="filters.predictivos.infoNashTexto">Favorece números menos populares.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Apuesta por números 'atrasados'.</span>
-                        </div>
+
+                        <button type="button" id="nashViewMapBtn" class="modal-filter-select" style="margin-top: 10px; width: 100%; text-align: center; background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; font-weight: 600;" data-i18n="filters.nash.viewMapButton">
+                            🗺️ Ver Mapa de Popularidad
+                        </button>
                     </div>
                     </div> <!-- End of standardFiltersContainer -->
                     
@@ -2139,6 +2165,26 @@
         <div class="modal-actions">
             <button class="modal-btn confirm" id="closeHelpModalBtn" style="background-color: var(--primary);">Entendido</button>
         </div>
+    </div>
+  </div>
+
+  <!-- Modal Mapa de Popularidad (Nash) -->
+  <div class="modal" id="popularityMapModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px; width: 95%;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 1.2rem; color: var(--primary);" data-i18n="filters.nash.mapModalTitle">🗺️ Mapa de Popularidad Estimada</h3>
+        <button class="close-btn" id="popularityMapCloseBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 15px 0;">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.5;" data-i18n="filters.nash.mapModalDesc">
+          Representación visual del peso de popularidad estimado por número (0 = poco jugado, 100 = hiper-jugado). Los tonos más oscuros indican números con mayor sesgo de selección del público (fechas, meses, múltiplos de 7).
+        </p>
+        <div id="popularityMapGrid" style="display: grid; gap: 6px; justify-content: center; margin-bottom: 15px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #475569; padding: 8px 12px; background: #f8fafc; border-radius: 8px;">
+          <span data-i18n="filters.nash.mapLegendLow">⚪ Menos jugado (0-30)</span>
+          <span data-i18n="filters.nash.mapLegendHigh">🟠 Más jugado (70-100)</span>
+        </div>
+      </div>
     </div>
   </div>
 

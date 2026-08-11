@@ -41,6 +41,7 @@ import { runFilterAudit } from './src/utils/filterAudit';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
+import { getPopularityWeight } from './src/utils/popularity';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
 import {
   findValidCombinations as runFindValidCombinations,
@@ -196,6 +197,9 @@ interface Filters {
   useMarkov: boolean;
   useNash: boolean;
   useRegression: boolean;
+  nashStrictMode?: boolean;
+  nashMinScore?: number;
+  nashMaxScore?: number;
   ai: {
     markovDepth: number;
     nashWeight: number;
@@ -1800,22 +1804,12 @@ class DataLotto49Advanced {
             <p><strong>Profundidad de Markov:</strong></p>
             <p>Fijar una mayor profundidad hace que el sistema busque patrones y secuencias cíclicas retrospectivas a lo largo de más sorteos previos encadenados en vez de limitarse al último sorteo. El generador utilizará esta información descartando combinaciones poco probables bajo la teoría de transición encadenada.</p>
         `;
-    } else if (target.closest('#useNashSwitch') || target.closest('#nashWeight') || (target.innerText && target.innerText.includes('Equilibrio de Nash'))) {
-        title = "⚖️ Equilibrio de Nash y Teoría de Juegos";
-        body = `
-            <p><strong>¿Qué es el Equilibrio de Nash en Lotería?</strong></p>
-            <p>El Equilibrio de Nash es un concepto fundamental en la <em>Teoría de Juegos</em> desarrollado por el premio Nobel John Nash. Modela la interacción entre múltiples agentes racionales independientes.</p>
-            <p><strong>¿Cómo se aplica a tus ganancias?</strong></p>
-            <p>La lotería no es solo ganarle a la máquina; es también competir contra otros humanos. Si ganas empleando números hiper-populares como cumpleaños tradicionales (del 1 al 31) u ordenaciones redundantes, tendrás que repartir el bote de premios entre cientos de personas ganando una fracción insignificante. El Equilibrio de Nash busca una posición óptima que maximiza tu <strong>Valor Esperado de Retorno (EV)</strong> si aciertas.</p>
-        `;
+    } else if (target.closest('#useNashSwitch') || target.closest('#nashWeight') || target.closest('#nashStrictModeSwitch') || target.closest('#nashFilterGroup') || (target.innerText && target.innerText.includes('Equilibrio de Nash'))) {
+        title = t('filters.nash.helpTitle');
+        body = t('filters.nash.helpBody');
     } else if (target.closest('#useRegressionSwitch') || target.closest('#regressionBonus') || (target.innerText && target.innerText.includes('Regresión Lineal'))) {
-        title = "📈 Regresión Lineal y Tendencia Histórica";
-        body = `
-            <p><strong>¿Qué hace la Regresión Lineal?</strong></p>
-            <p>Es un modelo estadístico descriptivo clásico en análisis de datos. Traza una línea matemática ajustada a los puntos históricos de sorteos pasados, como referencia de tendencia; no predice sorteos futuros, que son independientes entre sí.</p>
-            <p><strong>Aplicación:</strong></p>
-            <p>El sistema proyecta sobre la recta de tiempo el comportamiento ondulatorio de los números, evaluando si el promedio de la combinación ganadora tiende de manera general hacia números más altos o más bajos en los sorteos vigentes. Al asignarle un peso de <strong>Bono de Regresión</strong>, se incentiva la generación de boletos que se ajusten y acompañen este vector de tendencia calculado continuamente.</p>
-        `;
+        title = t('filters.regresion.helpTitle');
+        body = t('filters.regresion.helpBody');
     }
 
     // 5. Filtros Predictivos / Preajustes / Backtesting / Base de datos / Dashboard
@@ -2489,6 +2483,8 @@ class DataLotto49Advanced {
     setRangeVal('markovDepth', this.filters.ai.markovDepth);
     setRangeVal('nashWeight', this.filters.ai.nashWeight);
     setRangeVal('regressionBonus', this.filters.ai.regressionBonus);
+    setRangeVal('nashMinScore', this.filters.nashMinScore ?? 0.0);
+    setRangeVal('nashMaxScore', this.filters.nashMaxScore ?? 10.0);
 
 
     // Chips
@@ -2547,6 +2543,12 @@ class DataLotto49Advanced {
     setChecked('useMarkovSwitch', this.filters.useMarkov);
     setChecked('useNashSwitch', this.filters.useNash);
     setChecked('useRegressionSwitch', this.filters.useRegression);
+    setChecked('nashStrictModeSwitch', !!this.filters.nashStrictMode);
+
+    const strictSliders = document.getElementById('nashStrictSliders');
+    if (strictSliders) {
+      strictSliders.style.display = this.filters.nashStrictMode ? 'block' : 'none';
+    }
 
     if (this.currentGame.id === 'nacional') {
       // Inputs and select elements
@@ -5863,6 +5865,38 @@ class DataLotto49Advanced {
     });
     document.getElementById('closeHelpModalBtn')?.addEventListener('click', () => this.toggleModal('helpModal', false));
 
+    // Nash & Popularity Map Events
+    document.getElementById('nashStrictModeSwitch')?.addEventListener('change', (e) => {
+      const isChecked = (e.target as HTMLInputElement).checked;
+      this.filters.nashStrictMode = isChecked;
+      const strictSliders = document.getElementById('nashStrictSliders');
+      if (strictSliders) {
+        strictSliders.style.display = isChecked ? 'block' : 'none';
+      }
+      this.saveState();
+    });
+
+    const bindRangeDisplay = (id: string) => {
+      const el = document.getElementById(id) as HTMLInputElement;
+      if (!el) return;
+      el.addEventListener('input', () => {
+        const displayEl = document.getElementById(`${id}Value`);
+        if (displayEl) displayEl.textContent = el.value;
+        this.updateFilterStateFromUI();
+      });
+    };
+
+    bindRangeDisplay('nashMinScore');
+    bindRangeDisplay('nashMaxScore');
+
+    document.getElementById('nashViewMapBtn')?.addEventListener('click', () => {
+      this.renderPopularityMapModal();
+    });
+
+    document.getElementById('popularityMapCloseBtn')?.addEventListener('click', () => {
+      this.toggleModal('popularityMapModal', false);
+    });
+
     // Eventos de Registro de Aceptación y Condiciones de Uso
     document.getElementById('viewSignedContractBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -6335,6 +6369,51 @@ class DataLotto49Advanced {
     }
   }
 
+  renderPopularityMapModal() {
+    const gridContainer = document.getElementById('popularityMapGrid');
+    if (!gridContainer) return;
+    gridContainer.innerHTML = '';
+
+    const totalNumbers = this.currentGame?.numberRange || 49;
+    const cols = this.currentGame?.gridCols || 10;
+    gridContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+    for (let n = 1; n <= totalNumbers; n++) {
+      const weight = getPopularityWeight(n, totalNumbers);
+      const alpha = 0.15 + (weight / 100) * 0.8;
+      const bg = `rgba(249, 115, 22, ${alpha.toFixed(2)})`;
+      const textColor = weight > 50 ? '#ffffff' : '#1e293b';
+      const border = weight > 50 ? '1px solid #ea580c' : '1px solid #fed7aa';
+
+      const cell = document.createElement('div');
+      cell.style.cssText = `
+        background-color: ${bg};
+        color: ${textColor};
+        border: ${border};
+        border-radius: 8px;
+        padding: 6px 2px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+      `;
+      cell.title = `Número ${n}: Peso Popularidad = ${weight}/100`;
+
+      cell.innerHTML = `
+        <span>${n}</span>
+        <span style="font-size: 0.65rem; opacity: 0.85; font-weight: normal;">${weight}</span>
+      `;
+
+      gridContainer.appendChild(cell);
+    }
+
+    this.toggleModal('popularityMapModal', true);
+  }
+
   // ===== FILTROS (Reactivados y completos) =====
   updateFilterStateFromUI() {
       // FIX: Added type safety for DOM element access.
@@ -6378,6 +6457,9 @@ class DataLotto49Advanced {
       this.filters.useMarkov = getChecked('useMarkovSwitch');
       this.filters.useNash = getChecked('useNashSwitch');
       this.filters.useRegression = getChecked('useRegressionSwitch');
+      this.filters.nashStrictMode = getChecked('nashStrictModeSwitch');
+      this.filters.nashMinScore = getVal('nashMinScore', true);
+      this.filters.nashMaxScore = getVal('nashMaxScore', true);
       
       this.filters.ai.markovDepth = getVal('markovDepth');
       this.filters.ai.nashWeight = getVal('nashWeight');

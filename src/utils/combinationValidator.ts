@@ -1,4 +1,5 @@
 import { hasGeometricPattern, isSpaced } from './geometry';
+import { passesNashStrictFilter } from './optimizer';
 
 const DEFAULT_PRIMES = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]);
 
@@ -344,6 +345,11 @@ export function isValidCombination(
       if (filters.geometric.favor && filters.geometric.favor.includes('espaciados')) {
           if (!isSpaced(combination, currentGame.gridCols || 7)) return false;
       }
+  }
+
+  // 12.5 NASH STRICT MODE
+  if (filters.nashStrictMode) {
+      if (!passesNashStrictFilter(combination, currentGame.numberRange, filters.nashMinScore ?? 0, filters.nashMaxScore ?? 10)) return false;
   }
 
   // 13. ESTRELLAS: checked in similar lazy order
