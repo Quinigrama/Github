@@ -13,6 +13,28 @@ export function linearRegression(xs: number[], ys: number[]): { slope: number; i
   return { slope, intercept };
 }
 
+export interface ScatterPoint {
+  x: number;
+  y: number;
+  date?: string;
+}
+
+export function getSumSeriesWithRegression(historicalData: any[]): {
+  points: ScatterPoint[];
+  slope: number;
+  intercept: number;
+} {
+  const points: ScatterPoint[] = (historicalData || []).map((d, i) => ({
+    x: i,
+    y: (d.numbers || []).reduce((a: number, b: number) => a + b, 0),
+    date: d.date || d.fecha
+  }));
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const { slope, intercept } = linearRegression(xs, ys);
+  return { points, slope, intercept };
+}
+
 // Serie 1: tendencia de la SUMA total de la combinación ganadora por sorteo
 export function getSumTrendScore(candidateSum: number, historicalData: any[], bonusWeight: number): number {
   if (!historicalData || historicalData.length < 5) return 0;

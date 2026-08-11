@@ -42,6 +42,7 @@ import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight } from './src/utils/popularity';
+import { getSumSeriesWithRegression } from './src/utils/regression';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
 import {
   findValidCombinations as runFindValidCombinations,
@@ -706,7 +707,7 @@ class DataLotto49Advanced {
     anonymousUserId: string;
     googleAuthToken: string | null = null;
     googleUser: User | null = null;
-    vizMode: 'heatmap' | 'ranking' = 'heatmap';
+    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' = 'heatmap';
     vizTarget: 'number' | 'star' = 'number';
     officialDrawsPage: number = 1;
     officialDrawsPageSize: number = 20;
@@ -6131,18 +6132,32 @@ class DataLotto49Advanced {
 
 
 
-    document.getElementById('vizModeHeatmapBtn')?.addEventListener('click', () => {
-        this.vizMode = 'heatmap';
-        document.getElementById('vizModeHeatmapBtn')?.classList.add('active');
-        document.getElementById('vizModeRankingBtn')?.classList.remove('active');
+    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi') => {
+        this.vizMode = mode;
+        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.toggle('active', 
+                (id === 'vizModeHeatmapBtn' && mode === 'heatmap') ||
+                (id === 'vizModeRankingBtn' && mode === 'ranking') ||
+                (id === 'vizModeTrendBtn' && mode === 'trend') ||
+                (id === 'vizModeChiBtn' && mode === 'chi')
+            );
+        });
         this.renderFrequencyChart();
-    });
+    };
 
-    document.getElementById('vizModeRankingBtn')?.addEventListener('click', () => {
-        this.vizMode = 'ranking';
-        document.getElementById('vizModeRankingBtn')?.classList.add('active');
-        document.getElementById('vizModeHeatmapBtn')?.classList.remove('active');
-        this.renderFrequencyChart();
+    document.getElementById('vizModeHeatmapBtn')?.addEventListener('click', () => updateVizModeButtons('heatmap'));
+    document.getElementById('vizModeRankingBtn')?.addEventListener('click', () => updateVizModeButtons('ranking'));
+    document.getElementById('vizModeTrendBtn')?.addEventListener('click', () => updateVizModeButtons('trend'));
+    document.getElementById('vizModeChiBtn')?.addEventListener('click', () => updateVizModeButtons('chi'));
+
+    document.getElementById('helpModal')?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.id === 'goToTrendChartBtn' || target.closest('#goToTrendChartBtn'))) {
+        this.toggleModal('helpModal', false);
+        updateVizModeButtons('trend');
+        this.toggleModal('dataVizModal', true);
+      }
     });
 
     document.getElementById('vizTargetSelect')?.addEventListener('change', (e) => {
@@ -9635,6 +9650,249 @@ class DataLotto49Advanced {
     }
   }
 
+  getFrequencyStats() {
+    const isNacional = this.currentGame.id === 'nacional';
+    const isGordo = this.currentGame.id === 'gordo';
+
+    const N = this.vizTarget === 'star'
+        ? this.historicalData.filter(d => d.stars && d.stars.length > 0).length
+        : this.historicalData.filter(d => d.numbers && d.numbers.length > 0).length;
+    
+    const frequencies: { [key: number]: number } = {};
+    const startNum = isNacional ? 10 : 1;
+    for (let i = startNum; i <= this.currentGame.numberRange; i++) frequencies[i] = 0;
+    
+    this.historicalData.forEach(draw => {
+        (draw.numbers || []).forEach(num => {
+            if (frequencies[num] !== undefined) frequencies[num]++;
+        });
+    });
+
+    const starFrequencies: { [key: number]: number } = {};
+    if (this.currentGame.maxStars > 0) {
+        const minStar = isGordo ? 0 : 1;
+        const maxStar = isGordo ? 9 : this.currentGame.starRange;
+        for (let i = minStar; i <= maxStar; i++) starFrequencies[i] = 0;
+        this.historicalData.forEach(draw => {
+            if (draw.stars) {
+                draw.stars.forEach(star => {
+                    if (starFrequencies[star] !== undefined) starFrequencies[star]++;
+                });
+            }
+        });
+    }
+
+    let activeFreqs: { [key: number]: number } = {};
+    let minKey = 1;
+    let maxKey = 1;
+    let prob = 0;
+
+    if (isNacional) {
+        activeFreqs = frequencies;
+        minKey = 10;
+        maxKey = 59;
+        prob = 0.1;
+    } else if (this.vizTarget === 'star') {
+        activeFreqs = starFrequencies;
+        minKey = isGordo ? 0 : 1;
+        maxKey = isGordo ? 9 : this.currentGame.starRange;
+        prob = isGordo ? 0.1 : (this.currentGame.maxStars / this.currentGame.starRange);
+    } else {
+        activeFreqs = frequencies;
+        minKey = 1;
+        maxKey = this.currentGame.numberRange;
+        prob = this.currentGame.maxNumbers / this.currentGame.numberRange;
+    }
+
+    const mean = N > 0 ? N * prob : 0;
+    const variance = N > 0 ? N * prob * (1 - prob) : 0;
+    const sd = N > 0 ? Math.sqrt(variance) : 0;
+
+    return { N, activeFreqs, minKey, maxKey, prob, mean, variance, sd, isNacional, isGordo };
+  }
+
+  computeChiSquare(activeFreqs: Record<number, number>, expectedPerCategory: number): {
+    chiSquare: number;
+    degreesOfFreedom: number;
+  } {
+    const observed = Object.values(activeFreqs);
+    if (observed.length === 0 || expectedPerCategory <= 0) return { chiSquare: 0, degreesOfFreedom: 0 };
+    const chiSquare = observed.reduce((sum, o) => sum + Math.pow(o - expectedPerCategory, 2) / expectedPerCategory, 0);
+    const degreesOfFreedom = observed.length - 1;
+    return { chiSquare, degreesOfFreedom };
+  }
+
+  chiSquareCriticalValue(df: number, zAlpha: number = 1.645): number {
+    if (df <= 0) return 0;
+    const term = 1 - (2 / (9 * df)) + zAlpha * Math.sqrt(2 / (9 * df));
+    return df * Math.pow(term, 3);
+  }
+
+  renderTrendScatterChart() {
+    const container = document.getElementById('frequencyChartContainer');
+    const summary = document.getElementById('dataVizSummary');
+    if (!container) return;
+
+    if (!this.dataLoaded || !this.historicalData || this.historicalData.length === 0) {
+      container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding-top: 50px;">${t('dataviz.cargaGrafico')}</div>`;
+      if (summary) summary.innerHTML = `<div style="color:#666; text-align: center; width: 100%;">${t('dataviz.cargaResumen')}</div>`;
+      return;
+    }
+
+    const { points, slope, intercept } = getSumSeriesWithRegression(this.historicalData);
+    if (points.length === 0) return;
+
+    const ys = points.map(p => p.y);
+    const rawMinY = Math.min(...ys);
+    const rawMaxY = Math.max(...ys);
+    const yPadding = Math.max(10, Math.round((rawMaxY - rawMinY) * 0.1));
+    const minY = Math.max(0, rawMinY - yPadding);
+    const maxY = rawMaxY + yPadding;
+    const maxX = Math.max(1, points.length - 1);
+
+    const svgWidth = 800;
+    const svgHeight = 360;
+    const marginTop = 30;
+    const marginBottom = 50;
+    const marginLeft = 55;
+    const marginRight = 25;
+
+    const chartW = svgWidth - marginLeft - marginRight;
+    const chartH = svgHeight - marginTop - marginBottom;
+
+    const scaleX = (x: number) => marginLeft + (x / maxX) * chartW;
+    const scaleY = (y: number) => marginTop + chartH - ((y - minY) / Math.max(1, maxY - minY)) * chartH;
+
+    let yTicksHTML = '';
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+      const val = Math.round(minY + (i / ySteps) * (maxY - minY));
+      const yPos = scaleY(val);
+      yTicksHTML += `
+        <line x1="${marginLeft}" y1="${yPos.toFixed(1)}" x2="${(svgWidth - marginRight).toFixed(1)}" y2="${yPos.toFixed(1)}" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4" />
+        <text x="${(marginLeft - 8).toFixed(1)}" y="${(yPos + 4).toFixed(1)}" font-size="11" fill="#64748b" text-anchor="end">${val}</text>
+      `;
+    }
+
+    const circlesHTML = points.map(p => {
+      const cx = scaleX(p.x);
+      const cy = scaleY(p.y);
+      const titleText = `${p.date ? p.date + ' | ' : ''}Sorteo #${p.x + 1}: Suma = ${p.y}`;
+      return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#64748b" opacity="0.65"><title>${titleText}</title></circle>`;
+    }).join('');
+
+    const x0 = 0;
+    const y0 = intercept;
+    const x1 = maxX;
+    const y1 = slope * maxX + intercept;
+    const regLineHTML = `<line x1="${scaleX(x0).toFixed(1)}" y1="${scaleY(y0).toFixed(1)}" x2="${scaleX(x1).toFixed(1)}" y2="${scaleY(y1).toFixed(1)}" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>`;
+
+    const firstLabel = points[0]?.date || '#1';
+    const midIndex = Math.floor(points.length / 2);
+    const midLabel = points[midIndex]?.date || `#${midIndex + 1}`;
+    const lastLabel = points[points.length - 1]?.date || `#${points.length}`;
+
+    const xTicksHTML = `
+      <text x="${marginLeft}" y="${svgHeight - 15}" font-size="11" fill="#64748b" text-anchor="start">${firstLabel}</text>
+      <text x="${(marginLeft + chartW / 2).toFixed(1)}" y="${svgHeight - 15}" font-size="11" fill="#64748b" text-anchor="middle">${midLabel}</text>
+      <text x="${svgWidth - marginRight}" y="${svgHeight - 15}" font-size="11" fill="#64748b" text-anchor="end">${lastLabel}</text>
+    `;
+
+    const axesHTML = `
+      <line x1="${marginLeft}" y1="${marginTop}" x2="${marginLeft}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+      <line x1="${marginLeft}" y1="${marginTop + chartH}" x2="${svgWidth - marginRight}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+    `;
+
+    container.innerHTML = `
+      <div style="width: 100%; overflow-x: auto;">
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 400px; display: block; background: #ffffff; font-family: system-ui, sans-serif;">
+          ${yTicksHTML}
+          ${axesHTML}
+          ${circlesHTML}
+          ${regLineHTML}
+          ${xTicksHTML}
+        </svg>
+      </div>
+    `;
+
+    if (summary) {
+      const formattedSlope = (slope >= 0 ? '+' : '') + slope.toFixed(4);
+      summary.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+          <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+            <span>📈 ${t('dataviz.tendenciaResumen', { slope: formattedSlope })}</span>
+            <span style="font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">Pendiente m = ${formattedSlope}</span>
+          </div>
+          <div style="font-size: 0.82rem; color: #64748b; font-style: italic; line-height: 1.4;">
+            ${t('dataviz.tendenciaAviso')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  renderChiSquareCard() {
+    const container = document.getElementById('frequencyChartContainer');
+    const summary = document.getElementById('dataVizSummary');
+    if (!container) return;
+
+    if (!this.dataLoaded || !this.historicalData || this.historicalData.length === 0) {
+      container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding-top: 50px;">${t('dataviz.cargaGrafico')}</div>`;
+      if (summary) summary.innerHTML = `<div style="color:#666; text-align: center; width: 100%;">${t('dataviz.cargaResumen')}</div>`;
+      return;
+    }
+
+    const { activeFreqs, mean, N } = this.getFrequencyStats();
+    const { chiSquare, degreesOfFreedom } = this.computeChiSquare(activeFreqs, mean);
+    const criticalVal = this.chiSquareCriticalValue(degreesOfFreedom, 1.645);
+    const isSignificant = chiSquare > criticalVal;
+
+    const statusBg = isSignificant ? '#fef2f2' : '#f0fdf4';
+    const statusBorder = isSignificant ? '#fca5a5' : '#86efac';
+    const statusColor = isSignificant ? '#dc2626' : '#16a34a';
+    const verdictText = isSignificant ? t('dataviz.chiSignificativo') : t('dataviz.chiNoSignificativo');
+
+    if (summary) {
+      summary.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px;">
+          <div>
+            🔬 <strong>${t('dataviz.chiTitulo')}</strong>
+          </div>
+          <div style="font-size: 0.85rem; color: #475569;">
+            ${t('dataviz.analizar')}: <strong>${this.vizTarget === 'star' ? t('dataviz.estrellasGenerico') : t('dataviz.numerosPrincipales')}</strong> | N = ${N} sorteos
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = `
+      <div style="padding: 10px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.chiValor')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${chiSquare.toFixed(2)}</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.chiGL')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${degreesOfFreedom}</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.chiCritico')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${criticalVal.toFixed(2)}</div>
+          </div>
+        </div>
+
+        <div style="background: ${statusBg}; border: 1px solid ${statusBorder}; border-radius: 12px; padding: 16px; text-align: center; color: ${statusColor}; font-weight: 700; font-size: 0.98rem; line-height: 1.5;">
+          ${verdictText}
+        </div>
+
+        <div style="font-size: 0.82rem; color: #64748b; font-style: italic; line-height: 1.5; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+          ${t('dataviz.chiAviso')}
+        </div>
+      </div>
+    `;
+  }
+
   // ===== NEW FEATURES =====
 
   renderFrequencyChart() {
@@ -9651,6 +9909,20 @@ class DataLotto49Advanced {
             summary.innerHTML = `<div style="color:#666; text-align: center; width: 100%;">${t('dataviz.cargaResumen')}</div>`;
         }
         return;
+    }
+
+    if (this.vizMode === 'trend') {
+      if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
+      this.renderTrendScatterChart();
+      return;
+    }
+
+    if (this.vizMode === 'chi') {
+      if (this.currentGame.maxStars > 0 && targetSelectorContainer) {
+        targetSelectorContainer.style.display = 'flex';
+      }
+      this.renderChiSquareCard();
+      return;
     }
 
     // Toggle target selector visibility and update star option text
@@ -9680,65 +9952,7 @@ class DataLotto49Advanced {
         if (select) select.value = 'number';
     }
 
-    const isNacional = this.currentGame.id === 'nacional';
-    const isGordo = this.currentGame.id === 'gordo';
-
-    const N = this.vizTarget === 'star'
-        ? this.historicalData.filter(d => d.stars && d.stars.length > 0).length
-        : this.historicalData.filter(d => d.numbers && d.numbers.length > 0).length;
-    
-    // Calculate frequencies for numbers
-    const frequencies: { [key: number]: number } = {};
-    const startNum = isNacional ? 10 : 1;
-    for (let i = startNum; i <= this.currentGame.numberRange; i++) frequencies[i] = 0;
-    
-    this.historicalData.forEach(draw => {
-        draw.numbers.forEach(num => {
-            if (frequencies[num] !== undefined) frequencies[num]++;
-        });
-    });
-
-    // Calculate frequencies for stars
-    const starFrequencies: { [key: number]: number } = {};
-    if (this.currentGame.maxStars > 0) {
-        const minStar = isGordo ? 0 : 1;
-        const maxStar = isGordo ? 9 : this.currentGame.starRange;
-        for (let i = minStar; i <= maxStar; i++) starFrequencies[i] = 0;
-        this.historicalData.forEach(draw => {
-            if (draw.stars) {
-                draw.stars.forEach(star => {
-                    if (starFrequencies[star] !== undefined) starFrequencies[star]++;
-                });
-            }
-        });
-    }
-
-    // Determine current active metrics
-    let activeFreqs: { [key: number]: number } = {};
-    let minKey = 1;
-    let maxKey = 1;
-    let prob = 0;
-
-    if (isNacional) {
-        activeFreqs = frequencies;
-        minKey = 10;
-        maxKey = 59;
-        prob = 0.1; // 1/10
-    } else if (this.vizTarget === 'star') {
-        activeFreqs = starFrequencies;
-        minKey = isGordo ? 0 : 1;
-        maxKey = isGordo ? 9 : this.currentGame.starRange;
-        prob = isGordo ? 0.1 : (this.currentGame.maxStars / this.currentGame.starRange);
-    } else {
-        activeFreqs = frequencies;
-        minKey = 1;
-        maxKey = this.currentGame.numberRange;
-        prob = this.currentGame.maxNumbers / this.currentGame.numberRange;
-    }
-
-    const mean = N > 0 ? N * prob : 0;
-    const variance = N > 0 ? N * prob * (1 - prob) : 0;
-    const sd = N > 0 ? Math.sqrt(variance) : 0;
+    const { N, activeFreqs, minKey, maxKey, mean, sd, isNacional, isGordo } = this.getFrequencyStats();
 
     // Calculate min/max actual frequencies
     let maxActualFreq = -1;
