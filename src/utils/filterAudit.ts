@@ -41,6 +41,7 @@ export function runFilterAudit(
     consecutivos: { name: 'Bloques Consecutivos', count: 0, passed: 0, percent: 100 },
     agrupDecenas: { name: 'Agrupación por Decenas', count: 0, passed: 0, percent: 100 },
     desviacion: { name: 'Desviación Estándar', count: 0, passed: 0, percent: 100 },
+    positionRange: { name: 'Rango Óptimo por Posición', count: 0, passed: 0, percent: 100 },
     entropyTerminaciones: { name: 'Entropía (Terminaciones)', count: 0, passed: 0, percent: 100 },
     entropyIntervalos: { name: 'Entropía (Intervalos)', count: 0, passed: 0, percent: 100 },
     geometric: { name: 'Exclusión Geométrica', count: 0, passed: 0, percent: 100 }
@@ -54,6 +55,9 @@ export function runFilterAudit(
     results.starPrimos = { name: 'Estrellas Primos', count: 0, passed: 0, percent: 100 };
     results.starConsecutivos = { name: 'Estrellas Consecutivas', count: 0, passed: 0, percent: 100 };
     results.starDistancia = { name: 'Estrellas Distancia', count: 0, passed: 0, percent: 100 };
+    if (maxStars >= 2) {
+      results.starPositionRange = { name: 'Rango Óptimo por Posición (Estrellas)', count: 0, passed: 0, percent: 100 };
+    }
   }
 
   let actualSampleSize = 0;
@@ -163,6 +167,17 @@ export function runFilterAudit(
       const mean = sum / maxNumbers;
       const stdDev = Math.sqrt(combo.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / maxNumbers);
       if (stdDev >= filters.desviacion.min && stdDev <= filters.desviacion.max) results.desviacion.passed++;
+    }
+
+    // Rango Óptimo por Posición
+    if (currentGame.id !== 'nacional' && filters.positionRange?.enabled && Array.isArray(filters.positionRange.ranges)) {
+      results.positionRange.count++;
+      const sorted = [...combo].sort((a, b) => a - b);
+      const ok = filters.positionRange.ranges.every((r: any) => {
+        const val = sorted[r.position - 1];
+        return val === undefined || (val >= r.min && val <= r.max);
+      });
+      if (ok) results.positionRange.passed++;
     }
 
     // Entropía de Terminaciones
@@ -277,6 +292,15 @@ export function runFilterAudit(
           if (d < minStarDist) minStarDist = d;
         }
         if (minStarDist >= filters.starDistancia.min && minStarDist <= filters.starDistancia.max) results.starDistancia.passed++;
+      }
+      if (currentGame.id !== 'nacional' && maxStars >= 2 && filters.starPositionRange?.enabled && Array.isArray(filters.starPositionRange.ranges)) {
+        results.starPositionRange.count++;
+        const sortedStars = [...stars].sort((a, b) => a - b);
+        const ok = filters.starPositionRange.ranges.every((r: any) => {
+          const val = sortedStars[r.position - 1];
+          return val === undefined || (val >= r.min && val <= r.max);
+        });
+        if (ok) results.starPositionRange.passed++;
       }
     }
   }

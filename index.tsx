@@ -2005,6 +2005,7 @@ class DataLotto49Advanced {
 
     this.updateFilterStateFromUI();
     const { results, actualSampleSize } = this.runFilterAudit(1000);
+    console.table(results);
 
     // Filter results so we only show active filters that actually restrict combinations (percent < 100)
     const activeFilters = Object.keys(results)
@@ -2016,14 +2017,14 @@ class DataLotto49Advanced {
     if (activeFilters.length === 0) {
       ticketDiv.innerHTML = `
         <div class="ticket-header" style="border-bottom: 2px solid #fee2e2; margin-bottom: 12px; padding-bottom: 10px;">
-          <h4 style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-weight: bold;">⚠️ Generación Incompleta</h4>
-          <span style="font-size: 0.8rem; color: #7f1d1d; font-weight: bold;">Filtros Extremos</span>
+          <h4 style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-weight: bold;">${t('conflict.generacionIncompleta')}</h4>
+          <span style="font-size: 0.8rem; color: #7f1d1d; font-weight: bold;">${t('conflict.filtrosExtremos')}</span>
         </div>
         <div style="padding: 10px 5px; color: #7f1d1d; font-size: 0.9rem; line-height: 1.5;">
-          <p style="margin: 0 0 10px 0; font-weight: bold;">No se han podido encontrar combinaciones válidas en 50,000 intentos.</p>
-          <p style="margin: 0 0 15px 0; color: #991b1b; font-size: 0.85rem;">El universo seleccionado en el volante interactivo es demasiado bajo o hay un conflicto estricto en los filtros avanzados configurados.</p>
+          <p style="margin: 0 0 10px 0; font-weight: bold;">${t('conflict.noCombinaciones')}</p>
+          <p style="margin: 0 0 15px 0; color: #991b1b; font-size: 0.85rem;">${t('conflict.universoBajo')}</p>
           <button id="resetDiagFiltersBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; font-size: 0.9rem;">
-            🔄 Restablecer Filtros de ${this.currentGame.name}
+            ${t('conflict.restablecerBoton', { game: this.currentGame.name })}
           </button>
         </div>
       `;
@@ -2035,50 +2036,54 @@ class DataLotto49Advanced {
         const isCritical = item.percent < 8;
         const isBottleneck = index === 0 && item.percent < 30;
         const barColor = isCritical ? '#ef4444' : isBottleneck ? '#f97316' : '#10b981';
-        const labelText = isCritical ? 'Bloqueo Crítico 🚨' : isBottleneck ? 'Filtro Restrictivo ⚠️' : 'Filtro Activo';
+        const labelText = isCritical ? t('conflict.bloqueoCritico') : isBottleneck ? t('conflict.filtroRestrictivo') : t('conflict.filtroActivo');
         
         let recommendation = '';
         if (item.key === 'sum') {
-          recommendation = '💡 Amplía el Rango de Suma en el panel de control avanzado.';
+          recommendation = t('conflict.rec.sum');
         } else if (item.key === 'terminacionesDistintas') {
-          recommendation = '💡 Permite mayor variedad de terminaciones distintas.';
+          recommendation = t('conflict.rec.terminacionesDistintas');
         } else if (item.key === 'parImpar') {
-          recommendation = '💡 Activa más combinaciones de proporción Par/Impar.';
+          recommendation = t('conflict.rec.parImpar');
         } else if (item.key === 'bajosAltos') {
-          recommendation = '💡 Activa más alternativas para proporción Bajos/Altos.';
+          recommendation = t('conflict.rec.bajosAltos');
         } else if (item.key === 'primos') {
-          recommendation = '💡 Amplía los límites mínimo o máximo de cantidad de primos.';
+          recommendation = t('conflict.rec.primos');
         } else if (item.key === 'distancia') {
-          recommendation = '💡 Relaja la distancia mínima de espaciado o aumenta la máxima.';
+          recommendation = t('conflict.rec.distancia');
         } else if (item.key === 'sumaDigitos') {
-          recommendation = '💡 Amplía los márgenes de suma de dígitos individuales.';
+          recommendation = t('conflict.rec.sumaDigitos');
         } else if (item.key === 'consecutivos') {
-          recommendation = '💡 Selecciona más patrones de bloques consecutivos permitidos.';
+          recommendation = t('conflict.rec.consecutivos');
         } else if (item.key === 'agrupDecenas') {
-          recommendation = '💡 Permite más patrones de agrupación por decenas.';
+          recommendation = t('conflict.rec.agrupDecenas');
         } else if (item.key === 'desviacion') {
-          recommendation = '💡 Amplía el rango de desviación estándar permitida.';
+          recommendation = t('conflict.rec.desviacion');
         } else if (item.key === 'entropyTerminaciones') {
-          recommendation = '💡 Amplía los límites de Entropía de Terminaciones para mayor variedad de finales.';
+          recommendation = t('conflict.rec.entropyTerminaciones');
         } else if (item.key === 'entropyIntervalos') {
-          recommendation = '💡 Ajusta la Entropía de Intervalos para permitir un espaciado de números más flexible.';
+          recommendation = t('conflict.rec.entropyIntervalos');
         } else if (item.key === 'geometric') {
-          recommendation = '💡 Desmarca patrones visuales excluidos en el panel geométrico.';
+          recommendation = t('conflict.rec.geometric');
+        } else if (item.key === 'positionRange') {
+          recommendation = t('conflict.rec.positionRange');
+        } else if (item.key === 'starPositionRange') {
+          recommendation = t('conflict.rec.starPositionRange');
         } else if (item.key?.startsWith('star')) {
-          recommendation = '💡 Flexibiliza filtros específicos aplicados para las estrellas.';
+          recommendation = t('conflict.rec.star');
         }
 
         filtersHtml += `
           <div style="background: ${isCritical ? '#fff5f5' : '#fffaf5'}; border: 1px solid ${isCritical ? '#fecaca' : '#fed7aa'}; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
               <span style="font-weight: bold; color: #1e293b;">${item.name}</span>
-              <span style="font-weight: 900; color: ${barColor}">${item.percent}% aprueban</span>
+              <span style="font-weight: 900; color: ${barColor}">${t('conflict.aprueban', { percent: item.percent })}</span>
             </div>
             <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
               <div style="width: ${item.percent}%; height: 100%; background: ${barColor}; border-radius: 3px;"></div>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
-              <span>${item.passed} de ${item.count} apuestas de prueba pasaron</span>
+              <span>${t('conflict.apuestasPasaron', { passed: item.passed, count: item.count })}</span>
               <span style="font-weight: bold; color: ${barColor}">${labelText}</span>
             </div>
             ${recommendation ? `<div style="font-size: 0.75rem; color: #991b1b; margin-top: 4px; padding: 5px 8px; background: #fee2e2; border-radius: 4px; border-left: 2px solid ${barColor}; font-weight: 500;">${recommendation}</div>` : ''}
@@ -2088,13 +2093,12 @@ class DataLotto49Advanced {
 
       ticketDiv.innerHTML = `
         <div class="ticket-header" style="border-bottom: 2px solid #fee2e2; margin-bottom: 12px; padding-bottom: 10px;">
-          <h4 style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-weight: bold;">⚠️ Conflicto de Filtros Detectado</h4>
-          <span style="font-size: 0.8rem; color: #7f1d1d; font-weight: bold;">Auditoría de Embudo</span>
+          <h4 style="color: #dc2626; display: flex; align-items: center; gap: 8px; margin: 0; font-weight: bold;">${t('conflict.tituloDetectado')}</h4>
+          <span style="font-size: 0.8rem; color: #7f1d1d; font-weight: bold;">${t('conflict.auditoriaEmbudo')}</span>
         </div>
         <div style="padding: 0 5px; display: flex; flex-direction: column; gap: 15px;">
           <div style="color: #7f1d1d; font-size: 0.85rem; line-height: 1.5; background: #fee2e2; padding: 10px; border-radius: 6px; border-left: 4px solid #ef4444;">
-            <strong>⚠️ Bloqueo matemático detectado:</strong> No se han podido encontrar apuestas viables en 50,000 intentos.
-            Nuestro auditor ha analizado tus filtros mediante simulaciones de prueba en tiempo real para encontrar el embudo:
+            ${t('conflict.bloqueoMatematico')}
           </div>
           
           <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -2103,10 +2107,10 @@ class DataLotto49Advanced {
 
           <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
             <button id="resetDiagFiltersBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.1s, background 0.2s; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.23);">
-              🔄 Restablecer Filtros de ${this.currentGame.name}
+              ${t('conflict.restablecerBoton', { game: this.currentGame.name })}
             </button>
             <p style="font-size: 0.75rem; color: #64748b; text-align: center; margin: 0;">
-              Esto cargará los rangos recomendados diseñados por el motor de probabilidades para que la generación funcione de inmediato.
+              ${t('conflict.restablecerDescripcion')}
             </p>
           </div>
         </div>
@@ -2410,6 +2414,7 @@ class DataLotto49Advanced {
       consecutivos: '#consecutivosOptions',
       agrupDecenas: '#agrupDecenasOptions',
       desviacion: '#desviacionMin',
+      positionRange: '#positionRangeFilterGroup',
       entropyTerminaciones: '#entropyTerminacionesMin',
       entropyIntervalos: '#entropyIntervalosMin',
       geometric: '#geometricOptions',
@@ -2419,7 +2424,8 @@ class DataLotto49Advanced {
       starSumaDigitos: '#starSumaDigitosMin',
       starPrimos: '#starPrimosMin',
       starConsecutivos: '#starConsecutivosOptions',
-      starDistancia: '#starDistanciaMin'
+      starDistancia: '#starDistanciaMin',
+      starPositionRange: '#starPositionRangeFilterGroup'
     };
 
     // Remove any existing custom activity badges inside ALL .filter-title elements
@@ -11819,558 +11825,6 @@ class DataLotto49Advanced {
   // ============================================
   // MATHEMATICAL FILTERS & OPTIMIZATION
   // ============================================
-
-  // ===== OPTIMIZACIÓN MATEMÁTICA DE FILTROS =====
-  applyAiFilters() {
-    this.applyRoberTheorem();
-    return;
-  }
-
-  _oldApplyAiFiltersDisabled() {
-
-    const sampleSize = Math.min(100, this.historicalData.length);
-    const sampleDraws = this.historicalData.slice(-sampleSize);
-    const recentDraws3 = sampleDraws.slice(-3);
-    const recentDraws5 = sampleDraws.slice(-5);
-    const game = this.currentGame;
-    const maxNumbers = game.maxNumbers;
-
-    // 1. Exclusión de números individuales por sobre-frecuencia/saturación en últimos sorteos
-    this.excludedNumbers.clear();
-    this.excludedStars.clear();
-
-    const recentNumCounts: { [n: number]: number } = {};
-    recentDraws5.forEach(d => {
-      d.numbers.forEach(n => {
-        recentNumCounts[n] = (recentNumCounts[n] || 0) + 1;
-      });
-    });
-
-    const excludedRecentNums: number[] = [];
-    const startNum = game.id === 'nacional' ? 10 : 1;
-    for (let num = startNum; num <= game.numberRange; num++) {
-      const count5 = recentNumCounts[num] || 0;
-      const count3 = recentDraws3.filter(d => d.numbers.includes(num)).length;
-      // Excluir si ha salido 2+ veces en los últimos 3 sorteos, o 3+ veces en los últimos 5
-      if (count3 >= 2 || count5 >= 3) {
-        this.excludedNumbers.add(num);
-        excludedRecentNums.push(num);
-      }
-    }
-
-    // Para estrellas si aplica
-    const excludedRecentStars: number[] = [];
-    if (game.maxStars > 0) {
-      const recentStarCounts: { [s: number]: number } = {};
-      recentDraws5.forEach(d => {
-        if (d.stars) {
-          d.stars.forEach(s => {
-            recentStarCounts[s] = (recentStarCounts[s] || 0) + 1;
-          });
-        }
-      });
-      for (let star = 1; star <= game.starRange; star++) {
-        const count5 = recentStarCounts[star] || 0;
-        const count3 = recentDraws3.filter(d => d.stars && d.stars.includes(star)).length;
-        if (count3 >= 2 || count5 >= 3) {
-          this.excludedStars.add(star);
-          excludedRecentStars.push(star);
-        }
-      }
-    }
-
-    // Re-apply decade exclusions if active
-    this.excludedDecades.forEach(dec => {
-      const start = dec === 0 ? 1 : dec * 10;
-      const end = Math.min(dec * 10 + 9, game.numberRange);
-      for (let n = start; n <= end; n++) {
-        this.excludedNumbers.add(n);
-      }
-    });
-
-    if (game.maxStars > 0) {
-      this.excludedStarDecades.forEach(dec => {
-        const start = dec === 0 ? 1 : dec * 10;
-        const end = Math.min(dec * 10 + 9, game.starRange);
-        for (let s = start; s <= end; s++) {
-          this.excludedStars.add(s);
-        }
-      });
-    }
-
-    // Actualizar la cuadrícula del tablero con las exclusiones (ícono 🚫)
-    this.updateGridNumberStates();
-
-    // 2. Análisis de Suma Total (Media y Desviación Estándar)
-    const sums = sampleDraws.map(d => d.numbers.reduce((a, b) => a + b, 0));
-    const meanSum = sums.reduce((a, b) => a + b, 0) / sampleSize;
-    const stdSum = Math.sqrt(sums.reduce((sq, n) => sq + Math.pow(n - meanSum, 2), 0) / sampleSize);
-    
-    // Intervalo de confianza ~90% (1.645 desviaciones estándar)
-    let calcSumMin = Math.max(1, Math.floor(meanSum - 1.645 * stdSum));
-    let calcSumMax = Math.ceil(meanSum + 1.645 * stdSum);
-
-    const sumMinEl = document.getElementById('sumMin') as HTMLInputElement;
-    const sumMaxEl = document.getElementById('sumMax') as HTMLInputElement;
-    if (sumMinEl) sumMinEl.value = String(calcSumMin);
-    if (sumMaxEl) sumMaxEl.value = String(calcSumMax);
-
-    // 3. Análisis de Terminaciones (Dígitos 0-9) y Saturación en Últimos Sorteos
-    const termCounts: { [d: number]: number } = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
-    const recentTermCounts3: { [d: number]: number } = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
-    let totalNumbersDrawn = 0;
-
-    sampleDraws.forEach(d => {
-      d.numbers.forEach(n => {
-        const lastDigit = n % 10;
-        termCounts[lastDigit] = (termCounts[lastDigit] || 0) + 1;
-        totalNumbersDrawn++;
-      });
-    });
-
-    recentDraws3.forEach(d => {
-      d.numbers.forEach(n => {
-        const lastDigit = n % 10;
-        recentTermCounts3[lastDigit] = (recentTermCounts3[lastDigit] || 0) + 1;
-      });
-    });
-
-    const expectedPerTerm = totalNumbersDrawn / 10;
-    const excludedTerminaciones: number[] = [];
-    const excludedTermReasons: { [digit: number]: string } = {};
-
-    const termChips = document.querySelectorAll('#terminacionesOptions .filter-chip');
-    termChips.forEach(chip => {
-      const val = parseInt((chip as HTMLElement).dataset.value || '-1');
-      if (val >= 0 && val <= 9) {
-        const countSample = termCounts[val] || 0;
-        const countRecent3 = recentTermCounts3[val] || 0;
-        
-        const isLowFreq = countSample < expectedPerTerm * 0.55;
-        const isSaturated = countRecent3 >= 4;
-
-        if (isLowFreq || isSaturated) {
-          chip.classList.add('active'); // Chip activo en Excluir Terminaciones indica que está excluida
-          excludedTerminaciones.push(val);
-          if (isSaturated) excludedTermReasons[val] = `Saturación en últimos 3 sorteos (${countRecent3}x)`;
-          else excludedTermReasons[val] = 'Baja frecuencia histórica';
-        } else {
-          chip.classList.remove('active');
-        }
-      }
-    });
-
-    // 4. Variedad de Terminaciones (Cantidad de dígitos finales distintos)
-    const distinctTermCounts: { [val: number]: number } = {};
-    sampleDraws.forEach(d => {
-      const distinctSize = new Set(d.numbers.map(n => n % 10)).size;
-      distinctTermCounts[distinctSize] = (distinctTermCounts[distinctSize] || 0) + 1;
-    });
-
-    const recentDistinct3 = recentDraws3.map(d => new Set(d.numbers.map(n => n % 10)).size);
-
-    const activeDistinctTerms: number[] = [];
-    document.querySelectorAll('#terminacionesDistintasOptions .filter-chip').forEach(chip => {
-      const val = parseInt((chip as HTMLElement).dataset.value || '0', 10);
-      const count = distinctTermCounts[val] || 0;
-      const countInRecent = recentDistinct3.filter(v => v === val).length;
-      const isSaturatedRecent = countInRecent === 3;
-
-      if (count / sampleSize >= 0.04 && !isSaturatedRecent) {
-        chip.classList.add('active');
-        activeDistinctTerms.push(val);
-      } else {
-        chip.classList.remove('active');
-      }
-    });
-
-    if (activeDistinctTerms.length === 0) {
-      const bestDistinct = Object.entries(distinctTermCounts).sort((a, b) => b[1] - a[1])[0];
-      if (bestDistinct) {
-        const chip = document.querySelector(`#terminacionesDistintasOptions .filter-chip[data-value="${bestDistinct[0]}"]`);
-        if (chip) {
-          chip.classList.add('active');
-          activeDistinctTerms.push(Number(bestDistinct[0]));
-        }
-      }
-    }
-
-    // 5. Par / Impar y Bajos / Altos (Análisis de Rachas y Selección Óptima de Chips)
-    const parImparCounts: { [key: string]: number } = {};
-    const bajosAltosCounts: { [key: string]: number } = {};
-    const midPoint = Math.floor(game.numberRange / 2);
-
-    sampleDraws.forEach(d => {
-      const evens = d.numbers.filter(n => n % 2 === 0).length;
-      const odds = d.numbers.length - evens;
-      const keyPI = `${evens}/${odds}`;
-      parImparCounts[keyPI] = (parImparCounts[keyPI] || 0) + 1;
-
-      const lows = d.numbers.filter(n => n <= midPoint).length;
-      const highs = d.numbers.length - lows;
-      const keyBA = `${lows}/${highs}`;
-      bajosAltosCounts[keyBA] = (bajosAltosCounts[keyBA] || 0) + 1;
-    });
-
-    const recentParImpar3 = recentDraws3.map(d => {
-      const evens = d.numbers.filter(n => n % 2 === 0).length;
-      return `${evens}/${d.numbers.length - evens}`;
-    });
-
-    const recentBajosAltos3 = recentDraws3.map(d => {
-      const lows = d.numbers.filter(n => n <= midPoint).length;
-      return `${lows}/${d.numbers.length - lows}`;
-    });
-
-    const selectedParImpar: string[] = [];
-    const disabledParImparSaturated: string[] = [];
-    document.querySelectorAll('#parImparOptions .filter-chip').forEach(chip => {
-      const val = (chip as HTMLElement).dataset.value || '';
-      const count = parImparCounts[val] || 0;
-      const freq = count / sampleSize;
-
-      const recentRepeat = recentParImpar3.filter(k => k === val).length;
-      const isSaturatedRacha = recentRepeat >= 2 && freq < 0.65;
-
-      if (freq >= 0.05 && !isSaturatedRacha) {
-        chip.classList.add('active');
-        selectedParImpar.push(val);
-      } else {
-        chip.classList.remove('active');
-        if (isSaturatedRacha) disabledParImparSaturated.push(val);
-      }
-    });
-
-    if (selectedParImpar.length === 0) {
-      const topPI = Object.entries(parImparCounts).sort((a, b) => b[1] - a[1])[0];
-      if (topPI) {
-        const chip = document.querySelector(`#parImparOptions .filter-chip[data-value="${topPI[0]}"]`);
-        if (chip) {
-          chip.classList.add('active');
-          selectedParImpar.push(topPI[0]);
-        }
-      }
-    }
-
-    const selectedBajosAltos: string[] = [];
-    const disabledBajosAltosSaturated: string[] = [];
-    document.querySelectorAll('#bajosAltosOptions .filter-chip').forEach(chip => {
-      const val = (chip as HTMLElement).dataset.value || '';
-      const count = bajosAltosCounts[val] || 0;
-      const freq = count / sampleSize;
-
-      const recentRepeat = recentBajosAltos3.filter(k => k === val).length;
-      const isSaturatedRacha = recentRepeat >= 2 && freq < 0.65;
-
-      if (freq >= 0.05 && !isSaturatedRacha) {
-        chip.classList.add('active');
-        selectedBajosAltos.push(val);
-      } else {
-        chip.classList.remove('active');
-        if (isSaturatedRacha) disabledBajosAltosSaturated.push(val);
-      }
-    });
-
-    if (selectedBajosAltos.length === 0) {
-      const topBA = Object.entries(bajosAltosCounts).sort((a, b) => b[1] - a[1])[0];
-      if (topBA) {
-        const chip = document.querySelector(`#bajosAltosOptions .filter-chip[data-value="${topBA[0]}"]`);
-        if (chip) {
-          chip.classList.add('active');
-          selectedBajosAltos.push(topBA[0]);
-        }
-      }
-    }
-
-    // 6. Agrupación por Decenas (e.g. 2/2/1/1, 2/1/1/1/1, 3/2/1...)
-    const agrupDecenasCounts: { [key: string]: number } = {};
-    sampleDraws.forEach(d => {
-      const tens: { [k: number]: number } = {};
-      d.numbers.forEach(n => {
-        const ten = Math.floor((n - 1) / 10);
-        tens[ten] = (tens[ten] || 0) + 1;
-      });
-      const pattern = Object.values(tens).sort((a, b) => b - a).join('/');
-      agrupDecenasCounts[pattern] = (agrupDecenasCounts[pattern] || 0) + 1;
-    });
-
-    const activeDecenasPatterns: string[] = [];
-    document.querySelectorAll('#agrupDecenasOptions .filter-chip').forEach(chip => {
-      const val = (chip as HTMLElement).dataset.value || '';
-      const count = agrupDecenasCounts[val] || 0;
-      if (count / sampleSize >= 0.04) {
-        chip.classList.add('active');
-        activeDecenasPatterns.push(val);
-      } else {
-        chip.classList.remove('active');
-      }
-    });
-
-    // 7. Números Consecutivos (e.g. 1/1/1/1/1/1, 2/1/1/1/1, 2/2/1/1...)
-    const consecutivosCounts: { [key: string]: number } = {};
-    sampleDraws.forEach(d => {
-      const sorted = [...d.numbers].sort((a, b) => a - b);
-      let consecStr = '';
-      let cCount = 1;
-      for (let j = 1; j < sorted.length; j++) {
-        if (sorted[j] === sorted[j - 1] + 1) {
-          cCount++;
-        } else {
-          consecStr += cCount;
-          cCount = 1;
-        }
-      }
-      consecStr += cCount;
-      const pattern = consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
-      consecutivosCounts[pattern] = (consecutivosCounts[pattern] || 0) + 1;
-    });
-
-    document.querySelectorAll('#consecutivosOptions .filter-chip').forEach(chip => {
-      const val = (chip as HTMLElement).dataset.value || '';
-      const count = consecutivosCounts[val] || 0;
-      if (count / sampleSize >= 0.04) {
-        chip.classList.add('active');
-      } else {
-        chip.classList.remove('active');
-      }
-    });
-
-    // 8. Entropía de Terminaciones
-    const termEntropies = sampleDraws.map(d => {
-      const endingCounts: { [k: number]: number } = {};
-      d.numbers.forEach(n => {
-        const ending = n % 10;
-        endingCounts[ending] = (endingCounts[ending] || 0) + 1;
-      });
-      return -Object.values(endingCounts).reduce((s, countVal) => {
-        const p = countVal / maxNumbers;
-        return s + (p > 0 ? p * Math.log2(p) : 0);
-      }, 0);
-    });
-    termEntropies.sort((a, b) => a - b);
-    const minEntropyTerm = termEntropies[Math.floor(sampleSize * 0.05)] ?? termEntropies[0];
-    const maxEntropyTerm = termEntropies[Math.floor(sampleSize * 0.95)] ?? termEntropies[termEntropies.length - 1];
-
-    const entTermMinEl = document.getElementById('entropyTerminacionesMin') as HTMLInputElement;
-    const entTermMaxEl = document.getElementById('entropyTerminacionesMax') as HTMLInputElement;
-    if (entTermMinEl) entTermMinEl.value = minEntropyTerm.toFixed(3);
-    if (entTermMaxEl) entTermMaxEl.value = maxEntropyTerm.toFixed(3);
-
-    // 9. Entropía de Intervalos
-    const intervalEntropies = sampleDraws.map(d => {
-      const sortedCombo = [...d.numbers].sort((a, b) => a - b);
-      const intervalCounts: { [k: number]: number } = {};
-      for (let idx = 0; idx < sortedCombo.length - 1; idx++) {
-        const diff = sortedCombo[idx + 1] - sortedCombo[idx];
-        intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
-      }
-      const numIntervals = maxNumbers - 1;
-      if (numIntervals <= 0) return 0;
-      return -Object.values(intervalCounts).reduce((s, countVal) => {
-        const p = countVal / numIntervals;
-        return s + (p > 0 ? p * Math.log2(p) : 0);
-      }, 0);
-    });
-    intervalEntropies.sort((a, b) => a - b);
-    const minEntropyInt = intervalEntropies[Math.floor(sampleSize * 0.05)] ?? intervalEntropies[0];
-    const maxEntropyInt = intervalEntropies[Math.floor(sampleSize * 0.95)] ?? intervalEntropies[intervalEntropies.length - 1];
-
-    const entIntMinEl = document.getElementById('entropyIntervalosMin') as HTMLInputElement;
-    const entIntMaxEl = document.getElementById('entropyIntervalosMax') as HTMLInputElement;
-    if (entIntMinEl) entIntMinEl.value = minEntropyInt.toFixed(3);
-    if (entIntMaxEl) entIntMaxEl.value = maxEntropyInt.toFixed(3);
-
-    // 10. Desviación Estándar de la Combinación
-    const stdDevs = sampleDraws.map(d => {
-      const sumVal = d.numbers.reduce((a, b) => a + b, 0);
-      const meanVal = sumVal / maxNumbers;
-      return Math.sqrt(d.numbers.reduce((sq, n) => sq + Math.pow(n - meanVal, 2), 0) / maxNumbers);
-    });
-    stdDevs.sort((a, b) => a - b);
-    const minStdDev = stdDevs[Math.floor(sampleSize * 0.05)] ?? stdDevs[0];
-    const maxStdDev = stdDevs[Math.floor(sampleSize * 0.95)] ?? stdDevs[stdDevs.length - 1];
-
-    const desMinEl = document.getElementById('desviacionMin') as HTMLInputElement;
-    const desMaxEl = document.getElementById('desviacionMax') as HTMLInputElement;
-    if (desMinEl) desMinEl.value = minStdDev.toFixed(1);
-    if (desMaxEl) desMaxEl.value = maxStdDev.toFixed(1);
-
-    // 11. Distancia Mínima y Máxima entre números ordenados
-    const minDistances: number[] = [];
-    const maxDistances: number[] = [];
-    sampleDraws.forEach(d => {
-      const sorted = [...d.numbers].sort((a, b) => a - b);
-      let localMin = 999;
-      let localMax = 0;
-      for (let j = 0; j < sorted.length - 1; j++) {
-        const diff = sorted[j + 1] - sorted[j];
-        if (diff < localMin) localMin = diff;
-        if (diff > localMax) localMax = diff;
-      }
-      minDistances.push(localMin);
-      maxDistances.push(localMax);
-    });
-    minDistances.sort((a, b) => a - b);
-    maxDistances.sort((a, b) => a - b);
-    const calcDistMin = minDistances[Math.floor(sampleSize * 0.05)] ?? 1;
-    const calcDistMax = maxDistances[Math.floor(sampleSize * 0.95)] ?? Math.floor(game.numberRange / 2);
-
-    const distMinEl = document.getElementById('distanciaMin') as HTMLInputElement;
-    const distMaxEl = document.getElementById('distanciaMax') as HTMLInputElement;
-    if (distMinEl) distMinEl.value = String(calcDistMin);
-    if (distMaxEl) distMaxEl.value = String(calcDistMax);
-
-    // 12. Suma de Dígitos
-    const digitSums = sampleDraws.map(d => {
-      return d.numbers.reduce((acc, num) => {
-        const str = String(num);
-        return acc + str.split('').reduce((s, ch) => s + parseInt(ch, 10), 0);
-      }, 0);
-    });
-    digitSums.sort((a, b) => a - b);
-    const minDigitSum = digitSums[Math.floor(sampleSize * 0.05)] || digitSums[0];
-    const maxDigitSum = digitSums[Math.floor(sampleSize * 0.95)] || digitSums[digitSums.length - 1];
-
-    const digSumMinEl = document.getElementById('sumaDigitosMin') as HTMLInputElement;
-    const digSumMaxEl = document.getElementById('sumaDigitosMax') as HTMLInputElement;
-    if (digSumMinEl) digSumMinEl.value = String(minDigitSum);
-    if (digSumMaxEl) digSumMaxEl.value = String(maxDigitSum);
-
-    // 13. Números Primos y Racha Reciente
-    const isPrime = (n: number) => {
-      if (n < 2) return false;
-      for (let i = 2; i <= Math.sqrt(n); i++) {
-        if (n % i === 0) return false;
-      }
-      return true;
-    };
-    const primeCounts = sampleDraws.map(d => d.numbers.filter(isPrime).length);
-    const recentPrimes3 = recentDraws3.map(d => d.numbers.filter(isPrime).length);
-    primeCounts.sort((a, b) => a - b);
-
-    let minPrimos = primeCounts[Math.floor(sampleSize * 0.05)] ?? 0;
-    let maxPrimos = primeCounts[Math.floor(sampleSize * 0.95)] ?? game.maxNumbers;
-
-    const allRecentSamePrimes = recentPrimes3.length === 3 && recentPrimes3.every(p => p === recentPrimes3[0]);
-    let primeStreakNote = '';
-    if (allRecentSamePrimes) {
-      const repeatedCount = recentPrimes3[0];
-      primeStreakNote = ` (Racha de ${repeatedCount} primos en 3 sorteos seguidos; rango ajustado para alternancia probabilística)`;
-      if (repeatedCount === maxPrimos) {
-        minPrimos = Math.max(0, repeatedCount - 2);
-        maxPrimos = Math.max(minPrimos + 1, repeatedCount - 1);
-      }
-    }
-
-    const primosMinEl = document.getElementById('primosMin') as HTMLInputElement;
-    const primosMaxEl = document.getElementById('primosMax') as HTMLInputElement;
-    if (primosMinEl) primosMinEl.value = String(minPrimos);
-    if (primosMaxEl) primosMaxEl.value = String(maxPrimos);
-
-    // 14. Filtros de Estrellas (si aplica)
-    if (game.maxStars > 0) {
-      const validStarDraws = sampleDraws.filter(d => d.stars && d.stars.length > 0);
-      if (validStarDraws.length > 0) {
-        const starSums = validStarDraws.map(d => d.stars!.reduce((a, b) => a + b, 0));
-        starSums.sort((a, b) => a - b);
-        const minStarSum = starSums[Math.floor(starSums.length * 0.05)] || starSums[0];
-        const maxStarSum = starSums[Math.floor(starSums.length * 0.95)] || starSums[starSums.length - 1];
-
-        const starSumMinEl = document.getElementById('starSumMin') as HTMLInputElement;
-        const starSumMaxEl = document.getElementById('starSumMax') as HTMLInputElement;
-        if (starSumMinEl) starSumMinEl.value = String(minStarSum);
-        if (starSumMaxEl) starSumMaxEl.value = String(maxStarSum);
-
-        const starParImparCounts: { [k: string]: number } = {};
-        const starMid = Math.floor(game.starRange / 2);
-        const starBajosAltosCounts: { [k: string]: number } = {};
-        validStarDraws.forEach(d => {
-          const sEvens = d.stars!.filter(s => s % 2 === 0).length;
-          const sOdds = d.stars!.length - sEvens;
-          starParImparCounts[`${sEvens}/${sOdds}`] = (starParImparCounts[`${sEvens}/${sOdds}`] || 0) + 1;
-
-          const sLows = d.stars!.filter(s => s <= starMid).length;
-          const sHighs = d.stars!.length - sLows;
-          starBajosAltosCounts[`${sLows}/${sHighs}`] = (starBajosAltosCounts[`${sLows}/${sHighs}`] || 0) + 1;
-        });
-
-        document.querySelectorAll('#starParImparOptions .filter-chip').forEach(chip => {
-          const val = (chip as HTMLElement).dataset.value || '';
-          const count = starParImparCounts[val] || 0;
-          if (count / validStarDraws.length >= 0.08) chip.classList.add('active');
-          else chip.classList.remove('active');
-        });
-
-        document.querySelectorAll('#starBajosAltosOptions .filter-chip').forEach(chip => {
-          const val = (chip as HTMLElement).dataset.value || '';
-          const count = starBajosAltosCounts[val] || 0;
-          if (count / validStarDraws.length >= 0.08) chip.classList.add('active');
-          else chip.classList.remove('active');
-        });
-
-        const starPrimeCounts = validStarDraws.map(d => d.stars!.filter(isPrime).length);
-        starPrimeCounts.sort((a, b) => a - b);
-        const minStarPrimos = starPrimeCounts[Math.floor(validStarDraws.length * 0.05)] ?? 0;
-        const maxStarPrimos = starPrimeCounts[Math.floor(validStarDraws.length * 0.95)] ?? game.maxStars;
-
-        const starPrimosMinEl = document.getElementById('starPrimosMin') as HTMLInputElement;
-        const starPrimosMaxEl = document.getElementById('starPrimosMax') as HTMLInputElement;
-        if (starPrimosMinEl) starPrimosMinEl.value = String(minStarPrimos);
-        if (starPrimosMaxEl) starPrimosMaxEl.value = String(maxStarPrimos);
-      }
-    }
-
-    // 15. Sincronizar estado interno de filtros
-    this.updateFilterStateFromUI();
-
-    // 16. Mostrar bloque informativo completo de decisiones de optimización
-    const reasoningBlock = document.getElementById('aiReasoningBlock');
-    const reasoningText = document.getElementById('aiReasoningText');
-
-    if (reasoningBlock && reasoningText) {
-      reasoningBlock.style.display = 'block';
-      const termStr = excludedTerminaciones.length > 0 
-        ? excludedTerminaciones.sort((a, b) => a - b).map(t => `${t}${excludedTermReasons[t] ? ` (${excludedTermReasons[t]})` : ''}`).join(', ') 
-        : 'Ninguna (distribución uniforme)';
-
-      const exNumStr = excludedRecentNums.length > 0
-        ? excludedRecentNums.sort((a, b) => a - b).join(', ')
-        : 'Ninguno (sin repeticiones críticas en últimos sorteos)';
-
-      const exStarStr = excludedRecentStars.length > 0
-        ? ` | Estrellas excluidas: ${excludedRecentStars.sort((a, b) => a - b).join(', ')}`
-        : '';
-
-      const piSaturatedNote = disabledParImparSaturated.length > 0
-        ? ` (Desactivados por racha repetida reciente: <code>${disabledParImparSaturated.join(', ')}</code>)`
-        : '';
-
-      const baSaturatedNote = disabledBajosAltosSaturated.length > 0
-        ? ` (Desactivados por racha repetida reciente: <code>${disabledBajosAltosSaturated.join(', ')}</code>)`
-        : '';
-
-      reasoningText.innerHTML = `
-        <div style="font-size: 0.88rem; line-height: 1.5;">
-          <p style="margin: 0 0 8px 0; font-weight: 600;">Ajuste probabilístico óptimo (Últimos <strong>${sampleSize} sorteos</strong>):</p>
-          <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px;">
-            <li><strong>🚫 Números Excluidos por Repetición Reciente:</strong> <code>${exNumStr}</code>${exStarStr}. Marcados con 🚫 en el tablero.</li>
-            <li><strong>Terminaciones Excluidas:</strong> <code>${termStr}</code>.</li>
-            <li><strong>Par/Impar:</strong> Chips seleccionados <code>${selectedParImpar.join(', ')}</code>${piSaturatedNote}.</li>
-            <li><strong>Bajos/Altos:</strong> Chips seleccionados <code>${selectedBajosAltos.join(', ')}</code>${baSaturatedNote}.</li>
-            <li><strong>Variedad de Terminaciones:</strong> <code>${activeDistinctTerms.sort((a,b)=>a-b).join(', ')}</code> terminaciones distintas activas.</li>
-            <li><strong>Números Primos:</strong> Rango fijado en <strong>${minPrimos} a ${maxPrimos} primos</strong>${primeStreakNote}.</li>
-            <li><strong>Suma Total:</strong> Rango <strong>${calcSumMin} a ${calcSumMax}</strong> (Intervalo ~90% confianza, media: ${meanSum.toFixed(1)}).</li>
-            <li><strong>Agrupación por Decenas:</strong> Patrones activados <code>${activeDecenasPatterns.slice(0, 4).join(', ')}</code>.</li>
-            <li><strong>Entropías e Intervalos:</strong> Term <strong>${minEntropyTerm.toFixed(3)} - ${maxEntropyTerm.toFixed(3)}</strong> | Int <strong>${minEntropyInt.toFixed(3)} - ${maxEntropyInt.toFixed(3)}</strong>.</li>
-            <li><strong>Desviación & Distancias:</strong> Desviación <strong>${minStdDev.toFixed(1)} - ${maxStdDev.toFixed(1)}</strong> | Dist. <strong>${calcDistMin} - ${calcDistMax}</strong>.</li>
-          </ul>
-        </div>
-      `;
-    }
-
-    this.saveState();
-    this.showToast(t('toast.filtrosOptimizados'), 'success');
-  }
 
   applyRoberTheorem() {
     if (!this.dataLoaded || this.historicalData.length === 0) {
