@@ -3630,6 +3630,94 @@ body.dark-mode .filter-mode-btn.active {
 .calc-result-value.positive { color: #166534; }
 .calc-result-value.negative { color: #9f1239; }
 
+/* ===== Filas de controles reutilizables en modales (Visualización, Boletos Guardados, Historial) ===== */
+.modal-control-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 15px;
+}
+
+.modal-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-filter-select {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: white;
+  color: #1f2937;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.modal-toggle-group {
+  display: flex;
+  background: #e2e8f0;
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.modal-toggle-btn {
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.modal-toggle-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+@media (max-width: 480px) {
+  .modal-control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-control-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .modal-filter-select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modal-toggle-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modal-toggle-btn {
+    white-space: normal;
+    text-align: center;
+    padding: 8px 6px;
+    font-size: 0.78rem;
+  }
+}
+
+
 
 
 

@@ -1878,19 +1878,19 @@
           </div>
 
           <!-- Selectores de Control -->
-          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; justify-content: space-between; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;">
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <div class="modal-control-row">
+              <div class="modal-control-group">
                   <span style="font-weight: 600; font-size: 0.9rem; color: #475569;" data-i18n="dataviz.modoVisual">Modo visual:</span>
-                  <div style="display: flex; background: #e2e8f0; padding: 3px; border-radius: 8px; gap: 2px;">
-                      <button id="vizModeHeatmapBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: var(--primary); color: white;" class="viz-toggle-btn active" data-i18n="dataviz.modoMapaCalor">🗺️ Mapa de Calor</button>
-                      <button id="vizModeRankingBtn" style="border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: transparent; color: #475569;" class="viz-toggle-btn" data-i18n="dataviz.modoRanking">📊 Ranking de Frecuencias</button>
+                  <div class="modal-toggle-group">
+                      <button id="vizModeHeatmapBtn" class="modal-toggle-btn active" data-i18n="dataviz.modoMapaCalor">🗺️ Mapa de Calor</button>
+                      <button id="vizModeRankingBtn" class="modal-toggle-btn" data-i18n="dataviz.modoRanking">📊 Ranking de Frecuencias</button>
                   </div>
               </div>
 
               <!-- Selector de Elemento (Números vs Estrellas) si el juego tiene estrellas -->
-              <div id="vizTargetSelectorContainer" style="display: none; align-items: center; gap: 8px;">
+              <div id="vizTargetSelectorContainer" class="modal-control-group" style="display: none;">
                   <span style="font-weight: 600; font-size: 0.9rem; color: #475569;" data-i18n="dataviz.analizar">Analizar:</span>
-                  <select id="vizTargetSelect" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; background: white; color: #334155; font-weight: 500;">
+                  <select id="vizTargetSelect" class="modal-filter-select">
                       <option value="number" data-i18n="dataviz.numerosPrincipales">Números principales</option>
                       <option value="star" data-i18n="dataviz.estrellasGenerico">Estrellas</option>
                   </select>
@@ -1923,15 +1923,15 @@
 
         <div class="modal-body" style="padding: 15px 0; overflow-y: auto; flex: 1;">
           <!-- Selector de Juego para el Historial -->
-          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="modal-control-row" style="background: #f9fafb; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+              <div class="modal-control-group">
                   <span style="font-size: 1.2rem;">🎮</span>
                   <div style="text-align: left;">
                       <h4 style="margin: 0; font-size: 0.95rem; color: #1f2937; font-weight: 600;" data-i18n="history.juegoAnalizado">Juego Analizado</h4>
                       <p style="margin: 0; font-size: 0.8rem; color: #6b7280;" data-i18n="history.filtraEstadisticas">Filtra las estadísticas por tipo de juego</p>
                   </div>
               </div>
-              <select id="hrGameFilter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; background-color: #white; color: #1f2937; font-weight: 500; cursor: pointer; min-width: 180px;">
+              <select id="hrGameFilter" class="modal-filter-select">
                   <option value="all" data-i18n="history.todosLosJuegos">Todos los Juegos</option>
                   <option value="powerball">🇺🇸 Powerball</option>
                   <option value="bonoloto">🇪🇸 Bonoloto</option>
@@ -2397,10 +2397,10 @@
       </div>
 
       <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1; text-align: left;">
-        <div class="saved-tickets-header-controls" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="saved-tickets-header-controls modal-control-row" style="width: 100%;">
+            <div class="modal-control-group">
                 <span style="font-size: 0.9rem; font-weight: 600; color: #475569;" data-i18n="tickets.filtrarPorJuego">Filtrar por juego:</span>
-                <select id="savedTicketsGameFilter" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background-color: white; color: #1f2937; font-weight: 500;">
+                <select id="savedTicketsGameFilter" class="modal-filter-select">
                     <option value="all" data-i18n="tickets.todosLosJuegos">Todos los juegos</option>
                     <option value="powerball">Powerball</option>
                     <option value="bonoloto">Bonoloto</option>

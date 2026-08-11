@@ -6100,18 +6100,14 @@ class DataLotto49Advanced {
     document.getElementById('vizModeHeatmapBtn')?.addEventListener('click', () => {
         this.vizMode = 'heatmap';
         document.getElementById('vizModeHeatmapBtn')?.classList.add('active');
-        document.getElementById('vizModeHeatmapBtn')?.setAttribute('style', 'border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: var(--primary); color: white;');
         document.getElementById('vizModeRankingBtn')?.classList.remove('active');
-        document.getElementById('vizModeRankingBtn')?.setAttribute('style', 'border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: transparent; color: #475569;');
         this.renderFrequencyChart();
     });
 
     document.getElementById('vizModeRankingBtn')?.addEventListener('click', () => {
         this.vizMode = 'ranking';
         document.getElementById('vizModeRankingBtn')?.classList.add('active');
-        document.getElementById('vizModeRankingBtn')?.setAttribute('style', 'border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: var(--primary); color: white;');
         document.getElementById('vizModeHeatmapBtn')?.classList.remove('active');
-        document.getElementById('vizModeHeatmapBtn')?.setAttribute('style', 'border: none; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; cursor: pointer; background: transparent; color: #475569;');
         this.renderFrequencyChart();
     });
 
@@ -9048,10 +9044,10 @@ class DataLotto49Advanced {
           }
         };
 
-        // Auto-close notification banner after 2 minutes (120,000 ms)
+        // Auto-close notification banner after 30 seconds (30,000 ms)
         (this as any).highJackpotTimer = setTimeout(() => {
           closeBanner();
-        }, 120000);
+        }, 30000);
 
         playBtn.onclick = () => {
           this.switchGame(highJk.id);
