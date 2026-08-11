@@ -2605,6 +2605,7 @@
           <div class="calculator-tabs">
             <button type="button" class="calculator-tab active" data-bet-type="simple" data-i18n="calculator.simple">🎲 Simple</button>
             <button type="button" class="calculator-tab" data-bet-type="multiple" data-i18n="calculator.multiple">🎰 Múltiple</button>
+            <button type="button" class="calculator-tab" id="calcReducedTab" data-bet-type="reducida" data-i18n="calculator.reducida">🎯 Reducida</button>
           </div>
 
         <div id="calculatorSimpleInputs" class="calculator-multiple-inputs">
@@ -2619,6 +2620,12 @@
             <label for="calcStarsSelect" id="calcStarsLabel" data-i18n="calculator.estrellasMarcadas">Estrellas marcadas:</label>
             <select id="calcStarsSelect" class="calculator-input"></select>
           </div>
+        </div>
+
+        <div id="calculatorReducedInputs" class="calculator-multiple-inputs" style="display: none;">
+          <label for="calcReducedSystemSelect" data-i18n="calculator.sistemaReducido">Sistema reducido:</label>
+          <select id="calcReducedSystemSelect" class="calculator-input" style="width: 100%; max-width: 100%;"></select>
+          <p id="calcReducedNoSystems" style="display: none; font-size: 0.8rem; color: #9ca3af; margin: 6px 0 0 0;" data-i18n="calculator.sinSistemasReducidos">No hay sistemas reducidos disponibles para este juego.</p>
         </div>
 
           <div class="calculator-jackpot-row">
@@ -2638,6 +2645,10 @@
             <div class="calc-result-item">
               <span class="calc-result-label" data-i18n="calculator.probabilidad">Probabilidad Premio Máx.</span>
               <span class="calc-result-value" id="calcProbabilidad">-</span>
+            </div>
+            <div class="calc-result-item" id="calcGarantiaWrapper" style="display: none;">
+              <span class="calc-result-label" data-i18n="calculator.probGarantia">Probabilidad de Garantía</span>
+              <span class="calc-result-value" id="calcProbGarantia">-</span>
             </div>
             <div class="calc-result-item" id="calcEsperanzaWrapper" style="display: none;">
               <span class="calc-result-label" data-i18n="calculator.esperanzaNeta">Esperanza Matemática Neta</span>

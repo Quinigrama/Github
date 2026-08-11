@@ -3712,25 +3712,56 @@ class DataLotto49Advanced {
     }
   }
 
+  populateReducedSystemSelect() {
+    const select = document.getElementById('calcReducedSystemSelect') as HTMLSelectElement;
+    const noSystemsMsg = document.getElementById('calcReducedNoSystems');
+    const reducedInputsWrapper = document.getElementById('calculatorReducedInputs');
+    const reducedTab = document.getElementById('calcReducedTab');
+    if (!select || !reducedTab) return;
+
+    const systems = REDUCED_SYSTEMS[this.currentGame.id] || [];
+
+    if (systems.length === 0) {
+      reducedTab.style.display = 'none';
+      if (select) select.style.display = 'none';
+      if (noSystemsMsg) noSystemsMsg.style.display = 'block';
+      // Si la pestaña reducida estaba activa, volvemos a Simple
+      if (reducedTab.classList.contains('active')) {
+        const simpleTab = document.querySelector('.calculator-tab[data-bet-type="simple"]') as HTMLElement;
+        simpleTab?.click();
+      }
+      return;
+    }
+
+    reducedTab.style.display = 'inline-block';
+    if (select) select.style.display = 'block';
+    if (noSystemsMsg) noSystemsMsg.style.display = 'none';
+    select.innerHTML = systems.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    if (reducedInputsWrapper) reducedInputsWrapper.style.display = 'none'; // display gestionado por la pestaña activa
+  }
+
   initCalculator() {
     this.updateCalculatorJackpotValue();
     this.populateCalculatorSelects();
     this.updateCalculatorStarsWrapper();
+    this.populateReducedSystemSelect();
 
     document.querySelectorAll('.calculator-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.calculator-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const isMultiple = (tab as HTMLElement).dataset.betType === 'multiple';
-        const multipleInputs = document.getElementById('calculatorMultipleInputs');
+        const betType = (tab as HTMLElement).dataset.betType;
         const simpleInputs = document.getElementById('calculatorSimpleInputs');
-        if (multipleInputs) multipleInputs.style.display = isMultiple ? 'flex' : 'none';
-        if (simpleInputs) simpleInputs.style.display = isMultiple ? 'none' : 'flex';
+        const multipleInputs = document.getElementById('calculatorMultipleInputs');
+        const reducedInputs = document.getElementById('calculatorReducedInputs');
+        if (simpleInputs) simpleInputs.style.display = betType === 'simple' ? 'flex' : 'none';
+        if (multipleInputs) multipleInputs.style.display = betType === 'multiple' ? 'flex' : 'none';
+        if (reducedInputs) reducedInputs.style.display = betType === 'reducida' ? 'flex' : 'none';
         this.updateCalculatorResults();
       });
     });
 
-    ['calcSimpleQtyInput', 'calcNumbersSelect', 'calcStarsSelect', 'calcJackpotInput'].forEach(id => {
+    ['calcSimpleQtyInput', 'calcNumbersSelect', 'calcStarsSelect', 'calcJackpotInput', 'calcReducedSystemSelect'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', () => this.updateCalculatorResults());
       document.getElementById(id)?.addEventListener('change', () => this.updateCalculatorResults());
     });
@@ -3742,6 +3773,7 @@ class DataLotto49Advanced {
     const activeTab = document.querySelector('.calculator-tab.active') as HTMLElement;
     const betType = activeTab?.dataset.betType || 'simple';
     const isMultiple = betType === 'multiple';
+    const isReducida = betType === 'reducida';
 
     const maxNumbers = this.currentGame.maxNumbers;
     const maxStars = this.currentGame.maxStars || 0;
@@ -3749,7 +3781,14 @@ class DataLotto49Advanced {
     const currency = this.currentGame.currency || '€';
 
     let nCombos = 1;
-    if (isMultiple) {
+    let reducedSystem: ReducedSystem | undefined;
+
+    if (isReducida) {
+      const systems = REDUCED_SYSTEMS[this.currentGame.id] || [];
+      const selectedId = (document.getElementById('calcReducedSystemSelect') as HTMLSelectElement)?.value;
+      reducedSystem = systems.find(s => s.id === selectedId) || systems[0];
+      nCombos = reducedSystem ? reducedSystem.combinationsCount : 0;
+    } else if (isMultiple) {
       const n = parseInt((document.getElementById('calcNumbersSelect') as HTMLSelectElement)?.value || String(maxNumbers));
       const s = maxStars > 0 ? parseInt((document.getElementById('calcStarsSelect') as HTMLSelectElement)?.value || String(maxStars)) : 1;
       nCombos = this.calcMultipleCombos(n, s);
@@ -3769,6 +3808,19 @@ class DataLotto49Advanced {
     safeSetText('calcNumCombos', String(nCombos));
     safeSetText('calcCosteTotal', `${currency}${cost.toFixed(2)}`);
     safeSetText('calcProbabilidad', `${probPct.toFixed(7)}%`);
+
+    // Probabilidad de que los números ganadores estén dentro de tu base (activa la garantía del sistema)
+    const garantiaWrapper = document.getElementById('calcGarantiaWrapper');
+    const garantiaEl = document.getElementById('calcProbGarantia');
+    if (isReducida && reducedSystem && garantiaWrapper && garantiaEl) {
+      const favorable = this.nCr(reducedSystem.baseNumbersCount, maxNumbers);
+      const total = this.nCr(this.currentGame.numberRange, maxNumbers);
+      const probGarantiaPct = total > 0 ? (favorable / total) * 100 : 0;
+      garantiaWrapper.style.display = 'block';
+      garantiaEl.textContent = `${probGarantiaPct.toFixed(4)}%`;
+    } else if (garantiaWrapper) {
+      garantiaWrapper.style.display = 'none';
+    }
 
     const jackpotInput = document.getElementById('calcJackpotInput') as HTMLInputElement;
     const bote = parseFloat(jackpotInput?.value || '0');
@@ -4460,6 +4512,7 @@ class DataLotto49Advanced {
     this.populateCalculatorSelects();
     this.updateCalculatorStarsWrapper();
     this.updateCalculatorJackpotValue();
+    this.populateReducedSystemSelect();
 
     // Re-create grid and reset stats for the new game
     this.createNumbersGrid();
