@@ -684,6 +684,8 @@ class DataLotto49Advanced {
     excludedStars: Set<number>; // New for Euromillones
     excludedDecades: Set<number>;
     excludedDecadesSnapshot: Map<number, number[]>;
+    excludedTerminaciones: Set<number>;
+    excludedTerminacionesSnapshot: Map<number, number[]>;
     excludedStarDecades: Set<number>;
     excludedStarDecadesSnapshot: Map<number, number[]>;
     hotNumbers: Set<number>;
@@ -821,6 +823,8 @@ class DataLotto49Advanced {
     this.excludedStars = new Set();
     this.excludedDecades = new Set();
     this.excludedDecadesSnapshot = new Map();
+    this.excludedTerminaciones = new Set();
+    this.excludedTerminacionesSnapshot = new Map();
     this.excludedStarDecades = new Set();
     this.excludedStarDecadesSnapshot = new Map();
     this.hotNumbers = new Set();
@@ -2507,6 +2511,8 @@ class DataLotto49Advanced {
               favoriteGames: Array.from(this.favoriteGames), // Persist game favorites
               excludedDecades: Array.from(this.excludedDecades),
               excludedDecadesSnapshot: Array.from(this.excludedDecadesSnapshot.entries()),
+              excludedTerminaciones: Array.from(this.excludedTerminaciones),
+              excludedTerminacionesSnapshot: Array.from(this.excludedTerminacionesSnapshot.entries()),
               excludedStarDecades: Array.from(this.excludedStarDecades),
               excludedStarDecadesSnapshot: Array.from(this.excludedStarDecadesSnapshot.entries()),
               customGameUrls: this.customGameUrls, // Persist custom URLs
@@ -2659,6 +2665,8 @@ class DataLotto49Advanced {
               this.favoriteGames = new Set(savedState.favoriteGames || []);
               this.excludedDecades = new Set(savedState.excludedDecades || []);
               this.excludedDecadesSnapshot = new Map(savedState.excludedDecadesSnapshot || []);
+              this.excludedTerminaciones = new Set(savedState.excludedTerminaciones || []);
+              this.excludedTerminacionesSnapshot = new Map(savedState.excludedTerminacionesSnapshot || []);
               this.excludedStarDecades = new Set(savedState.excludedStarDecades || []);
               this.excludedStarDecadesSnapshot = new Map(savedState.excludedStarDecadesSnapshot || []);
               if (savedState.gameDataTypes) {
@@ -2805,6 +2813,13 @@ class DataLotto49Advanced {
       const dec = parseInt(chipEl.dataset.decade || '-1', 10);
       chipEl.classList.toggle('active', this.excludedStarDecades.has(dec));
     });
+
+    document.querySelectorAll('#terminacionesOptions .filter-chip').forEach(chip => {
+      const chipEl = chip as HTMLElement;
+      const val = parseInt(chipEl.dataset.value || '-1', 10);
+      chipEl.classList.toggle('active', this.excludedTerminaciones.has(val));
+    });
+    this.updateTerminacionesBadge();
 
     // Switches
     const setChecked = (id: string, isChecked: boolean) => {
@@ -6194,6 +6209,14 @@ class DataLotto49Advanced {
       this.toggleStarDecadeExclusion(decadeIndex);
     });
 
+    document.getElementById('terminacionesOptions')?.addEventListener('click', e => {
+      const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
+      if (!chip || chip.dataset.value === undefined) return;
+      e.stopPropagation();
+      const digit = parseInt(chip.dataset.value, 10);
+      this.toggleTerminacionExclusion(digit);
+    });
+
     document.querySelectorAll('[data-action="switch-game"]').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -6335,7 +6358,7 @@ class DataLotto49Advanced {
     document.querySelector('.filters-panel')?.addEventListener('click', e => {
        const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
        if (chip) {
-           if (chip.closest('#excluirDecenasOptions, #excluirDecenasEstrellasOptions')) return;
+           if (chip.closest('#excluirDecenasOptions, #excluirDecenasEstrellasOptions, #terminacionesOptions')) return;
            chip.classList.toggle('active');
            this.updateFilterBadgesFromAudit();
        }
@@ -7118,6 +7141,10 @@ class DataLotto49Advanced {
         this.showToast(t('toast.decenaBloqueada'), 'warning');
         return;
     }
+    if (type === 'number' && this.excludedTerminaciones.has(number % 10)) {
+        this.showToast(t('toast.decenaBloqueada'), 'warning');
+        return;
+    }
     if (type === 'star' && this.excludedStarDecades.has(decadeIndex)) {
         this.showToast(t('toast.decenaBloqueada'), 'warning');
         return;
@@ -7251,6 +7278,83 @@ class DataLotto49Advanced {
     this.saveState();
   }
 
+  toggleTerminacionExclusion(digit: number) {
+    const startNum = this.currentGame.id === 'nacional' ? 10 : 1;
+    const numbersWithEnding: number[] = [];
+    for (let n = startNum; n <= this.currentGame.numberRange; n++) {
+      if (n % 10 === digit) numbersWithEnding.push(n);
+    }
+
+    if (this.excludedTerminaciones.has(digit)) {
+      // Desactivar: solo quitar de excludedNumbers los que NO estaban excluidos antes de activar este dígito
+      this.excludedTerminaciones.delete(digit);
+      const snapshot = this.excludedTerminacionesSnapshot.get(digit) || [];
+      const snapshotSet = new Set(snapshot);
+      numbersWithEnding.forEach(n => {
+        if (!snapshotSet.has(n)) this.excludedNumbers.delete(n);
+      });
+      this.excludedTerminacionesSnapshot.delete(digit);
+    } else {
+      // Activar: recordar cuáles ya estaban excluidos antes (memoria antes/después)
+      const snapshot = numbersWithEnding.filter(n => this.excludedNumbers.has(n));
+      this.excludedTerminacionesSnapshot.set(digit, snapshot);
+      this.excludedTerminaciones.add(digit);
+      numbersWithEnding.forEach(n => {
+        this.excludedNumbers.add(n);
+        this.selectedNumbers.delete(n);
+        this.favoriteNumbers.delete(n);
+      });
+    }
+
+    const chip = document.querySelector(`#terminacionesOptions .filter-chip[data-value="${digit}"]`);
+    if (chip) chip.classList.toggle('active', this.excludedTerminaciones.has(digit));
+
+    this.filters.terminaciones = Array.from(this.excludedTerminaciones);
+
+    this.updateGridNumberStates();
+    this.updateSelectedDisplay();
+    this.updateTerminacionesBadge();
+    this.saveState();
+  }
+
+  updateTerminacionesBadge() {
+    const container = document.querySelector('#terminacionesOptions')?.closest('.filter-group');
+    if (!container) return;
+
+    const titleEl = container.querySelector('.filter-title');
+    if (!titleEl) return;
+
+    let badgeEl = titleEl.querySelector('.terminaciones-exclude-badge') as HTMLElement;
+
+    if (this.excludedTerminaciones.size === 0) {
+      if (badgeEl) badgeEl.remove();
+      return;
+    }
+
+    const startNum = this.currentGame.id === 'nacional' ? 10 : 1;
+    const totalRange = this.currentGame.id === 'nacional' 
+      ? (this.currentGame.numberRange - 9) 
+      : this.currentGame.numberRange;
+
+    let excludedCount = 0;
+    for (let n = startNum; n <= this.currentGame.numberRange; n++) {
+      if (this.excludedTerminaciones.has(n % 10)) {
+        excludedCount++;
+      }
+    }
+
+    const pct = Math.round((excludedCount / totalRange) * 100);
+
+    if (!badgeEl) {
+      badgeEl = document.createElement('span');
+      badgeEl.className = 'terminaciones-exclude-badge';
+      badgeEl.style.cssText = 'margin-left: 8px; font-size: 0.75rem; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-weight: 600;';
+      titleEl.appendChild(badgeEl);
+    }
+
+    badgeEl.textContent = t('filter.excludeBadge', { pct });
+  }
+
   toggleStarDecadeExclusion(decadeIndex: number) {
     const start = decadeIndex === 0 ? 1 : decadeIndex * 10;
     const end = Math.min(decadeIndex * 10 + 9, this.currentGame.starRange);
@@ -7367,7 +7471,11 @@ class DataLotto49Advanced {
       this.excludedDecadesSnapshot.clear();
       this.excludedStarDecades.clear();
       this.excludedStarDecadesSnapshot.clear();
-      document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip').forEach(c => c.classList.remove('active'));
+      this.excludedTerminaciones.clear();
+      this.excludedTerminacionesSnapshot.clear();
+      this.filters.terminaciones = [];
+      document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip, #terminacionesOptions .filter-chip').forEach(c => c.classList.remove('active'));
+      this.updateTerminacionesBadge();
       this.hotNumbers.clear();
       this.hotStars.clear();
       this.coldNumbers.clear();

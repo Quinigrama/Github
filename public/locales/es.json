@@ -871,6 +871,7 @@
   "filter.positionRange.theoreticalOnly": "Basado solo en cálculo teórico (histórico insuficiente)",
   "filter.positionRange.position": "Posición {n}",
   "filter.positionRange.enabled": "Activar filtro",
+  "filter.excludeBadge": "Excluye {pct}%",
   "conflict.universoInsuficiente": "⚠️ El universo de números o estrellas disponible en el volante interactivo es insuficiente para formar una apuesta. Revisa tus números excluidos manualmente.",
   "conflict.resolutorAgotado": "❌ El resolutor por percentiles no pudo encontrar una combinación válida tras relajar los filtros al 100% histórico. Revisa si tienes exclusiones o filtros contradictorios.",
   "conflict.resolutorExito": "✅ Conflicto resuelto relajando los filtros al Nivel {level} de tolerancia estadística."

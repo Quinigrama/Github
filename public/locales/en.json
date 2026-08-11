@@ -871,6 +871,7 @@
   "filter.positionRange.theoreticalOnly": "Based solely on theoretical calculation (insufficient history)",
   "filter.positionRange.position": "Position {n}",
   "filter.positionRange.enabled": "Enable filter",
+  "filter.excludeBadge": "Excludes {pct}%",
   "conflict.universoInsuficiente": "⚠️ The universe of numbers or stars available on the interactive grid is insufficient to form a bet. Check your manually excluded numbers.",
   "conflict.resolutorAgotado": "❌ The percentile solver could not find a valid combination even after relaxing filters to 100% historical range. Check for conflicting exclusions.",
   "conflict.resolutorExito": "✅ Conflict resolved by relaxing filters to Level {level} of statistical tolerance."
