@@ -2,7 +2,7 @@
 // SISTEMA DE ALMACENAMIENTO PERSISTENTE
 // ============================================
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames } from "./game-configs";
-import { Draw, Ticket, Penia, PeniaAlert, PeniaChatMessage } from './src/types';
+import { Draw, Ticket, Penia, PeniaAlert, PeniaChatMessage, PositionRangeFilter, PositionRangeConfig } from './src/types';
 import {
   nCr,
   getCombinations,
@@ -43,12 +43,22 @@ import { getCombinationStats, calculateTicketMetrics } from './src/utils/combina
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight } from './src/utils/popularity';
 import { getSumSeriesWithRegression } from './src/utils/regression';
+import {
+  getRoberExclusions,
+  RoberResult,
+  hypergeometricPMF,
+  ChipCategory,
+  getChipExclusions,
+  layer1Threshold,
+  findCriticalK
+} from './src/utils/roberTheorem';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
 import {
   findValidCombinations as runFindValidCombinations,
   findValidSuperset as runFindValidSuperset,
   findAndRankWinningCombinations as runFindAndRankWinningCombinations
 } from './src/utils/combinationFinder';
+import { calculateAllPositionRanges } from './src/utils/orderStatistics';
 import {
   saveAppStateToStorage,
   loadAppStateFromStorage,
@@ -187,6 +197,7 @@ interface Filters {
   entropyTerminaciones: { min: number; max: number };
   entropyIntervalos: { min: number; max: number };
   geometric: { exclude: string[]; favor: string[] };
+  positionRange?: PositionRangeFilter;
   // Star filters
   starSum: { min: number; max: number };
   starParImpar: string[];
@@ -195,6 +206,7 @@ interface Filters {
   starPrimos: { min: number; max: number };
   starConsecutivos: string[];
   starDistancia: { min: number; max: number };
+  starPositionRange?: PositionRangeFilter;
   useMarkov: boolean;
   useNash: boolean;
   useRegression: boolean;
@@ -1822,6 +1834,9 @@ class DataLotto49Advanced {
             <p><strong>¿Cómo funcionan?</strong></p>
             <p>El sistema examina la distribución histórica del juego seleccionado, identifica desviaciones y patrones estadísticos significativos, y sugiere configuraciones optimizadas para los filtros del panel de control (como rangos de entropía, sumas o distribución de terminaciones) basándose en tendencias cuantitativas reales.</p>
         `;
+    } else if (target.closest('#roberTheoremBtn')) {
+        title = t('rober.helpTitle');
+        body = t('rober.helpBody');
     } else if (target.closest('#saveFiltersBtn')) {
         title = "💾 Guardar Plantilla de Filtros";
         body = `
@@ -2486,6 +2501,17 @@ class DataLotto49Advanced {
     setRangeVal('regressionBonus', this.filters.ai.regressionBonus);
     setRangeVal('nashMinScore', this.filters.nashMinScore ?? 0.0);
     setRangeVal('nashMaxScore', this.filters.nashMaxScore ?? 10.0);
+
+    if (this.filters.positionRange) {
+      const posCb = document.getElementById('positionRangeEnabled') as HTMLInputElement;
+      if (posCb) posCb.checked = !!this.filters.positionRange.enabled;
+      setVal('positionRangeConfidence', this.filters.positionRange.confidenceLevel);
+    }
+    if (this.filters.starPositionRange) {
+      const starPosCb = document.getElementById('starPositionRangeEnabled') as HTMLInputElement;
+      if (starPosCb) starPosCb.checked = !!this.filters.starPositionRange.enabled;
+      setVal('starPositionRangeConfidence', this.filters.starPositionRange.confidenceLevel);
+    }
 
 
     // Chips
@@ -5127,7 +5153,11 @@ class DataLotto49Advanced {
 
     // 14. Multiple Strategy Options
     this.renderMultipleStrategyOptions();
+
+    // 15. Position Range Options (Estadísticos de Orden)
+    this.renderPositionRangeFilterOptions();
   }
+
 
   renderMultipleStrategyOptions() {
       const multipleOptions = document.getElementById('multipleNumbersOptions');
@@ -5302,6 +5332,288 @@ class DataLotto49Advanced {
 
       updateCostBadge();
   }
+
+  renderPositionRangeFilterOptions() {
+    this.renderPositionRangeInfoModal();
+
+    // 1. Main Numbers Matrix (Position Range Filter)
+    const standardContainer = document.getElementById('standardFiltersContainer');
+    let groupEl = document.getElementById('positionRangeFilterGroup');
+
+    if (this.currentGame.id === 'nacional') {
+      if (groupEl) groupEl.style.display = 'none';
+      const starGroupEl = document.getElementById('starPositionRangeFilterGroup');
+      if (starGroupEl) starGroupEl.style.display = 'none';
+      return;
+    }
+
+    const geometricGroup = document.getElementById('geometricOptions')?.closest('.filter-group');
+
+    if (!groupEl && standardContainer) {
+      groupEl = document.createElement('div');
+      groupEl.id = 'positionRangeFilterGroup';
+      groupEl.className = 'filter-group position-range-filter-group';
+      groupEl.setAttribute('data-filter-level', 'expert');
+      if (geometricGroup) {
+        standardContainer.insertBefore(groupEl, geometricGroup);
+      } else {
+        standardContainer.appendChild(groupEl);
+      }
+    } else if (groupEl && standardContainer && geometricGroup) {
+      if (groupEl.nextElementSibling !== geometricGroup) {
+        standardContainer.insertBefore(groupEl, geometricGroup);
+      }
+    }
+
+    if (groupEl) {
+      groupEl.style.display = 'block';
+
+      const confidenceLevel = this.filters.positionRange?.confidenceLevel || 1.645;
+      const isEnabled = !!this.filters.positionRange?.enabled;
+
+      const mainHistorical = (this.historicalData || [])
+        .map(d => d.numbers || [])
+        .filter(n => n && n.length >= this.currentGame.maxNumbers);
+
+      const ranges = calculateAllPositionRanges(
+        this.currentGame.numberRange,
+        this.currentGame.maxNumbers,
+        mainHistorical,
+        confidenceLevel
+      );
+
+      this.filters.positionRange = {
+        enabled: isEnabled,
+        confidenceLevel,
+        ranges
+      };
+
+      let html = `
+        <div class="filter-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span>📍 ${t('filter.positionRange.title')}</span>
+            <button type="button" class="position-range-info-btn" id="positionRangeInfoBtn" title="${t('filter.positionRange.infoTitle')}">
+              ℹ️
+            </button>
+          </div>
+          <label class="switch-toggle" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: normal; cursor: pointer;">
+            <input type="checkbox" id="positionRangeEnabled" ${isEnabled ? 'checked' : ''} />
+            <span>${t('filter.positionRange.enabled')}</span>
+          </label>
+        </div>
+
+        <div class="position-range-controls" style="margin-top: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; background: rgba(99, 102, 241, 0.05); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.15); flex-wrap: wrap; gap: 8px;">
+            <label for="positionRangeConfidence" style="font-size: 0.85rem; font-weight: 600; color: var(--dark);">
+              🎯 ${t('filter.positionRange.confidenceLabel')}:
+            </label>
+            <select id="positionRangeConfidence" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; font-weight: 600; cursor: pointer;">
+              <option value="1.645" ${confidenceLevel === 1.645 ? 'selected' : ''}>90% (z = 1.645)</option>
+              <option value="1.960" ${confidenceLevel === 1.960 ? 'selected' : ''}>95% (z = 1.960)</option>
+              <option value="2.576" ${confidenceLevel === 2.576 ? 'selected' : ''}>99% (z = 2.576)</option>
+            </select>
+          </div>
+
+          <div class="position-ranges-container">
+      `;
+
+      ranges.forEach(r => {
+        html += `
+          <div class="position-range-item">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+              ${t('filter.positionRange.position', { n: r.position })}
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <input type="number" id="positionRangeMin_${r.position}" value="${r.min}" readonly style="width: 48px; text-align: center; font-weight: bold; padding: 3px; border-radius: 4px; font-size: 0.85rem;" />
+              <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold;">a</span>
+              <input type="number" id="positionRangeMax_${r.position}" value="${r.max}" readonly style="width: 48px; text-align: center; font-weight: bold; padding: 3px; border-radius: 4px; font-size: 0.85rem;" />
+            </div>
+            ${!r.usedHistorical ? `<div id="positionRangeBadge_${r.position}" data-used-historical="false" style="font-size: 0.65rem; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 2px 4px; margin-top: 4px; line-height: 1.1;" title="${t('filter.positionRange.theoreticalOnly')}">
+              ⚠️ ${t('filter.positionRange.theoreticalOnly')}
+            </div>` : `<div id="positionRangeBadge_${r.position}" data-used-historical="true" style="display:none;"></div>`}
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      groupEl.innerHTML = html;
+
+      document.getElementById('positionRangeInfoBtn')?.addEventListener('click', () => {
+        this.toggleModal('positionRangeInfoModal', true);
+      });
+
+      document.getElementById('positionRangeEnabled')?.addEventListener('change', () => {
+        this.updateFilterStateFromUI();
+      });
+
+      document.getElementById('positionRangeConfidence')?.addEventListener('change', (e) => {
+        const select = e.target as HTMLSelectElement;
+        const newZ = parseFloat(select.value);
+        if (this.filters.positionRange) {
+          this.filters.positionRange.confidenceLevel = newZ;
+        }
+        this.renderPositionRangeFilterOptions();
+        this.updateFilterStateFromUI();
+      });
+    }
+
+    // 2. Secondary Matrix (Stars Position Range Filter) - Only if maxStars >= 2
+    const starSection = document.getElementById('starFiltersSection');
+    let starGroupEl = document.getElementById('starPositionRangeFilterGroup');
+
+    if (this.currentGame.maxStars >= 2) {
+      if (!starGroupEl && starSection) {
+        starGroupEl = document.createElement('div');
+        starGroupEl.id = 'starPositionRangeFilterGroup';
+        starGroupEl.className = 'filter-group position-range-filter-group';
+        starSection.appendChild(starGroupEl);
+      }
+
+      if (starGroupEl) {
+        starGroupEl.style.display = 'block';
+
+        const starConfidenceLevel = this.filters.starPositionRange?.confidenceLevel || 1.645;
+        const isStarEnabled = !!this.filters.starPositionRange?.enabled;
+
+        const starHistorical = (this.historicalData || [])
+          .map(d => d.stars || [])
+          .filter(s => s && s.length >= this.currentGame.maxStars);
+
+        const starRanges = calculateAllPositionRanges(
+          this.currentGame.starRange,
+          this.currentGame.maxStars,
+          starHistorical,
+          starConfidenceLevel
+        );
+
+        this.filters.starPositionRange = {
+          enabled: isStarEnabled,
+          confidenceLevel: starConfidenceLevel,
+          ranges: starRanges
+        };
+
+        let starHtml = `
+          <div class="filter-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>📍 ${t('filter.positionRange.starTitle')}</span>
+              <button type="button" class="position-range-info-btn" id="starPositionRangeInfoBtn" title="${t('filter.positionRange.infoTitle')}">
+                ℹ️
+              </button>
+            </div>
+            <label class="switch-toggle" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: normal; cursor: pointer;">
+              <input type="checkbox" id="starPositionRangeEnabled" ${isStarEnabled ? 'checked' : ''} />
+              <span>${t('filter.positionRange.enabled')}</span>
+            </label>
+          </div>
+
+          <div class="position-range-controls" style="margin-top: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; background: rgba(251, 191, 36, 0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.25); flex-wrap: wrap; gap: 8px;">
+              <label for="starPositionRangeConfidence" style="font-size: 0.85rem; font-weight: 600; color: var(--dark);">
+                🎯 ${t('filter.positionRange.confidenceLabel')}:
+              </label>
+              <select id="starPositionRangeConfidence" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; font-weight: 600; cursor: pointer;">
+                <option value="1.645" ${starConfidenceLevel === 1.645 ? 'selected' : ''}>90% (z = 1.645)</option>
+                <option value="1.960" ${starConfidenceLevel === 1.960 ? 'selected' : ''}>95% (z = 1.960)</option>
+                <option value="2.576" ${starConfidenceLevel === 2.576 ? 'selected' : ''}>99% (z = 2.576)</option>
+              </select>
+            </div>
+
+            <div class="position-ranges-container">
+        `;
+
+        starRanges.forEach(r => {
+          starHtml += `
+            <div class="position-range-item">
+              <div style="font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+                ${t('filter.positionRange.position', { n: r.position })}
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <input type="number" id="starPositionRangeMin_${r.position}" value="${r.min}" readonly style="width: 48px; text-align: center; font-weight: bold; padding: 3px; border-radius: 4px; font-size: 0.85rem;" />
+                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold;">a</span>
+                <input type="number" id="starPositionRangeMax_${r.position}" value="${r.max}" readonly style="width: 48px; text-align: center; font-weight: bold; padding: 3px; border-radius: 4px; font-size: 0.85rem;" />
+              </div>
+              ${!r.usedHistorical ? `<div id="starPositionRangeBadge_${r.position}" data-used-historical="false" style="font-size: 0.65rem; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 2px 4px; margin-top: 4px; line-height: 1.1;" title="${t('filter.positionRange.theoreticalOnly')}">
+                ⚠️ ${t('filter.positionRange.theoreticalOnly')}
+              </div>` : `<div id="starPositionRangeBadge_${r.position}" data-used-historical="true" style="display:none;"></div>`}
+            </div>
+          `;
+        });
+
+        starHtml += `
+            </div>
+          </div>
+        `;
+
+        starGroupEl.innerHTML = starHtml;
+
+        document.getElementById('starPositionRangeInfoBtn')?.addEventListener('click', () => {
+          this.toggleModal('positionRangeInfoModal', true);
+        });
+
+        document.getElementById('starPositionRangeEnabled')?.addEventListener('change', () => {
+          this.updateFilterStateFromUI();
+        });
+
+        document.getElementById('starPositionRangeConfidence')?.addEventListener('change', (e) => {
+          const select = e.target as HTMLSelectElement;
+          const newZ = parseFloat(select.value);
+          if (this.filters.starPositionRange) {
+            this.filters.starPositionRange.confidenceLevel = newZ;
+          }
+          this.renderPositionRangeFilterOptions();
+          this.updateFilterStateFromUI();
+        });
+      }
+    } else {
+      if (starGroupEl) starGroupEl.style.display = 'none';
+    }
+  }
+
+  renderPositionRangeInfoModal() {
+    let modal = document.getElementById('positionRangeInfoModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'positionRangeInfoModal';
+      modal.className = 'modal';
+      modal.style.display = 'none';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 520px; padding: 24px; border-radius: 16px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 1.2rem; color: var(--dark); font-weight: 700;">
+            📊 ${t('filter.positionRange.infoTitle')}
+          </h3>
+          <button type="button" id="closePositionRangeInfoModalBtn" class="close-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <div class="modal-body" style="font-size: 0.92rem; line-height: 1.6; color: #334155;">
+          <p style="margin-bottom: 14px;">${t('filter.positionRange.infoBody')}</p>
+          <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border-left: 4px solid #6366f1; font-size: 0.84rem; line-height: 1.5; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-weight: 700; margin-bottom: 6px; color: #4338ca;">📐 Fórmulas de Estadísticos de Orden:</div>
+            <div style="margin-top: 4px; font-family: monospace;">• <b>Media Teórica:</b> E[X_k] = k · (N + 1) / (n + 1)</div>
+            <div style="margin-top: 4px; font-family: monospace;">• <b>Varianza Teórica:</b> Var(X_k) = k · (n - k + 1) · (N + 1) · (N - n) / [(n + 1)² · (n + 2)]</div>
+            <div style="margin-top: 6px;">• <b>Combinación de Rangos:</b> Promedio ponderado entre intervalo teórico (nivel z seleccionable: 90%, 95%, 99%) y percentil empírico (5%-95% de sorteos históricos reales).</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('closePositionRangeInfoModalBtn')?.addEventListener('click', () => {
+      this.toggleModal('positionRangeInfoModal', false);
+    });
+
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        this.toggleModal('positionRangeInfoModal', false);
+      }
+    };
+  }
+
 
   renderStarFilterOptions() {
     const maxStars = this.currentGame.maxStars;
@@ -5989,6 +6301,7 @@ class DataLotto49Advanced {
     document.getElementById('loadFiltersBtn')?.addEventListener('click', () => this.openLoadFilterModal());
     document.getElementById('saveFiltersBtn')?.addEventListener('click', () => this.openSaveFilterModal());
     document.getElementById('aiFiltersBtn')?.addEventListener('click', () => this.applyAiFilters());
+    document.getElementById('roberTheoremBtn')?.addEventListener('click', () => this.applyRoberTheorem());
     document.getElementById('closeSaveFilterBtn')?.addEventListener('click', () => this.toggleModal('saveFilterModal', false));
     document.getElementById('confirmSaveFilterBtn')?.addEventListener('click', () => this.confirmSaveFilter());
     document.getElementById('closeLoadFilterBtn')?.addEventListener('click', () => this.toggleModal('loadFilterModal', false));
@@ -6480,7 +6793,43 @@ class DataLotto49Advanced {
       this.filters.ai.nashWeight = getVal('nashWeight');
       this.filters.ai.regressionBonus = getVal('regressionBonus');
 
+      if (this.currentGame.id !== 'nacional') {
+          const posEnabled = getChecked('positionRangeEnabled');
+          const confEl = document.getElementById('positionRangeConfidence') as HTMLSelectElement;
+          const confVal = confEl ? parseFloat(confEl.value) : 1.645;
+          const ranges: PositionRangeConfig[] = [];
+          for (let k = 1; k <= this.currentGame.maxNumbers; k++) {
+              const minVal = getVal(`positionRangeMin_${k}`);
+              const maxVal = getVal(`positionRangeMax_${k}`);
+              const usedHistBadge = document.getElementById(`positionRangeBadge_${k}`);
+              const usedHist = usedHistBadge ? usedHistBadge.dataset.usedHistorical === 'true' : false;
+              ranges.push({ position: k, min: minVal, max: maxVal, usedHistorical: usedHist });
+          }
+          this.filters.positionRange = { enabled: posEnabled, confidenceLevel: confVal, ranges };
+
+          if (this.currentGame.maxStars >= 2) {
+              const starPosEnabled = getChecked('starPositionRangeEnabled');
+              const starConfEl = document.getElementById('starPositionRangeConfidence') as HTMLSelectElement;
+              const starConfVal = starConfEl ? parseFloat(starConfEl.value) : 1.645;
+              const starRanges: PositionRangeConfig[] = [];
+              for (let k = 1; k <= this.currentGame.maxStars; k++) {
+                  const minVal = getVal(`starPositionRangeMin_${k}`);
+                  const maxVal = getVal(`starPositionRangeMax_${k}`);
+                  const starUsedHistBadge = document.getElementById(`starPositionRangeBadge_${k}`);
+                  const starUsedHist = starUsedHistBadge ? starUsedHistBadge.dataset.usedHistorical === 'true' : false;
+                  starRanges.push({ position: k, min: minVal, max: maxVal, usedHistorical: starUsedHist });
+              }
+              this.filters.starPositionRange = { enabled: starPosEnabled, confidenceLevel: starConfVal, ranges: starRanges };
+          } else {
+              delete this.filters.starPositionRange;
+          }
+      } else {
+          delete this.filters.positionRange;
+          delete this.filters.starPositionRange;
+      }
+
       if (this.currentGame.id === 'nacional') {
+
           const getSelectStr = (id: string): string => {
               const el = document.getElementById(id) as HTMLSelectElement;
               return el ? el.value : 'all';
@@ -11680,6 +12029,494 @@ class DataLotto49Advanced {
 
     this.saveState();
     this.showToast(t('toast.filtrosOptimizados'), 'success');
+  }
+
+  applyRoberTheorem() {
+    if (!this.dataLoaded || this.historicalData.length === 0) {
+      this.showToast(t('toast.cargaPrimeroDatos'), 'warning');
+      return;
+    }
+
+    const game = this.currentGame;
+    this.excludedNumbers.clear();
+    this.excludedStars.clear();
+
+    const startNum = game.id === 'nacional' ? 10 : 1;
+    const numberUniverseSize = game.numberRange - startNum + 1;
+
+    // 1. Exclusión de números e individuales (Capa 1 + Capa 2)
+    const numbersResult = getRoberExclusions(
+      this.historicalData, numberUniverseSize, game.maxNumbers, 100, 8,
+      (d: any) => d.numbers || []
+    );
+    numbersResult.excluded.forEach(n => this.excludedNumbers.add(n));
+
+    let starsResult: ReturnType<typeof getRoberExclusions> | null = null;
+    if (game.maxStars > 0) {
+      starsResult = getRoberExclusions(
+        this.historicalData, game.starRange, game.maxStars, 100, 8,
+        (d: any) => d.stars || []
+      );
+      starsResult.excluded.forEach(s => this.excludedStars.add(s));
+    }
+
+    // Reaplicar exclusiones de decenas activas
+    this.excludedDecades.forEach(dec => {
+      const start = dec === 0 ? 1 : dec * 10;
+      const end = Math.min(dec * 10 + 9, game.numberRange);
+      for (let n = start; n <= end; n++) this.excludedNumbers.add(n);
+    });
+
+    if (game.maxStars > 0) {
+      this.excludedStarDecades.forEach(dec => {
+        const start = dec === 0 ? 1 : dec * 10;
+        const end = Math.min(dec * 10 + 9, game.starRange);
+        for (let s = start; s <= end; s++) this.excludedStars.add(s);
+      });
+    }
+
+    // 2. Suma Total (Intervalo de confianza al 90% con z_alpha = 1.2816)
+    const sampleSize100 = Math.min(100, this.historicalData.length);
+    const sampleDraws100 = this.historicalData.slice(-sampleSize100);
+    const sums = sampleDraws100.map(d => (d.numbers || []).reduce((a: number, b: number) => a + b, 0));
+    const meanSum = sums.reduce((a, b) => a + b, 0) / sampleSize100;
+    const stdSum = Math.sqrt(sums.reduce((sq, n) => sq + Math.pow(n - meanSum, 2), 0) / sampleSize100);
+    const calcSumMin = Math.max(1, Math.floor(meanSum - 1.2816 * stdSum));
+    const calcSumMax = Math.ceil(meanSum + 1.2816 * stdSum);
+
+    const sumMinEl = document.getElementById('sumMin') as HTMLInputElement;
+    const sumMaxEl = document.getElementById('sumMax') as HTMLInputElement;
+    if (sumMinEl) sumMinEl.value = String(calcSumMin);
+    if (sumMaxEl) sumMaxEl.value = String(calcSumMax);
+
+    // 3. Excluir Terminaciones (Dígitos 0-9) mediante evaluación de Capa 1 y Capa 2
+    const M = game.numberRange;
+    const m = game.maxNumbers;
+    const totalStartN = game.id === 'nacional' ? 10 : 1;
+    const totalPossibleN = M - totalStartN + 1;
+
+    const termCategories: ChipCategory[] = [];
+    for (let digit = 0; digit <= 9; digit++) {
+      let countDigitInUniverse = 0;
+      for (let n = totalStartN; n <= M; n++) {
+        if (n % 10 === digit) countDigitInUniverse++;
+      }
+      const p = countDigitInUniverse / totalPossibleN;
+      termCategories.push({ key: String(digit), p });
+    }
+
+    const effectiveNL = Math.min(100, this.historicalData.length);
+    const effectiveNC = Math.min(8, this.historicalData.length);
+    const sampleL = this.historicalData.slice(-effectiveNL);
+    const sampleC = this.historicalData.slice(-effectiveNC);
+
+    const termCountsL: Record<number, number> = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+    const termCountsC: Record<number, number> = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+    sampleL.forEach(d => (d.numbers || []).forEach((n: number) => { termCountsL[n % 10] = (termCountsL[n % 10] || 0) + 1; }));
+    sampleC.forEach(d => (d.numbers || []).forEach((n: number) => { termCountsC[n % 10] = (termCountsC[n % 10] || 0) + 1; }));
+
+    const termDetails: Record<string, { p: number; countL: number; countC: number; layer1Cutoff: number; kStar: number }> = {};
+    const excludedTermKeys: string[] = [];
+
+    termCategories.forEach(cat => {
+      const digit = Number(cat.key);
+      const pNum = cat.p;
+      const layer1Cutoff = layer1Threshold(effectiveNL * m, pNum, 0.10);
+      const kStar = findCriticalK(effectiveNC * m, pNum, 0.10);
+      const countL = termCountsL[digit] || 0;
+      const countC = termCountsC[digit] || 0;
+      termDetails[cat.key] = { p: pNum, countL, countC, layer1Cutoff, kStar };
+      if (countL >= layer1Cutoff || countC >= kStar) {
+        excludedTermKeys.push(cat.key);
+      }
+    });
+
+    document.querySelectorAll('#terminacionesOptions .filter-chip').forEach(chip => {
+      const val = (chip as HTMLElement).dataset.value || '';
+      chip.classList.toggle('active', excludedTermKeys.includes(val));
+    });
+
+    // 4. Variedad de Terminaciones Distintas
+    const distinctCountsL: Record<number, number> = {};
+    sampleL.forEach(d => {
+      const distinct = new Set((d.numbers || []).map((n: number) => n % 10)).size;
+      distinctCountsL[distinct] = (distinctCountsL[distinct] || 0) + 1;
+    });
+
+    const distinctCategories: ChipCategory[] = [];
+    for (let v = 1; v <= m; v++) {
+      const p = (distinctCountsL[v] || 0) / effectiveNL;
+      if (p > 0) distinctCategories.push({ key: String(v), p });
+    }
+
+    const distinctTermResult = getChipExclusions(
+      this.historicalData, distinctCategories, 100, 8,
+      (d: any) => String(new Set((d.numbers || []).map((n: number) => n % 10)).size)
+    );
+
+    document.querySelectorAll('#terminacionesDistintasOptions .filter-chip').forEach(chip => {
+      const val = (chip as HTMLElement).dataset.value || '';
+      chip.classList.toggle('active', !distinctTermResult.excludedKeys.includes(val));
+    });
+
+    // 5. Par/Impar y Bajos/Altos
+    let parImparResult: ReturnType<typeof getChipExclusions> | null = null;
+    let bajosAltosResult: ReturnType<typeof getChipExclusions> | null = null;
+
+    if (game.id !== 'nacional') {
+      const K_pares = Math.floor(M / 2);
+      const parImparCategories: ChipCategory[] = [];
+      for (let j = 0; j <= m; j++) {
+        const p = hypergeometricPMF(M, K_pares, m, j);
+        if (p > 0) parImparCategories.push({ key: `${j}/${m - j}`, p });
+      }
+      parImparResult = getChipExclusions(
+        this.historicalData, parImparCategories, 100, 8,
+        (d: any) => {
+          const evens = (d.numbers || []).filter((n: number) => n % 2 === 0).length;
+          return `${evens}/${m - evens}`;
+        }
+      );
+
+      const midPoint = Math.floor(M / 2);
+      const K_bajos = midPoint;
+      const bajosAltosCategories: ChipCategory[] = [];
+      for (let j = 0; j <= m; j++) {
+        const p = hypergeometricPMF(M, K_bajos, m, j);
+        if (p > 0) bajosAltosCategories.push({ key: `${j}/${m - j}`, p });
+      }
+      bajosAltosResult = getChipExclusions(
+        this.historicalData, bajosAltosCategories, 100, 8,
+        (d: any) => {
+          const lows = (d.numbers || []).filter((n: number) => n <= midPoint).length;
+          return `${lows}/${m - lows}`;
+        }
+      );
+
+      document.querySelectorAll('#parImparOptions .filter-chip').forEach(chip => {
+        const val = (chip as HTMLElement).dataset.value || '';
+        chip.classList.toggle('active', !parImparResult!.excludedKeys.includes(val));
+      });
+      document.querySelectorAll('#bajosAltosOptions .filter-chip').forEach(chip => {
+        const val = (chip as HTMLElement).dataset.value || '';
+        chip.classList.toggle('active', !bajosAltosResult!.excludedKeys.includes(val));
+      });
+    }
+
+    // 6. Agrupación por Decenas
+    const agrupCountsL: Record<string, number> = {};
+    sampleL.forEach(d => {
+      const tens: Record<number, number> = {};
+      (d.numbers || []).forEach((n: number) => {
+        const ten = Math.floor((n - 1) / 10);
+        tens[ten] = (tens[ten] || 0) + 1;
+      });
+      const pattern = Object.values(tens).sort((a, b) => b - a).join('/');
+      agrupCountsL[pattern] = (agrupCountsL[pattern] || 0) + 1;
+    });
+
+    const agrupCategories: ChipCategory[] = [];
+    Object.entries(agrupCountsL).forEach(([pat, count]) => {
+      const p = count / effectiveNL;
+      agrupCategories.push({ key: pat, p });
+    });
+
+    const agrupResult = getChipExclusions(
+      this.historicalData, agrupCategories, 100, 8,
+      (d: any) => {
+        const tens: Record<number, number> = {};
+        (d.numbers || []).forEach((n: number) => {
+          const ten = Math.floor((n - 1) / 10);
+          tens[ten] = (tens[ten] || 0) + 1;
+        });
+        return Object.values(tens).sort((a, b) => b - a).join('/');
+      }
+    );
+
+    document.querySelectorAll('#agrupDecenasOptions .filter-chip').forEach(chip => {
+      const val = (chip as HTMLElement).dataset.value || '';
+      chip.classList.toggle('active', !agrupResult.excludedKeys.includes(val));
+    });
+
+    // 7. Números Consecutivos
+    const consecCountsL: Record<string, number> = {};
+    sampleL.forEach(d => {
+      const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
+      let consecStr = '';
+      let cCount = 1;
+      for (let j = 1; j < sorted.length; j++) {
+        if (sorted[j] === sorted[j - 1] + 1) {
+          cCount++;
+        } else {
+          consecStr += cCount;
+          cCount = 1;
+        }
+      }
+      consecStr += cCount;
+      const pattern = consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+      consecCountsL[pattern] = (consecCountsL[pattern] || 0) + 1;
+    });
+
+    const consecCategories: ChipCategory[] = [];
+    Object.entries(consecCountsL).forEach(([pat, count]) => {
+      const p = count / effectiveNL;
+      consecCategories.push({ key: pat, p });
+    });
+
+    const consecResult = getChipExclusions(
+      this.historicalData, consecCategories, 100, 8,
+      (d: any) => {
+        const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
+        let consecStr = '';
+        let cCount = 1;
+        for (let j = 1; j < sorted.length; j++) {
+          if (sorted[j] === sorted[j - 1] + 1) {
+            cCount++;
+          } else {
+            consecStr += cCount;
+            cCount = 1;
+          }
+        }
+        consecStr += cCount;
+        return consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+      }
+    );
+
+    document.querySelectorAll('#consecutivosOptions .filter-chip').forEach(chip => {
+      const val = (chip as HTMLElement).dataset.value || '';
+      chip.classList.toggle('active', !consecResult.excludedKeys.includes(val));
+    });
+
+    // 8. Entropía de Terminaciones (Rango percentil 5%-95%)
+    const termEntropies = sampleL.map(d => {
+      const endingCounts: Record<number, number> = {};
+      (d.numbers || []).forEach((n: number) => {
+        const ending = n % 10;
+        endingCounts[ending] = (endingCounts[ending] || 0) + 1;
+      });
+      return -Object.values(endingCounts).reduce((s, countVal) => {
+        const p = countVal / m;
+        return s + (p > 0 ? p * Math.log2(p) : 0);
+      }, 0);
+    }).sort((a, b) => a - b);
+
+    const minEntropyTerm = termEntropies[Math.floor(effectiveNL * 0.05)] ?? termEntropies[0];
+    const maxEntropyTerm = termEntropies[Math.floor(effectiveNL * 0.95)] ?? termEntropies[termEntropies.length - 1];
+
+    const entTermMinEl = document.getElementById('entropyTerminacionesMin') as HTMLInputElement;
+    const entTermMaxEl = document.getElementById('entropyTerminacionesMax') as HTMLInputElement;
+    if (entTermMinEl) entTermMinEl.value = minEntropyTerm.toFixed(3);
+    if (entTermMaxEl) entTermMaxEl.value = maxEntropyTerm.toFixed(3);
+
+    // 9. Entropía de Intervalos (Rango percentil 5%-95%)
+    const intervalEntropies = sampleL.map(d => {
+      const sortedCombo = [...(d.numbers || [])].sort((a, b) => a - b);
+      const intervalCounts: Record<number, number> = {};
+      for (let idx = 0; idx < sortedCombo.length - 1; idx++) {
+        const diff = sortedCombo[idx + 1] - sortedCombo[idx];
+        intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
+      }
+      const numIntervals = m - 1;
+      if (numIntervals <= 0) return 0;
+      return -Object.values(intervalCounts).reduce((s, countVal) => {
+        const p = countVal / numIntervals;
+        return s + (p > 0 ? p * Math.log2(p) : 0);
+      }, 0);
+    }).sort((a, b) => a - b);
+
+    const minEntropyInt = intervalEntropies[Math.floor(effectiveNL * 0.05)] ?? intervalEntropies[0];
+    const maxEntropyInt = intervalEntropies[Math.floor(effectiveNL * 0.95)] ?? intervalEntropies[intervalEntropies.length - 1];
+
+    const entIntMinEl = document.getElementById('entropyIntervalosMin') as HTMLInputElement;
+    const entIntMaxEl = document.getElementById('entropyIntervalosMax') as HTMLInputElement;
+    if (entIntMinEl) entIntMinEl.value = minEntropyInt.toFixed(3);
+    if (entIntMaxEl) entIntMaxEl.value = maxEntropyInt.toFixed(3);
+
+    this.updateGridNumberStates();
+    this.updateFilterStateFromUI();
+
+    this.renderRoberReasoningBlock({
+      numResult: numbersResult,
+      starResult: starsResult,
+      parImparResult,
+      bajosAltosResult,
+      sumRange: { min: calcSumMin, max: calcSumMax, mean: meanSum, std: stdSum },
+      excludedTermKeys,
+      termDetails,
+      distinctTermResult,
+      agrupResult,
+      consecResult,
+      entTermRange: { min: minEntropyTerm, max: maxEntropyTerm },
+      entIntRange: { min: minEntropyInt, max: maxEntropyInt }
+    });
+    this.saveState();
+  }
+
+  renderRoberReasoningBlock(payload: {
+    numResult: RoberResult;
+    starResult: RoberResult | null;
+    parImparResult: ReturnType<typeof getChipExclusions> | null;
+    bajosAltosResult: ReturnType<typeof getChipExclusions> | null;
+    sumRange: { min: number; max: number; mean: number; std: number };
+    excludedTermKeys: string[];
+    termDetails: Record<string, { p: number; countL: number; countC: number; layer1Cutoff: number; kStar: number }>;
+    distinctTermResult: ReturnType<typeof getChipExclusions>;
+    agrupResult: ReturnType<typeof getChipExclusions>;
+    consecResult: ReturnType<typeof getChipExclusions>;
+    entTermRange: { min: number; max: number };
+    entIntRange: { min: number; max: number };
+  }) {
+    const container = document.getElementById('roberReasoningBlock');
+    const textEl = document.getElementById('roberReasoningText');
+    if (!container || !textEl) return;
+
+    container.style.display = 'block';
+
+    const {
+      numResult, starResult, parImparResult, bajosAltosResult,
+      sumRange, excludedTermKeys, termDetails, distinctTermResult,
+      agrupResult, consecResult, entTermRange, entIntRange
+    } = payload;
+
+    let html = '';
+
+    // 1. Números principales
+    const numP = (numResult.p * 100).toFixed(2);
+    const numLambda = numResult.lambda.toFixed(1);
+    html += `<div style="margin-bottom: 8px;">`;
+    html += `<strong>🔢 ${t('dataviz.numerosPrincipales')}:</strong> `;
+    html += `<span>${t('rober.parametros', { p: numP, lambda: numLambda, umbral: numResult.layer1Cutoff, kStar: numResult.kStar, nLarga: numResult.nLarga, nCorta: numResult.nCorta })}</span>`;
+    html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+    html += `<li><strong>${t('rober.capa1Label')}:</strong> ${numResult.excludedLayer1.length > 0 ? numResult.excludedLayer1.join(', ') : t('rober.ninguno')}</li>`;
+    html += `<li><strong>${t('rober.capa2Label')}:</strong> ${numResult.excludedLayer2.length > 0 ? numResult.excludedLayer2.join(', ') : t('rober.ninguno')}</li>`;
+    html += `<li><strong>${t('rober.numerosExcluidos')}:</strong> ${numResult.excluded.length > 0 ? numResult.excluded.join(', ') : t('rober.ninguno')}</li>`;
+    html += `</ul>`;
+    html += `</div>`;
+
+    // 2. Estrellas (si aplica)
+    if (starResult) {
+      const starP = (starResult.p * 100).toFixed(2);
+      const starLambda = starResult.lambda.toFixed(1);
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>⭐ ${t('dataviz.estrellasGenerico')}:</strong> `;
+      html += `<span>${t('rober.parametros', { p: starP, lambda: starLambda, umbral: starResult.layer1Cutoff, kStar: starResult.kStar, nLarga: starResult.nLarga, nCorta: starResult.nCorta })}</span>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      html += `<li><strong>${t('rober.capa1Label')}:</strong> ${starResult.excludedLayer1.length > 0 ? starResult.excludedLayer1.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.capa2Label')}:</strong> ${starResult.excludedLayer2.length > 0 ? starResult.excludedLayer2.join(', ') : t('rober.ninguno')}</li>`;
+      html += `<li><strong>${t('rober.estrellasExcluidas')}:</strong> ${starResult.excluded.length > 0 ? starResult.excluded.join(', ') : t('rober.ninguno')}</li>`;
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 3. Suma Total
+    html += `<div style="margin-bottom: 8px;">`;
+    html += `<strong>➕ ${t('rober.sumaTitulo')}:</strong> `;
+    html += `<span>${t('rober.sumaDetalle', { mean: sumRange.mean.toFixed(1), std: sumRange.std.toFixed(1), min: sumRange.min, max: sumRange.max })}</span>`;
+    html += `</div>`;
+
+    // 4. Excluir Terminaciones
+    html += `<div style="margin-bottom: 8px;">`;
+    html += `<strong>🚫 ${t('rober.terminacionesTitulo')}:</strong>`;
+    html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+    Object.entries(termDetails).forEach(([key, d]) => {
+      const pPercent = (d.p * 100).toFixed(2);
+      const isEx = excludedTermKeys.includes(key);
+      const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+      html += `<li>${t('rober.chipDetalle', { key: `Dígito ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+    });
+    html += `</ul>`;
+    html += `</div>`;
+
+    // 5. Variedad de Terminaciones
+    if (distinctTermResult && Object.keys(distinctTermResult.details).length > 0) {
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>🔀 ${t('rober.variedadTitulo')}:</strong>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      Object.entries(distinctTermResult.details).forEach(([key, d]) => {
+        const pPercent = (d.p * 100).toFixed(2);
+        const isEx = distinctTermResult.excludedKeys.includes(key);
+        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+        html += `<li>${t('rober.chipDetalle', { key: `${key} distintas`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+      });
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 6. Par/Impar (si aplica)
+    if (parImparResult) {
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>⚖️ ${t('rober.parImparTitulo')}:</strong>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      Object.entries(parImparResult.details).forEach(([key, d]) => {
+        const pPercent = (d.p * 100).toFixed(2);
+        const isEx = parImparResult.excludedKeys.includes(key);
+        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+        html += `<li>${t('rober.chipDetalle', { key, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+      });
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 7. Bajos/Altos (si aplica)
+    if (bajosAltosResult) {
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>📊 ${t('rober.bajosAltosTitulo')}:</strong>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      Object.entries(bajosAltosResult.details).forEach(([key, d]) => {
+        const pPercent = (d.p * 100).toFixed(2);
+        const isEx = bajosAltosResult.excludedKeys.includes(key);
+        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+        html += `<li>${t('rober.chipDetalle', { key, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+      });
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 8. Agrupación por Decenas
+    if (agrupResult && Object.keys(agrupResult.details).length > 0) {
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>🏢 ${t('rober.agrupTitulo')}:</strong>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      Object.entries(agrupResult.details).forEach(([key, d]) => {
+        const pPercent = (d.p * 100).toFixed(2);
+        const isEx = agrupResult.excludedKeys.includes(key);
+        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+        html += `<li>${t('rober.chipDetalle', { key: `Patrón ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+      });
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 9. Consecutivos
+    if (consecResult && Object.keys(consecResult.details).length > 0) {
+      html += `<div style="margin-bottom: 8px;">`;
+      html += `<strong>🔗 ${t('rober.consecTitulo')}:</strong>`;
+      html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+      Object.entries(consecResult.details).forEach(([key, d]) => {
+        const pPercent = (d.p * 100).toFixed(2);
+        const isEx = consecResult.excludedKeys.includes(key);
+        const statusText = isEx ? `❌ (${t('rober.excluido')})` : `✅ (${t('rober.mantenido')})`;
+        html += `<li>${t('rober.chipDetalle', { key: `Patrón ${key}`, p: pPercent, countL: d.countL, countC: d.countC, layer1Cutoff: d.layer1Cutoff, kStar: d.kStar })} — ${statusText}</li>`;
+      });
+      html += `</ul>`;
+      html += `</div>`;
+    }
+
+    // 10. Entropías
+    html += `<div style="margin-bottom: 8px;">`;
+    html += `<strong>🌀 ${t('rober.entropiaTermTitulo')} / ${t('rober.entropiaIntTitulo')}:</strong>`;
+    html += `<ul style="margin: 4px 0 6px 20px; padding: 0;">`;
+    html += `<li><strong>${t('rober.entropiaTermTitulo')}:</strong> ${t('rober.entropiaDetalle', { min: entTermRange.min.toFixed(3), max: entTermRange.max.toFixed(3) })}</li>`;
+    html += `<li><strong>${t('rober.entropiaIntTitulo')}:</strong> ${t('rober.entropiaDetalle', { min: entIntRange.min.toFixed(3), max: entIntRange.max.toFixed(3) })}</li>`;
+    html += `</ul>`;
+    html += `</div>`;
+
+    // 11. Aviso honesto
+    html += `<div style="font-size: 0.82rem; font-style: italic; color: #6b21a8; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #ddd6fe;">`;
+    html += `${t('rober.aviso')}`;
+    html += `</div>`;
+
+    textEl.innerHTML = html;
   }
 
   updateCorrelationScore() {

@@ -229,6 +229,24 @@ export function isValidCombination(
       if (sum < filters.sum.min || sum > filters.sum.max) return false;
   }
 
+  // 1b. RANGO ÓPTIMO POR POSICIÓN (Estadísticos de Orden)
+  if (currentGame.id !== 'nacional' && filters.positionRange && filters.positionRange.enabled && Array.isArray(filters.positionRange.ranges)) {
+      const sortedCombo = [...combination].sort((a, b) => a - b);
+      for (const r of filters.positionRange.ranges) {
+          const val = sortedCombo[r.position - 1];
+          if (val !== undefined && (val < r.min || val > r.max)) return false;
+      }
+  }
+
+  // 1c. RANGO ÓPTIMO POR POSICIÓN ESTRELLAS
+  if (currentGame.id !== 'nacional' && maxStars >= 2 && filters.starPositionRange && filters.starPositionRange.enabled && Array.isArray(filters.starPositionRange.ranges)) {
+      const sortedStars = [...stars].sort((a, b) => a - b);
+      for (const r of filters.starPositionRange.ranges) {
+          const val = sortedStars[r.position - 1];
+          if (val !== undefined && (val < r.min || val > r.max)) return false;
+      }
+  }
+
   // 2. TERMINACIONES DISTINTAS: very cheap, uses set map
   if (filters.terminacionesDistintas && filters.terminacionesDistintas.length > 0) {
       const uniqueEndings = new Set(combination.map(n => n % 10)).size;

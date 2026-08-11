@@ -248,6 +248,22 @@ export class BaseGameConfig implements GameConfig {
       ai: { markovDepth: 5, nashWeight: 1, regressionBonus: 3 }
     };
 
+    if (this.id !== 'nacional') {
+      baseFilters.positionRange = {
+        enabled: false,
+        confidenceLevel: 1.645,
+        ranges: []
+      };
+      if (this.maxStars >= 2) {
+        baseFilters.starPositionRange = {
+          enabled: false,
+          confidenceLevel: 1.645,
+          ranges: []
+        };
+      }
+    }
+
+
     if (this.customFilterLimits) {
       if (this.customFilterLimits.sum) baseFilters.sum = { ...this.customFilterLimits.sum };
       if (this.customFilterLimits.sumaDigitos) baseFilters.sumaDigitos = { ...this.customFilterLimits.sumaDigitos };

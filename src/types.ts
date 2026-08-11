@@ -64,3 +64,17 @@ export interface Penia {
   messages: PeniaChatMessage[];
   totalPrizes?: number;
 }
+
+export interface PositionRangeConfig {
+  position: number;
+  min: number;
+  max: number;
+  usedHistorical: boolean;
+}
+
+export interface PositionRangeFilter {
+  enabled: boolean;
+  confidenceLevel: number; // z-score: 1.645 (90%), 1.960 (95%), 2.576 (99%)
+  ranges: PositionRangeConfig[];
+}
+
