@@ -55,7 +55,8 @@ import {
   findCriticalK,
   orderedPercentileExclusion,
   nominalTailExclusion,
-  nominalActivationSet
+  nominalActivationSet,
+  computeRoberFilterState
 } from './src/utils/roberTheorem';
 import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
 import {
@@ -12033,24 +12034,10 @@ class DataLotto49Advanced {
     this.excludedNumbers.clear();
     this.excludedStars.clear();
 
-    const startNum = game.id === 'nacional' ? 10 : 1;
-    const numberUniverseSize = game.numberRange - startNum + 1;
+    const roberState = computeRoberFilterState(this.historicalData, game);
 
-    // 1. Exclusión de números e individuales (Capa 1 + Capa 2)
-    const numbersResult = getRoberExclusions(
-      this.historicalData, numberUniverseSize, game.maxNumbers, 100, 8,
-      (d: any) => d.numbers || []
-    );
-    numbersResult.excluded.forEach(n => this.excludedNumbers.add(n));
-
-    let starsResult: ReturnType<typeof getRoberExclusions> | null = null;
-    if (game.maxStars > 0) {
-      starsResult = getRoberExclusions(
-        this.historicalData, game.starRange, game.maxStars, 100, 8,
-        (d: any) => d.stars || []
-      );
-      starsResult.excluded.forEach(s => this.excludedStars.add(s));
-    }
+    roberState.excludedNumbers.forEach(n => this.excludedNumbers.add(n));
+    roberState.excludedStars.forEach(s => this.excludedStars.add(s));
 
     // Reaplicar exclusiones de decenas activas
     this.excludedDecades.forEach(dec => {
@@ -12068,357 +12055,87 @@ class DataLotto49Advanced {
     }
 
     // 2. Suma Total (Percentil empírico 5%-95% sobre el histórico completo)
-    const allSums = this.historicalData.map(d => (d.numbers || []).reduce((a: number, b: number) => a + b, 0));
-    const sortedSums = [...allSums].sort((a, b) => a - b);
-    const meanSum = allSums.reduce((a, b) => a + b, 0) / (allSums.length || 1);
-    const stdSum = Math.sqrt(allSums.reduce((sq, n) => sq + Math.pow(n - meanSum, 2), 0) / (allSums.length || 1));
-    const calcSumMin = Math.max(1, Math.floor(percentile(sortedSums, 0.05)));
-    const calcSumMax = Math.ceil(percentile(sortedSums, 0.95));
-
     const sumMinEl = document.getElementById('sumMin') as HTMLInputElement;
     const sumMaxEl = document.getElementById('sumMax') as HTMLInputElement;
-    if (sumMinEl) sumMinEl.value = String(calcSumMin);
-    if (sumMaxEl) sumMaxEl.value = String(calcSumMax);
+    if (sumMinEl) sumMinEl.value = String(roberState.sumRange.min);
+    if (sumMaxEl) sumMaxEl.value = String(roberState.sumRange.max);
 
     // 3. Excluir Terminaciones (Dígitos 0-9) mediante Capa Reciente + Capa Percentil
-    const M = game.numberRange;
-    const m = game.maxNumbers;
-    const totalStartN = game.id === 'nacional' ? 10 : 1;
-    const totalPossibleN = M - totalStartN + 1;
-
-    const termCategories: ChipCategory[] = [];
-    for (let digit = 0; digit <= 9; digit++) {
-      let countDigitInUniverse = 0;
-      for (let n = totalStartN; n <= M; n++) {
-        if (n % 10 === digit) countDigitInUniverse++;
-      }
-      const p = countDigitInUniverse / totalPossibleN;
-      termCategories.push({ key: String(digit), p });
-    }
-
-    const effectiveNL = Math.min(100, this.historicalData.length);
-    const effectiveNC = Math.min(8, this.historicalData.length);
-    const sampleL = this.historicalData.slice(-effectiveNL);
-    const sampleC = this.historicalData.slice(-effectiveNC);
-
-    const termCountsL: Record<number, number> = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
-    const termCountsC: Record<number, number> = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
-    sampleL.forEach(d => (d.numbers || []).forEach((n: number) => { termCountsL[n % 10] = (termCountsL[n % 10] || 0) + 1; }));
-    sampleC.forEach(d => (d.numbers || []).forEach((n: number) => { termCountsC[n % 10] = (termCountsC[n % 10] || 0) + 1; }));
-
-    const termDetails: Record<string, { p: number; countL: number; countC: number; layer1Cutoff: number; kStar: number }> = {};
-    const excludedTermKeysRecency: string[] = [];
-
-    termCategories.forEach(cat => {
-      const digit = Number(cat.key);
-      const pNum = cat.p;
-      const layer1Cutoff = layer1Threshold(effectiveNL * m, pNum, 0.10);
-      const kStar = findCriticalK(effectiveNC * m, pNum, 0.10);
-      const countL = termCountsL[digit] || 0;
-      const countC = termCountsC[digit] || 0;
-      termDetails[cat.key] = { p: pNum, countL, countC, layer1Cutoff, kStar };
-      if (countL >= layer1Cutoff || countC >= kStar) {
-        excludedTermKeysRecency.push(cat.key);
-      }
-    });
-
-    const allTermCounts: Record<string, number> = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0 };
-    this.historicalData.forEach(d => (d.numbers || []).forEach((n: number) => {
-      const digitStr = String(n % 10);
-      allTermCounts[digitStr] = (allTermCounts[digitStr] || 0) + 1;
-    }));
-    const termPercentileRes = nominalTailExclusion(allTermCounts, 0.10);
-    const excludedTermKeysPercentile = termPercentileRes.excludedKeys;
-    const excludedTermKeys = Array.from(new Set([...excludedTermKeysRecency, ...excludedTermKeysPercentile]));
-
     document.querySelectorAll('#terminacionesOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', excludedTermKeys.includes(val));
+      chip.classList.toggle('active', roberState.excludedTermKeys.includes(val));
     });
 
     // 4. Variedad de Terminaciones Distintas
-    const distinctCountsL: Record<number, number> = {};
-    sampleL.forEach(d => {
-      const distinct = new Set((d.numbers || []).map((n: number) => n % 10)).size;
-      distinctCountsL[distinct] = (distinctCountsL[distinct] || 0) + 1;
-    });
-
-    const distinctCategories: ChipCategory[] = [];
-    for (let v = 1; v <= m; v++) {
-      const p = (distinctCountsL[v] || 0) / effectiveNL;
-      if (p > 0) distinctCategories.push({ key: String(v), p });
-    }
-
-    const distinctTermResult = getChipExclusions(
-      this.historicalData, distinctCategories, 100, 8,
-      (d: any) => String(new Set((d.numbers || []).map((n: number) => n % 10)).size)
-    );
-
-    const allDistinctValues = this.historicalData.map(d => new Set((d.numbers || []).map((n: number) => n % 10)).size);
-    const allDistinctCatValues = Array.from({ length: m }, (_, i) => i + 1);
-    const distPercentileRes = orderedPercentileExclusion(allDistinctValues, allDistinctCatValues, 0.05, 0.95);
-    const distExcludedPercentileKeys = distPercentileRes.excludedValues.map(v => String(v));
-    const distinctExcludedKeys = Array.from(new Set([...distinctTermResult.excludedKeys, ...distExcludedPercentileKeys]));
-
     document.querySelectorAll('#terminacionesDistintasOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !distinctExcludedKeys.includes(val));
+      chip.classList.toggle('active', !roberState.distinctExcludedKeys.includes(val));
     });
 
     // 5. Par/Impar y Bajos/Altos
-    let parImparResult: ReturnType<typeof getChipExclusions> | null = null;
-    let bajosAltosResult: ReturnType<typeof getChipExclusions> | null = null;
-    let parImparExcludedKeys: string[] = [];
-    let parImparPercentileKeys: string[] = [];
-    let bajosAltosExcludedKeys: string[] = [];
-    let bajosAltosPercentileKeys: string[] = [];
-
     if (game.id !== 'nacional') {
-      const K_pares = Math.floor(M / 2);
-      const parImparCategories: ChipCategory[] = [];
-      for (let j = 0; j <= m; j++) {
-        const p = hypergeometricPMF(M, K_pares, m, j);
-        if (p > 0) parImparCategories.push({ key: `${j}/${m - j}`, p });
-      }
-      parImparResult = getChipExclusions(
-        this.historicalData, parImparCategories, 100, 8,
-        (d: any) => {
-          const evens = (d.numbers || []).filter((n: number) => n % 2 === 0).length;
-          return `${evens}/${m - evens}`;
-        }
-      );
-
-      const allEvenCounts = this.historicalData.map(d => (d.numbers || []).filter((n: number) => n % 2 === 0).length);
-      const allParCatValues = Array.from({ length: m + 1 }, (_, i) => i);
-      const parPercentileRes = orderedPercentileExclusion(allEvenCounts, allParCatValues, 0.05, 0.95);
-      parImparPercentileKeys = parPercentileRes.excludedValues.map(j => `${j}/${m - j}`);
-      parImparExcludedKeys = Array.from(new Set([...parImparResult.excludedKeys, ...parImparPercentileKeys]));
-
-      const midPoint = Math.floor(M / 2);
-      const K_bajos = midPoint;
-      const bajosAltosCategories: ChipCategory[] = [];
-      for (let j = 0; j <= m; j++) {
-        const p = hypergeometricPMF(M, K_bajos, m, j);
-        if (p > 0) bajosAltosCategories.push({ key: `${j}/${m - j}`, p });
-      }
-      bajosAltosResult = getChipExclusions(
-        this.historicalData, bajosAltosCategories, 100, 8,
-        (d: any) => {
-          const lows = (d.numbers || []).filter((n: number) => n <= midPoint).length;
-          return `${lows}/${m - lows}`;
-        }
-      );
-
-      const allLowCounts = this.historicalData.map(d => (d.numbers || []).filter((n: number) => n <= midPoint).length);
-      const allLowCatValues = Array.from({ length: m + 1 }, (_, i) => i);
-      const lowPercentileRes = orderedPercentileExclusion(allLowCounts, allLowCatValues, 0.05, 0.95);
-      bajosAltosPercentileKeys = lowPercentileRes.excludedValues.map(j => `${j}/${m - j}`);
-      bajosAltosExcludedKeys = Array.from(new Set([...bajosAltosResult.excludedKeys, ...bajosAltosPercentileKeys]));
-
       document.querySelectorAll('#parImparOptions .filter-chip').forEach(chip => {
         const val = (chip as HTMLElement).dataset.value || '';
-        chip.classList.toggle('active', !parImparExcludedKeys.includes(val));
+        chip.classList.toggle('active', !roberState.parImparExcludedKeys.includes(val));
       });
       document.querySelectorAll('#bajosAltosOptions .filter-chip').forEach(chip => {
         const val = (chip as HTMLElement).dataset.value || '';
-        chip.classList.toggle('active', !bajosAltosExcludedKeys.includes(val));
+        chip.classList.toggle('active', !roberState.bajosAltosExcludedKeys.includes(val));
       });
     }
 
     // 6. Agrupación por Decenas
-    const agrupCountsL: Record<string, number> = {};
-    sampleL.forEach(d => {
-      const tens: Record<number, number> = {};
-      (d.numbers || []).forEach((n: number) => {
-        const ten = Math.floor((n - 1) / 10);
-        tens[ten] = (tens[ten] || 0) + 1;
-      });
-      const pattern = Object.values(tens).sort((a, b) => b - a).join('/');
-      agrupCountsL[pattern] = (agrupCountsL[pattern] || 0) + 1;
-    });
-
-    const agrupCategories: ChipCategory[] = [];
-    Object.entries(agrupCountsL).forEach(([pat, count]) => {
-      const p = count / effectiveNL;
-      agrupCategories.push({ key: pat, p });
-    });
-
-    const agrupResult = getChipExclusions(
-      this.historicalData, agrupCategories, 100, 8,
-      (d: any) => {
-        const tens: Record<number, number> = {};
-        (d.numbers || []).forEach((n: number) => {
-          const ten = Math.floor((n - 1) / 10);
-          tens[ten] = (tens[ten] || 0) + 1;
-        });
-        return Object.values(tens).sort((a, b) => b - a).join('/');
-      }
-    );
-
-    const allAgrupCounts: Record<string, number> = {};
-    this.historicalData.forEach(d => {
-      const tens: Record<number, number> = {};
-      (d.numbers || []).forEach((n: number) => {
-        const ten = Math.floor((n - 1) / 10);
-        tens[ten] = (tens[ten] || 0) + 1;
-      });
-      const pattern = Object.values(tens).sort((a, b) => b - a).join('/');
-      allAgrupCounts[pattern] = (allAgrupCounts[pattern] || 0) + 1;
-    });
-
-    const agrupPercentileRes = nominalTailExclusion(allAgrupCounts, 0.10);
-    const agrupExcludedPercentileKeys = agrupPercentileRes.excludedKeys;
-    const agrupExcludedKeys = Array.from(new Set([...agrupResult.excludedKeys, ...agrupExcludedPercentileKeys]));
-
     document.querySelectorAll('#agrupDecenasOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !agrupExcludedKeys.includes(val));
+      chip.classList.toggle('active', !roberState.agrupExcludedKeys.includes(val));
     });
 
     // 7. Números Consecutivos
-    const consecCountsL: Record<string, number> = {};
-    sampleL.forEach(d => {
-      const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
-      let consecStr = '';
-      let cCount = 1;
-      for (let j = 1; j < sorted.length; j++) {
-        if (sorted[j] === sorted[j - 1] + 1) {
-          cCount++;
-        } else {
-          consecStr += cCount;
-          cCount = 1;
-        }
-      }
-      consecStr += cCount;
-      const pattern = consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
-      consecCountsL[pattern] = (consecCountsL[pattern] || 0) + 1;
-    });
-
-    const consecCategories: ChipCategory[] = [];
-    Object.entries(consecCountsL).forEach(([pat, count]) => {
-      const p = count / effectiveNL;
-      consecCategories.push({ key: pat, p });
-    });
-
-    const consecResult = getChipExclusions(
-      this.historicalData, consecCategories, 100, 8,
-      (d: any) => {
-        const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
-        let consecStr = '';
-        let cCount = 1;
-        for (let j = 1; j < sorted.length; j++) {
-          if (sorted[j] === sorted[j - 1] + 1) {
-            cCount++;
-          } else {
-            consecStr += cCount;
-            cCount = 1;
-          }
-        }
-        consecStr += cCount;
-        return consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
-      }
-    );
-
-    const allConsecCounts: Record<string, number> = {};
-    this.historicalData.forEach(d => {
-      const sorted = [...(d.numbers || [])].sort((a, b) => a - b);
-      let consecStr = '';
-      let cCount = 1;
-      for (let j = 1; j < sorted.length; j++) {
-        if (sorted[j] === sorted[j - 1] + 1) {
-          cCount++;
-        } else {
-          consecStr += cCount;
-          cCount = 1;
-        }
-      }
-      consecStr += cCount;
-      const pattern = consecStr.split('').sort((a, b) => Number(b) - Number(a)).join('/');
-      allConsecCounts[pattern] = (allConsecCounts[pattern] || 0) + 1;
-    });
-
-    const consecPercentileRes = nominalTailExclusion(allConsecCounts, 0.10);
-    const consecExcludedPercentileKeys = consecPercentileRes.excludedKeys;
-    const consecExcludedKeys = Array.from(new Set([...consecResult.excludedKeys, ...consecExcludedPercentileKeys]));
-
     document.querySelectorAll('#consecutivosOptions .filter-chip').forEach(chip => {
       const val = (chip as HTMLElement).dataset.value || '';
-      chip.classList.toggle('active', !consecExcludedKeys.includes(val));
+      chip.classList.toggle('active', !roberState.consecExcludedKeys.includes(val));
     });
 
-    // 8. Entropía de Terminaciones (Rango percentil 5%-95% en N=100)
-    const termEntropies = sampleL.map(d => {
-      const endingCounts: Record<number, number> = {};
-      (d.numbers || []).forEach((n: number) => {
-        const ending = n % 10;
-        endingCounts[ending] = (endingCounts[ending] || 0) + 1;
-      });
-      return -Object.values(endingCounts).reduce((s, countVal) => {
-        const p = countVal / m;
-        return s + (p > 0 ? p * Math.log2(p) : 0);
-      }, 0);
-    }).sort((a, b) => a - b);
-
-    const minEntropyTerm = percentile(termEntropies, 0.05);
-    const maxEntropyTerm = percentile(termEntropies, 0.95);
-
+    // 8. Entropía de Terminaciones
     const entTermMinEl = document.getElementById('entropyTerminacionesMin') as HTMLInputElement;
     const entTermMaxEl = document.getElementById('entropyTerminacionesMax') as HTMLInputElement;
-    if (entTermMinEl) entTermMinEl.value = minEntropyTerm.toFixed(3);
-    if (entTermMaxEl) entTermMaxEl.value = maxEntropyTerm.toFixed(3);
+    if (entTermMinEl) entTermMinEl.value = roberState.entropiaTerminacionesRange.min.toFixed(3);
+    if (entTermMaxEl) entTermMaxEl.value = roberState.entropiaTerminacionesRange.max.toFixed(3);
 
-    // 9. Entropía de Intervalos (Rango percentil 5%-95% en N=100)
-    const intervalEntropies = sampleL.map(d => {
-      const sortedCombo = [...(d.numbers || [])].sort((a, b) => a - b);
-      const intervalCounts: Record<number, number> = {};
-      for (let idx = 0; idx < sortedCombo.length - 1; idx++) {
-        const diff = sortedCombo[idx + 1] - sortedCombo[idx];
-        intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
-      }
-      const numIntervals = m - 1;
-      if (numIntervals <= 0) return 0;
-      return -Object.values(intervalCounts).reduce((s, countVal) => {
-        const p = countVal / numIntervals;
-        return s + (p > 0 ? p * Math.log2(p) : 0);
-      }, 0);
-    }).sort((a, b) => a - b);
-
-    const minEntropyInt = percentile(intervalEntropies, 0.05);
-    const maxEntropyInt = percentile(intervalEntropies, 0.95);
-
+    // 9. Entropía de Intervalos
     const entIntMinEl = document.getElementById('entropyIntervalosMin') as HTMLInputElement;
     const entIntMaxEl = document.getElementById('entropyIntervalosMax') as HTMLInputElement;
-    if (entIntMinEl) entIntMinEl.value = minEntropyInt.toFixed(3);
-    if (entIntMaxEl) entIntMaxEl.value = maxEntropyInt.toFixed(3);
+    if (entIntMinEl) entIntMinEl.value = roberState.entropiaIntervalosRange.min.toFixed(3);
+    if (entIntMaxEl) entIntMaxEl.value = roberState.entropiaIntervalosRange.max.toFixed(3);
 
     this.updateGridNumberStates();
     this.updateFilterStateFromUI();
 
     this.renderRoberReasoningBlock({
-      numResult: numbersResult,
-      starResult: starsResult,
-      parImparResult,
-      parImparPercentileKeys,
-      parImparExcludedKeys,
-      bajosAltosResult,
-      bajosAltosPercentileKeys,
-      bajosAltosExcludedKeys,
-      sumRange: { min: calcSumMin, max: calcSumMax, mean: meanSum, std: stdSum },
-      excludedTermKeysRecency,
-      excludedTermKeysPercentile,
-      excludedTermKeys,
-      termDetails,
-      distinctTermResult,
-      distExcludedPercentileKeys,
-      distinctExcludedKeys,
-      agrupResult,
-      agrupExcludedPercentileKeys,
-      agrupExcludedKeys,
-      consecResult,
-      consecExcludedPercentileKeys,
-      consecExcludedKeys,
-      entTermRange: { min: minEntropyTerm, max: maxEntropyTerm },
-      entIntRange: { min: minEntropyInt, max: maxEntropyInt }
+      numResult: roberState.numResult,
+      starResult: roberState.starResult,
+      parImparResult: roberState.parImparResult,
+      parImparPercentileKeys: roberState.parImparPercentileKeys,
+      parImparExcludedKeys: roberState.parImparExcludedKeys,
+      bajosAltosResult: roberState.bajosAltosResult,
+      bajosAltosPercentileKeys: roberState.bajosAltosPercentileKeys,
+      bajosAltosExcludedKeys: roberState.bajosAltosExcludedKeys,
+      sumRange: roberState.sumRange,
+      excludedTermKeysRecency: roberState.excludedTermKeysRecency,
+      excludedTermKeysPercentile: roberState.excludedTermKeysPercentile,
+      excludedTermKeys: roberState.excludedTermKeys,
+      termDetails: roberState.termDetails,
+      distinctTermResult: roberState.distinctTermResult,
+      distExcludedPercentileKeys: roberState.distExcludedPercentileKeys,
+      distinctExcludedKeys: roberState.distinctExcludedKeys,
+      agrupResult: roberState.agrupResult,
+      agrupExcludedPercentileKeys: roberState.agrupExcludedPercentileKeys,
+      agrupExcludedKeys: roberState.agrupExcludedKeys,
+      consecResult: roberState.consecResult,
+      consecExcludedPercentileKeys: roberState.consecExcludedPercentileKeys,
+      consecExcludedKeys: roberState.consecExcludedKeys,
+      entTermRange: roberState.entTermRange,
+      entIntRange: roberState.entIntRange
     });
     this.saveState();
   }
