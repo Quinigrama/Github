@@ -44,6 +44,7 @@ import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight } from './src/utils/popularity';
 import { getSumSeriesWithRegression } from './src/utils/regression';
 import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
+import { construirMatrizPares, rankingPares, rankingTrios } from './src/utils/coocurrencia';
 import {
   getRoberExclusions,
   RoberResult,
@@ -729,8 +730,9 @@ class DataLotto49Advanced {
     anonymousUserId: string;
     googleAuthToken: string | null = null;
     googleUser: User | null = null;
-    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' = 'heatmap';
+    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia' = 'heatmap';
     selectedGapNumber: number = 1;
+    coocurrenciaModo: 'pares' | 'trios' = 'pares';
     vizTarget: 'number' | 'star' = 'number';
     officialDrawsPage: number = 1;
     officialDrawsPageSize: number = 20;
@@ -6534,19 +6536,20 @@ class DataLotto49Advanced {
 
 
 
-    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps') => {
-        if (mode === 'gaps' && this.currentGame?.id === 'nacional') {
+    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia') => {
+        if ((mode === 'gaps' || mode === 'coocurrencia') && this.currentGame?.id === 'nacional') {
             mode = 'heatmap';
         }
         this.vizMode = mode;
-        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn', 'vizModeGapsBtn'].forEach(id => {
+        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn', 'vizModeGapsBtn', 'vizModeCoocurrenciaBtn'].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) btn.classList.toggle('active', 
                 (id === 'vizModeHeatmapBtn' && mode === 'heatmap') ||
                 (id === 'vizModeRankingBtn' && mode === 'ranking') ||
                 (id === 'vizModeTrendBtn' && mode === 'trend') ||
                 (id === 'vizModeChiBtn' && mode === 'chi') ||
-                (id === 'vizModeGapsBtn' && mode === 'gaps')
+                (id === 'vizModeGapsBtn' && mode === 'gaps') ||
+                (id === 'vizModeCoocurrenciaBtn' && mode === 'coocurrencia')
             );
         });
         this.renderFrequencyChart();
@@ -6557,6 +6560,7 @@ class DataLotto49Advanced {
     document.getElementById('vizModeTrendBtn')?.addEventListener('click', () => updateVizModeButtons('trend'));
     document.getElementById('vizModeChiBtn')?.addEventListener('click', () => updateVizModeButtons('chi'));
     document.getElementById('vizModeGapsBtn')?.addEventListener('click', () => updateVizModeButtons('gaps'));
+    document.getElementById('vizModeCoocurrenciaBtn')?.addEventListener('click', () => updateVizModeButtons('coocurrencia'));
 
     document.getElementById('filterInfoExpandedModal')?.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).id === 'filterInfoExpandedModal') {
@@ -10755,6 +10759,176 @@ class DataLotto49Advanced {
     `;
   }
 
+  renderCoocurrenciaChart() {
+    const container = document.getElementById('frequencyChartContainer');
+    const summary = document.getElementById('dataVizSummary');
+    if (!container) return;
+
+    if (!this.dataLoaded || !this.historicalData || this.historicalData.length === 0) {
+      container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding: 40px 10px; font-weight: 500;">⚠️ ${t('coocurrencia.sinDatos')}</div>`;
+      if (summary) {
+        summary.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+            <div style="font-weight: 700; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+            <div style="font-size: 0.85rem; color: #64748b;">${t('coocurrencia.subtitulo')}</div>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const numberRange = this.currentGame?.numberRange || 49;
+    const maxNumbers = this.currentGame?.maxNumbers || 6;
+
+    if (maxNumbers < 3 && this.coocurrenciaModo === 'trios') {
+      this.coocurrenciaModo = 'pares';
+    }
+
+    if (summary) {
+      const triosDisabled = maxNumbers < 3;
+      summary.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+            <div>
+              <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+              <div style="font-size: 0.82rem; color: #64748b;">${t('coocurrencia.subtitulo')}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px; border-radius: 8px;">
+              <button id="coocurrenciaModeParesBtn" type="button" class="modal-toggle-btn ${this.coocurrenciaModo === 'pares' ? 'active' : ''}" style="padding: 4px 12px; font-size: 0.85rem;">
+                ${t('coocurrencia.modoPares')}
+              </button>
+              <button id="coocurrenciaModeTriosBtn" type="button" class="modal-toggle-btn ${this.coocurrenciaModo === 'trios' ? 'active' : ''}" ${triosDisabled ? 'disabled style="opacity: 0.5; cursor: not-allowed; padding: 4px 12px; font-size: 0.85rem;"' : 'style="padding: 4px 12px; font-size: 0.85rem;"'} title="${triosDisabled ? t('coocurrencia.triosNoDisponible') : ''}">
+                ${t('coocurrencia.modoTrios')}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('coocurrenciaModeParesBtn')?.addEventListener('click', () => {
+        this.coocurrenciaModo = 'pares';
+        this.renderCoocurrenciaChart();
+      });
+
+      document.getElementById('coocurrenciaModeTriosBtn')?.addEventListener('click', () => {
+        if (!triosDisabled) {
+          this.coocurrenciaModo = 'trios';
+          this.renderCoocurrenciaChart();
+        }
+      });
+    }
+
+    let rowsHtml = '';
+    let isTriosLimited = false;
+
+    if (this.coocurrenciaModo === 'pares') {
+      const matriz = construirMatrizPares(this.historicalData, numberRange);
+      const pares = rankingPares(matriz, this.historicalData.length, maxNumbers, numberRange, 20);
+
+      pares.forEach((p, idx) => {
+        let ratioBg = '#f1f5f9';
+        let ratioColor = '#334155';
+        if (p.ratio > 1.15) {
+          ratioBg = '#dcfce7';
+          ratioColor = '#15803d';
+        } else if (p.ratio < 0.85) {
+          ratioBg = '#fee2e2';
+          ratioColor = '#b91c1c';
+        }
+
+        rowsHtml += `
+          <tr style="border-bottom: 1px solid #f1f5f9; background: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'}; font-size: 0.88rem;">
+            <td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">
+              <span style="display: inline-flex; gap: 6px; align-items: center;">
+                <span style="background: var(--primary, #2563eb); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${p.a}</span>
+                <span style="color: #94a3b8;">+</span>
+                <span style="background: var(--primary, #2563eb); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${p.b}</span>
+              </span>
+            </td>
+            <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: #334155;">${p.count}</td>
+            <td style="padding: 10px 14px; text-align: center; color: #475569;">${p.pctSobreSorteos}%</td>
+            <td style="padding: 10px 14px; text-align: center; color: #64748b;">${p.esperado}</td>
+            <td style="padding: 10px 14px; text-align: center;">
+              <span style="background: ${ratioBg}; color: ${ratioColor}; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">
+                ${p.ratio.toFixed(2)}x
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+    } else {
+      if (this.historicalData.length > 2000) {
+        isTriosLimited = true;
+      }
+      const trios = rankingTrios(this.historicalData, maxNumbers, numberRange, 20);
+
+      trios.forEach((tItem, idx) => {
+        let ratioBg = '#f1f5f9';
+        let ratioColor = '#334155';
+        if (tItem.ratio > 1.15) {
+          ratioBg = '#dcfce7';
+          ratioColor = '#15803d';
+        } else if (tItem.ratio < 0.85) {
+          ratioBg = '#fee2e2';
+          ratioColor = '#b91c1c';
+        }
+
+        rowsHtml += `
+          <tr style="border-bottom: 1px solid #f1f5f9; background: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'}; font-size: 0.88rem;">
+            <td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">
+              <span style="display: inline-flex; gap: 6px; align-items: center;">
+                <span style="background: #0d9488; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${tItem.a}</span>
+                <span style="color: #94a3b8;">+</span>
+                <span style="background: #0d9488; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${tItem.b}</span>
+                <span style="color: #94a3b8;">+</span>
+                <span style="background: #0d9488; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${tItem.c}</span>
+              </span>
+            </td>
+            <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: #334155;">${tItem.count}</td>
+            <td style="padding: 10px 14px; text-align: center; color: #475569;">${tItem.pctSobreSorteos}%</td>
+            <td style="padding: 10px 14px; text-align: center; color: #64748b;">${tItem.esperado}</td>
+            <td style="padding: 10px 14px; text-align: center;">
+              <span style="background: ${ratioBg}; color: ${ratioColor}; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">
+                ${tItem.ratio.toFixed(2)}x
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    container.innerHTML = `
+      <div id="coocurrenciaContainer" style="padding: 10px; display: flex; flex-direction: column; gap: 16px;">
+        ${isTriosLimited ? `
+          <div style="font-size: 0.8rem; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; padding: 8px 12px; border-radius: 8px; font-weight: 500;">
+            ℹ️ ${t('coocurrencia.limiteTrios')}
+          </div>
+        ` : ''}
+
+        <div style="width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; background: #ffffff;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase; color: #64748b;">
+                <th style="padding: 12px 14px;">${t('coocurrencia.colNumeros')}</th>
+                <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colVeces')}</th>
+                <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colPct')}</th>
+                <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colEsperado')}</th>
+                <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colRatio')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-size: 0.82rem; color: #64748b; font-style: italic; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.4;">
+          ${t('coocurrencia.aviso')}
+        </div>
+      </div>
+    `;
+  }
+
   // ===== NEW FEATURES =====
 
   renderFrequencyChart() {
@@ -10762,16 +10936,21 @@ class DataLotto49Advanced {
     const summary = document.getElementById('dataVizSummary');
     const targetSelectorContainer = document.getElementById('vizTargetSelectorContainer');
     const gapsBtn = document.getElementById('vizModeGapsBtn');
+    const coocurrenciaBtn = document.getElementById('vizModeCoocurrenciaBtn');
 
     if (gapsBtn) {
       gapsBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
     }
+    if (coocurrenciaBtn) {
+      coocurrenciaBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
+    }
 
-    if (this.currentGame?.id === 'nacional' && this.vizMode === 'gaps') {
+    if (this.currentGame?.id === 'nacional' && (this.vizMode === 'gaps' || this.vizMode === 'coocurrencia')) {
       this.vizMode = 'heatmap';
       const heatmapBtn = document.getElementById('vizModeHeatmapBtn');
       if (heatmapBtn) heatmapBtn.classList.add('active');
       if (gapsBtn) gapsBtn.classList.remove('active');
+      if (coocurrenciaBtn) coocurrenciaBtn.classList.remove('active');
     }
 
     if (!container) return;
@@ -10788,6 +10967,12 @@ class DataLotto49Advanced {
     if (this.vizMode === 'gaps') {
       if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
       this.renderGapHistogramChart();
+      return;
+    }
+
+    if (this.vizMode === 'coocurrencia') {
+      if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
+      this.renderCoocurrenciaChart();
       return;
     }
 
