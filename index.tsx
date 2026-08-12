@@ -1331,8 +1331,12 @@ class DataLotto49Advanced {
     const example = t(`filterInfo.${groupKey}.modalExample`);
     const mathNote = t(`filterInfo.${groupKey}.modalMathNote`);
 
-    const hasFormula = formula && formula !== `filterInfo.${groupKey}.modalFormula`;
-    const hasMathNote = mathNote && mathNote !== `filterInfo.${groupKey}.modalMathNote`;
+    // t() devuelve "[clave]" (con corchetes) cuando la clave no existe en el locale, así
+    // que comparar contra la clave sin corchetes nunca detectaba una clave ausente y el
+    // modal acababa mostrando el placeholder "[filterInfo.x.modalFormula]" tal cual para
+    // cualquier filtro sin fórmula/nota propias. Se detecta por el prefijo "[" en su lugar.
+    const hasFormula = !!formula && !formula.startsWith('[filterInfo.');
+    const hasMathNote = !!mathNote && !mathNote.startsWith('[filterInfo.');
 
     bodyEl.innerHTML = `
       <p style="margin-bottom: 14px;">${theory}</p>
@@ -1353,301 +1357,6 @@ class DataLotto49Advanced {
 
     this.toggleModal('filterInfoExpandedModal', true);
   }
-
-  /*
-
-    // 1. Selector de modo de selección
-    const modeBtn = target.closest<HTMLElement>('.selection-mode-btn');
-    if (modeBtn) {
-        const mode = modeBtn.dataset.mode;
-        const id = modeBtn.id;
-        if (mode === 'cold') {
-            title = "❄️ Números Fríos";
-            body = `
-                <p><strong>¿Qué son los Números Fríos?</strong></p>
-                <p>Son los dígitos que han aparecido con menor frecuencia en la base de datos de los últimos sorteos históricos analizados.</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Es un dato puramente descriptivo del histórico analizado. No implica que un número frío tenga más probabilidad de salir en el próximo sorteo: cada sorteo es independiente y la probabilidad de cada número permanece constante.</p>
-                <p><strong>Cómo usarlos:</strong></p>
-                <p>Al activar este modo, la cuadrícula física se coloreará señalando los números fríos, facilitándote hacer clic para marcarlos obligatoriamente o dejárselos al algoritmo generador para que balancee la jugada.</p>
-            `;
-        } else if (mode === 'hot') {
-            title = "🔥 Números Calientes";
-            body = `
-                <p><strong>¿Qué son los Números Calientes?</strong></p>
-                <p>Son los números líderes en frecuencia que más veces han sido extraídos del bombo en el período analizado.</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Es un dato descriptivo: son los números que más veces han salido en el periodo analizado. No hay evidencia de sesgos físicos en las bolas de sorteos oficiales certificados, y cada sorteo es independiente del anterior, por lo que un número "caliente" no tiene mayor probabilidad de repetirse en el siguiente sorteo.</p>
-                <p><strong>Cómo usarlos:</strong></p>
-                <p>Te permite identificar visualmente estos números en la cuadrícula para incluirlos en tu boleto si lo deseas, como referencia estadística.</p>
-            `;
-        } else if (mode === 'absent') {
-            title = "⏱️ Números Ausentes";
-            body = `
-                <p><strong>¿Qué son los Números Ausentes?</strong></p>
-                <p>Son los números que llevan una mayor cantidad acumulada de sorteos sin salir (el mayor índice de "delay" u holgura temporal).</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Es un dato descriptivo del histórico: cuánto tiempo lleva cada número sin aparecer. No indica que esté "a punto" de salir, ya que cada sorteo es independiente y la probabilidad de cada número no cambia por su ausencia previa.</p>
-                <p><strong>Cómo usarlos:</strong></p>
-                <p>Activa este modo para aislar en el tablero aquellos números con retraso extremo y seleccionarlos de manera prioritaria.</p>
-            `;
-        } else if (mode === 'favorites') {
-            title = "⭐ Modo Favoritos";
-            body = `
-                <p><strong>¿Qué es el Modo Favoritos?</strong></p>
-                <p>Es una ranura de personalización intuitiva que te permite reservar hasta un máximo de 10 números favoritos.</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>La lotería es una mezcla de ciencia matemática y factor emocional/azar. El Modo Favoritos introduce tus combinaciones, fechas de nacimiento o números de fuerza en el motor de renderizado de boletos. El generador inteligente utilizará estos números favoritos como tu base fija de juego y completará el boleto aplicando filtros avanzados sobre el resto de números para maximizar la calidad estadística sin arruinar tu intuición.</p>
-            `;
-        } else if (mode === 'excluded') {
-            title = "🚫 Números Excluidos";
-            body = `
-                <p><strong>¿Qué son los Números Excluidos?</strong></p>
-                <p>Son números que decides vetar o eliminar completamente de tus jugadas matemáticas.</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Reduce radicalmente la dimensión espacial del problema de búsqueda. En una lotería 6/49 hay casi 14 millones de combinaciones. Al excluir solo 5 números que de antemano consideras improductivos o que descartas por mala racha, reduces las combinaciones posibles en varios millones, ayudando al motor a escudriñar un universo más concentrado de apuestas con mejores distribuciones de probabilidad.</p>
-            `;
-        } else if (mode === 'figure') {
-            title = "📐 Modo Figura Geométrica";
-            body = `
-                <p><strong>¿Qué es el Modo Figura Geométrica?</strong></p>
-                <p>Examina la distribución visual espacial de tus números sobre el boleto impreso físico.</p>
-                <p><strong>Teoría de Juego Aplicada:</strong></p>
-                <p>Estudios en psicología del juego revelan que miles de personas rellenan sus boletos dibujando figuras geométricas básicas (cruces, líneas rectas paralelas, letras, esquinas, espirales). Si estas figuras visuales resultan premiadas, el pozo se comparte entre miles de ganadores reduciendo significativamente tu premio. El sistema analiza y califica la estructura visual para evitar combinaciones obvias y proteger el valor de tus posibles ganancias.</p>
-            `;
-        } else if (id === 'dataBtn') {
-            title = "📂 Cargar Base de Datos de Sorteos";
-            body = `
-                <p><strong>¿Qué hace esta función?</strong></p>
-                <p>Te permite cargar un archivo de datos local (.csv, .db) conteniendo el histórico de resultados anteriores del juego seleccionado.</p>
-                <p><strong>Ventaja Estadística:</strong></p>
-                <p>Toda la analítica teórica (desviación, entropías, frecuencias calientes/frías) se actualiza de inmediato para sincronizarse con los datos del archivo provisto en el momento. Esto garantiza un aprendizaje y filtrado siempre preciso y fiel con la realidad actual del juego.</p>
-            `;
-        } else if (id === 'urlBtn') {
-            title = "🌐 Seleccionar URL de Base de Datos";
-            body = `
-                <p><strong>¿Qué hace este botón?</strong></p>
-                <p>Te permite elegir la ruta web o API oficial desde donde la aplicación descarga e inicializa los últimos resultados del sorteo.</p>
-                <p><strong>Ventaja Estadística:</strong></p>
-                <p>Evitara tener que importar de forma manual un archivo cada semana. El sistema se conectará a internet de forma transparente para tener siempre la base de datos histórica con los últimos sorteos oficiales computados.</p>
-            `;
-        } else if (id === 'simulateBtn') {
-            title = "🧬 Simulador por Generador Monte Carlo";
-            body = `
-                <p><strong>¿Qué es la Simulación de Datos?</strong></p>
-                <p>Inyecta un juego masivo de resultados simulados matemáticamente (ej. 500 sorteos virtuales creados con algoritmos de distribución probabilística clásica).</p>
-                <p><strong>Aplicación:</strong></p>
-                <p>Sirve para probar a fondo todos los filtros avanzados del generador, ensayar estrategias, verificar el comportamiento del backtesting en escenarios diversos e interactuar con la interfaz científica sin límites de red.</p>
-            `;
-        } else if (id === 'randomBtn') {
-            title = "🎲 Selección de Números al Azar";
-            body = `
-                <p><strong>¿Qué es la Selección al Azar de DataLotto?</strong></p>
-                <p>Elige una serie de números aleatorios puros iniciales que respetan el diseño de la cuadrícula.</p>
-                <p><strong>Aplicación:</strong></p>
-                <p>Es un excelente punto inicial de juego. Al azar puro, puedes superponerle luego tus estrategias personalizadas de filtrado de campana de Gauss, Markov, Nash o descartes de números excluidos para transformar una jugada de azar simple en una apuesta técnica optimizada.</p>
-            `;
-        } else if (id === 'clearBtn') {
-            title = "🗑️ Limpiar Todo";
-            body = `
-                <p><strong>¿Qué hace esta acción?</strong></p>
-                <p>Vuelve a su estado neutral a la grilla y borra las selecciones actuales de números calientes, ausentes, fríos, favoritos y excluidos de un plumazo.</p>
-                <p><strong>Aplicación:</strong></p>
-                <p>Perfecto para empezar una estrategia de diseño nueva libre de residuos o herencias de juegos anteriores.</p>
-            `;
-        }
-    }
-
-    // 2. Botones de acción del boleto
-    else if (target.closest('#generateBtn') || target.id === 'generateBtn') {
-        title = "⚙️ Filtro Generador Inteligente";
-        body = `
-            <p><strong>¿Cómo funciona el Generador?</strong></p>
-            <p>A diferencia de una simple máquina que te da números al azar, el motor de DataLotto evalúa miles de combinaciones posibles por segundo en tu navegador mediante fuerza bruta inteligente guiada por restricciones.</p>
-            <p><strong>Criterio de Aceptación:</strong></p>
-            <p>Cada combinación candidata es evaluada contra <strong>TODOS</strong> los filtros que hayas configurado en el panel. Solo si una combinación supera de manera óptima las restricciones de Entropía, Suma de números, Cantidad de primos, Cadenas de Markov y Desviación, es finalmente renderizada como boleto. Esto asegura que juegues exclusivamente boletos de máxima probabilidad matemática acumulada.</p>
-        `;
-    } else if (target.closest('#saveBtn') || target.id === 'saveBtn') {
-        title = "💾 Guardar Boleto";
-        body = `
-            <p><strong>¿Qué hace este botón?</strong></p>
-            <p>Almacena la combinación seleccionada o generada en la base de datos de tu navegador de forma segura (LocalStorage local).</p>
-            <p><strong>Para qué utilizarlo:</strong></p>
-            <p>Te permite hacer un seguimiento analítico. Tus apuestas guardadas se consolidarán en la sección de estadísticas históricas y backtesting para calcular tu porcentaje de éxito real con el paso del tiempo.</p>
-        `;
-    } else if (target.closest('#shareBtn') || target.id === 'shareBtn') {
-        title = "📤 Compartir Combinación";
-        body = `
-            <p><strong>¿Qué hace este botón?</strong></p>
-            <p>Genera una versión en texto estructurado de la jugada lista para copiar al portapapeles y compartirla rápido por WhatsApp o chat, facilitando el juego conjunto o peñas.</p>
-        `;
-    } else if (target.closest('#downloadTxtBtn') || target.id === 'downloadTxtBtn') {
-        title = "📄 Descargar Boleto en .txt";
-        body = `
-            <p><strong>¿Qué hace este botón?</strong></p>
-            <p>Descarga un archivo de texto plano (.txt) con tus apuestas estructuradas en el formato estándar de administraciones (dos dígitos por número separados por comas y '+' para estrellas).</p>
-            <p><strong>Para qué utilizarlo:</strong></p>
-            <p>Puedes subir directamente este archivo en la web de tu administración de loterías online para validar tus apuestas automáticamente.</p>
-        `;
-    } else if (target.closest('#playOnlineBtn') || target.id === 'playOnlineBtn') {
-        title = "📲 Jugar Online Registrado";
-        body = `
-            <p><strong>¿Qué hace esta acción?</strong></p>
-            <p>Te redirige a la plataforma de apuestas en línea oficial del operador de lotería, autotransfiriendo (siempre que el juego u operador lo permita) los números de tu boleto inteligente para que los registres con un clic sin posibilidad de equivocaciones humanas de transcripción.</p>
-        `;
-    }
-
-    // 3. Filtros del panel (identificados por ID/clase de inputs o cabeceras)
-    else if (target.closest('#entropyTerminacionesMin') || target.closest('#entropyTerminacionesMax') || target.closest('label[for*="entropyTerminaciones"]') || (target.innerText && target.innerText.includes('Entropía de Terminaciones'))) {
-        title = "📊 Entropía de Terminaciones";
-        body = `
-            <p><strong>¿Qué mide la Entropía de Terminaciones?</strong></p>
-            <p>La entropía matemática es una medida de desorden o información. Este filtro evalúa la composición de los <strong>últimos dígitos</strong> (las terminaciones) de los números de tu boleto.</p>
-            <p><strong>Teoría de Juego Aplicada:</strong></p>
-            <p>Si eliges números como 2, 12, 22, 32, 42, todos terminan en '2'. La entropía de terminaciones de esta jugada es extremadamente baja (poca información, patrón plano). Los sorteos históricos de lotería demuestran que las combinaciones ganadoras contienen terminaciones muy variadas (ej. 3, 14, 21, 28, 35, 49 con terminaciones 3, 4, 1, 8, 5, 9). Al fijar el rango recomendado (ej. de 1.000 a 2.585), descartas apuestas simplistas que jamás suceden en sorteos reales.</p>
-        `;
-    } else if (target.closest('#sumMin') || target.closest('#sumMax') || (target.innerText && target.innerText.includes('Suma de Números'))) {
-        title = "➕ Rango de Suma de Números";
-        body = `
-            <p><strong>¿Qué es el Rango de Suma?</strong></p>
-            <p>Es la suma directa aritmética de todos los números que forman el boleto.</p>
-            <p><strong>Teoría de Juego Aplicada:</strong></p>
-            <p>Se asienta en el principio probabilístico de la <strong>Campana de Gauss</strong> (La Distribución Normal). Aunque cualquier combinación individual tiene exactamente la misma probabilidad teórica de salir, la sumatoria de las combinaciones agrupadas se concentra de forma abrumadora en una franja media.</p>
-            <p>Por ejemplo, en una lotería 6/49 la menor suma posible es 21 (1+2+3+4+5+6) y la máxima es 279 (44+45+46+47+48+49). La inmensa mayoría de los sorteos reales registran sumas que caen de forma estricta entre 121 y 190. Configurar este rango garantiza que nunca juegues combinaciones extremas que representen un desperdicio probabilístico de tu dinero.</p>
-        `;
-    } else if (target.closest('#primosMin') || target.closest('#primosMax') || (target.innerText && target.innerText.includes('Cantidad de Primos'))) {
-        title = "🔢 Números Primos en el Boleto";
-        body = `
-            <p><strong>¿Qué analiza la Cantidad de Primos?</strong></p>
-            <p>Controla cuántos de los números en tu combinación deben ser primos (números que solo se pueden dividir de forma exacta por el 1 y por sí mismos, como el 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, etc.).</p>
-            <p><strong>Estudio Estadístico:</strong></p>
-            <p>El comportamiento histórico indica que es sumamente raro que un sorteo contenga 0 números primos, o bien que los 6 números sean primos. En más del 80% de los sorteos reales, el boleto ganador se compone de <strong>entre 1 y 3 números primos</strong>. Este filtro descarta boletos desequilibrados numéricamente para ajustarse al comportamiento predilecto de la probabilidad natural de los bombos de lotería.</p>
-        `;
-    } else if (target.closest('#entropyIntervalosMin') || target.closest('#entropyIntervalosMax') || (target.innerText && target.innerText.includes('Entropía de Intervalos'))) {
-        title = "🌌 Entropía de Intervalos de Separación";
-        body = `
-            <p><strong>¿Qué es la Entropía de Intervalos?</strong></p>
-            <p>Mide la regularidad o el desorden de los saltos numéricos que hay entre cada uno de los números ordenados consecutivos de la combinación.</p>
-            <p><strong>Importancia:</strong></p>
-            <p>Previene contra la acumulación repetitiva de ciertas diferencias geométricas o secuencias demasiado estables (ejemplo: 5, 10, 15, 20, 25, 30, donde los intervalos son todos exactamente de 5). El sistema descarta estas combinaciones estériles asegurando un desorden saludable similar a las dinámicas complejas del movimiento de las bolas en los sorteos reales.</p>
-        `;
-    } else if (target.closest('#distanciaMin') || target.closest('#distanciaMax') || (target.innerText && target.innerText.includes('Distancia Mínima y Máxima'))) {
-        title = "📏 Distancia entre Elementos";
-        body = `
-            <p><strong>¿A qué se refiere este filtro?</strong></p>
-            <p>A la separación (diferencia matemática) entre los números contiguos más cercanos del boleto agrupados y ordenados.</p>
-            <p><strong>Aplicación:</strong></p>
-            <p>Por ejemplo, si la combinación es [12, 14, 25, 27, 39, 41], la distancia mínima es de 2 (entre 12 y 14, y 25 y 27). Este filtro evita que el generador escoja secuencias absurdas donde todos los números están apretados con diferencias de 1 (ejemplo: 12, 13, 14, 15, 16, 17) o con saltos demasiado distanciados que impidan la naturalidad de dispersión.</p>
-        `;
-    } else if (target.closest('#sumaDigitosMin') || target.closest('#sumaDigitosMax') || (target.innerText && target.innerText.includes('Suma de Todos los Dígitos'))) {
-        title = "🧮 Suma de Todos los Dígitos";
-        body = `
-            <p><strong>¿Qué calcula la Suma de Dígitos?</strong></p>
-            <p>Suma cada una de las cifras o letras numéricas individuales que forman el boleto de manera separada.</p>
-            <p><strong>Ejemplo:</strong></p>
-            <p>Si los números del boleto son [10, 25, 36], el filtro desglosará la jugada entera en cifras matemáticas individuales y sumará: 1 + 0 + 2 + 5 + 3 + 6 = 17. Al igual que el rango de suma estándar del juego completo, este indicador acumulado de geometría digital se distribuye en una curva de alta probabilidad que el generador utiliza para calibrar apuestas con excelente factor de simetría espacial.</p>
-        `;
-    } else if (target.closest('#desviacionMin') || target.closest('#desviacionMax') || (target.innerText && target.innerText.includes('Desviación Estándar de la Combinación'))) {
-        title = "📉 Desviación Estándar de la Combinación";
-        body = `
-            <p><strong>¿Qué es la Desviación Estándar?</strong></p>
-            <p>Es una métrica clásica de la estadística analítica corporativa que define qué tan dispersos se encuentran los números de una muestra respecto de su valor medio o promedio.</p>
-            <p><strong>Teoría de Juego Aplicada:</strong></p>
-            <p>Una desviación estándar muy baja (ej. menor a 5.0) significa que todos tus números están densamente aglutinados en un solo sector de la cuadrícula (ejemplo: 18, 19, 21, 22, 23, 25). Una desviación estándar excesivamente alta (ej. mayor a 21.0) significa que los números están solo en las fronteras físicas más distantes (como 1, 2, 47, 48, 49). Configurar rangos equilibrados (como el por defecto, de 12.0 a 18.0) garantiza boletos homogéneos que barren eficientemente toda la cuadrícula.</p>
-        `;
-    }
-
-    // 4. Estrategias avanzadas: Markov, Nash, Regresión lineal
-    else if (target.closest('#useMarkovSwitch') || target.closest('#markovDepth') || (target.innerText && target.innerText.includes('Markov'))) {
-        title = "⛓️ Cadena de Markov y Transiciones";
-        body = `
-            <p><strong>¿Qué es el Filtro de Cadenas de Markov?</strong></p>
-            <p>Las cadenas de Markov son un modelo matemático que estudia la probabilidad de que ocurra un evento futuro basándose estrictamente en el estado actual de los eventos anteriores.</p>
-            <p><strong>Teoría de Juego de Loterías:</strong></p>
-            <p>El sistema estudia el histórico de sorteos completo. Calcula una matriz gigante de transiciones estadísticas que responde a la pregunta de: <em>Si en un sorteo dado sale el número X, ¿qué probabilidad hay en el siguiente sorteo de que salga el número Y?</em>.</p>
-            <p><strong>Profundidad de Markov:</strong></p>
-            <p>Fijar una mayor profundidad hace que el sistema busque patrones y secuencias cíclicas retrospectivas a lo largo de más sorteos previos encadenados en vez de limitarse al último sorteo. El generador utilizará esta información descartando combinaciones poco probables bajo la teoría de transición encadenada.</p>
-        `;
-    } else if (target.closest('#useNashSwitch') || target.closest('#nashWeight') || target.closest('#nashStrictModeSwitch') || target.closest('#nashFilterGroup') || (target.innerText && target.innerText.includes('Equilibrio de Nash'))) {
-        title = t('filters.nash.helpTitle');
-        body = t('filters.nash.helpBody');
-    } else if (target.closest('#useRegressionSwitch') || target.closest('#regressionBonus') || (target.innerText && target.innerText.includes('Regresión Lineal'))) {
-        title = t('filters.regresion.helpTitle');
-        body = t('filters.regresion.helpBody');
-    }
-
-    // 5. Preajustes / Backtesting / Base de datos / Dashboard
-    else if (target.closest('#roberTheoremBtn')) {
-        title = t('rober.helpTitle');
-        body = t('rober.helpBody');
-    } else if (target.closest('#saveFiltersBtn')) {
-        title = "💾 Guardar Plantilla de Filtros";
-        body = `
-            <p>Permite congelar permanentemente tu combinación actual de sliders y límites estadísticos asignándoles un nombre identificativo para volver a usarlos cómodamente en cualquier instante.</p>
-        `;
-    } else if (target.closest('#loadFiltersBtn')) {
-        title = "📂 Cargar Plantillas de Filtros";
-        body = `
-            <p>Accede directamente a tu colección exclusiva de estrategias y configuraciones previas guardadas.</p>
-        `;
-    } else if (target.closest('#filtersDashboardBtn')) {
-        title = "📊 Filtros de Juego";
-        body = `
-            <p>Abre el completo centro de operaciones donde se encuentran los controles avanzados matemáticos. Aquí es donde ajustas cada una de las restricciones que debe satisfacer el generador de boletos.</p>
-        `;
-    } else if (target.closest('#disclaimerBtn')) {
-        title = "⚠️ Descargo de Responsabilidad Ético";
-        body = `
-            <p>Recuerda siempre jugar con responsabilidad. Las loterías son juegos basados fundamentalmente en el azar y la aleatoriedad matemática. Ningún software en el mundo, por avanzado que sea, puede garantizar un premio seguro del 100% en sorteos ideales.</p>
-            <p>DataLotto es una herramienta de asistencia científica que maximiza tus probabilidades reduciendo desperdicios matemáticos, pero recuerda definir siempre límites moderados y divertirte jugando.</p>
-        `;
-    } else if (target.closest('#runBacktestBtn') || target.closest('.collapsible-header[data-target="backtesting"]')) {
-        title = "🧪 Módulo de Backtesting Retrospectivo";
-        body = `
-            <p><strong>¿Qué es el Backtesting?</strong></p>
-            <p>Es el estándar de oro utilizado por físicos y analistas de apuestas deportivas de alto nivel para ratificar teorías cuantitativas.</p>
-            <p><strong>¿Cómo valida tu estrategia?</strong></p>
-            <p>Ejecuta una simulación retrospectiva histórica en base a sorteos de la vida real. Es decir, el simulador retrocederá de forma virtual 50, 100 o 500 sorteos reales pasados, aplicará fielmente tu actual configuración de filtros matemáticos para "generar" las apuestas sugeridas que habrías realizado en su momento, y luego las cruzará contra las bolas de la loto ganadoras reales que cayeron en ese momento.</p>
-            <p>El reporte te mostrará de forma pormenorizada cuántos premios de 3, 4, 5 o 6 aciertos habrías obtenido, dándote la confirmación definitiva de la eficacia de tu estrategia de filtrado antes de poner en juego dinero de verdad.</p>
-        `;
-    } else if (target.closest('.db-tab')) {
-        title = "🗄️ Pestañas de Análisis de Datos Integrados";
-        body = `
-            <p><strong>¿Qué muestran estos paneles?</strong></p>
-            <p>Permite navegar entre diferentes módulos y vistas estadísticas del juego cargado:</p>
-            <ul>
-                <li><strong>Análisis Básico</strong>: Gráficos simples de frecuencia (números más repetidos), porcentajes de salida y ranking de apariciones simples directos.</li>
-                <li><strong>Análisis Avanzado</strong>: Desglose de retrasos actuales de números, matriz de correlaciones de salida múltiple, comportamiento por décadas estadístico e intervalos de holgura.</li>
-                <li><strong>Patrones Especiales</strong>: Histórico de apariciones de números pares vs impares, dispersión de sumas y simetrías espaciales complejas.</li>
-                <li><strong>Estrategias</strong>: Recomendaciones científicas preestablecidas ajustadas individualmente para el tipo de sorteo seleccionado vigentes en el momento.</li>
-            </ul>
-        `;
-    } else if (target.closest('.number-ball')) {
-        const num = target.innerText.trim();
-        title = `🎯 Bola de Número ${num}`;
-        body = `
-            <p><strong>¿Qué pasa al hacer clic en este número?</strong></p>
-            <p>Has pulsado sobre el número <strong>${num}</strong> en la parrilla física táctil.</p>
-            <p><strong>Acción directa:</strong></p>
-            <p>Dependiendo del Modo de Selección en el que te encuentres, al pulsar esta bola podrás:</p>
-            <ul>
-                <li>Añadirla a tus <strong>Favoritos</strong> (para que salga obligatoriamente en tu jugada).</li>
-                <li>Añadirla a tus <strong>Excluidos</strong> (para vetarla y que el algoritmo nunca la genere).</li>
-                <li>Apreciar su coloración fría (azul), caliente (rojo) o ausente (gris/amarillo) para tomar decisiones informadas antes de fabricar tu boleto estadístico óptimo.</li>
-            </ul>
-        `;
-    }
-
-    // Actualizar título y contenido del helpModal
-    const helpModalTitle = document.getElementById('helpModalTitle');
-    const helpModalBody = document.getElementById('helpModalBody');
-    if (helpModalTitle) helpModalTitle.textContent = title;
-    if (helpModalBody) helpModalBody.innerHTML = body;
-
-    // Mostrar modal
-    this.toggleModal('helpModal', true);
-  }
-  */
 
   runSelfDiagnostics() {
     console.log("=== INICIANDO PRUEBAS DE DIAGNÓSTICO DATALOTTO PLATAFORMA ===");
@@ -2531,7 +2240,68 @@ class DataLotto49Advanced {
       }
   }
 
+  syncExclusionsWithFilters() {
+    if (this.filters) {
+      if (Array.isArray(this.filters.excluirDecenas)) {
+        this.filters.excluirDecenas.forEach((d: number) => this.excludedDecades.add(d));
+      }
+      if (Array.isArray(this.filters.excluirStarDecades)) {
+        this.filters.excluirStarDecades.forEach((d: number) => this.excludedStarDecades.add(d));
+      }
+      if (Array.isArray(this.filters.excluirTerminaciones)) {
+        this.filters.excluirTerminaciones.forEach((t: number) => this.excludedTerminaciones.add(t));
+      }
+    }
+
+    const game = this.currentGame;
+    if (!game) return;
+    const startNum = game.id === 'nacional' ? 10 : 1;
+
+    // Sincronizar números excluidos para las decenas activas
+    this.excludedDecades.forEach(dec => {
+      const start = dec === 0 ? 1 : dec * 10;
+      const end = Math.min(dec * 10 + 9, game.numberRange);
+      for (let n = Math.max(start, startNum); n <= end; n++) {
+        this.excludedNumbers.add(n);
+        this.selectedNumbers.delete(n);
+        this.favoriteNumbers.delete(n);
+      }
+    });
+
+    // Sincronizar estrellas excluidas para las decenas activas
+    if (game.maxStars > 0) {
+      this.excludedStarDecades.forEach(dec => {
+        const start = dec === 0 ? 1 : dec * 10;
+        const end = Math.min(dec * 10 + 9, game.starRange);
+        for (let s = start; s <= end; s++) {
+          this.excludedStars.add(s);
+          this.selectedStars.delete(s);
+          this.favoriteStars.delete(s);
+        }
+      });
+    }
+
+    // Sincronizar terminaciones excluidas
+    this.excludedTerminaciones.forEach(digit => {
+      for (let n = startNum; n <= game.numberRange; n++) {
+        if (n % 10 === digit) {
+          this.excludedNumbers.add(n);
+          this.selectedNumbers.delete(n);
+          this.favoriteNumbers.delete(n);
+        }
+      }
+    });
+
+    // Mantener sincronizados los arrays de this.filters
+    if (this.filters) {
+      this.filters.excluirDecenas = Array.from(this.excludedDecades);
+      this.filters.excluirStarDecades = Array.from(this.excludedStarDecades);
+      this.filters.excluirTerminaciones = Array.from(this.excludedTerminaciones);
+    }
+  }
+
   updateUIFromFilterState() {
+    this.syncExclusionsWithFilters();
     document.querySelectorAll('.filter-title .filter-activity-badge').forEach(el => el.remove());
     // Inputs de rango
     const setVal = (id: string, value: number | string) => {
@@ -5025,6 +4795,7 @@ class DataLotto49Advanced {
   }
 
   renderFilterOptions() {
+    this.syncExclusionsWithFilters();
     const maxNumbers = this.currentGame.maxNumbers;
     const maxStars = this.currentGame.maxStars;
     const numberRange = this.currentGame.numberRange;
@@ -5039,7 +4810,7 @@ class DataLotto49Advanced {
         const chip = document.createElement('div');
         chip.className = 'filter-chip';
         chip.dataset.value = `${p}/${i}`;
-        chip.textContent = `${p}P/${i}I`;
+        chip.textContent = `${p}/${i}`;
         parImparOptions.appendChild(chip);
       }
     }
@@ -5053,7 +4824,7 @@ class DataLotto49Advanced {
         const chip = document.createElement('div');
         chip.className = 'filter-chip';
         chip.dataset.value = `${b}/${a}`;
-        chip.textContent = `${b}B/${a}A`;
+        chip.textContent = `${b}/${a}`;
         bajosAltosOptions.appendChild(chip);
       }
     }
@@ -5713,7 +5484,7 @@ class DataLotto49Advanced {
             const chip = document.createElement('div');
             chip.className = 'filter-chip active';
             chip.dataset.value = `${p}/${i}`;
-            chip.textContent = `${p}P/${i}I`;
+            chip.textContent = `${p}/${i}`;
             starParImparOptions.appendChild(chip);
         }
     }
@@ -5727,7 +5498,7 @@ class DataLotto49Advanced {
             const chip = document.createElement('div');
             chip.className = 'filter-chip active';
             chip.dataset.value = `${b}/${a}`;
-            chip.textContent = `${b}B/${a}A`;
+            chip.textContent = `${b}/${a}`;
             starBajosAltosOptions.appendChild(chip);
         }
     }
@@ -5859,8 +5630,23 @@ class DataLotto49Advanced {
 
   initFilterInfoButtons() {
     const EXPANDED_FILTERS: { [selector: string]: string } = {
+      '#terminacionesOptions': 'terminaciones',
+      '#terminacionesDistintasOptions': 'variedadTerm',
+      '#entropyTerminacionesMin': 'entropiaTerm',
+      '#sumMin': 'sumaTotal',
       '#parImparOptions': 'parImpar',
-      '#terminacionesOptions': 'terminaciones'
+      '#bajosAltosOptions': 'bajosAltos',
+      '#primosMin': 'primos',
+      '#consecutivosOptions': 'consecutivos',
+      '#entropyIntervalosMin': 'entropiaInt',
+      '#distanciaMin': 'distancia',
+      '#agrupDecenasOptions': 'agrupDecenas',
+      '#excluirDecenasOptions': 'excluirDecenas',
+      '#sumaDigitosMin': 'sumaDigitos',
+      '#desviacionMin': 'desviacion',
+      '#geometricOptions': 'geometricos',
+      '#useMarkovSwitch': 'predictivos',
+      '#useNashSwitch': 'nash'
     };
 
     const filterGroups = document.querySelectorAll('.filter-group, .dashboard-filter-group');
@@ -7102,6 +6888,8 @@ class DataLotto49Advanced {
       });
     }
 
+    this.filters.excluirDecenas = Array.from(this.excludedDecades);
+
     const chip = document.querySelector(`#excluirDecenasOptions .filter-chip[data-decade="${decadeIndex}"]`);
     if (chip) {
       chip.classList.toggle('active', this.excludedDecades.has(decadeIndex));
@@ -7297,6 +7085,8 @@ class DataLotto49Advanced {
         this.favoriteStars.delete(n);
       });
     }
+
+    this.filters.excluirStarDecades = Array.from(this.excludedStarDecades);
 
     const chip = document.querySelector(`#excluirDecenasEstrellasOptions .filter-chip[data-decade="${decadeIndex}"]`);
     if (chip) {
@@ -7645,6 +7435,8 @@ class DataLotto49Advanced {
     this.showLoading(t('main.iniciandoLoading'));
     
     this.updateFilterStateFromUI();
+    this.syncExclusionsWithFilters();
+    this.updateGridNumberStates();
     const availableUniverse = this.getAvailableUniverse('number');
     const availableStars = this.getAvailableUniverse('star');
     const maxNumbers = this.currentGame.maxNumbers;

@@ -222,6 +222,29 @@ export function isValidCombination(
       return true; // Passed all Lotería Nacional checks!
   }
 
+  // 0a. EXCLUIR DECENAS Y TERMINACIONES
+  if (currentGame.id !== 'nacional') {
+      if (filters.excluirDecenas && filters.excluirDecenas.length > 0) {
+          for (let i = 0; i < maxNumbers; i++) {
+              const decade = Math.floor((combination[i] - 1) / 10);
+              if (filters.excluirDecenas.includes(decade)) return false;
+          }
+      }
+      if (filters.excluirTerminaciones && filters.excluirTerminaciones.length > 0) {
+          for (let i = 0; i < maxNumbers; i++) {
+              const ending = combination[i] % 10;
+              if (filters.excluirTerminaciones.includes(ending)) return false;
+          }
+      }
+  }
+
+  if (maxStars > 0 && stars.length === maxStars && filters.excluirStarDecades && filters.excluirStarDecades.length > 0) {
+      for (let i = 0; i < maxStars; i++) {
+          const decade = Math.floor((stars[i] - 1) / 10);
+          if (filters.excluirStarDecades.includes(decade)) return false;
+      }
+  }
+
   // 1. SUM: extremely cheap to check
   let sum = 0;
   for (let i = 0; i < maxNumbers; i++) sum += combination[i];
