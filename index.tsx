@@ -709,7 +709,6 @@ class DataLotto49Advanced {
     gameFilters: { [gameId: string]: Filters }; // NEW: Independent filters per game
     currentSelectionMode: 'excluded' | 'hot' | 'cold' | 'figure' | 'absent' | 'favorites' | null;
     isGenerating: boolean;
-    activeDashboardFilters: Set<string>;
     lastMultipleStats: { validCount: number, totalCount: number } | null;
     lastDebugInfo: string;
     savedTickets: Ticket[];
@@ -865,7 +864,6 @@ class DataLotto49Advanced {
 
     this.currentSelectionMode = null; // null | 'excluded' | 'hot' | 'cold' | 'figure' | 'absent' | 'favorites'
     this.isGenerating = false;
-    this.activeDashboardFilters = new Set();
     this.lastDebugInfo = '';
     this.lastMultipleStats = null;
     this.savedTickets = [];
@@ -6585,31 +6583,6 @@ class DataLotto49Advanced {
         this.updateHistoryDashboard();
     });
 
-    // Dashboard Filters Events
-    document.querySelectorAll('.db-filter-option').forEach(opt => {
-        opt.addEventListener('click', (e) => {
-            const target = e.currentTarget as HTMLElement;
-            this.handleDashboardFilterClick(target);
-        });
-    });
-
-    document.getElementById('dbClearFiltersBtn')?.addEventListener('click', () => {
-        this.clearDashboardFilters();
-    });
-
-    // Dashboard Tabs Events
-    document.querySelectorAll('.db-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            const target = e.currentTarget as HTMLElement;
-            const tabId = target.dataset.tab!;
-            this.switchDashboardTab(tabId);
-        });
-    });
-
-    document.getElementById('dbBackToMainBtn')?.addEventListener('click', () => {
-        this.showMainApp();
-    });
-
     document.getElementById('runBacktestBtn')?.addEventListener('click', () => {
         this.runBacktest();
     });
@@ -11531,30 +11504,11 @@ class DataLotto49Advanced {
       document.getElementById('numbersGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  showFiltersDashboard() {
-    this.closeSidebar();
-    const mainApp = document.getElementById('mainAppContainer');
-    const filtersDashboard = document.getElementById('filtersDashboardContainer');
-    const peniaPage = document.getElementById('peniaPageContainer');
-    if (mainApp && filtersDashboard) {
-        mainApp.style.display = 'none';
-        filtersDashboard.style.display = 'block';
-        if (peniaPage) peniaPage.style.display = 'none';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Update sidebar active state
-        document.querySelectorAll('.sidebar-links li').forEach(li => li.classList.remove('active'));
-        document.getElementById('filtersDashboardBtn')?.parentElement?.classList.add('active');
-    }
-  }
-
   showMainApp() {
     const mainApp = document.getElementById('mainAppContainer');
-    const filtersDashboard = document.getElementById('filtersDashboardContainer');
     const peniaPage = document.getElementById('peniaPageContainer');
     if (mainApp) {
         mainApp.style.display = 'block';
-        if (filtersDashboard) filtersDashboard.style.display = 'none';
         if (peniaPage) peniaPage.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
@@ -11568,11 +11522,9 @@ class DataLotto49Advanced {
   showPeniaPage() {
     this.closeSidebar();
     const mainApp = document.getElementById('mainAppContainer');
-    const filtersDashboard = document.getElementById('filtersDashboardContainer');
     const peniaPage = document.getElementById('peniaPageContainer');
     if (mainApp && peniaPage) {
         mainApp.style.display = 'none';
-        if (filtersDashboard) filtersDashboard.style.display = 'none';
         peniaPage.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
@@ -12065,131 +12017,7 @@ class DataLotto49Advanced {
     }
   }
 
-  handleDashboardFilterClick(element: HTMLElement) {
-    const filterGroup = element.dataset.filter!;
-    const filterValue = element.dataset.value!;
-    const filterKey = `${filterGroup}:${filterValue}`;
-    
-    if (this.activeDashboardFilters.has(filterKey)) {
-        this.activeDashboardFilters.delete(filterKey);
-        element.classList.remove('selected');
-    } else {
-        this.activeDashboardFilters.add(filterKey);
-        element.classList.add('selected');
-    }
 
-    this.updateDashboardResults();
-  }
-
-  clearDashboardFilters() {
-    this.activeDashboardFilters.clear();
-    document.querySelectorAll('.db-filter-option').forEach(opt => opt.classList.remove('selected'));
-    this.updateDashboardResults();
-  }
-
-  updateDashboardResults() {
-    const activeFiltersContainer = document.getElementById('dbActiveFiltersContainer');
-    if (activeFiltersContainer) {
-        activeFiltersContainer.innerHTML = '';
-        if (this.activeDashboardFilters.size === 0) {
-            activeFiltersContainer.innerHTML = '<span style="color: #666; font-style: italic;">Ningún filtro seleccionado</span>';
-        } else {
-            this.activeDashboardFilters.forEach(filterKey => {
-                const [group, value] = filterKey.split(':');
-                const tag = document.createElement('span');
-                tag.className = 'db-active-filter-tag';
-                tag.textContent = `${group.toUpperCase()}: ${value}`;
-                activeFiltersContainer.appendChild(tag);
-            });
-        }
-    }
-
-    // Calculate impact (simplified statistical model for the dashboard)
-    let totalCombinations = 13983816;
-    let successRate = 100;
-
-    // Filter probabilities (approximate for 6/49)
-    const filterProbabilities: Record<string, number> = {
-        'suma:21-80': 0.006, 'suma:81-120': 0.13, 'suma:121-140': 0.20, 'suma:141-169': 0.32, 'suma:170-190': 0.20, 'suma:191-230': 0.13, 'suma:231-279': 0.014,
-        'parImpar:6/0': 0.0096, 'parImpar:5/1': 0.2407, 'parImpar:4/2': 0.4349, 'parImpar:3/3': 0.2898, 'parImpar:2/4': 0.0217, 'parImpar:1/5': 0.0035, 'parImpar:0/6': 0.0127,
-        'bajosAltos:6/0': 0.0127, 'bajosAltos:5/1': 0.0760, 'bajosAltos:4/2': 0.2304, 'bajosAltos:3/3': 0.3302, 'bajosAltos:2/4': 0.2304, 'bajosAltos:1/5': 0.0760, 'bajosAltos:0/6': 0.0096,
-        'primos:0': 0.1975, 'primos:1': 0.3950, 'primos:2': 0.2963, 'primos:3': 0.0987, 'primos:4': 0.0118, 'primos:5': 0.0006, 'primos:6': 0.0004,
-        'consecutivos:sin-consecutivos': 0.4362, 'consecutivos:1-par': 0.4110, 'consecutivos:2-pares': 0.1313, 'consecutivos:3-seguidos': 0.0185, 'consecutivos:4-seguidos': 0.0030,
-        'decenas:2/2/1/1': 0.3866, 'decenas:2/1/1/1/1': 0.3093, 'decenas:3/2/1': 0.1547, 'decenas:2/2/2': 0.0773, 'decenas:otros': 0.0721
-    };
-
-    // Group active filters by category
-    const groupedFilters: Record<string, string[]> = {};
-    this.activeDashboardFilters.forEach(filterKey => {
-        const [group, value] = filterKey.split(':');
-        if (!groupedFilters[group]) groupedFilters[group] = [];
-        groupedFilters[group].push(value);
-    });
-
-    // Apply probabilities group by group
-    // If multiple options in a group are selected, sum their probabilities
-    Object.keys(groupedFilters).forEach(group => {
-        const selectedValues = groupedFilters[group];
-        let groupProb = 0;
-        selectedValues.forEach(val => {
-            groupProb += filterProbabilities[`${group}:${val}`] || 0;
-        });
-        
-        // If no options were selected in this group (shouldn't happen due to logic above), prob is 1
-        // If some were selected, multiply the overall success rate
-        if (groupProb > 0) {
-            successRate = successRate * groupProb;
-        }
-    });
-
-    const currentCombinations = Math.floor(totalCombinations * (successRate / 100));
-
-    // Update UI
-    const successRateEl = document.getElementById('dbSuccessRate');
-    const combinationsCountEl = document.getElementById('dbCombinationsCount');
-    const progressBarEl = document.getElementById('dbProgressBar');
-    const probValueEl = document.getElementById('dbProbValue');
-    const filterCountEl = document.getElementById('dbFilterCount');
-    const reductionValueEl = document.getElementById('dbReductionValue');
-
-    if (successRateEl) successRateEl.textContent = `${successRate.toFixed(2)}%`;
-    if (combinationsCountEl) combinationsCountEl.textContent = `${currentCombinations.toLocaleString()} combinaciones`;
-    if (progressBarEl) {
-        progressBarEl.style.width = `${successRate}%`;
-        progressBarEl.textContent = `${successRate.toFixed(1)}%`;
-    }
-    if (probValueEl) {
-        if (successRate > 0) {
-            probValueEl.textContent = `1 entre ${Math.floor(100 / successRate)}`;
-        } else {
-            probValueEl.textContent = "Casi imposible";
-        }
-    }
-    if (filterCountEl) filterCountEl.textContent = String(this.activeDashboardFilters.size);
-    
-    const reduction = ((totalCombinations - currentCombinations) / totalCombinations * 100).toFixed(2);
-    if (reductionValueEl) reductionValueEl.textContent = `${reduction}%`;
-
-    // Strategy Advice
-    const strategyAdviceEl = document.getElementById('dbStrategyAdvice');
-    if (strategyAdviceEl) {
-        if (successRate > 40) {
-            strategyAdviceEl.textContent = "Estrategia de alta cobertura. Ideal para apuestas múltiples con alta probabilidad de premios menores.";
-        } else if (successRate > 15) {
-            strategyAdviceEl.textContent = "Estrategia equilibrada. Filtros optimizados para capturar el núcleo estadístico del sorteo.";
-        } else {
-            strategyAdviceEl.textContent = "Estrategia de alta precisión. Gran reducción de combinaciones, enfocada en patrones de alta rentabilidad.";
-        }
-    }
-  }
-
-  switchDashboardTab(tabId: string) {
-    document.querySelectorAll('.db-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.db-tab-content').forEach(c => c.classList.remove('active'));
-    
-    document.querySelector(`.db-tab[data-tab="${tabId}"]`)?.classList.add('active');
-    document.getElementById(tabId)?.classList.add('active');
-  }
 
   // ============================================
   // MATHEMATICAL FILTERS & OPTIMIZATION
