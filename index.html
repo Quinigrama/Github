@@ -923,21 +923,29 @@
                             <input type="range" id="regressionBonus" min="0" max="10" value="3">
                         </div>
 
-                        <div class="switch-control">
+                        <div class="filter-info-text">
+                            <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Ajusta por tendencia.</span>
+                        </div>
+                    </div>
+
+                    <!-- GRUPO: Percentil de Hueco (Gap) -->
+                    <div class="filter-group" data-filter-level="expert" title="Exclusión de números por hueco anómalo respecto a su propia historia." data-i18n-title="filters.gapPercentil.tooltip">
+                        <div class="filter-title" data-i18n="filters.gapPercentil.titulo">📐 Percentil de Hueco (Gap)</div>
+                        <div class="switch-control" style="margin-top: 0;">
                             <label class="switch">
                                 <input type="checkbox" id="useGapPercentilSwitch">
                                 <span class="slider"></span>
                             </label>
-                            <span data-i18n="filters.gapPercentil.switch">Excluir por Hueco Anómalo (Percentil)</span>
+                            <span data-i18n="filters.gapPercentil.switch">Excluir por Hueco Anómalo</span>
                         </div>
                         <div class="ai-config-row">
                             <label for="gapPercentilUmbral"><span data-i18n="filters.gapPercentil.label">Umbral de exclusión (percentil):</span> <span id="gapPercentilUmbralValue">90</span></label>
                             <input type="range" id="gapPercentilUmbral" min="70" max="99" value="90">
                         </div>
-                        
-                        <div class="filter-info-text">
-                            <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Ajusta por tendencia.</span>
-                        </div>
+
+                        <!-- NUEVO: contenedor del gráfico de barras en vivo -->
+                        <div id="gapPercentilLiveChart" style="margin-top: 12px; display: none;"></div>
+                        <div id="gapPercentilExcludedSummary" style="margin-top: 8px; font-size: 0.82rem; color: #64748b; display: none;"></div>
                     </div>
 
                     <!-- GRUPO: Filtro Nash y Popularidad -->

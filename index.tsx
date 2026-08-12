@@ -758,6 +758,8 @@ class DataLotto49Advanced {
     drawCalYear: number = new Date().getFullYear();
     drawCalMonth: number = new Date().getMonth();
     powerPlayActive: boolean = false;
+    gapFilterSnapshotAntes: Set<number> | null = null;
+    gapFilterExclusionesPropias: Set<number> = new Set();
     toastQueue: Array<{ message: string; type: string; customDuration?: number; priority: number; timestamp: number }> = [];
     isToastShowing: boolean = false;
     currentToastTimer: any = null;
@@ -2315,21 +2317,137 @@ class DataLotto49Advanced {
       this.filters.excluirTerminaciones = Array.from(this.excludedTerminaciones);
     }
 
-    if (this.filters?.gapPercentilEnabled && this.currentGame.id !== 'nacional' && this.dataLoaded && this.historicalData && this.historicalData.length > 0) {
+    this.applyGapFilterMemory();
+  }
+
+  // Limitación conocida: si el usuario excluye manualmente un número NUEVO mientras el filtro gap ya está activo, ese número no forma parte del snapshot original y se tratará como "no excluido antes" a efectos de este filtro.
+  applyGapFilterMemory() {
+    const game = this.currentGame;
+    if (!game) return;
+
+    const isNacional = game.id === 'nacional';
+    const isEnabled = !!this.filters?.gapPercentilEnabled;
+    const canUse = isEnabled && !isNacional && this.dataLoaded && this.historicalData && this.historicalData.length > 0;
+
+    if (canUse) {
+      if (this.gapFilterSnapshotAntes === null) {
+        this.gapFilterSnapshotAntes = new Set(this.excludedNumbers);
+      }
       const umbral = this.filters.gapPercentilUmbral ?? 90;
       const analisis = analizarTodosLosNumeros(this.historicalData, game.numberRange);
       const { excluidos, failsafe } = aplicarFiltroGap(analisis, umbral);
-      if (failsafe) {
-        if (this.isGenerating) {
-          this.showToast(t('toast.gapFailsafe'), 'warning');
+      const nuevosExcluidos = new Set(failsafe ? [] : excluidos);
+
+      // 1. Restaurar los que este filtro excluía antes pero ya no debe excluir
+      this.gapFilterExclusionesPropias.forEach(n => {
+        if (!nuevosExcluidos.has(n)) {
+          const estabaExcluidoAntes = this.gapFilterSnapshotAntes?.has(n) ?? false;
+          if (!estabaExcluidoAntes) {
+            this.excludedNumbers.delete(n);
+            this.selectedNumbers.delete(n);
+          }
         }
-      } else {
-        excluidos.forEach(n => {
-          this.excludedNumbers.add(n);
-          this.selectedNumbers.delete(n);
-          this.favoriteNumbers.delete(n);
+      });
+
+      // 2. Añadir los nuevos excluidos por este filtro
+      nuevosExcluidos.forEach(n => {
+        this.excludedNumbers.add(n);
+        this.selectedNumbers.delete(n);
+        this.favoriteNumbers.delete(n);
+      });
+
+      this.gapFilterExclusionesPropias = nuevosExcluidos;
+    } else {
+      if (this.gapFilterExclusionesPropias.size > 0 || this.gapFilterSnapshotAntes !== null) {
+        this.gapFilterExclusionesPropias.forEach(n => {
+          const estabaExcluidoAntes = this.gapFilterSnapshotAntes?.has(n) ?? false;
+          if (!estabaExcluidoAntes) {
+            this.excludedNumbers.delete(n);
+          }
         });
+        this.gapFilterSnapshotAntes = null;
+        this.gapFilterExclusionesPropias = new Set();
       }
+    }
+  }
+
+  renderGapPercentilChart() {
+    const chartContainer = document.getElementById('gapPercentilLiveChart');
+    const summaryContainer = document.getElementById('gapPercentilExcludedSummary');
+    if (!chartContainer || !summaryContainer) return;
+
+    const gapSwitch = document.getElementById('useGapPercentilSwitch') as HTMLInputElement;
+    const gapUmbralInput = document.getElementById('gapPercentilUmbral') as HTMLInputElement;
+
+    const isEnabled = gapSwitch ? gapSwitch.checked : !!this.filters?.gapPercentilEnabled;
+    const hasHistory = this.dataLoaded && this.historicalData && this.historicalData.length > 0;
+    const isNacional = this.currentGame?.id === 'nacional';
+    const canUse = isEnabled && hasHistory && !isNacional;
+
+    if (!canUse) {
+      chartContainer.style.display = 'none';
+      summaryContainer.style.display = 'none';
+      return;
+    }
+
+    chartContainer.style.display = 'block';
+    summaryContainer.style.display = 'block';
+
+    const umbral = gapUmbralInput ? parseInt(gapUmbralInput.value, 10) : (this.filters?.gapPercentilUmbral ?? 90);
+    const numberRange = this.currentGame?.numberRange || 49;
+    const analisis = analizarTodosLosNumeros(this.historicalData, numberRange);
+    const { excluidos, failsafe } = aplicarFiltroGap(analisis, umbral);
+
+    const legendHtml = `
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-bottom: 8px; color: var(--text-muted, #64748b);">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            <span style="width: 8px; height: 8px; background-color: #3b82f6; border-radius: 2px;"></span>
+            ${t('filters.gapPercentil.leyendaDentro')}
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            <span style="width: 8px; height: 8px; background-color: #ef4444; border-radius: 2px;"></span>
+            ${t('filters.gapPercentil.leyendaExcluido')}
+          </span>
+        </div>
+        <span style="font-weight: 600; font-family: monospace; color: var(--text-color, #334155);">≥ ${umbral}%</span>
+      </div>
+    `;
+
+    const lineTopPercent = Math.max(0, Math.min(100, 100 - umbral));
+
+    const barsHtml = analisis.map(item => {
+      const isExcluded = item.percentil >= umbral && !failsafe;
+      const heightPercent = Math.max(item.percentil, 3);
+      const barColor = isExcluded ? '#ef4444' : '#3b82f6';
+      const tooltip = t('filters.gapPercentil.barTooltip', { n: item.numero, p: item.percentil, h: item.huecoActual });
+
+      return `
+        <div title="${tooltip}" style="flex: 1; min-width: 2px; max-width: 10px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; cursor: pointer; position: relative; z-index: 3;">
+          <div style="width: 100%; height: ${heightPercent}%; background-color: ${barColor}; border-radius: 2px 2px 0 0; transition: height 0.15s ease, background-color 0.15s ease;"></div>
+        </div>
+      `;
+    }).join('');
+
+    chartContainer.innerHTML = `
+      ${legendHtml}
+      <div style="position: relative; height: 95px; width: 100%; border-bottom: 1px solid var(--border-color, #cbd5e1); border-left: 1px solid var(--border-color, #cbd5e1); padding: 4px 2px 0 2px; background: rgba(0,0,0,0.02); border-radius: 4px; box-sizing: border-box;">
+        <div style="position: absolute; top: ${lineTopPercent}%; left: 0; right: 0; border-top: 1.5px dashed #ef4444; pointer-events: none; z-index: 2; opacity: 0.85;"></div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 100%; width: 100%; gap: 1px;">
+          ${barsHtml}
+        </div>
+      </div>
+    `;
+
+    if (failsafe) {
+      summaryContainer.innerHTML = `<div style="color: #dc2626; font-weight: 500; background: rgba(239, 68, 68, 0.08); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2); margin-top: 6px;">${t('toast.gapFailsafe')}</div>`;
+    } else if (excluidos.length > 0) {
+      const sortedNums = [...excluidos].sort((a, b) => a - b).join(', ');
+      const text = t('filters.gapPercentil.resumenExcluidos').replace('{numeros}', sortedNums).replace('{umbral}', umbral.toString());
+      summaryContainer.innerHTML = `<div style="color: var(--text-color, #334155); font-weight: 500; margin-top: 6px;">🚫 ${text}</div>`;
+    } else {
+      const text = t('filters.gapPercentil.resumenNinguno');
+      summaryContainer.innerHTML = `<div style="color: #10b981; font-weight: 500; margin-top: 6px;">✅ ${text}</div>`;
     }
   }
 
@@ -2478,6 +2596,8 @@ class DataLotto49Advanced {
     if (gapUmbral) {
       gapUmbral.disabled = !canUseGap;
     }
+    this.applyGapFilterMemory();
+    this.renderGapPercentilChart();
 
     const strictSliders = document.getElementById('nashStrictSliders');
     if (strictSliders) {
@@ -3793,6 +3913,9 @@ class DataLotto49Advanced {
       }
     }
     if (gapUmbral) gapUmbral.disabled = !canUseGap;
+
+    this.applyGapFilterMemory();
+    this.renderGapPercentilChart();
 
     // Frequencies for Numbers
     const frequencies: { [key: number]: number } = {};
@@ -6042,10 +6165,22 @@ class DataLotto49Advanced {
             const display = document.getElementById(`${target.id}Value`);
             if (display) display.textContent = target.value;
         }
+        if (target.id === 'gapPercentilUmbral') {
+            if (this.filters) this.filters.gapPercentilUmbral = parseFloat(target.value);
+            this.applyGapFilterMemory();
+            this.renderGapPercentilChart();
+            this.updateGridNumberStates();
+        }
         this.updateFilterBadgesFromAudit();
     });
     document.querySelector('.filters-panel')?.addEventListener('change', (e) => {
         const target = e.target as HTMLInputElement;
+        if (target.id === 'useGapPercentilSwitch') {
+            if (this.filters) this.filters.gapPercentilEnabled = target.checked;
+            this.applyGapFilterMemory();
+            this.renderGapPercentilChart();
+            this.updateGridNumberStates();
+        }
         if (target.type === 'range') return; // already handled by input event
         this.updateFilterBadgesFromAudit();
     });
@@ -7259,6 +7394,8 @@ class DataLotto49Advanced {
       this.excludedTerminaciones.clear();
       this.excludedTerminacionesSnapshot.clear();
       this.filters.terminaciones = [];
+      this.gapFilterSnapshotAntes = null;
+      this.gapFilterExclusionesPropias = new Set();
       document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip, #terminacionesOptions .filter-chip').forEach(c => c.classList.remove('active'));
       this.updateTerminacionesBadge();
       this.updateDecadasBadge();
