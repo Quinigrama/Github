@@ -43,6 +43,7 @@ import { getCombinationStats, calculateTicketMetrics } from './src/utils/combina
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight } from './src/utils/popularity';
 import { getSumSeriesWithRegression } from './src/utils/regression';
+import { analizarTodosLosNumeros, aplicarFiltroGap } from './src/utils/gapFilter';
 import {
   getRoberExclusions,
   RoberResult,
@@ -216,6 +217,8 @@ interface Filters {
   useMarkov: boolean;
   useNash: boolean;
   useRegression: boolean;
+  gapPercentilEnabled?: boolean;
+  gapPercentilUmbral?: number;
   nashStrictMode?: boolean;
   nashMinScore?: number;
   nashMaxScore?: number;
@@ -1324,6 +1327,13 @@ class DataLotto49Advanced {
     const bodyEl = document.getElementById('filterInfoExpandedModalBody');
     if (!titleEl || !bodyEl) return;
 
+    if (groupKey === 'gapPercentil' || groupKey === 'useGapPercentilSwitch') {
+      titleEl.textContent = t('filters.gapPercentil.helpTitle');
+      bodyEl.innerHTML = t('filters.gapPercentil.helpBody');
+      this.toggleModal('filterInfoExpandedModal', true);
+      return;
+    }
+
     titleEl.textContent = t(`filterInfo.${groupKey}.modalTitle`);
 
     const theory = t(`filterInfo.${groupKey}.modalTheory`);
@@ -2012,6 +2022,12 @@ class DataLotto49Advanced {
       if (!filters.entropyIntervalos) {
           filters.entropyIntervalos = defaults.entropyIntervalos;
       }
+      if (filters.gapPercentilEnabled === undefined) {
+          filters.gapPercentilEnabled = false;
+      }
+      if (filters.gapPercentilUmbral === undefined) {
+          filters.gapPercentilUmbral = 90;
+      }
       return filters;
   }
 
@@ -2298,6 +2314,23 @@ class DataLotto49Advanced {
       this.filters.excluirStarDecades = Array.from(this.excludedStarDecades);
       this.filters.excluirTerminaciones = Array.from(this.excludedTerminaciones);
     }
+
+    if (this.filters?.gapPercentilEnabled && this.currentGame.id !== 'nacional' && this.dataLoaded && this.historicalData && this.historicalData.length > 0) {
+      const umbral = this.filters.gapPercentilUmbral ?? 90;
+      const analisis = analizarTodosLosNumeros(this.historicalData, game.numberRange);
+      const { excluidos, failsafe } = aplicarFiltroGap(analisis, umbral);
+      if (failsafe) {
+        if (this.isGenerating) {
+          this.showToast(t('toast.gapFailsafe'), 'warning');
+        }
+      } else {
+        excluidos.forEach(n => {
+          this.excludedNumbers.add(n);
+          this.selectedNumbers.delete(n);
+          this.favoriteNumbers.delete(n);
+        });
+      }
+    }
   }
 
   updateUIFromFilterState() {
@@ -2425,7 +2458,26 @@ class DataLotto49Advanced {
     setChecked('useMarkovSwitch', this.filters.useMarkov);
     setChecked('useNashSwitch', this.filters.useNash);
     setChecked('useRegressionSwitch', this.filters.useRegression);
+    setChecked('useGapPercentilSwitch', !!this.filters.gapPercentilEnabled);
+    setRangeVal('gapPercentilUmbral', this.filters.gapPercentilUmbral ?? 90);
     setChecked('nashStrictModeSwitch', !!this.filters.nashStrictMode);
+
+    const gapSwitch = document.getElementById('useGapPercentilSwitch') as HTMLInputElement;
+    const gapUmbral = document.getElementById('gapPercentilUmbral') as HTMLInputElement;
+    const hasHistory = this.dataLoaded && this.historicalData && this.historicalData.length > 0;
+    const isNacional = this.currentGame.id === 'nacional';
+    const canUseGap = hasHistory && !isNacional;
+
+    if (gapSwitch) {
+      gapSwitch.disabled = !canUseGap;
+      if (!canUseGap) {
+        gapSwitch.checked = false;
+        this.filters.gapPercentilEnabled = false;
+      }
+    }
+    if (gapUmbral) {
+      gapUmbral.disabled = !canUseGap;
+    }
 
     const strictSliders = document.getElementById('nashStrictSliders');
     if (strictSliders) {
@@ -3719,8 +3771,28 @@ class DataLotto49Advanced {
       dataInfo.className = 'data-info';
       dataStatsGrid.style.display = 'none';
       this.renderFrequencyChart(); // Clear chart
+      const gapSwitch = document.getElementById('useGapPercentilSwitch') as HTMLInputElement;
+      const gapUmbral = document.getElementById('gapPercentilUmbral') as HTMLInputElement;
+      if (gapSwitch) {
+        gapSwitch.disabled = true;
+        gapSwitch.checked = false;
+        if (this.filters) this.filters.gapPercentilEnabled = false;
+      }
+      if (gapUmbral) gapUmbral.disabled = true;
       return;
     }
+
+    const gapSwitch = document.getElementById('useGapPercentilSwitch') as HTMLInputElement;
+    const gapUmbral = document.getElementById('gapPercentilUmbral') as HTMLInputElement;
+    const canUseGap = this.currentGame.id !== 'nacional';
+    if (gapSwitch) {
+      gapSwitch.disabled = !canUseGap;
+      if (!canUseGap) {
+        gapSwitch.checked = false;
+        if (this.filters) this.filters.gapPercentilEnabled = false;
+      }
+    }
+    if (gapUmbral) gapUmbral.disabled = !canUseGap;
 
     // Frequencies for Numbers
     const frequencies: { [key: number]: number } = {};
@@ -5450,10 +5522,10 @@ class DataLotto49Advanced {
         <div class="modal-body" style="font-size: 0.92rem; line-height: 1.6; color: #334155;">
           <p style="margin-bottom: 14px;">${t('filter.positionRange.infoBody')}</p>
           <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border-left: 4px solid #6366f1; font-size: 0.84rem; line-height: 1.5; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-weight: 700; margin-bottom: 6px; color: #4338ca;">📐 Fórmulas de Estadísticos de Orden:</div>
-            <div style="margin-top: 4px; font-family: monospace;">• <b>Media Teórica:</b> E[X_k] = k · (N + 1) / (n + 1)</div>
-            <div style="margin-top: 4px; font-family: monospace;">• <b>Varianza Teórica:</b> Var(X_k) = k · (n - k + 1) · (N + 1) · (N - n) / [(n + 1)² · (n + 2)]</div>
-            <div style="margin-top: 6px;">• <b>Combinación de Rangos:</b> Promedio ponderado entre intervalo teórico (nivel z seleccionable: 90%, 95%, 99%) y percentil empírico (5%-95% de sorteos históricos reales).</div>
+            <div style="font-weight: 700; margin-bottom: 6px; color: #4338ca;">📐 ${t('filter.positionRange.formulaBoxTitle')}:</div>
+            <div style="margin-top: 4px; font-family: monospace;">• <b>${t('filter.positionRange.formulaMeanLabel')}:</b> E[X_k] = k · (N + 1) / (n + 1)</div>
+            <div style="margin-top: 4px; font-family: monospace;">• <b>${t('filter.positionRange.formulaVarianceLabel')}:</b> Var(X_k) = k · (n - k + 1) · (N + 1) · (N - n) / [(n + 1)² · (n + 2)]</div>
+            <div style="margin-top: 6px;">• <b>${t('filter.positionRange.formulaCombinationLabel')}:</b> ${t('filter.positionRange.formulaCombinationText')}</div>
           </div>
         </div>
       </div>
@@ -5646,7 +5718,8 @@ class DataLotto49Advanced {
       '#desviacionMin': 'desviacion',
       '#geometricOptions': 'geometricos',
       '#useMarkovSwitch': 'predictivos',
-      '#useNashSwitch': 'nash'
+      '#useNashSwitch': 'nash',
+      '#useGapPercentilSwitch': 'gapPercentil'
     };
 
     const filterGroups = document.querySelectorAll('.filter-group, .dashboard-filter-group');
@@ -6020,6 +6093,12 @@ class DataLotto49Advanced {
       e.preventDefault();
       const nextLocale = getLocale() === 'es' ? 'en' : 'es';
       await setLocale(nextLocale);
+      // applyTranslations() (llamado dentro de setLocale) solo actualiza elementos con
+      // atributos data-i18n*. Los paneles de filtros construidos dinámicamente via innerHTML
+      // (p.ej. Rango Óptimo por Posición y su modal ℹ️) tienen el texto de t() "horneado" en
+      // el HTML generado y no se refrescan solos — hay que volver a renderizarlos aquí.
+      this.renderFilterOptions();
+      this.initFilterInfoButtons();
     });
 
     // Notification Config Modal Events
@@ -6660,6 +6739,8 @@ class DataLotto49Advanced {
       this.filters.useMarkov = getChecked('useMarkovSwitch');
       this.filters.useNash = getChecked('useNashSwitch');
       this.filters.useRegression = getChecked('useRegressionSwitch');
+      this.filters.gapPercentilEnabled = getChecked('useGapPercentilSwitch');
+      this.filters.gapPercentilUmbral = getVal('gapPercentilUmbral');
       this.filters.nashStrictMode = getChecked('nashStrictModeSwitch');
       this.filters.nashMinScore = getVal('nashMinScore', true);
       this.filters.nashMaxScore = getVal('nashMaxScore', true);

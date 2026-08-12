@@ -922,6 +922,18 @@
                             <label for="regressionBonus"><span data-i18n="filters.regresion.label">Bonus de Regresión:</span> <span id="regressionBonusValue">3</span></label>
                             <input type="range" id="regressionBonus" min="0" max="10" value="3">
                         </div>
+
+                        <div class="switch-control">
+                            <label class="switch">
+                                <input type="checkbox" id="useGapPercentilSwitch">
+                                <span class="slider"></span>
+                            </label>
+                            <span data-i18n="filters.gapPercentil.switch">Excluir por Hueco Anómalo (Percentil)</span>
+                        </div>
+                        <div class="ai-config-row">
+                            <label for="gapPercentilUmbral"><span data-i18n="filters.gapPercentil.label">Umbral de exclusión (percentil):</span> <span id="gapPercentilUmbralValue">90</span></label>
+                            <input type="range" id="gapPercentilUmbral" min="70" max="99" value="90">
+                        </div>
                         
                         <div class="filter-info-text">
                             <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Ajusta por tendencia.</span>
