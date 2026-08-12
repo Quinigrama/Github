@@ -187,6 +187,9 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
 interface Filters {
   terminaciones: number[];
+  excluirDecenas?: number[];
+  excluirTerminaciones?: number[];
+  excluirStarDecades?: number[];
   terminacionesDistintas: number[];
   sum: { min: number; max: number };
   parImpar: string[];
@@ -720,7 +723,6 @@ class DataLotto49Advanced {
     primes: Set<number>;
     TOLERANCE_LEVELS: { [key: number]: number };
     currentGame: GameConfig;
-    helpModeActive: boolean;
     anonymousUserId: string;
     googleAuthToken: string | null = null;
     googleUser: User | null = null;
@@ -813,7 +815,6 @@ class DataLotto49Advanced {
   }
 
   constructor() {
-    this.helpModeActive = false;
     // Estado del sistema
     this.selectedNumbers = new Set();
     this.selectedStars = new Set();
@@ -982,8 +983,12 @@ class DataLotto49Advanced {
                         window.location.hostname === '127.0.0.1';
                         
     if (isMobileApp) {
-      // The deployed Cloud Run backend URL. It holds the configured backend endpoints.
-      const cloudRunUrl = 'https://ais-pre-4dcwjcmaizdkuof2rhey4p-7070977073.europe-west2.run.app';
+      const customApi = localStorage.getItem('customApiServerUrl')?.trim();
+      if (customApi) {
+        return `${customApi.replace(/\/+$/, '')}${path}`;
+      }
+      // Active Cloud Run backend deployment URL
+      const cloudRunUrl = 'https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app';
       return `${cloudRunUrl}${path}`;
     }
     return path;
@@ -1312,305 +1317,44 @@ class DataLotto49Advanced {
     }
   }
 
-  toggleHelpMode() {
-    this.closeSidebar();
-    this.helpModeActive = !this.helpModeActive;
-    
-    const btn = document.getElementById('helpModeBtn');
-    if (btn) {
-        if (this.helpModeActive) {
-            btn.innerHTML = t('main.modoAyudaDesactivarBtn');
-            this.showToast(t('toast.modoAyudaActivado'), 'info');
-        } else {
-            btn.innerHTML = t('main.modoAyudaActivarBtn');
-            this.showToast(t('toast.modoAyudaDesactivado'), 'success');
-        }
-    }
-  }
 
-  showHelpForElement(target: HTMLElement) {
-    let title = "Manual DataLotto";
-    let body = `
-        <p>Estás en el <strong>Modo Ayuda</strong> de DataLotto.</p>
-        <p>Al pulsar sobre cualquier botón, pestaña, filtro o control del panel, se interceptará su acción tradicional para mostrarte en esta ventana emergente una explicación detallada de su teoría de juego y funcionalidad.</p>
-        <p><strong>¿Cómo empezar?</strong></p>
-        <ul>
-            <li>Pulsa sobre los <strong>Modos de Selección</strong> (Calientes, Fríos, Ausentes) para entender cómo clasificar los números.</li>
-            <li>Haz clic en cualquiera de los <strong>Filtros Matemáticos</strong> para aprender conceptos como Entropía, Sumas campana de Gauss, Distribución y Desviación Estándar.</li>
-            <li>Pulsa sobre el botón <strong>Generar combinación</strong> para conocer la fuerza bruta inteligente operada por el sistema.</li>
-        </ul>
-        <p>Para volver a usar la aplicación de forma normal, accede de nuevo al menú del lateral izquierdo y pulsa en <strong>❌ Desactivar Modo Ayuda</strong>.</p>
+
+  renderExpandedFilterModal(groupKey: string) {
+    const titleEl = document.getElementById('filterInfoExpandedModalTitle');
+    const bodyEl = document.getElementById('filterInfoExpandedModalBody');
+    if (!titleEl || !bodyEl) return;
+
+    titleEl.textContent = t(`filterInfo.${groupKey}.modalTitle`);
+
+    const theory = t(`filterInfo.${groupKey}.modalTheory`);
+    const formula = t(`filterInfo.${groupKey}.modalFormula`);
+    const example = t(`filterInfo.${groupKey}.modalExample`);
+    const mathNote = t(`filterInfo.${groupKey}.modalMathNote`);
+
+    const hasFormula = formula && formula !== `filterInfo.${groupKey}.modalFormula`;
+    const hasMathNote = mathNote && mathNote !== `filterInfo.${groupKey}.modalMathNote`;
+
+    bodyEl.innerHTML = `
+      <p style="margin-bottom: 14px;">${theory}</p>
+      ${hasFormula ? `
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 6px; font-family: monospace; font-size: 0.88rem; margin-bottom: 14px; color: #0f172a;">
+          <strong>📐 ${t('filterInfo.shared.formulaLabel')}:</strong> ${formula}
+        </div>
+      ` : ''}
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 14px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 14px; color: #1e3a8a;">
+        💡 <strong>${t('filterInfo.shared.exampleLabel')}:</strong> ${example}
+      </div>
+      ${hasMathNote ? `
+        <div style="font-size: 0.85rem; color: #475569; font-style: italic;">
+          📊 ${mathNote}
+        </div>
+      ` : ''}
     `;
 
-    // 0. Si se pulsa sobre algún componente o etiqueta dentro de un filtro, priorizar su explicación científica
-    const filterGroup = target.closest<HTMLElement>('.filter-group');
-    if (filterGroup) {
-        const titleText = filterGroup.querySelector('.filter-title')?.textContent || '';
-        let matched = false;
-        
-        if (titleText.includes('Excluir Terminaciones') || filterGroup.querySelector('#terminacionesOptions')) {
-            matched = true;
-            title = "🚫 Excluir Terminaciones";
-            body = `
-                <p><strong>¿Qué es el filtro de Excluir Terminaciones?</strong></p>
-                <p>Permite descartar de manera selectiva combinaciones de boletos basándose en la cifra terminal de los números individuales que las componen.</p>
-                <p><strong>Teoría de Juego y Fundamento Matemático:</strong></p>
-                <p>En la lotería, a menudo los apostadores tienen presentimientos o supersticiones negativas sobre ciertas terminaciones (por ejemplo, el número 13 termina en 3, o no desear terminaciones en 0 o 9). Más de lo analítico-probabilístico, este filtro matemáticamente reduce las combinaciones al eliminar grupos completos de números de tu jugada. Por ejemplo, al excluir la terminación <b>"7"</b>, estás eliminando del bombo el 7, 17, 27, 37 y 47.</p>
-                <p><strong>Estrategia Aplicada:</strong></p>
-                <p>Si los últimos sorteos históricos de la base de datos de DataLotto han mostrado una saturación anormal de salidas de una terminación concreta (por ejemplo, tres sorteos seguidos con múltiples números terminados en 2), la ley de distribución uniforme sugiere que esa terminación entrará pronto en una fase de enfriamiento. Al excluirla de tus jugadas temporales, evitas combinaciones cargadas de esa cifra.</p>
-            `;
-        } else if (titleText.includes('Variedad de Terminaciones') || filterGroup.querySelector('#terminacionesDistintasOptions')) {
-            matched = true;
-            title = "#️⃣ Variedad de Terminaciones";
-            body = `
-                <p><strong>¿Qué es la Variedad de Terminaciones?</strong></p>
-                <p>Mide la cantidad de dígitos finales únicos o diferentes que componen tu jugada de 6 números.</p>
-                <p><strong>Fundamento Matemático (Teoría del Desorden):</strong></p>
-                <p>Si tuviésemos la jugada [5, 15, 25, 35, 45, 49], tenemos las terminaciones [5, 5, 5, 5, 5, 9]. Las terminaciones distintas son solo dos (el 5 y el 9), por lo que la variedad de terminaciones es 2. En cambio, si la jugada es [3, 12, 25, 34, 46, 48], las terminaciones son [3, 2, 5, 4, 6, 8], con 6 terminaciones diferentes (variedad de 6).</p>
-                <p><strong>Por qué es crítico:</strong></p>
-                <p>El análisis estadístico retrospectivo demuestra que el <strong>85% de las combinaciones ganadoras reales</strong> tienen una variedad de terminaciones de 4, 5 o 6 cifras distintas. Prácticamente nunca sale un premio gordo donde todos los números terminen igual (variedad de 1 o 2). El motor viene configurado para retener solo combinaciones con un mínimo de 4 terminaciones distintas por defecto.</p>
-            `;
-        } else if (titleText.includes('Entropía (Terminaciones)') || filterGroup.querySelector('#entropyTerminacionesMin')) {
-            matched = true;
-            title = "🌀 Entropía de Terminaciones";
-            body = `
-                <p><strong>¿Qué mide la Entropía de Terminaciones?</strong></p>
-                <p>La entropía es un concepto físico y matemático inventado por Claude Shannon (Teoría de la Información) que sirve para cuantificar el nivel de caos, desorden o imprevisibilidad de un sistema.</p>
-                <p><strong>Fórmula e Implicaciones:</strong></p>
-                <p>Se calcula matemáticamente como H = -Σ (pi * log2(pi)), donde pi es la frecuencia proporcional de aparición de cada una de las terminaciones decimales en el boleto. El rango óptimo es de 1.900 a 2.585 (la entropía máxima para 6 números únicos es 2.585).</p>
-                <p><strong>¿Por qué se usa?</strong></p>
-                <p>Los sorteos de azar de la vida real tienden al desorden máximo sostenible. Las combinaciones que tienen una entropía muy baja en sus dígitos terminales (como 12, 22, 32, 42 con terminaciones idénticas) muestran un orden estructural artificial. Al delimitar el límite inferior de la entropía en tu generador de DataLotto, desterramos de forma inmediata millones de combinaciones estériles y redundantes que representan un desperdicio del presupuesto, filtrando solo aquellas que emulan el caos termodinámico de los bombos de aire flotante tradicionales o sistemas mecánicos.</p>
-            `;
-        } else if (titleText.includes('Suma Total') || filterGroup.querySelector('#sumMin') || filterGroup.querySelector('#sumMax')) {
-            matched = true;
-            title = "🎯 Suma Total (Números)";
-            body = `
-                <p><strong>¿Qué es el Rango de Suma Total?</strong></p>
-                <p>Es el resultado de sumar directamente los 6 números que componen tu apuesta.</p>
-                <p><strong>Sustento Probabilístico (La Campana de Gauss):</strong></p>
-                <p>En una lotería clásica 6/49, la menor suma matemática posible es 21 (1+2+3+4+5+6), y la mayor es 279 (44+45+46+47+48+49). Entre estos dos límites hay millones de combinaciones.</p>
-                <p>Si graficamos la cantidad de combinaciones para cada valor de suma, visualizaremos una perfecta <strong>Campana de Gauss</strong> (distribución normal multinomial). Las sumas extremas (como 21 o 279) solo tienen una única combinación posible, por lo que su probabilidad conjunta de ocurrir es virtualmente nula. En contraposición, más del <strong>70% de las combinaciones que salen premiadas en la historia real</strong> acumulan sumatorios centrados en la cima de la campana, entre 121 y 190. Al forzar este intervalo, tu boleto se sitúa exactamente en la zona de mayor densidad probabilística mundial.</p>
-            `;
-        } else if ((titleText.includes('Par/Impar') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#parImparOptions')) {
-            matched = true;
-            title = "⚖️ Relación Par / Impar";
-            body = `
-                <p><strong>¿Qué es la Proporción Par/Impar?</strong></p>
-                <p>Filtra la combinación en base a la cantidad de números pares frente a números impares presentes en tu boleto.</p>
-                <p><strong>Estadísticas de la Lotería:</strong></p>
-                <p>Cada número individual tiene un 50% de probabilidad de ser par o impar. Al extraer 6 números principales, las combinaciones extremas que constan únicamente de impares (0 pares / 6 impares) o únicamente de pares (6 pares / 0 impares) representan juntas menos del 2.5% de los sorteos históricos.</p>
-                <p><strong>Diseño de la Apuesta Ganadora:</strong></p>
-                <p>La máxima frecuencia de ocurrencias históricas (más del 80%) la dominan diseños equilibrados:</p>
-                <ul>
-                  <li><strong>3 Pares y 3 Impares (3P/3I)</strong>: La configuración más frecuente y estable en la naturaleza.</li>
-                  <li><strong>4 Pares y 2 Impares (4P/2I)</strong> o <strong>2 Pares y 4 Impares (2P/4I)</strong>.</li>
-                </ul>
-                <p>Al restringir el generador para que descarte combinaciones planas con proporciones extravagantes, el sistema mejora la sintonía geométrica de tus boletos producidos.</p>
-            `;
-        } else if ((titleText.includes('Bajos/Altos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#bajosAltosOptions')) {
-            matched = true;
-            title = "📊 Relación Bajos / Altos";
-            body = `
-                <p><strong>¿Qué define el Filtro de Bajos y Altos?</strong></p>
-                <p>Clasifica los números del boleto en función de su magnitud:</p>
-                <ul>
-                  <li><strong>Números Bajos</strong>: Números ubicados en la mitad inferior de la tabla (por ejemplo, del 1 al 24 en un juego de 49 números).</li>
-                  <li><strong>Números Altos</strong>: Números ubicados en la mitad superior de la tabla (por ejemplo, del 25 al 49).</li>
-                </ul>
-                <p><strong>Matemática e Historial Colectivo:</strong></p>
-                <p>Al igual que la relación par/impar, la distribución equitativa es dominante. Un sorteo real donde salgan de forma simultánea únicamente números pequeños (por ejemplo: 2, 4, 7, 9, 12, 18) o únicamente números gigantescos (39, 41, 44, 45, 47, 49) ocurre de forma sumamente esporádica.</p>
-                <p><strong>Consejos de Configuración:</strong></p>
-                <p>Actvar las opciones <strong>3B/3A</strong> (3 Bajos / 3 Altos), <strong>4B/2A</strong>, o <strong>2B/4A</strong> asegura que la jugada cubra el tablero con un balance vertical perfecto, neutralizando el riesgo de estancamiento sectorial en el boleto.</p>
-            `;
-        } else if ((titleText.includes('Primos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#primosMin')) {
-            matched = true;
-            title = "🔢 Filtro de Números Primos";
-            body = `
-                <p><strong>¿Qué hace el Filtro de Números Primos?</strong></p>
-                <p>Restringe el número de dígitos primos que pueden formar parte de tu combinación generada.</p>
-                <p><strong>¿Cuáles son los números primos?</strong></p>
-                <p>Los primos son enteros positivos divisibles solo por 1 y por sí mismos. En el rango del 1 al 49, tenemos 15 primos: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47.</p>
-                <p><strong>Lógica Probabilística:</strong></p>
-                <p>Matemáticamente, cerca del 30% de los números en la lotería son primos. Los eventos reales de lotería muestran que la inmensa mayoría de las apuestas premiadas (alrededor del 82% de las ocasiones) contienen <strong>entre 1, 2 o 3 números primos</strong>. Raras veces verás un boleto ganador que esté compuesto enteramente por primos (ejemplo: 5, 7, 11, 17, 23, 31) o que carezca por completo de ellos. Ajustar los límites en el generador te mantendrá dentro de la tónica preferente de los sorteos reales.</p>
-            `;
-        } else if ((titleText.includes('Consecutivos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#consecutivosOptions')) {
-            matched = true;
-            title = "🔗 Filtro de Números Consecutivos";
-            body = `
-                <p><strong>¿Qué analiza el Filtro de Números Consecutivos?</strong></p>
-                <p>Determina la estructura de agrupamientos consecutivos de cifras numéricas continuas en un mismo boleto (por ejemplo, tener el 12 y el 13 es una pareja consecutiva).</p>
-                <p><strong>Nomenclatura Técnica del Tablero:</strong></p>
-                <ul>
-                  <li><strong>1/1/1/1/1/1</strong>: Ningún número es consecutivo (ej: 4, 12, 21, 33, 39, 45). Máxima dispersión.</li>
-                  <li><strong>2/1/1/1/1</strong>: Una pareja de números seguidos (ej: 4, 12, <strong>22, 23</strong>, 35, 41).</li>
-                  <li><strong>2/2/2</strong>: Tres parejas de números seguidos independientes.</li>
-                  <li><strong>3/1/1/1</strong>: Un trío de números consecutivos juntos (ej: <strong>14, 15, 16</strong>, 28, 32, 45).</li>
-                </ul>
-                <p><strong>Secreto de los Diseños Reales:</strong></p>
-                <p>La creencia popular asume que en la lotería nunca deben ir números seguidos. Sin embargo, la estadística destrona este mito: ¡más del <strong>50% de las combinaciones ganadoras históricas de Loterías contienen exactamente una pareja consecutiva (2/1/1/1/1)</strong>! El sistema de DataLotto te permite activar estos formatos probados para simular con precisión la impredecibilidad típica de las extracciones físicas.</p>
-            `;
-        } else if (titleText.includes('Entropía (Intervalos)') || filterGroup.querySelector('#entropyIntervalosMin')) {
-            matched = true;
-            title = "🌀 Entropía de Intervalos de Separación";
-            body = `
-                <p><strong>¿Qué es la Entropía de Intervalos de Separación?</strong></p>
-                <p>Similar al filtro de terminaciones, aplica la <strong>Entropía de la Información de Shannon</strong>, pero en este caso se computa sobre las <strong>distancias matemáticas (los intervalos)</strong> existentes entre cada número del boleto alineado de menor a mayor.</p>
-                <p><strong>Ejemplo Descriptivo:</strong></p>
-                <p>Si introduces un boleto con distancias monótonas como [5, 10, 15, 20, 25, 30], los saltos son siempre exactamente de 5. El desorden o entropía de estos intervalos es 0 (patrón predecible y estático). En cambio, un boleto real como [2, 14, 17, 28, 30, 44] tiene saltos de [12, 3, 11, 2, 14]. El nivel de entropía de este conjunto de saltos es elevado.</p>
-                <p><strong>Función de este Filtro:</strong></p>
-                <p>Impide que el generador escoja secuencias hiper-estructuradas creadas artificialmente por la mente humana que el bombo aleatorio real jamás produciría. Es la barrera defensiva número uno contra jugadas lineales improductivas.</p>
-            `;
-        } else if (titleText.includes('Distancia entre') || filterGroup.querySelector('#distanciaMin')) {
-            matched = true;
-            title = "↔️ Distancia entre Números";
-            body = `
-                <p><strong>¿Qué es el Rango de Distancia entre Números?</strong></p>
-                <p>Este filtro regula la envergadura o el tamaño de la separación permitida entre dos elementos adyacentes cualesquiera en tu boleto ordenado.</p>
-                <p><strong>Aplicación y Límites:</strong></p>
-                <ul>
-                  <li><strong>Distancia Mínima</strong>: El salto más pequeño permitido entre números consecutivos. Si fijas un valor de 2, el generador nunca pondrá números seguidos (como 12 y 13), forzando que exista al menos una separación de dos unidades o más (como 12 y 14).</li>
-                  <li><strong>Distancia Máxima</strong>: El límite superior del tamaño del salto. Si configuras una distancia máxima de 25, evitas que haya un gran agujero o abismo de separación vacío en la cuadrícula (por ejemplo, saltar directamente de la bola 3 a la 44), lo que dejaría franjas gigantes sin barajar.</li>
-                </ul>
-                <p><strong>Recomendación Profesional:</strong></p>
-                <p>Establecer la distancia mínima en 1 (lo que permite parejas consecutivas de alta incidencia) y una distancia máxima de 25 asegura que el juego baraje óptimamente todas las áreas del boleto.</p>
-            `;
-        } else if (titleText.includes('Agrupación por Decenas') || filterGroup.querySelector('#agrupDecenasOptions')) {
-            matched = true;
-            title = "📦 Agrupación por Decenas";
-            body = `
-                <p><strong>¿Qué mide la Agrupación por Decenas?</strong></p>
-                <p>Evalúa el patrón de distribución de los números según las filas o décadas de la cuadrícula física (ej. la decena del 1 al 9, del 10 al 19, del 20 al 29, del 30 al 39 y del 40 en adelante).</p>
-                <p><strong>Matemática de Compartimentos Estancos:</strong></p>
-                <p>El formato <strong>"3/2/1"</strong> significa que tu combinación tiene 3 números concentrados en una decena concreta, 2 números en otra decena, y 1 número en una decena diferente (ejemplo: [2, 5, 8, 14, 19, 21] con tres dígitos en la decena simple del 0, dos en los '10', y uno en los '20').</p>
-                <p><strong>Utilidad Científica:</strong></p>
-                <p>Evita aberraciones de distribución sectorial. Por ejemplo, tener los 6 números del boleto hacinados exclusivamente dentro de la década de los 30 (como 30, 31, 33, 35, 36, 39) tiene un histórico de ocurrencia inferior al 0.04% en sorteos internacionales. Activar agrupaciones versátiles y balanceadas como "2/2/1/1" o "2/1/1/1/1" distribuye la presión de probabilidad en todo el ancho físico del tablero.</p>
-            `;
-        } else if ((titleText.includes('Suma de Dígitos') && !titleText.includes('Estrellas')) || filterGroup.querySelector('#sumaDigitosMin')) {
-            matched = true;
-            title = "∑ Suma de Dígitos";
-            body = `
-                <p><strong>¿Qué formula la Suma de Dígitos del Boleto?</strong></p>
-                <p>Desglosa cada número principal del boleto en sus cifras individuales de unidades y decenas y efectúa un sumatorio total acumulado.</p>
-                <p><strong>Ejemplo Práctico e Ilustrativo:</strong></p>
-                <p>Si tu boleto inteligente contiene los números [12, 23, 35, 41, 46], el filtro de dígitos sumará:</p>
-                <p style="text-align: center; font-size: 1.1rem; font-weight: bold; background: #f3f4f6; padding: 6px; border-radius: 6px; display: inline-block; margin: 5px auto; width: 100%;">
-                  (1 + 2) + (2 + 3) + (3 + 5) + (4 + 1) + (4 + 6) = 31
-                </p>
-                <p><strong>Por qué es una herramienta de precisión:</strong></p>
-                <p>Tanto en programación fractal como en investigación de sutiles factores pseudoaleatorios, los dígitos individuales delatan patrones de sesgo estético o error de distribución humana. Al forzar este sumatorio de cifras elementales a un rango equilibrado central (usualmente de 28 a 45), anulas cualquier combinación que presente anomalías en el reparto del espacio métrico digital del boleto de lotería.</p>
-            `;
-        } else if (titleText.includes('Desviación Estándar') || filterGroup.querySelector('#desviacionMin')) {
-            matched = true;
-            title = "📈 Desviación Estándar";
-            body = `
-                <p><strong>¿Qué es la Desviación Estándar estocástica?</strong></p>
-                <p>Es el rey de los indicadores de dispersión estadística. Mide cuantitativamente cuánto se alejan los números de tu boleto respecto a la media aritmética de esa misma jugada.</p>
-                <p><strong>Formulación Conceptual:</strong></p>
-                <p>Se calcula restando de cada número el promedio aritmético de la apuesta, elevando el valor al cuadrado, sumándolos todos, dividiendo entre N-1 y extrayendo la raíz cuadrada final.</p>
-                <p><strong>¿Qué representa en tu boleto?</strong></p>
-                <ul>
-                  <li>Una <strong>Desviación Estándar muy baja</strong> (por ejemplo: menor a 6) significa que todos los números están apretados en una sola zona.</li>
-                  <li>Una <strong>Desviación Estándar gigante</strong> (por ejemplo: mayor a 21) significa que los números están fragmentados en las esquinas más alejadas de la tabla.</li>
-                </ul>
-                <p><strong>Rango Óptimo Estándar:</strong></p>
-                <p>La cúpula matemática de DataLotto sitúa el rango perfecto entre <strong>12.0 y 18.0</strong>. Esto induce al generador a fabricar apuestas que emulan la verdadera distancia inercial del barajado mecánico.</p>
-            `;
-        } else if (titleText.includes('Geométricos') || filterGroup.querySelector('#geometricOptions')) {
-            matched = true;
-            title = "🗺️ Filtros Geométricos y Figuras";
-            body = `
-                <p><strong>¿Qué analizan los Filtros Geométricos?</strong></p>
-                <p>Inspeccionan si las marcas o cruces impresas sobre tu boleto físico forman patrones lineales, simetrías geométricas básicas o dibujos reconocibles en la libreta.</p>
-                <p><strong>Teoría de la Elección Humana y Compartición de Botes:</strong></p>
-                <p>Los humanos somos seres estructurados visualmente. Cuando rellenamos un boleto, tendemos de forma inconsciente a dibujar líneas rectas (horizontales o verticales), seguir las cuatro esquinas del papel, trazar cruces perfectas, aspas de avión o caminos diagonales.</p>
-                <p><strong>El Peligro del "Premio Compartido" (Efecto Dilución):</strong></p>
-                <p>Si sale ganadora una combinación que forma una hermosa y obvia figura simétrica en el boleto, no serás el único rico. Centenares de personas habrán impreso el mismo patrón geométrico, reduciendo tu premio millonario individual a unos pocos miles de euros por la división del pozo acumulado. Al activar <strong>🚫 Líneas</strong>, <strong>🚫 Diagonales o 🚫 Cruces</strong>, impides que se jueguen estas trampas estéticas, blindando el valor de tu bote.</p>
-            `;
-        } else if (titleText.includes('Suma Estrellas') || filterGroup.querySelector('#starSumMin')) {
-            matched = true;
-            title = "⭐ Suma de Estrellas";
-            body = `
-                <p><strong>¿Qué es la Suma de Estrellas?</strong></p>
-                <p>Suma los dígitos de los dos números secundarios elegidos en las Estrellas de Euromillones.</p>
-                <p><strong>Aplicación:</strong></p>
-                <p>Evita que juegues sumas extremas no deseadas (por ejemplo: 1+2=3 o 11+12=23 en Euromillones son sumas insólitamente raras en las estadísticas reales). El rango inteligente recomendado optimiza el espectro de suma entre 8 y 15 para alinearse con los registros frecuentes.</p>
-            `;
-        } else if (titleText.includes('Par/Impar Estrellas') || filterGroup.querySelector('#starParImparOptions')) {
-            matched = true;
-            title = "⭐ Par/Impar Estrellas";
-            body = `
-                <p><strong>Filtro de Par/Impar Estrellas:</strong></p>
-                <p>Regula la proporción de números pares e impares en el mini-bombo de Estrellas del sorteo.</p>
-                <p><strong>Estrategia ideal:</strong></p>
-                <p>Lo más común del comportamiento matemático es jugar de forma mixta: 1 estrella par y 1 estrella impar. Al activar esta restricción, evitas boletos de doble estrella impar o doble estrella par que ocurren con menor asiduidad en los sorteos europeos oficiales.</p>
-            `;
-        } else if (titleText.includes('Bajos/Altos Estrellas') || filterGroup.querySelector('#starBajosAltosOptions')) {
-            matched = true;
-            title = "⭐ Bajos/Altos Estrellas";
-            body = `
-                <p><strong>Filtro de Bajos/Altos Estrellas:</strong></p>
-                <p>Clasifica las estrellas en bajas (del 1 al 6) y altas (del 7 al 12).</p>
-                <p><strong>Estrategia ideal:</strong></p>
-                <p>La combinación mixta (1 estrella baja y 1 estrella alta) es la campeona absoluta de frecuencia. Al forzar este intervalo, garantizas que tus estrellas estén bien repartidas a lo largo de toda la dimensión del tablero auxiliar.</p>
-            `;
-        } else if (titleText.includes('Suma Dígitos Estrellas') || filterGroup.querySelector('#starSumaDigitosMin')) {
-            matched = true;
-            title = "⭐ Suma de Dígitos de Estrellas";
-            body = `
-                <p><strong>¿Qué calcula la Suma de Dígitos de Estrellas?</strong></p>
-                <p>Suma por separado el juego de cifras elementales de tus dos estrellas (por ejemplo, si tus estrellas son 5 y 12, sumaría: 5 + 1 + 2 = 8).</p>
-                <p>Esta medida permite filtrar con mayor sutileza la densidad probabilística de las estrellas para asegurar que mantengan una dispersión equilibrada.</p>
-            `;
-        } else if (titleText.includes('Primos Estrellas') || filterGroup.querySelector('#starPrimosMin')) {
-            matched = true;
-            title = "⭐ Primos Estrellas";
-            body = `
-                <p><strong>¿Qué son los Primos Estrellas?</strong></p>
-                <p>Controla cuántas de tus dos estrellas secundarias deben ser números primos (2, 3, 5, 7, 11).</p>
-                <p>La distribución uniforme ideal sugiere seleccionar entre 0 y 2 estrellas de rango primo, siendo ideal mantener una estrella prima y otra compuesta para un balance riguroso.</p>
-            `;
-        } else if (titleText.includes('Consecutivos Estrellas') || filterGroup.querySelector('#starConsecutivosOptions')) {
-            matched = true;
-            title = "⭐ Consecutivos Estrellas";
-            body = `
-                <p><strong>Filtro de Consecutivos en Estrellas:</strong></p>
-                <p>Determina si permites jugar estrellas consecutivas de forma seguidiza en el tablero secundario (ej: estrella 4 y 5).</p>
-                <p>Jugar de manera no consecutiva aporta mayor variabilidad probabilística al boleto.</p>
-            `;
-        } else if (titleText.includes('Distancia Estrellas') || filterGroup.querySelector('#starDistanciaMin')) {
-            matched = true;
-            title = "⭐ Distancia de Estrellas";
-            body = `
-                <p><strong>¿Qué es la Distancia de Estrellas?</strong></p>
-                <p>Mide la diferencia matemática absoluta entre las dos estrellas seleccionadas (ej: si juegas las estrellas 2 y 9, la distancia es 7).</p>
-                <p>Regula la dispersión de las estrellas secundarias en el boleto de Euromillones, evitando agrupamientos drásticos o separaciones imposibles.</p>
-            `;
-        } else if (filterGroup.querySelector('#useMarkovSwitch') || filterGroup.querySelector('#useNashSwitch') || filterGroup.querySelector('#useRegressionSwitch')) {
-            matched = true;
-            title = "📊 Modelos Estadísticos Avanzados (No Predictivos)";
-            body = `
-                <p>Este módulo agrupa tres herramientas de análisis estadístico sobre datos históricos. Ninguna aumenta la probabilidad de acertar el próximo sorteo: cada sorteo de lotería es un evento independiente.</p>
-                
-                <p><strong>1. Cadenas de Markov y Probabilidades de Transición:</strong></p>
-                <p>Analiza, sobre el histórico de sorteos, la frecuencia con la que ciertos números han coincidido en sorteos consecutivos pasados. Es un análisis descriptivo de patrones históricos; no implica una relación causal entre un sorteo y el siguiente. Configurar "Sorteos a considerar" amplía el rango histórico evaluado.</p>
-              
-                <p><strong>2. Teoría de Juegos de John Nash (Equilibrio de Nash):</strong></p>
-                <p>Utilizada para predecir el comportamiento del resto del público. Analiza los sesgos estéticos humanos tradicionales (jugar fechas, patrones rectos, simetrías) y aplica un algoritmo teorético que penaliza combinaciones que el público juega a gran escala. El resultado es que, si aciertas el premio gordo, no tendrás que diluirlo ni compartirlo entre cientos de personas, maximizando tu Valor Esperado de Retorno (EV).</p>
-              
-                <p><strong>3. Regresión Lineal de Ajuste Mínimo-Cuadrado:</strong></p>
-                <p>Analiza cómo ha variado la media de los números ganadores a lo largo del histórico, como referencia estadística descriptiva. No predice si el próximo sorteo tendrá números más altos o más bajos, ya que cada sorteo es independiente del anterior. El Bono de Regresión pondera combinaciones cuyo perfil se acerca a esa media histórica.</p>
-            `;
-        }
+    this.toggleModal('filterInfoExpandedModal', true);
+  }
 
-        if (matched) {
-            const helpModalTitle = document.getElementById('helpModalTitle');
-            const helpModalBody = document.getElementById('helpModalBody');
-            if (helpModalTitle) helpModalTitle.textContent = title;
-            if (helpModalBody) helpModalBody.innerHTML = body;
-            this.toggleModal('helpModal', true);
-            return;
-        }
-    }
+  /*
 
     // 1. Selector de modo de selección
     const modeBtn = target.closest<HTMLElement>('.selection-mode-btn');
@@ -1903,6 +1647,7 @@ class DataLotto49Advanced {
     // Mostrar modal
     this.toggleModal('helpModal', true);
   }
+  */
 
   runSelfDiagnostics() {
     console.log("=== INICIANDO PRUEBAS DE DIAGNÓSTICO DATALOTTO PLATAFORMA ===");
@@ -2023,8 +1768,9 @@ class DataLotto49Advanced {
         <div style="padding: 10px 5px; color: #7f1d1d; font-size: 0.9rem; line-height: 1.5;">
           <p style="margin: 0 0 10px 0; font-weight: bold;">${t('conflict.noCombinaciones')}</p>
           <p style="margin: 0 0 15px 0; color: #991b1b; font-size: 0.85rem;">${t('conflict.universoBajo')}</p>
-          <button id="resetDiagFiltersBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; font-size: 0.9rem;">
-            ${t('conflict.restablecerBoton', { game: this.currentGame.name })}
+          <button id="resetDiagFiltersBtn" type="button" style="width: auto; max-width: 320px; padding: 10px 20px; margin: 8px auto 0; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #ffffff; border: 1px solid #7f1d1d; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); text-transform: uppercase; letter-spacing: 0.03em; pointer-events: auto;">
+            <span style="font-size: 1.1rem; pointer-events: none;">⚡</span>
+            <span style="pointer-events: none;">${t('conflict.restablecerBoton', { game: this.currentGame.name })}</span>
           </button>
         </div>
       `;
@@ -2105,9 +1851,10 @@ class DataLotto49Advanced {
             ${filtersHtml}
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-            <button id="resetDiagFiltersBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.1s, background 0.2s; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.23);">
-              ${t('conflict.restablecerBoton', { game: this.currentGame.name })}
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px; align-items: center;">
+            <button id="resetDiagFiltersBtn" type="button" style="width: auto; max-width: 320px; padding: 10px 20px; margin: 8px auto 0; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #ffffff; border: 1px solid #7f1d1d; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35); text-transform: uppercase; letter-spacing: 0.03em; pointer-events: auto;">
+              <span style="font-size: 1.1rem; pointer-events: none;">⚡</span>
+              <span style="pointer-events: none;">${t('conflict.restablecerBoton', { game: this.currentGame.name })}</span>
             </button>
             <p style="font-size: 0.75rem; color: #64748b; text-align: center; margin: 0;">
               ${t('conflict.restablecerDescripcion')}
@@ -2119,13 +1866,15 @@ class DataLotto49Advanced {
 
     const resetBtn = document.getElementById('resetDiagFiltersBtn');
     if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
+      resetBtn.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
-          this.resolveFilterConflict();
+          await this.resolveFilterConflict();
         } catch (err: any) {
           console.error("Fallo al resolver conflicto de filtros:", err);
         }
-      });
+      };
     }
 
     // Scroll to ticket with safety delay and mobile optimization
@@ -2146,9 +1895,36 @@ class DataLotto49Advanced {
     this.updateUIFromFilterState();
   }
 
-  resolveFilterConflict() {
-    const numUniv = this.getAvailableUniverse('number');
-    const starUniv = this.currentGame.maxStars > 0 ? this.getAvailableUniverse('star') : [];
+  async resolveFilterConflict() {
+    // 0. Reset filters to clean default state for current game
+    const defaultFilters = this.getDefaultFiltersForGame(this.currentGame.id);
+    this.filters = JSON.parse(JSON.stringify(defaultFilters));
+    this.gameFilters[this.currentGame.id] = this.filters;
+
+    // 1. Clear manual exclusions that reduce universe or block numbers
+    this.excludedNumbers.clear();
+    this.excludedStars.clear();
+    this.excludedDecades.clear();
+    this.excludedDecadesSnapshot.clear();
+    this.excludedStarDecades.clear();
+    this.excludedStarDecadesSnapshot.clear();
+    this.excludedTerminaciones.clear();
+    this.excludedTerminacionesSnapshot.clear();
+    this.selectedNumbers.clear();
+    this.favoriteNumbers.clear();
+    this.hotNumbers.clear();
+    this.coldNumbers.clear();
+    this.absentNumbers.clear();
+
+    document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip, #terminacionesOptions .filter-chip').forEach(c => c.classList.remove('active'));
+    this.updateTerminacionesBadge();
+    this.updateDecadasBadge();
+    this.updateStarDecadasBadge();
+    this.updateGridNumberStates();
+    this.updateSelectedDisplay();
+
+    let numUniv = this.getAvailableUniverse('number');
+    let starUniv = this.currentGame.maxStars > 0 ? this.getAvailableUniverse('star') : [];
     const maxNumbers = this.currentGame.maxNumbers;
     const maxStars = this.currentGame.maxStars || 0;
 
@@ -2157,11 +1933,15 @@ class DataLotto49Advanced {
       return;
     }
 
-    if (!this.historicalData || this.historicalData.length === 0) {
+    if (!this.historicalData || this.historicalData.length === 0 || this.currentGame.id === 'nacional') {
       this.resetFiltersToDefault();
+      this.saveState();
+      this.updateUIFromFilterState();
+      this.updateFilterBadgesFromAudit();
       this.showToast(t('conflict.resolutorExito', { level: 1 }), 'success');
       const ticketDiv = document.getElementById('ticket');
       if (ticketDiv) ticketDiv.classList.remove('show', 'conflict');
+      await this.generateCombinations();
       return;
     }
 
@@ -2296,6 +2076,12 @@ class DataLotto49Advanced {
     const allPossibleLows = Array.from({ length: maxNumbers + 1 }, (_, i) => i);
 
     for (const level of levels) {
+      if (this.filters.geometric) {
+        this.filters.geometric.exclude = [];
+      }
+      this.filters.nashMinScore = 0.0;
+      this.filters.nashMaxScore = 10.0;
+
       if (level.pLow === 0 && level.pHigh === 1) {
         this.filters.sum = { min: (maxNumbers * (maxNumbers + 1)) / 2, max: this.currentGame.numberRange * maxNumbers };
         this.filters.primos = { min: 0, max: maxNumbers };
@@ -2309,7 +2095,6 @@ class DataLotto49Advanced {
         this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, 1.0));
         this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, 1.0));
         this.filters.terminacionesDistintas = Array.from({ length: maxNumbers }, (_, i) => i + 1);
-        if (this.filters.geometric && this.filters.geometric.exclude) this.filters.geometric.exclude = [];
         this.filters.nashStrictMode = false;
       } else {
         this.filters.sum = { min: percentile(histSums, level.pLow), max: percentile(histSums, level.pHigh) };
@@ -2329,16 +2114,33 @@ class DataLotto49Advanced {
         const targetMass = 1.0 - level.pLow * 2;
         this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, targetMass));
         this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, targetMass));
+        this.filters.terminacionesDistintas = [maxNumbers - 2, maxNumbers - 1, maxNumbers].filter(v => v >= 2);
       }
 
-      if (this.filters.positionRange && this.filters.positionRange.enabled) {
-        const ranges = calculateAllPositionRanges(this.currentGame.numberRange, maxNumbers, this.historicalData.map((d: any) => d.numbers), level.z);
-        this.filters.positionRange.confidenceLevel = level.z;
-        this.filters.positionRange.ranges = ranges;
+      if (!this.filters.positionRange) {
+        this.filters.positionRange = { enabled: true, confidenceLevel: level.z, ranges: [] };
       }
+      const mainHist = this.historicalData.map((d: any) => d.numbers);
+      const ranges = calculateAllPositionRanges(this.currentGame.numberRange, maxNumbers, mainHist, level.z);
+      if (level.pLow === 0 && level.pHigh === 1) {
+        for (let k = 1; k <= maxNumbers; k++) {
+          ranges[k - 1] = { position: k, min: 1, max: this.currentGame.numberRange - (maxNumbers - k), usedHistorical: true };
+        }
+      }
+      this.filters.positionRange.confidenceLevel = level.z;
+      this.filters.positionRange.ranges = ranges;
 
-      if (maxStars > 0 && this.filters.starPositionRange && this.filters.starPositionRange.enabled) {
-        const starRanges = calculateAllPositionRanges(this.currentGame.starRange, maxStars, this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars), level.z);
+      if (maxStars > 0) {
+        if (!this.filters.starPositionRange) {
+          this.filters.starPositionRange = { enabled: true, confidenceLevel: level.z, ranges: [] };
+        }
+        const starHist = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars);
+        const starRanges = calculateAllPositionRanges(this.currentGame.starRange, maxStars, starHist, level.z);
+        if (level.pLow === 0 && level.pHigh === 1) {
+          for (let k = 1; k <= maxStars; k++) {
+            starRanges[k - 1] = { position: k, min: 1, max: this.currentGame.starRange - (maxStars - k), usedHistorical: true };
+          }
+        }
         this.filters.starPositionRange.confidenceLevel = level.z;
         this.filters.starPositionRange.ranges = starRanges;
       }
@@ -2383,14 +2185,25 @@ class DataLotto49Advanced {
         }
       }
 
-      if (validFound) {
+      if (validFound || level.levelNum === 3) {
         this.saveState();
         this.updateUIFromFilterState();
+        this.updateFilterBadgesFromAudit();
         const ticketDiv = document.getElementById('ticket');
         if (ticketDiv) {
           ticketDiv.classList.remove('show', 'conflict');
+          ticketDiv.innerHTML = `
+            <div class="ticket-header">
+              <h4>${t('ticket.tituloBoleto')}</h4>
+              <p id="ticketDate"></p>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
+              ⚡ ${t('main.iniciandoLoading')}
+            </div>
+          `;
         }
         this.showToast(t('conflict.resolutorExito', { level: level.levelNum }), 'success');
+        await this.generateCombinations();
         return;
       }
     }
@@ -2403,6 +2216,9 @@ class DataLotto49Advanced {
     const { results } = this.runFilterAudit(500);
 
     const filterSelectors: { [key: string]: string } = {
+      excluirDecenas: '#excluirDecenasOptions',
+      excluirTerminaciones: '#terminacionesOptions',
+      excluirStarDecades: '#excluirDecenasEstrellasOptions',
       terminaciones: '#terminacionesOptions',
       sum: '#sumMin',
       terminacionesDistintas: '#terminacionesDistintasOptions',
@@ -2761,6 +2577,7 @@ class DataLotto49Advanced {
     setRangeVal('nashMinScore', this.filters.nashMinScore ?? 0.0);
     setRangeVal('nashMaxScore', this.filters.nashMaxScore ?? 10.0);
 
+    this.renderPositionRangeFilterOptions();
     if (this.filters.positionRange) {
       const posCb = document.getElementById('positionRangeEnabled') as HTMLInputElement;
       if (posCb) posCb.checked = !!this.filters.positionRange.enabled;
@@ -2826,6 +2643,8 @@ class DataLotto49Advanced {
       chipEl.classList.toggle('active', this.excludedTerminaciones.has(val));
     });
     this.updateTerminacionesBadge();
+    this.updateDecadasBadge();
+    this.updateStarDecadasBadge();
 
     // Switches
     const setChecked = (id: string, isChecked: boolean) => {
@@ -5629,12 +5448,15 @@ class DataLotto49Advanced {
         .map(d => d.numbers || [])
         .filter(n => n && n.length >= this.currentGame.maxNumbers);
 
-      const ranges = calculateAllPositionRanges(
-        this.currentGame.numberRange,
-        this.currentGame.maxNumbers,
-        mainHistorical,
-        confidenceLevel
-      );
+      let ranges = this.filters.positionRange?.ranges;
+      if (!ranges || ranges.length !== this.currentGame.maxNumbers) {
+        ranges = calculateAllPositionRanges(
+          this.currentGame.numberRange,
+          this.currentGame.maxNumbers,
+          mainHistorical,
+          confidenceLevel
+        );
+      }
 
       this.filters.positionRange = {
         enabled: isEnabled,
@@ -5702,6 +5524,7 @@ class DataLotto49Advanced {
 
       document.getElementById('positionRangeEnabled')?.addEventListener('change', () => {
         this.updateFilterStateFromUI();
+        this.updateFilterBadgesFromAudit();
       });
 
       document.getElementById('positionRangeConfidence')?.addEventListener('change', (e) => {
@@ -5709,9 +5532,11 @@ class DataLotto49Advanced {
         const newZ = parseFloat(select.value);
         if (this.filters.positionRange) {
           this.filters.positionRange.confidenceLevel = newZ;
+          delete this.filters.positionRange.ranges;
         }
         this.renderPositionRangeFilterOptions();
         this.updateFilterStateFromUI();
+        this.updateFilterBadgesFromAudit();
       });
     }
 
@@ -5737,12 +5562,15 @@ class DataLotto49Advanced {
           .map(d => d.stars || [])
           .filter(s => s && s.length >= this.currentGame.maxStars);
 
-        const starRanges = calculateAllPositionRanges(
-          this.currentGame.starRange,
-          this.currentGame.maxStars,
-          starHistorical,
-          starConfidenceLevel
-        );
+        let starRanges = this.filters.starPositionRange?.ranges;
+        if (!starRanges || starRanges.length !== this.currentGame.maxStars) {
+          starRanges = calculateAllPositionRanges(
+            this.currentGame.starRange,
+            this.currentGame.maxStars,
+            starHistorical,
+            starConfidenceLevel
+          );
+        }
 
         this.filters.starPositionRange = {
           enabled: isStarEnabled,
@@ -5810,6 +5638,7 @@ class DataLotto49Advanced {
 
         document.getElementById('starPositionRangeEnabled')?.addEventListener('change', () => {
           this.updateFilterStateFromUI();
+          this.updateFilterBadgesFromAudit();
         });
 
         document.getElementById('starPositionRangeConfidence')?.addEventListener('change', (e) => {
@@ -5817,9 +5646,11 @@ class DataLotto49Advanced {
           const newZ = parseFloat(select.value);
           if (this.filters.starPositionRange) {
             this.filters.starPositionRange.confidenceLevel = newZ;
+            delete this.filters.starPositionRange.ranges;
           }
           this.renderPositionRangeFilterOptions();
           this.updateFilterStateFromUI();
+          this.updateFilterBadgesFromAudit();
         });
       }
     } else {
@@ -6027,12 +5858,30 @@ class DataLotto49Advanced {
   }
 
   initFilterInfoButtons() {
+    const EXPANDED_FILTERS: { [selector: string]: string } = {
+      '#parImparOptions': 'parImpar',
+      '#terminacionesOptions': 'terminaciones'
+    };
+
     const filterGroups = document.querySelectorAll('.filter-group, .dashboard-filter-group');
     filterGroups.forEach((group) => {
       const titleEl = group.querySelector('.filter-title, .dashboard-filter-header');
       if (!titleEl) return;
 
       if (titleEl.querySelector('.filter-info-btn')) return;
+
+      for (const [selector, groupKey] of Object.entries(EXPANDED_FILTERS)) {
+        if (group.querySelector(selector)) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'filter-info-btn filter-info-btn-expanded';
+          btn.dataset.expandedKey = groupKey;
+          btn.textContent = 'ℹ️';
+          btn.title = t('filterInfo.shared.titleExpanded');
+          titleEl.appendChild(btn);
+          return;
+        }
+      }
 
       let infoText = group.getAttribute('data-info') || group.getAttribute('title') || '';
       const headerText = titleEl.textContent || '';
@@ -6092,6 +5941,14 @@ class DataLotto49Advanced {
         const filterGroup = infoBtn.closest<HTMLElement>('.filter-group, .dashboard-filter-group');
         if (!filterGroup) return;
 
+        if (infoBtn.classList.contains('filter-info-btn-expanded')) {
+          const expandedKey = infoBtn.dataset.expandedKey;
+          if (expandedKey) {
+            this.renderExpandedFilterModal(expandedKey);
+          }
+          return;
+        }
+
         let popover = filterGroup.querySelector<HTMLElement>('.filter-info-popover');
         const wasActive = popover?.classList.contains('active');
 
@@ -6137,34 +5994,6 @@ class DataLotto49Advanced {
         document.querySelectorAll('.filter-info-btn.active').forEach(b => b.classList.remove('active'));
       }
     });
-
-    // Interceptor in capture phase for Help Mode
-    document.addEventListener('click', (e) => {
-        if (!this.helpModeActive) return;
-
-        const target = e.target as HTMLElement;
-        // Ignore interactions on the sidebar, toggle buttons, reset/close buttons, help modals, filter info buttons, and collapsible elements
-        if (
-            target.closest('#sidebar') || 
-            target.closest('#helpModeBtn') || 
-            target.closest('#menuBtn') || 
-            target.closest('#helpModal') || 
-            target.closest('#overlay') ||
-            target.id === 'closeHelpModalBtn' ||
-            target.closest('.collapsible-header') ||
-            target.closest('.collapse-btn') ||
-            target.closest('.filter-info-btn') ||
-            target.closest('.filter-info-popover')
-        ) {
-            return;
-        }
-
-        // Intercept action
-        e.preventDefault();
-        e.stopPropagation();
-
-        this.showHelpForElement(target);
-    }, true);
 
     document.getElementById('savedTicketsGameFilter')?.addEventListener('change', () => {
         this.updateSavedTickets();
@@ -6434,11 +6263,9 @@ class DataLotto49Advanced {
     document.getElementById('closeContactBtn')?.addEventListener('click', () => this.toggleModal('contactModal', false));
     document.getElementById('sendContactBtn')?.addEventListener('click', () => this.sendContactForm());
     
-    document.getElementById('helpModeBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.toggleHelpMode();
+    document.getElementById('closeFilterInfoExpandedModalBtn')?.addEventListener('click', () => {
+      this.toggleModal('filterInfoExpandedModal', false);
     });
-    document.getElementById('closeHelpModalBtn')?.addEventListener('click', () => this.toggleModal('helpModal', false));
 
     // Nash & Popularity Map Events
     document.getElementById('nashStrictModeSwitch')?.addEventListener('change', (e) => {
@@ -6725,12 +6552,9 @@ class DataLotto49Advanced {
     document.getElementById('vizModeTrendBtn')?.addEventListener('click', () => updateVizModeButtons('trend'));
     document.getElementById('vizModeChiBtn')?.addEventListener('click', () => updateVizModeButtons('chi'));
 
-    document.getElementById('helpModal')?.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.id === 'goToTrendChartBtn' || target.closest('#goToTrendChartBtn'))) {
-        this.toggleModal('helpModal', false);
-        updateVizModeButtons('trend');
-        this.toggleModal('dataVizModal', true);
+    document.getElementById('filterInfoExpandedModal')?.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).id === 'filterInfoExpandedModal') {
+        this.toggleModal('filterInfoExpandedModal', false);
       }
     });
 
@@ -7008,13 +6832,17 @@ class DataLotto49Advanced {
       // FIX: Added type safety for DOM element access.
       const getVal = (id: string, isFloat = false): number => {
           const el = document.getElementById(id) as HTMLInputElement;
-          if (!el) return isFloat ? 0.0 : 0;
-          return isFloat ? parseFloat(el.value) : parseInt(el.value);
+          if (!el || el.value === undefined || el.value === '') return isFloat ? 0.0 : 0;
+          const parsed = isFloat ? parseFloat(el.value) : parseInt(el.value, 10);
+          return isNaN(parsed) ? (isFloat ? 0.0 : 0) : parsed;
       };
       const getChecked = (id: string): boolean => (document.getElementById(id) as HTMLInputElement)?.checked || false;
       const getActiveChips = (selector: string): string[] => Array.from(document.querySelectorAll(selector)).map(el => (el as HTMLElement).dataset.value!);
 
       this.filters.terminaciones = getActiveChips('#terminacionesOptions .filter-chip.active').map(Number);
+      this.filters.excluirDecenas = Array.from(this.excludedDecades);
+      this.filters.excluirTerminaciones = Array.from(this.excludedTerminaciones);
+      this.filters.excluirStarDecades = Array.from(this.excludedStarDecades);
       this.filters.terminacionesDistintas = getActiveChips('#terminacionesDistintasOptions .filter-chip.active').map(Number);
       this.filters.sum = { min: getVal('sumMin'), max: getVal('sumMax') };
       this.filters.parImpar = getActiveChips('#parImparOptions .filter-chip.active');
@@ -7281,7 +7109,84 @@ class DataLotto49Advanced {
 
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
+    this.updateDecadasBadge();
+    this.updateFilterBadgesFromAudit();
     this.saveState();
+  }
+
+  updateDecadasBadge() {
+    const container = document.querySelector('#excluirDecenasOptions')?.closest('.filter-group');
+    if (!container) return;
+
+    const titleEl = container.querySelector('.filter-title');
+    if (!titleEl) return;
+
+    let badgeEl = titleEl.querySelector('.decadas-exclude-badge') as HTMLElement;
+
+    if (this.excludedDecades.size === 0) {
+      if (badgeEl) badgeEl.remove();
+      return;
+    }
+
+    const startNum = this.currentGame.id === 'nacional' ? 10 : 1;
+    const totalRange = this.currentGame.id === 'nacional' 
+      ? (this.currentGame.numberRange - 9) 
+      : this.currentGame.numberRange;
+
+    let excludedCount = 0;
+    this.excludedDecades.forEach(d => {
+      const start = d === 0 ? 1 : d * 10;
+      const end = Math.min(d * 10 + 9, this.currentGame.numberRange);
+      if (end >= startNum) {
+        const effectiveStart = Math.max(start, startNum);
+        excludedCount += Math.max(0, end - effectiveStart + 1);
+      }
+    });
+
+    const pct = Math.round((excludedCount / totalRange) * 100);
+
+    if (!badgeEl) {
+      badgeEl = document.createElement('span');
+      badgeEl.className = 'decadas-exclude-badge';
+      badgeEl.style.cssText = 'margin-left: 8px; font-size: 0.75rem; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-weight: 600;';
+      titleEl.appendChild(badgeEl);
+    }
+
+    badgeEl.textContent = t('filter.excludeBadge', { pct });
+  }
+
+  updateStarDecadasBadge() {
+    const container = document.querySelector('#excluirDecenasEstrellasOptions')?.closest('.filter-group');
+    if (!container) return;
+
+    const titleEl = container.querySelector('.filter-title');
+    if (!titleEl) return;
+
+    let badgeEl = titleEl.querySelector('.star-decadas-exclude-badge') as HTMLElement;
+
+    if (this.excludedStarDecades.size === 0 || !this.currentGame.starRange) {
+      if (badgeEl) badgeEl.remove();
+      return;
+    }
+
+    const totalRange = this.currentGame.starRange;
+    let excludedCount = 0;
+    this.excludedStarDecades.forEach(d => {
+      const start = d === 0 ? 1 : d * 10;
+      const end = Math.min(d * 10 + 9, totalRange);
+      excludedCount += Math.max(0, end - start + 1);
+    });
+
+    const pct = Math.round((excludedCount / totalRange) * 100);
+
+    if (!badgeEl) {
+      badgeEl = document.createElement('span');
+      badgeEl.className = 'star-decadas-exclude-badge';
+      badgeEl.style.cssText = 'margin-left: 8px; font-size: 0.75rem; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-weight: 600;';
+      titleEl.appendChild(badgeEl);
+    }
+
+    badgeEl.textContent = t('filter.excludeBadge', { pct });
   }
 
   toggleTerminacionExclusion(digit: number) {
@@ -7320,6 +7225,7 @@ class DataLotto49Advanced {
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
     this.updateTerminacionesBadge();
+    this.updateFilterBadgesFromAudit();
     this.saveState();
   }
 
@@ -7399,6 +7305,8 @@ class DataLotto49Advanced {
 
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
+    this.updateStarDecadasBadge();
+    this.updateFilterBadgesFromAudit();
     this.saveState();
   }
 
@@ -7482,6 +7390,8 @@ class DataLotto49Advanced {
       this.filters.terminaciones = [];
       document.querySelectorAll('#excluirDecenasOptions .filter-chip, #excluirDecenasEstrellasOptions .filter-chip, #terminacionesOptions .filter-chip').forEach(c => c.classList.remove('active'));
       this.updateTerminacionesBadge();
+      this.updateDecadasBadge();
+      this.updateStarDecadasBadge();
       this.hotNumbers.clear();
       this.hotStars.clear();
       this.coldNumbers.clear();
@@ -8041,7 +7951,7 @@ class DataLotto49Advanced {
     const ticketDiv = document.getElementById('ticket');
     if (!ticketDiv) return;
 
-    if (ticketDiv.classList.contains('conflict')) {
+    if (!document.getElementById('ticketCombinations') || ticketDiv.classList.contains('conflict')) {
         ticketDiv.classList.remove('conflict');
         ticketDiv.innerHTML = `
           <div class="ticket-header">
@@ -10261,6 +10171,31 @@ class DataLotto49Advanced {
             group.appendChild(input);
             container.appendChild(group);
         });
+
+        // Configuración de Servidor API Backend para Capacitor / Móvil
+        const apiGroup = document.createElement('div');
+        apiGroup.style.cssText = 'margin-top: 15px; padding-top: 15px; border-top: 2px dashed #e2e8f0; display: flex; flex-direction: column; gap: 5px;';
+        
+        const apiLabel = document.createElement('label');
+        apiLabel.style.cssText = 'display: block; font-size: 0.85rem; color: #2563eb; font-weight: bold;';
+        apiLabel.textContent = '🖥️ Servidor API Backend (Móvil / Capacitor):';
+        
+        const apiHelp = document.createElement('span');
+        apiHelp.style.cssText = 'font-size: 0.75rem; color: #64748b; margin-bottom: 4px;';
+        apiHelp.textContent = 'Si usas la APK en Android, indica la URL de tu servidor backend para enviar correos y telemetría:';
+
+        const apiInput = document.createElement('input');
+        apiInput.type = 'text';
+        apiInput.id = 'urlInput_customApiServer';
+        apiInput.className = 'modal-input';
+        apiInput.style.width = '100%';
+        apiInput.value = localStorage.getItem('customApiServerUrl') || '';
+        apiInput.placeholder = 'https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app';
+
+        apiGroup.appendChild(apiLabel);
+        apiGroup.appendChild(apiHelp);
+        apiGroup.appendChild(apiInput);
+        container.appendChild(apiGroup);
     }
     
     this.closeSidebar();
@@ -10274,6 +10209,16 @@ class DataLotto49Advanced {
             this.customGameUrls[key] = input.value;
         }
     });
+
+    const apiInput = document.getElementById('urlInput_customApiServer') as HTMLInputElement;
+    if (apiInput) {
+      const val = apiInput.value.trim();
+      if (val) {
+        localStorage.setItem('customApiServerUrl', val);
+      } else {
+        localStorage.removeItem('customApiServerUrl');
+      }
+    }
     
     this.saveState();
     this.toggleModal('configUrlsModal', false);
@@ -10284,16 +10229,21 @@ class DataLotto49Advanced {
     this.closeSidebar();
     const messageInput = document.getElementById('contactMessage') as HTMLTextAreaElement;
     const emailInput = document.getElementById('contactEmail') as HTMLInputElement;
+    const fallbackDiv = document.getElementById('contactMailtoFallback');
     if (messageInput) messageInput.value = '';
     if (emailInput) emailInput.value = '';
+    if (fallbackDiv) fallbackDiv.style.display = 'none';
     this.toggleModal('contactModal', true);
   }
 
   async sendContactForm() {
     const messageInput = document.getElementById('contactMessage') as HTMLTextAreaElement;
     const emailInput = document.getElementById('contactEmail') as HTMLInputElement;
+    const fallbackDiv = document.getElementById('contactMailtoFallback');
     const message = messageInput?.value.trim();
     const email = emailInput?.value.trim();
+
+    if (fallbackDiv) fallbackDiv.style.display = 'none';
 
     if (!message) {
       this.showToast(t('toast.contactoSinMensaje'), 'warning');
@@ -10307,7 +10257,8 @@ class DataLotto49Advanced {
     }
 
     try {
-      const response = await fetch(this.getApiUrl('/api/contact'), {
+      const targetUrl = this.getApiUrl('/api/contact');
+      const response = await fetch(targetUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, email })
@@ -10323,8 +10274,22 @@ class DataLotto49Advanced {
       }
     } catch (error: any) {
       console.error('Error enviando contacto:', error);
-      const errMsg = error?.message || t('contact.errorEnviarReintentar');
+      let errMsg = error?.message || t('contact.errorEnviarReintentar');
+      if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network request failed')) {
+        errMsg = `No se pudo conectar con el servidor backend (${this.getApiUrl('/api/contact')}). Verifica tu conexión o la URL del servidor en Ajustes.`;
+      }
       this.showToast(`❌ ${errMsg}`, 'error');
+
+      // Mostrar opción alternativa mailto
+      if (fallbackDiv) {
+        fallbackDiv.style.display = 'block';
+        const mailtoBtn = document.getElementById('contactMailtoBtn') as HTMLAnchorElement;
+        if (mailtoBtn) {
+          const subject = encodeURIComponent("📬 Mensaje de contacto - DataLotto");
+          const body = encodeURIComponent(`Mensaje:\n${message}\n\nEmail del remitente: ${email || "No especificado"}`);
+          mailtoBtn.href = `mailto:datalotto49@gmail.com?subject=${subject}&body=${body}`;
+        }
+      }
     } finally {
       if (sendBtn) {
         sendBtn.disabled = false;

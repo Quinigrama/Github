@@ -1902,6 +1902,30 @@ body.dark-mode .filter-info-popover-close:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.filter-info-btn.filter-info-btn-expanded {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  margin-left: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  color: inherit;
+}
+
+.filter-info-btn.filter-info-btn-expanded:hover {
+  opacity: 1;
+  transform: scale(1.15);
+  background: none;
+}
+
 /* FILTER ACTIONS FOOTER BAR */
 .filter-actions-footer-container {
   margin-top: 20px;
@@ -1969,6 +1993,13 @@ body.dark-mode .filter-actions-footer-container #aiFiltersBtn {
 .range-control input.error {
   border-color: var(--danger);
   background-color: #fef2f2;
+}
+
+/* Campos de entropía: muestran valores con 3 decimales (p.ej. "2.585"),
+   por lo que necesitan más ancho que el resto de inputs de rango
+   para que el último decimal no se corte visualmente. */
+.range-control input.entropy-value {
+  width: 92px;
 }
 
 .range-control span {

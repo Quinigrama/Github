@@ -44,10 +44,13 @@ export function runFilterAudit(
     positionRange: { name: 'Rango Óptimo por Posición', count: 0, passed: 0, percent: 100 },
     entropyTerminaciones: { name: 'Entropía (Terminaciones)', count: 0, passed: 0, percent: 100 },
     entropyIntervalos: { name: 'Entropía (Intervalos)', count: 0, passed: 0, percent: 100 },
-    geometric: { name: 'Exclusión Geométrica', count: 0, passed: 0, percent: 100 }
+    geometric: { name: 'Exclusión Geométrica', count: 0, passed: 0, percent: 100 },
+    excluirDecenas: { name: 'Exclusión de Decenas', count: 0, passed: 0, percent: 100 },
+    excluirTerminaciones: { name: 'Exclusión de Terminaciones', count: 0, passed: 0, percent: 100 }
   };
 
   if (maxStars > 0) {
+    results.excluirStarDecades = { name: 'Exclusión de Decenas (Estrellas)', count: 0, passed: 0, percent: 100 };
     results.starSum = { name: 'Suma de Estrellas', count: 0, passed: 0, percent: 100 };
     results.starParImpar = { name: 'Estrellas Par/Impar', count: 0, passed: 0, percent: 100 };
     results.starBajosAltos = { name: 'Estrellas Bajos/Altos', count: 0, passed: 0, percent: 100 };
@@ -232,7 +235,35 @@ export function runFilterAudit(
       if (comboPassed) results.geometric.passed++;
     }
 
+    // Exclusión de Decenas
+    if (filters.excluirDecenas && Array.isArray(filters.excluirDecenas) && filters.excluirDecenas.length > 0) {
+      results.excluirDecenas.count++;
+      const hasExcludedDecade = combo.some(n => {
+        const dec = Math.floor((n - 1) / 10);
+        return filters.excluirDecenas.includes(dec);
+      });
+      if (!hasExcludedDecade) results.excluirDecenas.passed++;
+    }
+
+    // Exclusión de Terminaciones
+    if (filters.excluirTerminaciones && Array.isArray(filters.excluirTerminaciones) && filters.excluirTerminaciones.length > 0) {
+      results.excluirTerminaciones.count++;
+      const hasExcludedEnding = combo.some(n => filters.excluirTerminaciones.includes(n % 10));
+      if (!hasExcludedEnding) results.excluirTerminaciones.passed++;
+    }
+
     // Stars
+    if (maxStars > 0) {
+      if (filters.excluirStarDecades && Array.isArray(filters.excluirStarDecades) && filters.excluirStarDecades.length > 0) {
+        results.excluirStarDecades.count++;
+        const hasExcludedStarDecade = stars.some(s => {
+          const dec = Math.floor((s - 1) / 10);
+          return filters.excluirStarDecades.includes(dec);
+        });
+        if (!hasExcludedStarDecade) results.excluirStarDecades.passed++;
+      }
+    }
+
     if (maxStars > 1) {
       const starSum = stars.reduce((a, b) => a + b, 0);
       if (filters.starSum) {
