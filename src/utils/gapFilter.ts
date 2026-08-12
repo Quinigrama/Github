@@ -79,3 +79,45 @@ export function aplicarFiltroGap(
   }
   return { excluidos, failsafe: false };
 }
+
+export interface GapHistogramRow {
+  rangoLabel: string; // ej. "1-3"
+  empirico: number;   // frecuencia real de huecos en ese rango
+  teorico: number;    // frecuencia esperada según distribución geométrica
+}
+
+/**
+ * Agrupa los huecos históricos de un número en buckets, y calcula en paralelo
+ * la frecuencia esperada bajo una distribución geométrica teórica con
+ * probabilidad p = maxNumbers / numberRange del juego activo.
+ */
+export function construirHistogramaGaps(
+  gaps: number[],
+  maxNumbers: number,
+  numberRange: number,
+  nBucketsObjetivo: number = 14
+): GapHistogramRow[] {
+  const p = maxNumbers / numberRange;
+  const maxGap = gaps.length ? Math.max(...gaps) : 30;
+  const bucketSize = Math.max(1, Math.ceil((maxGap + 1) / nBucketsObjetivo));
+  const nBuckets = Math.ceil((maxGap + 1) / bucketSize);
+
+  const counts = new Array(nBuckets).fill(0);
+  gaps.forEach(g => {
+    const b = Math.min(nBuckets - 1, Math.floor(g / bucketSize));
+    counts[b]++;
+  });
+
+  return counts.map((c, idx) => {
+    let probTeorica = 0;
+    for (let k = idx * bucketSize + 1; k <= (idx + 1) * bucketSize; k++) {
+      probTeorica += Math.pow(1 - p, k - 1) * p;
+    }
+    return {
+      rangoLabel: `${idx * bucketSize + 1}-${(idx + 1) * bucketSize}`,
+      empirico: c,
+      teorico: Number((probTeorica * gaps.length).toFixed(2)),
+    };
+  });
+}
+

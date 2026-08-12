@@ -43,7 +43,7 @@ import { getCombinationStats, calculateTicketMetrics } from './src/utils/combina
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight } from './src/utils/popularity';
 import { getSumSeriesWithRegression } from './src/utils/regression';
-import { analizarTodosLosNumeros, aplicarFiltroGap } from './src/utils/gapFilter';
+import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
 import {
   getRoberExclusions,
   RoberResult,
@@ -729,7 +729,8 @@ class DataLotto49Advanced {
     anonymousUserId: string;
     googleAuthToken: string | null = null;
     googleUser: User | null = null;
-    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' = 'heatmap';
+    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' = 'heatmap';
+    selectedGapNumber: number = 1;
     vizTarget: 'number' | 'star' = 'number';
     officialDrawsPage: number = 1;
     officialDrawsPageSize: number = 20;
@@ -6533,15 +6534,19 @@ class DataLotto49Advanced {
 
 
 
-    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi') => {
+    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps') => {
+        if (mode === 'gaps' && this.currentGame?.id === 'nacional') {
+            mode = 'heatmap';
+        }
         this.vizMode = mode;
-        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn'].forEach(id => {
+        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn', 'vizModeGapsBtn'].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) btn.classList.toggle('active', 
                 (id === 'vizModeHeatmapBtn' && mode === 'heatmap') ||
                 (id === 'vizModeRankingBtn' && mode === 'ranking') ||
                 (id === 'vizModeTrendBtn' && mode === 'trend') ||
-                (id === 'vizModeChiBtn' && mode === 'chi')
+                (id === 'vizModeChiBtn' && mode === 'chi') ||
+                (id === 'vizModeGapsBtn' && mode === 'gaps')
             );
         });
         this.renderFrequencyChart();
@@ -6551,6 +6556,7 @@ class DataLotto49Advanced {
     document.getElementById('vizModeRankingBtn')?.addEventListener('click', () => updateVizModeButtons('ranking'));
     document.getElementById('vizModeTrendBtn')?.addEventListener('click', () => updateVizModeButtons('trend'));
     document.getElementById('vizModeChiBtn')?.addEventListener('click', () => updateVizModeButtons('chi'));
+    document.getElementById('vizModeGapsBtn')?.addEventListener('click', () => updateVizModeButtons('gaps'));
 
     document.getElementById('filterInfoExpandedModal')?.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).id === 'filterInfoExpandedModal') {
@@ -10564,12 +10570,209 @@ class DataLotto49Advanced {
     `;
   }
 
+  renderGapHistogramChart() {
+    const container = document.getElementById('frequencyChartContainer');
+    const summary = document.getElementById('dataVizSummary');
+    if (!container) return;
+
+    if (!this.dataLoaded || !this.historicalData || this.historicalData.length < 30) {
+      container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding: 40px 10px; font-weight: 500;">⚠️ ${t('dataviz.gaps.sinDatos')}</div>`;
+      if (summary) {
+        summary.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+            <div style="font-weight: 700; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+            <div style="font-size: 0.85rem; color: #64748b;">${t('dataviz.gaps.subtitulo')}</div>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const numberRange = this.currentGame?.numberRange || 49;
+    const maxNumbers = this.currentGame?.maxNumbers || 6;
+
+    if (this.selectedGapNumber < 1 || this.selectedGapNumber > numberRange) {
+      this.selectedGapNumber = 1;
+    }
+
+    const num = this.selectedGapNumber;
+    const { gaps, huecoActual } = calcularGaps(this.historicalData, num);
+    const percentil = percentilHueco(gaps, huecoActual);
+    const p = maxNumbers / numberRange;
+    const mediaTeorica = 1 / p;
+    const mediaEmpirica = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+    const histogramData = construirHistogramaGaps(gaps, maxNumbers, numberRange);
+
+    if (summary) {
+      let optionsHtml = '';
+      for (let i = 1; i <= numberRange; i++) {
+        optionsHtml += `<option value="${i}" ${i === num ? 'selected' : ''}>${i}</option>`;
+      }
+
+      summary.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+            <div>
+              <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+              <div style="font-size: 0.82rem; color: #64748b;">${t('dataviz.gaps.subtitulo')}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="datavizGapNumberSelect" style="font-weight: 600; font-size: 0.88rem; color: #334155;">${t('dataviz.gaps.seleccionarNumero')}</label>
+              <select id="datavizGapNumberSelect" class="modal-filter-select" style="min-width: 80px; padding: 4px 8px; font-weight: bold; border-color: var(--primary);">
+                ${optionsHtml}
+              </select>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: #64748b; font-style: italic; background: #f8fafc; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.4;">
+            ${t('dataviz.gaps.aviso')}
+          </div>
+        </div>
+      `;
+
+      const selectEl = document.getElementById('datavizGapNumberSelect') as HTMLSelectElement;
+      if (selectEl) {
+        selectEl.addEventListener('change', (e) => {
+          this.selectedGapNumber = parseInt((e.target as HTMLSelectElement).value, 10);
+          this.renderGapHistogramChart();
+        });
+      }
+    }
+
+    const svgWidth = 800;
+    const svgHeight = 360;
+    const marginTop = 30;
+    const marginBottom = 60;
+    const marginLeft = 55;
+    const marginRight = 25;
+
+    const chartW = svgWidth - marginLeft - marginRight;
+    const chartH = svgHeight - marginTop - marginBottom;
+
+    const maxVal = Math.max(...histogramData.map(d => Math.max(d.empirico, d.teorico)), 1) * 1.15;
+
+    const nBuckets = histogramData.length;
+    const colWidth = chartW / nBuckets;
+    const barWidth = Math.max(8, colWidth * 0.55);
+
+    let yTicksHTML = '';
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+      const val = Math.round((i / ySteps) * maxVal);
+      const yPos = marginTop + chartH - (val / maxVal) * chartH;
+      yTicksHTML += `
+        <line x1="${marginLeft}" y1="${yPos.toFixed(1)}" x2="${(svgWidth - marginRight).toFixed(1)}" y2="${yPos.toFixed(1)}" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4" />
+        <text x="${(marginLeft - 8).toFixed(1)}" y="${(yPos + 4).toFixed(1)}" font-size="11" fill="#64748b" text-anchor="end">${val}</text>
+      `;
+    }
+
+    let barsHTML = '';
+    let linePoints: { x: number; y: number }[] = [];
+
+    histogramData.forEach((row, idx) => {
+      const cx = marginLeft + (idx + 0.5) * colWidth;
+      const barH = (row.empirico / maxVal) * chartH;
+      const barY = marginTop + chartH - barH;
+      const barX = cx - barWidth / 2;
+
+      const teoricoY = marginTop + chartH - (row.teorico / maxVal) * chartH;
+      linePoints.push({ x: cx, y: teoricoY });
+
+      const tooltipText = `Rango ${row.rangoLabel}: Real = ${row.empirico}, Teórico = ${row.teorico}`;
+
+      barsHTML += `
+        <rect x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" fill="#3b82f6" rx="3" opacity="0.85">
+          <title>${tooltipText}</title>
+        </rect>
+      `;
+    });
+
+    let linePathD = '';
+    linePoints.forEach((pt, i) => {
+      if (i === 0) {
+        linePathD += `M ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+      } else {
+        linePathD += ` L ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+      }
+    });
+
+    const lineHTML = `<path d="${linePathD}" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    const pointsHTML = linePoints.map((pt, i) => {
+      const row = histogramData[i];
+      return `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4" fill="#ef4444"><title>Rango ${row.rangoLabel}: Teórico = ${row.teorico}</title></circle>`;
+    }).join('');
+
+    let xTicksHTML = '';
+    histogramData.forEach((row, idx) => {
+      const cx = marginLeft + (idx + 0.5) * colWidth;
+      xTicksHTML += `<text x="${cx.toFixed(1)}" y="${(svgHeight - 20).toFixed(1)}" font-size="10" fill="#64748b" text-anchor="middle">${row.rangoLabel}</text>`;
+    });
+
+    const axesHTML = `
+      <line x1="${marginLeft}" y1="${marginTop}" x2="${marginLeft}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+      <line x1="${marginLeft}" y1="${marginTop + chartH}" x2="${svgWidth - marginRight}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+    `;
+
+    container.innerHTML = `
+      <div id="gapsHistogramContainer" style="padding: 10px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.gaps.huecoActual')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${huecoActual} <span style="font-size: 0.85rem; font-weight: normal; color: #64748b;">sorteos</span></div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.gaps.percentilActual')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: ${percentil >= 90 ? '#dc2626' : '#1e293b'}; margin-top: 4px;">P${percentil}%</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.gaps.mediaComparada')}</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${mediaEmpirica.toFixed(1)} / ${mediaTeorica.toFixed(1)}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px; align-items: center; font-size: 0.82rem; color: #475569;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 12px; height: 12px; background-color: #3b82f6; border-radius: 2px;"></span>
+            <span>${t('dataviz.gaps.leyendaEmpirico')}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 16px; height: 3px; background-color: #ef4444; border-radius: 2px;"></span>
+            <span>${t('dataviz.gaps.leyendaTeorico')}</span>
+          </div>
+        </div>
+
+        <div style="width: 100%; overflow-x: auto;">
+          <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 380px; display: block; background: #ffffff; font-family: system-ui, sans-serif;">
+            ${yTicksHTML}
+            ${axesHTML}
+            ${barsHTML}
+            ${lineHTML}
+            ${pointsHTML}
+            ${xTicksHTML}
+          </svg>
+        </div>
+      </div>
+    `;
+  }
+
   // ===== NEW FEATURES =====
 
   renderFrequencyChart() {
     const container = document.getElementById('frequencyChartContainer');
     const summary = document.getElementById('dataVizSummary');
     const targetSelectorContainer = document.getElementById('vizTargetSelectorContainer');
+    const gapsBtn = document.getElementById('vizModeGapsBtn');
+
+    if (gapsBtn) {
+      gapsBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
+    }
+
+    if (this.currentGame?.id === 'nacional' && this.vizMode === 'gaps') {
+      this.vizMode = 'heatmap';
+      const heatmapBtn = document.getElementById('vizModeHeatmapBtn');
+      if (heatmapBtn) heatmapBtn.classList.add('active');
+      if (gapsBtn) gapsBtn.classList.remove('active');
+    }
 
     if (!container) return;
     container.innerHTML = '';
@@ -10580,6 +10783,12 @@ class DataLotto49Advanced {
             summary.innerHTML = `<div style="color:#666; text-align: center; width: 100%;">${t('dataviz.cargaResumen')}</div>`;
         }
         return;
+    }
+
+    if (this.vizMode === 'gaps') {
+      if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
+      this.renderGapHistogramChart();
+      return;
     }
 
     if (this.vizMode === 'trend') {
