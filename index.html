@@ -1281,10 +1281,21 @@
                             <button id="loadFiltersBtn" class="strategy-btn" style="display: inline-block; width: auto; padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; font-weight: 600; border-radius: 8px;">
                                 📂 Cargar Filtros
                             </button>
+                            <button id="restaurarFiltrosBtn" class="strategy-btn" style="display: inline-block; width: auto; padding: 8px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; border-radius: 8px;" data-i18n="restaurarFiltros.boton">
+                                🔧 Restaurar Filtros
+                            </button>
                         </div>
                         <div class="filter-actions-collapse">
                             <button type="button" id="filtersBottomCollapseBtn" class="collapse-btn" title="Contraer panel de filtros" aria-label="Contraer panel de filtros">-</button>
                         </div>
+                    </div>
+
+                    <!-- Bloque de resumen de Restaurar Filtros -->
+                    <div id="restaurarFiltrosBlock" style="display: none; margin-top: 15px; padding: 12px; background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 4px; text-align: left; font-size: 0.9rem;">
+                        <div style="font-weight: bold; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <span data-i18n="restaurarFiltros.legendTitulo">🔧 Restaurar Filtros — Rangos por Percentil Histórico:</span>
+                        </div>
+                        <div id="restaurarFiltrosText" style="color: #14532d; margin: 0; line-height: 1.4;"></div>
                     </div>
 
                 </div>

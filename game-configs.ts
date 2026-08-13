@@ -55,6 +55,7 @@ export interface GameConfig {
   theoreticalProbabilities: { [tier: string]: number };
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
+  restaurarFiltrosLevel?: { pLow: number; pHigh: number };
 
   getTheoreticalLimits(): GameTheoreticalLimits;
   getDefaultFilters(): any;
@@ -153,6 +154,7 @@ export class BaseGameConfig implements GameConfig {
   theoreticalProbabilities: { [tier: string]: number };
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
+  restaurarFiltrosLevel?: { pLow: number; pHigh: number };
 
   constructor(opts: {
     id: string;
@@ -174,6 +176,7 @@ export class BaseGameConfig implements GameConfig {
     theoreticalProbabilities: { [tier: string]: number };
     jackpotThresholds?: { excellent: number; good: number };
     customFilterLimits?: Partial<GameFilterLimits>;
+    restaurarFiltrosLevel?: { pLow: number; pHigh: number };
   }) {
     this.id = opts.id;
     this.name = opts.name;
@@ -194,6 +197,7 @@ export class BaseGameConfig implements GameConfig {
     this.theoreticalProbabilities = opts.theoreticalProbabilities;
     this.jackpotThresholds = opts.jackpotThresholds || { excellent: 5000000, good: 2000000 };
     this.customFilterLimits = opts.customFilterLimits;
+    this.restaurarFiltrosLevel = opts.restaurarFiltrosLevel;
   }
 
   get drawDays(): number[] {
@@ -393,6 +397,7 @@ export const GAMES: { [key: string]: GameConfig } = {
     allowedDays: [0, 1, 2, 3, 4, 5, 6],
     theoreticalProbabilities: { '6': 0.00000715, '5': 0.00184, '4': 0.0969, '3': 1.765, '<=2': 98.136 },
     jackpotThresholds: { excellent: 2000000, good: 1000000 },
+    restaurarFiltrosLevel: { pLow: 0.10, pHigh: 0.90 },
     customFilterLimits: {
       sum: { min: 121, max: 190 },
       sumaDigitos: { min: 28, max: 52 },

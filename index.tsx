@@ -1665,6 +1665,64 @@ class DataLotto49Advanced {
       { pLow: 0, pHigh: 1, z: 2.576, levelNum: 3 }
     ];
 
+    for (const level of levels) {
+      this.applyPercentileFilterLevel(level);
+
+      let validFound = false;
+      for (let attempt = 0; attempt < 500; attempt++) {
+        const combo = generateRandomCombination(numUniv, maxNumbers);
+        const stars = maxStars > 0 ? generateRandomCombination(starUniv, maxStars) : [];
+        if (validateCombination(combo, stars, this.currentGame, this.filters, this.primes)) {
+          validFound = true;
+          break;
+        }
+      }
+
+      if (validFound || level.levelNum === 3) {
+        this.saveState();
+        this.updateUIFromFilterState();
+        this.updateFilterBadgesFromAudit();
+        const ticketDiv = document.getElementById('ticket');
+        if (ticketDiv) {
+          ticketDiv.classList.remove('show', 'conflict');
+          ticketDiv.innerHTML = `
+            <div class="ticket-header">
+              <h4>${t('ticket.tituloBoleto')}</h4>
+              <p id="ticketDate"></p>
+            </div>
+            <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
+              ⚡ ${t('main.iniciandoLoading')}
+            </div>
+          `;
+        }
+        this.showToast(t('conflict.resolutorExito', { level: level.levelNum }), 'success');
+        await this.generateCombinations();
+        return;
+      }
+    }
+
+    this.showToast(t('conflict.resolutorAgotado'), 'error');
+  }
+
+  applyPercentileFilterLevel(level: { pLow: number; pHigh: number; z?: number }) {
+    if (!this.historicalData || this.historicalData.length === 0) {
+      return {
+        sumRange: this.filters.sum,
+        parImparCount: Array.isArray(this.filters.parImpar) ? this.filters.parImpar.length : 0,
+        bajosAltosCount: Array.isArray(this.filters.bajosAltos) ? this.filters.bajosAltos.length : 0,
+        agrupDecenasCount: Array.isArray(this.filters.agrupDecenas) ? this.filters.agrupDecenas.length : 0,
+        consecutivosCount: Array.isArray(this.filters.consecutivos) ? this.filters.consecutivos.length : 0,
+        entropyTerminaciones: this.filters.entropyTerminaciones,
+        entropyIntervalos: this.filters.entropyIntervalos,
+        pLow: level.pLow,
+        pHigh: level.pHigh
+      };
+    }
+
+    const zVal = level.z !== undefined ? level.z : (level.pLow === 0 && level.pHigh === 1 ? 2.576 : 1.645);
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars || 0;
+
     const getDecadePatternKey = (nums: number[]) => {
       const tens: Record<number, number> = {};
       nums.forEach(n => {
@@ -1789,140 +1847,158 @@ class DataLotto49Advanced {
     const allPossibleEvens = Array.from({ length: maxNumbers + 1 }, (_, i) => i);
     const allPossibleLows = Array.from({ length: maxNumbers + 1 }, (_, i) => i);
 
-    for (const level of levels) {
-      if (this.filters.geometric) {
-        this.filters.geometric.exclude = [];
+    if (this.filters.geometric) {
+      this.filters.geometric.exclude = [];
+    }
+    this.filters.nashMinScore = 0.0;
+    this.filters.nashMaxScore = 10.0;
+
+    if (level.pLow === 0 && level.pHigh === 1) {
+      this.filters.sum = { min: (maxNumbers * (maxNumbers + 1)) / 2, max: this.currentGame.numberRange * maxNumbers };
+      this.filters.primos = { min: 0, max: maxNumbers };
+      this.filters.distancia = { min: 1, max: this.currentGame.numberRange };
+      this.filters.sumaDigitos = { min: 1, max: maxNumbers * 18 };
+      this.filters.desviacion = { min: 0, max: 99 };
+      this.filters.entropyTerminaciones = { min: 0, max: 5 };
+      this.filters.entropyIntervalos = { min: 0, max: 5 };
+      this.filters.parImpar = allPossibleEvens.map(e => `${e}/${maxNumbers - e}`);
+      this.filters.bajosAltos = allPossibleLows.map(l => `${l}/${maxNumbers - l}`);
+      this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, 1.0));
+      this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, 1.0));
+      this.filters.terminacionesDistintas = Array.from({ length: maxNumbers }, (_, i) => i + 1);
+      this.filters.nashStrictMode = false;
+    } else {
+      this.filters.sum = { min: percentile(histSums, level.pLow), max: percentile(histSums, level.pHigh) };
+      this.filters.primos = { min: percentile(histPrimes, level.pLow), max: percentile(histPrimes, level.pHigh) };
+      this.filters.distancia = { min: percentile(histDistances, level.pLow), max: percentile(histDistances, level.pHigh) };
+      this.filters.sumaDigitos = { min: percentile(histDigitSums, level.pLow), max: percentile(histDigitSums, level.pHigh) };
+      this.filters.desviacion = { min: Number(percentile(histStdDevs, level.pLow).toFixed(1)), max: Number(percentile(histStdDevs, level.pHigh).toFixed(1)) };
+      this.filters.entropyTerminaciones = { min: Number(percentile(histTermEntropies, level.pLow).toFixed(3)), max: Number(percentile(histTermEntropies, level.pHigh).toFixed(3)) };
+      this.filters.entropyIntervalos = { min: Number(percentile(histIntEntropies, level.pLow).toFixed(3)), max: Number(percentile(histIntEntropies, level.pHigh).toFixed(3)) };
+
+      const { excludedValues: excludedEvens } = orderedPercentileExclusion(histEvens, allPossibleEvens, level.pLow, level.pHigh);
+      this.filters.parImpar = allPossibleEvens.filter(e => !excludedEvens.includes(e)).map(e => `${e}/${maxNumbers - e}`);
+
+      const { excludedValues: excludedLows } = orderedPercentileExclusion(histLows, allPossibleLows, level.pLow, level.pHigh);
+      this.filters.bajosAltos = allPossibleLows.filter(l => !excludedLows.includes(l)).map(l => `${l}/${maxNumbers - l}`);
+
+      const targetMass = 1.0 - level.pLow * 2;
+      this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, targetMass));
+      this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, targetMass));
+      this.filters.terminacionesDistintas = [maxNumbers - 2, maxNumbers - 1, maxNumbers].filter(v => v >= 2);
+    }
+
+    if (!this.filters.positionRange) {
+      this.filters.positionRange = { enabled: true, confidenceLevel: zVal, ranges: [] };
+    }
+    const mainHist = this.historicalData.map((d: any) => d.numbers);
+    const ranges = calculateAllPositionRanges(this.currentGame.numberRange, maxNumbers, mainHist, zVal);
+    if (level.pLow === 0 && level.pHigh === 1) {
+      for (let k = 1; k <= maxNumbers; k++) {
+        ranges[k - 1] = { position: k, min: 1, max: this.currentGame.numberRange - (maxNumbers - k), usedHistorical: true };
       }
-      this.filters.nashMinScore = 0.0;
-      this.filters.nashMaxScore = 10.0;
+    }
+    this.filters.positionRange.confidenceLevel = zVal;
+    this.filters.positionRange.ranges = ranges;
 
+    if (maxStars > 0) {
+      if (!this.filters.starPositionRange) {
+        this.filters.starPositionRange = { enabled: true, confidenceLevel: zVal, ranges: [] };
+      }
+      const starHist = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars);
+      const starRanges = calculateAllPositionRanges(this.currentGame.starRange, maxStars, starHist, zVal);
       if (level.pLow === 0 && level.pHigh === 1) {
-        this.filters.sum = { min: (maxNumbers * (maxNumbers + 1)) / 2, max: this.currentGame.numberRange * maxNumbers };
-        this.filters.primos = { min: 0, max: maxNumbers };
-        this.filters.distancia = { min: 1, max: this.currentGame.numberRange };
-        this.filters.sumaDigitos = { min: 1, max: maxNumbers * 18 };
-        this.filters.desviacion = { min: 0, max: 99 };
-        this.filters.entropyTerminaciones = { min: 0, max: 5 };
-        this.filters.entropyIntervalos = { min: 0, max: 5 };
-        this.filters.parImpar = allPossibleEvens.map(e => `${e}/${maxNumbers - e}`);
-        this.filters.bajosAltos = allPossibleLows.map(l => `${l}/${maxNumbers - l}`);
-        this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, 1.0));
-        this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, 1.0));
-        this.filters.terminacionesDistintas = Array.from({ length: maxNumbers }, (_, i) => i + 1);
-        this.filters.nashStrictMode = false;
+        for (let k = 1; k <= maxStars; k++) {
+          starRanges[k - 1] = { position: k, min: 1, max: this.currentGame.starRange - (maxStars - k), usedHistorical: true };
+        }
+      }
+      this.filters.starPositionRange.confidenceLevel = zVal;
+      this.filters.starPositionRange.ranges = starRanges;
+    }
+
+    if (maxStars > 1 && starSums.length > 0) {
+      if (level.pLow === 0 && level.pHigh === 1) {
+        if (this.filters.starSum) this.filters.starSum = { min: 1, max: this.currentGame.starRange * maxStars };
+        if (this.filters.starPrimos) this.filters.starPrimos = { min: 0, max: maxStars };
+        if (this.filters.starDistancia) this.filters.starDistancia = { min: 1, max: this.currentGame.starRange };
+        if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: 1, max: maxStars * 18 };
+        const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
+        const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
+        if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.map(e => `${e}/${maxStars - e}`);
+        if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.map(l => `${l}/${maxStars - l}`);
+        if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, 1.0));
       } else {
-        this.filters.sum = { min: percentile(histSums, level.pLow), max: percentile(histSums, level.pHigh) };
-        this.filters.primos = { min: percentile(histPrimes, level.pLow), max: percentile(histPrimes, level.pHigh) };
-        this.filters.distancia = { min: percentile(histDistances, level.pLow), max: percentile(histDistances, level.pHigh) };
-        this.filters.sumaDigitos = { min: percentile(histDigitSums, level.pLow), max: percentile(histDigitSums, level.pHigh) };
-        this.filters.desviacion = { min: Number(percentile(histStdDevs, level.pLow).toFixed(1)), max: Number(percentile(histStdDevs, level.pHigh).toFixed(1)) };
-        this.filters.entropyTerminaciones = { min: Number(percentile(histTermEntropies, level.pLow).toFixed(3)), max: Number(percentile(histTermEntropies, level.pHigh).toFixed(3)) };
-        this.filters.entropyIntervalos = { min: Number(percentile(histIntEntropies, level.pLow).toFixed(3)), max: Number(percentile(histIntEntropies, level.pHigh).toFixed(3)) };
+        if (this.filters.starSum) this.filters.starSum = { min: percentile(starSums, level.pLow), max: percentile(starSums, level.pHigh) };
+        if (this.filters.starPrimos) this.filters.starPrimos = { min: percentile(starPrimes, level.pLow), max: percentile(starPrimes, level.pHigh) };
+        if (this.filters.starDistancia) this.filters.starDistancia = { min: percentile(starDistances, level.pLow), max: percentile(starDistances, level.pHigh) };
+        if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: percentile(starDigitSums, level.pLow), max: percentile(starDigitSums, level.pHigh) };
 
-        const { excludedValues: excludedEvens } = orderedPercentileExclusion(histEvens, allPossibleEvens, level.pLow, level.pHigh);
-        this.filters.parImpar = allPossibleEvens.filter(e => !excludedEvens.includes(e)).map(e => `${e}/${maxNumbers - e}`);
+        const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
+        const { excludedValues: exStarEvens } = orderedPercentileExclusion(starEvens, allPossibleStarEvens, level.pLow, level.pHigh);
+        if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.filter(e => !exStarEvens.includes(e)).map(e => `${e}/${maxStars - e}`);
 
-        const { excludedValues: excludedLows } = orderedPercentileExclusion(histLows, allPossibleLows, level.pLow, level.pHigh);
-        this.filters.bajosAltos = allPossibleLows.filter(l => !excludedLows.includes(l)).map(l => `${l}/${maxNumbers - l}`);
+        const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
+        const { excludedValues: exStarLows } = orderedPercentileExclusion(starLows, allPossibleStarLows, level.pLow, level.pHigh);
+        if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.filter(l => !exStarLows.includes(l)).map(l => `${l}/${maxStars - l}`);
 
         const targetMass = 1.0 - level.pLow * 2;
-        this.filters.agrupDecenas = Array.from(nominalActivationSet(decadeCounts, targetMass));
-        this.filters.consecutivos = Array.from(nominalActivationSet(consecCounts, targetMass));
-        this.filters.terminacionesDistintas = [maxNumbers - 2, maxNumbers - 1, maxNumbers].filter(v => v >= 2);
-      }
-
-      if (!this.filters.positionRange) {
-        this.filters.positionRange = { enabled: true, confidenceLevel: level.z, ranges: [] };
-      }
-      const mainHist = this.historicalData.map((d: any) => d.numbers);
-      const ranges = calculateAllPositionRanges(this.currentGame.numberRange, maxNumbers, mainHist, level.z);
-      if (level.pLow === 0 && level.pHigh === 1) {
-        for (let k = 1; k <= maxNumbers; k++) {
-          ranges[k - 1] = { position: k, min: 1, max: this.currentGame.numberRange - (maxNumbers - k), usedHistorical: true };
-        }
-      }
-      this.filters.positionRange.confidenceLevel = level.z;
-      this.filters.positionRange.ranges = ranges;
-
-      if (maxStars > 0) {
-        if (!this.filters.starPositionRange) {
-          this.filters.starPositionRange = { enabled: true, confidenceLevel: level.z, ranges: [] };
-        }
-        const starHist = this.historicalData.filter((d: any) => d.stars && d.stars.length === maxStars).map((d: any) => d.stars);
-        const starRanges = calculateAllPositionRanges(this.currentGame.starRange, maxStars, starHist, level.z);
-        if (level.pLow === 0 && level.pHigh === 1) {
-          for (let k = 1; k <= maxStars; k++) {
-            starRanges[k - 1] = { position: k, min: 1, max: this.currentGame.starRange - (maxStars - k), usedHistorical: true };
-          }
-        }
-        this.filters.starPositionRange.confidenceLevel = level.z;
-        this.filters.starPositionRange.ranges = starRanges;
-      }
-
-      if (maxStars > 1 && starSums.length > 0) {
-        if (level.pLow === 0 && level.pHigh === 1) {
-          if (this.filters.starSum) this.filters.starSum = { min: 1, max: this.currentGame.starRange * maxStars };
-          if (this.filters.starPrimos) this.filters.starPrimos = { min: 0, max: maxStars };
-          if (this.filters.starDistancia) this.filters.starDistancia = { min: 1, max: this.currentGame.starRange };
-          if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: 1, max: maxStars * 18 };
-          const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
-          const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
-          if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.map(e => `${e}/${maxStars - e}`);
-          if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.map(l => `${l}/${maxStars - l}`);
-          if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, 1.0));
-        } else {
-          if (this.filters.starSum) this.filters.starSum = { min: percentile(starSums, level.pLow), max: percentile(starSums, level.pHigh) };
-          if (this.filters.starPrimos) this.filters.starPrimos = { min: percentile(starPrimes, level.pLow), max: percentile(starPrimes, level.pHigh) };
-          if (this.filters.starDistancia) this.filters.starDistancia = { min: percentile(starDistances, level.pLow), max: percentile(starDistances, level.pHigh) };
-          if (this.filters.starSumaDigitos) this.filters.starSumaDigitos = { min: percentile(starDigitSums, level.pLow), max: percentile(starDigitSums, level.pHigh) };
-
-          const allPossibleStarEvens = Array.from({ length: maxStars + 1 }, (_, i) => i);
-          const { excludedValues: exStarEvens } = orderedPercentileExclusion(starEvens, allPossibleStarEvens, level.pLow, level.pHigh);
-          if (this.filters.starParImpar) this.filters.starParImpar = allPossibleStarEvens.filter(e => !exStarEvens.includes(e)).map(e => `${e}/${maxStars - e}`);
-
-          const allPossibleStarLows = Array.from({ length: maxStars + 1 }, (_, i) => i);
-          const { excludedValues: exStarLows } = orderedPercentileExclusion(starLows, allPossibleStarLows, level.pLow, level.pHigh);
-          if (this.filters.starBajosAltos) this.filters.starBajosAltos = allPossibleStarLows.filter(l => !exStarLows.includes(l)).map(l => `${l}/${maxStars - l}`);
-
-          const targetMass = 1.0 - level.pLow * 2;
-          if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, targetMass));
-        }
-      }
-
-      let validFound = false;
-      for (let attempt = 0; attempt < 500; attempt++) {
-        const combo = generateRandomCombination(numUniv, maxNumbers);
-        const stars = maxStars > 0 ? generateRandomCombination(starUniv, maxStars) : [];
-        if (validateCombination(combo, stars, this.currentGame, this.filters, this.primes)) {
-          validFound = true;
-          break;
-        }
-      }
-
-      if (validFound || level.levelNum === 3) {
-        this.saveState();
-        this.updateUIFromFilterState();
-        this.updateFilterBadgesFromAudit();
-        const ticketDiv = document.getElementById('ticket');
-        if (ticketDiv) {
-          ticketDiv.classList.remove('show', 'conflict');
-          ticketDiv.innerHTML = `
-            <div class="ticket-header">
-              <h4>${t('ticket.tituloBoleto')}</h4>
-              <p id="ticketDate"></p>
-            </div>
-            <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
-              ⚡ ${t('main.iniciandoLoading')}
-            </div>
-          `;
-        }
-        this.showToast(t('conflict.resolutorExito', { level: level.levelNum }), 'success');
-        await this.generateCombinations();
-        return;
+        if (this.filters.starConsecutivos) this.filters.starConsecutivos = Array.from(nominalActivationSet(starConsecCounts, targetMass));
       }
     }
 
-    this.showToast(t('conflict.resolutorAgotado'), 'error');
+    return {
+      sumRange: this.filters.sum,
+      parImparCount: this.filters.parImpar.length,
+      bajosAltosCount: this.filters.bajosAltos.length,
+      agrupDecenasCount: this.filters.agrupDecenas.length,
+      consecutivosCount: this.filters.consecutivos.length,
+      entropyTerminaciones: this.filters.entropyTerminaciones,
+      entropyIntervalos: this.filters.entropyIntervalos,
+      pLow: level.pLow,
+      pHigh: level.pHigh
+    };
+  }
+
+  async restaurarFiltros() {
+    const defaultFilters = this.getDefaultFiltersForGame(this.currentGame.id);
+    this.filters = JSON.parse(JSON.stringify(defaultFilters));
+    this.gameFilters[this.currentGame.id] = this.filters;
+
+    if (!this.historicalData || this.historicalData.length === 0 || this.currentGame.id === 'nacional') {
+      this.resetFiltersToDefault();
+      this.saveState();
+      this.updateUIFromFilterState();
+      this.updateFilterBadgesFromAudit();
+      this.showToast(t('restaurarFiltros.sinHistorico'), 'warning');
+      await this.generateCombinations();
+      return;
+    }
+
+    const level = this.currentGame.restaurarFiltrosLevel || { pLow: 0.05, pHigh: 0.95 };
+    const resumen = this.applyPercentileFilterLevel(level);
+
+    this.saveState();
+    this.updateUIFromFilterState();
+    this.updateFilterBadgesFromAudit();
+    this.renderRestaurarFiltrosBlock(resumen);
+    this.showToast(t('restaurarFiltros.aplicado', { pct: Math.round((level.pHigh - level.pLow) * 100) }), 'success');
+    await this.generateCombinations();
+  }
+
+  renderRestaurarFiltrosBlock(resumen: ReturnType<typeof this.applyPercentileFilterLevel>) {
+    const container = document.getElementById('restaurarFiltrosBlock');
+    const textEl = document.getElementById('restaurarFiltrosText');
+    if (!container || !textEl) return;
+    const pct = Math.round((resumen.pHigh - resumen.pLow) * 100);
+    textEl.innerHTML = t('restaurarFiltros.resumenTexto', {
+      pct: String(pct),
+      sumaMin: String(resumen.sumRange.min),
+      sumaMax: String(resumen.sumRange.max),
+      parImparCount: String(resumen.parImparCount),
+      agrupCount: String(resumen.agrupDecenasCount),
+      consecCount: String(resumen.consecutivosCount)
+    });
+    container.style.display = 'block';
   }
 
   updateFilterBadgesFromAudit() {
@@ -6382,6 +6458,7 @@ class DataLotto49Advanced {
     // Filter Presets Events
     document.getElementById('loadFiltersBtn')?.addEventListener('click', () => this.openLoadFilterModal());
     document.getElementById('saveFiltersBtn')?.addEventListener('click', () => this.openSaveFilterModal());
+    document.getElementById('restaurarFiltrosBtn')?.addEventListener('click', () => this.restaurarFiltros());
     document.getElementById('closeSaveFilterBtn')?.addEventListener('click', () => this.toggleModal('saveFilterModal', false));
     document.getElementById('confirmSaveFilterBtn')?.addEventListener('click', () => this.confirmSaveFilter());
     document.getElementById('closeLoadFilterBtn')?.addEventListener('click', () => this.toggleModal('loadFilterModal', false));
