@@ -725,6 +725,7 @@ class DataLotto49Advanced {
     selectedGapNumber: number = 1;
     coocurrenciaModo: 'pares' | 'trios' = 'pares';
     vizTarget: 'number' | 'star' = 'number';
+    currentStatsFilterKey: string | null = null;
     officialDrawsPage: number = 1;
     officialDrawsPageSize: number = 20;
     officialDrawsSearchQuery: string = '';
@@ -2035,6 +2036,399 @@ class DataLotto49Advanced {
       consecCount: String(resumen.consecutivosCount)
     });
     container.style.display = 'block';
+  }
+
+  showFilterStatsModal(filterKey: string) {
+    if (!this.historicalData || this.historicalData.length === 0) {
+      this.showToast(t('filterStats.sinHistorico'), 'warning');
+      return;
+    }
+    this.currentStatsFilterKey = filterKey;
+    const windowSelect = document.getElementById('filterStatsWindowSelect') as HTMLSelectElement;
+    const windowSize = parseInt(windowSelect?.value || '20', 10);
+
+    const titleEl = document.getElementById('filterStatsModalTitle');
+    const contentEl = document.getElementById('filterStatsModalContent');
+    if (!titleEl || !contentEl) return;
+
+    let html = '';
+    switch (filterKey) {
+      case 'terminaciones':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloTerminaciones')}`;
+        html = this.buildTerminacionesStatsHtml(windowSize);
+        break;
+      case 'parImpar':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloParImpar')}`;
+        html = this.buildParImparStatsHtml(windowSize);
+        break;
+      case 'sumaTotal':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloSuma')}`;
+        html = this.buildSumaStatsHtml(windowSize);
+        break;
+      case 'decenas':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloDecenas')}`;
+        html = this.buildDecenasStatsHtml(windowSize);
+        break;
+      case 'consecutivos':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloConsecutivos')}`;
+        html = this.buildConsecutivosStatsHtml(windowSize);
+        break;
+      default:
+        return;
+    }
+    contentEl.innerHTML = html;
+    this.toggleModal('filterStatsModal', true);
+  }
+
+  buildTerminacionesStatsHtml(windowSize: number): string {
+    const maxNumbers = this.currentGame.maxNumbers || 6;
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const fullTotalNums = totalDraws * maxNumbers;
+    const recentTotalNums = recentDrawsCount * maxNumbers;
+
+    const fullCounts = Array(10).fill(0);
+    const recentCounts = Array(10).fill(0);
+    const lastSeenIndex = Array(10).fill(-1);
+
+    this.historicalData.forEach((draw, idx) => {
+      draw.numbers.forEach(num => {
+        const digit = Math.abs(num) % 10;
+        fullCounts[digit]++;
+        lastSeenIndex[digit] = idx;
+      });
+    });
+
+    recentData.forEach(draw => {
+      draw.numbers.forEach(num => {
+        const digit = Math.abs(num) % 10;
+        recentCounts[digit]++;
+      });
+    });
+
+    const digitsData = Array.from({ length: 10 }, (_, d) => {
+      const drawsSince = lastSeenIndex[d] === -1 ? totalDraws : (totalDraws - 1) - lastSeenIndex[d];
+      const fullPct = fullTotalNums > 0 ? (fullCounts[d] / fullTotalNums) * 100 : 0;
+      const recentPct = recentTotalNums > 0 ? (recentCounts[d] / recentTotalNums) * 100 : 0;
+      return { digit: d, fullPct, recentPct, drawsSince };
+    });
+
+    digitsData.sort((a, b) => b.drawsSince - a.drawsSince);
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colDigito')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colSinAparecer')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    digitsData.forEach(item => {
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${item.digit}</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.recentPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center; ${item.drawsSince > 5 ? 'color: #dc2626; font-weight: bold;' : ''}">${item.drawsSince}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  buildParImparStatsHtml(windowSize: number): string {
+    const k = this.currentGame.maxNumbers || 6;
+    const N = this.currentGame.numberRange || 49;
+    const totalEvensInUniverse = Math.floor(N / 2);
+    const totalOddsInUniverse = N - totalEvensInUniverse;
+    const totalWays = this.nCr(N, k);
+
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const fullCounts: Record<string, number> = {};
+    const recentCounts: Record<string, number> = {};
+
+    for (let e = k; e >= 0; e--) {
+      const cat = `${e}/${k - e}`;
+      fullCounts[cat] = 0;
+      recentCounts[cat] = 0;
+    }
+
+    this.historicalData.forEach(draw => {
+      const evens = draw.numbers.filter(n => n % 2 === 0).length;
+      const cat = `${evens}/${k - evens}`;
+      if (fullCounts[cat] !== undefined) fullCounts[cat]++;
+    });
+
+    recentData.forEach(draw => {
+      const evens = draw.numbers.filter(n => n % 2 === 0).length;
+      const cat = `${evens}/${k - evens}`;
+      if (recentCounts[cat] !== undefined) recentCounts[cat]++;
+    });
+
+    const categoriesData = [];
+    for (let e = k; e >= 0; e--) {
+      const cat = `${e}/${k - e}`;
+      const ways = this.nCr(totalEvensInUniverse, e) * this.nCr(totalOddsInUniverse, k - e);
+      const theoPct = totalWays > 0 ? (ways / totalWays) * 100 : 0;
+      const fullPct = totalDraws > 0 ? (fullCounts[cat] / totalDraws) * 100 : 0;
+      const recentPct = recentDrawsCount > 0 ? (recentCounts[cat] / recentDrawsCount) * 100 : 0;
+      categoriesData.push({ cat, theoPct, fullPct, recentPct });
+    }
+
+    const last10 = this.historicalData.slice(-10).map(draw => {
+      const evens = draw.numbers.filter(n => n % 2 === 0).length;
+      return `${evens}/${k - evens}`;
+    });
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colCategoria')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colTeorico')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    categoriesData.forEach(item => {
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${item.cat}</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.recentPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center; color: #64748b;">${item.theoPct.toFixed(1)}%</td>
+        </tr>
+      `;
+    });
+
+    html += `
+      </tbody></table>
+      <div style="margin-top: 14px; font-weight: 600; font-size: 0.85rem; color: #1e293b;">${t('filterStats.secuenciaReciente')}</div>
+      <div style="margin-top: 6px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #334155;">
+        ${last10.join(', ')}
+      </div>
+    `;
+
+    return html;
+  }
+
+  buildSumaStatsHtml(windowSize: number): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const allSums = this.historicalData.map(d => d.numbers.reduce((a, b) => a + b, 0));
+    const recentSums = allSums.slice(-recentDrawsCount);
+
+    const minFull = Math.min(...allSums);
+    const maxFull = Math.max(...allSums);
+    const avgFull = allSums.reduce((a, b) => a + b, 0) / totalDraws;
+
+    const minRecent = Math.min(...recentSums);
+    const maxRecent = Math.max(...recentSums);
+    const avgRecent = recentSums.reduce((a, b) => a + b, 0) / recentDrawsCount;
+
+    const lastSum = allSums[allSums.length - 1];
+    const countLessOrEqual = allSums.filter(s => s <= lastSum).length;
+    const percentile = (countLessOrEqual / totalDraws) * 100;
+
+    const last10Sums = allSums.slice(-10);
+
+    let html = `
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 12px;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: left;">Métrica</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.historicoCompleto', { n: totalDraws })}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">Suma Mínima</td>
+            <td style="padding: 6px 8px; text-align: center;">${minFull}</td>
+            <td style="padding: 6px 8px; text-align: center;">${minRecent}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">Suma Media</td>
+            <td style="padding: 6px 8px; text-align: center;">${avgFull.toFixed(1)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${avgRecent.toFixed(1)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">Suma Máxima</td>
+            <td style="padding: 6px 8px; text-align: center;">${maxFull}</td>
+            <td style="padding: 6px 8px; text-align: center;">${maxRecent}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="padding: 10px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; font-size: 0.85rem; margin-bottom: 12px;">
+        📌 <strong>Último sorteo:</strong> Suma <strong>${lastSum}</strong> (Percentil <strong>${percentile.toFixed(1)}%</strong> del histórico).
+      </div>
+
+      <div style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">Sumas de los últimos 10 sorteos:</div>
+      <div style="margin-top: 6px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #334155;">
+        ${last10Sums.join(', ')}
+      </div>
+    `;
+
+    return html;
+  }
+
+  buildDecenasStatsHtml(windowSize: number): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const getDecadePatternKey = (nums: number[]) => {
+      const tens: Record<number, number> = {};
+      nums.forEach(n => {
+        const ten = Math.floor((n - 1) / 10);
+        tens[ten] = (tens[ten] || 0) + 1;
+      });
+      return Object.values(tens).sort((a, b) => b - a).join('/');
+    };
+
+    const fullCounts: Record<string, number> = {};
+    const recentCounts: Record<string, number> = {};
+
+    this.historicalData.forEach(draw => {
+      const key = getDecadePatternKey(draw.numbers);
+      fullCounts[key] = (fullCounts[key] || 0) + 1;
+    });
+
+    recentData.forEach(draw => {
+      const key = getDecadePatternKey(draw.numbers);
+      recentCounts[key] = (recentCounts[key] || 0) + 1;
+    });
+
+    const topPatterns = Object.keys(fullCounts)
+      .sort((a, b) => fullCounts[b] - fullCounts[a])
+      .slice(0, 5);
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colPatron')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    topPatterns.forEach(pattern => {
+      const fullPct = (fullCounts[pattern] / totalDraws) * 100;
+      const recentPct = ((recentCounts[pattern] || 0) / recentDrawsCount) * 100;
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${pattern}</td>
+          <td style="padding: 6px 8px; text-align: center;">${fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${recentPct.toFixed(1)}%</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  buildConsecutivosStatsHtml(windowSize: number): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const getConsecutivePatternKey = (nums: number[]) => {
+      const sorted = [...nums].sort((a, b) => a - b);
+      let pattern = '';
+      let count = 1;
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === sorted[i - 1] + 1) {
+          count++;
+        } else {
+          pattern += count;
+          count = 1;
+        }
+      }
+      pattern += count;
+      return pattern.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+    };
+
+    const fullCounts: Record<string, number> = {};
+    const recentCounts: Record<string, number> = {};
+
+    this.historicalData.forEach(draw => {
+      const key = getConsecutivePatternKey(draw.numbers);
+      fullCounts[key] = (fullCounts[key] || 0) + 1;
+    });
+
+    recentData.forEach(draw => {
+      const key = getConsecutivePatternKey(draw.numbers);
+      recentCounts[key] = (recentCounts[key] || 0) + 1;
+    });
+
+    const topPatterns = Object.keys(fullCounts)
+      .sort((a, b) => fullCounts[b] - fullCounts[a])
+      .slice(0, 5);
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colPatron')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    topPatterns.forEach(pattern => {
+      const fullPct = (fullCounts[pattern] / totalDraws) * 100;
+      const recentPct = ((recentCounts[pattern] || 0) / recentDrawsCount) * 100;
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${pattern}</td>
+          <td style="padding: 6px 8px; text-align: center;">${fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${recentPct.toFixed(1)}%</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    return html;
   }
 
   updateFilterBadgesFromAudit() {
@@ -6372,6 +6766,10 @@ class DataLotto49Advanced {
       this.toggleModal('filterInfoExpandedModal', false);
     });
 
+    document.getElementById('closeFilterStatsModalBtn')?.addEventListener('click', () => {
+      this.toggleModal('filterStatsModal', false);
+    });
+
     // Nash & Popularity Map Events
     document.getElementById('nashStrictModeSwitch')?.addEventListener('change', (e) => {
       const isChecked = (e.target as HTMLInputElement).checked;
@@ -6668,6 +7066,24 @@ class DataLotto49Advanced {
       if ((e.target as HTMLElement).id === 'filterInfoExpandedModal') {
         this.toggleModal('filterInfoExpandedModal', false);
       }
+    });
+
+    document.getElementById('filterStatsModal')?.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).id === 'filterStatsModal') {
+        this.toggleModal('filterStatsModal', false);
+      }
+    });
+
+    document.querySelectorAll('.filter-stats-icon').forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const filterKey = (icon as HTMLElement).dataset.filterStats;
+        if (filterKey) this.showFilterStatsModal(filterKey);
+      });
+    });
+
+    document.getElementById('filterStatsWindowSelect')?.addEventListener('change', () => {
+      if (this.currentStatsFilterKey) this.showFilterStatsModal(this.currentStatsFilterKey);
     });
 
     document.getElementById('vizTargetSelect')?.addEventListener('change', (e) => {

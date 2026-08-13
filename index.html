@@ -629,7 +629,7 @@
                     
                     <!-- GRUPO: Excluir Terminaciones -->
                     <div class="filter-group" title="Excluye cualquier combinación que contenga un número terminado en los dígitos seleccionados." data-i18n-title="filters.excluirTerm.tooltip">
-                        <div class="filter-title" data-i18n="filters.excluirTerm.titulo">🚫 Excluir Terminaciones</div>
+                        <div class="filter-title"><span data-i18n="filters.excluirTerm.titulo">🚫 Excluir Terminaciones</span> <span class="filter-stats-icon" data-filter-stats="terminaciones" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="terminacionesOptions">
                             <div class="filter-chip" data-value="0">0</div>
                             <div class="filter-chip" data-value="1">1</div>
@@ -672,7 +672,7 @@
 
                     <!-- GRUPO: Filtros de Balance -->
                     <div class="filter-group" title="La suma de los números principales." data-i18n-title="filters.sumaTotal.tooltip">
-                        <div class="filter-title" data-i18n="filters.sumaTotal.titulo">🎯 Suma Total (Números)</div>
+                        <div class="filter-title"><span data-i18n="filters.sumaTotal.titulo">🎯 Suma Total (Números)</span> <span class="filter-stats-icon" data-filter-stats="sumaTotal" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="sumMin" value="121" min="21" max="279">
                             <span data-i18n="filters.rangoA">a</span>
@@ -682,7 +682,7 @@
                     </div>
 
                     <div class="filter-group" title="Proporción de números pares e impares." data-i18n-title="filters.parImpar.tooltip">
-                        <div class="filter-title" data-i18n="filters.parImpar.titulo">⚖️ Par/Impar (Números)</div>
+                        <div class="filter-title"><span data-i18n="filters.parImpar.titulo">⚖️ Par/Impar (Números)</span> <span class="filter-stats-icon" data-filter-stats="parImpar" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="parImparOptions">
                             <div class="filter-chip" data-value="6/0" data-i18n="chip.parImpar.6/0">6/0</div>
                             <div class="filter-chip" data-value="5/1" data-i18n="chip.parImpar.5/1">5/1</div>
@@ -721,7 +721,7 @@
                     </div>
 
                     <div class="filter-group" title="Agrupación de números consecutivos." data-i18n-title="filters.consecutivos.tooltip">
-                        <div class="filter-title" data-i18n="filters.consecutivos.titulo">🔗 Números Consecutivos</div>
+                        <div class="filter-title"><span data-i18n="filters.consecutivos.titulo">🔗 Números Consecutivos</span> <span class="filter-stats-icon" data-filter-stats="consecutivos" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="consecutivosOptions">
                             <div class="filter-chip" data-value="6">6</div>
                             <div class="filter-chip" data-value="5/1">5/1</div>
@@ -762,7 +762,7 @@
                     </div>
                     
                     <div class="filter-group" data-filter-level="expert" title="Distribución de los números en las decenas." data-i18n-title="filters.decenas.tooltip">
-                        <div class="filter-title" data-i18n="filters.decenas.titulo">📦 Agrupación por Decenas</div>
+                        <div class="filter-title"><span data-i18n="filters.decenas.titulo">📦 Agrupación por Decenas</span> <span class="filter-stats-icon" data-filter-stats="decenas" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                          <div class="filter-options" id="agrupDecenasOptions">
                             <div class="filter-chip active" data-value="6">6</div>
                             <div class="filter-chip active" data-value="5/1">5/1</div>
@@ -1840,9 +1840,32 @@
     <div class="modal-content" style="max-width: 600px; width: 92%; padding: 24px;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
         <h3 id="filterInfoExpandedModalTitle" style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.25rem;">ℹ️ Información del Filtro</h3>
-        <button type="button" class="close-modal" id="closeFilterInfoExpandedModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        <button type="button" class="close-modal" id="closeFilterInfoExpandedModalBtn" style="background: none; border: border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
       </div>
       <div class="modal-body" id="filterInfoExpandedModalBody" style="font-size: 0.95rem; line-height: 1.6; color: #334155; max-height: 70vh; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="filterStatsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px; width: 92%; padding: 24px;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 id="filterStatsModalTitle" style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.25rem;">📊 Estadísticas del Filtro</h3>
+        <button type="button" class="close-modal" id="closeFilterStatsModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+      <div class="modal-body" id="filterStatsModalBody" style="font-size: 0.9rem; line-height: 1.5; color: #334155; max-height: 70vh; overflow-y: auto;">
+        <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <label for="filterStatsWindowSelect" style="font-weight: 600; font-size: 0.85rem;" data-i18n="filterStats.ventanaLabel">Ventana reciente:</label>
+          <select id="filterStatsWindowSelect" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            <option value="10">10 sorteos</option>
+            <option value="20" selected>20 sorteos</option>
+            <option value="50">50 sorteos</option>
+          </select>
+        </div>
+        <div id="filterStatsModalContent"></div>
+        <p style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;" data-i18n="filterStats.aviso">
+          Estos datos son descriptivos del histórico cargado, no predictivos. Cada sorteo es un evento independiente: una racha reciente no cambia la probabilidad del próximo sorteo.
+        </p>
+      </div>
     </div>
   </div>
 
