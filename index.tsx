@@ -1665,8 +1665,44 @@ class DataLotto49Advanced {
       { pLow: 0, pHigh: 1, z: 2.576, levelNum: 3 }
     ];
 
+    const resultado = await this.tryFilterLevelsWithValidation(levels, numUniv, starUniv);
+
+    if (resultado) {
+      this.saveState();
+      this.updateUIFromFilterState();
+      this.updateFilterBadgesFromAudit();
+      const ticketDiv = document.getElementById('ticket');
+      if (ticketDiv) {
+        ticketDiv.classList.remove('show', 'conflict');
+        ticketDiv.innerHTML = `
+          <div class="ticket-header">
+            <h4>${t('ticket.tituloBoleto')}</h4>
+            <p id="ticketDate"></p>
+          </div>
+          <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
+            ⚡ ${t('main.iniciandoLoading')}
+          </div>
+        `;
+      }
+      if (resultado.success) {
+        this.showToast(t('conflict.resolutorExito', { level: resultado.levelUsed }), 'success');
+      } else {
+        this.showToast(t('conflict.resolutorAgotado'), 'error');
+      }
+      await this.generateCombinations();
+    }
+  }
+
+  async tryFilterLevelsWithValidation(
+    levels: { pLow: number; pHigh: number; z?: number; levelNum: number }[],
+    numUniv: number[],
+    starUniv: number[]
+  ): Promise<{ success: boolean; levelUsed: number; resumen: ReturnType<typeof this.applyPercentileFilterLevel> } | null> {
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars || 0;
+
     for (const level of levels) {
-      this.applyPercentileFilterLevel(level);
+      const resumen = this.applyPercentileFilterLevel(level);
 
       let validFound = false;
       for (let attempt = 0; attempt < 500; attempt++) {
@@ -1679,29 +1715,12 @@ class DataLotto49Advanced {
       }
 
       if (validFound || level.levelNum === 3) {
-        this.saveState();
-        this.updateUIFromFilterState();
-        this.updateFilterBadgesFromAudit();
-        const ticketDiv = document.getElementById('ticket');
-        if (ticketDiv) {
-          ticketDiv.classList.remove('show', 'conflict');
-          ticketDiv.innerHTML = `
-            <div class="ticket-header">
-              <h4>${t('ticket.tituloBoleto')}</h4>
-              <p id="ticketDate"></p>
-            </div>
-            <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
-              ⚡ ${t('main.iniciandoLoading')}
-            </div>
-          `;
-        }
-        this.showToast(t('conflict.resolutorExito', { level: level.levelNum }), 'success');
-        await this.generateCombinations();
-        return;
+        return { success: true, levelUsed: level.levelNum, resumen };
       }
     }
 
-    this.showToast(t('conflict.resolutorAgotado'), 'error');
+    const ultimoResumen = this.applyPercentileFilterLevel(levels[levels.length - 1]);
+    return { success: false, levelUsed: levels[levels.length - 1].levelNum, resumen: ultimoResumen };
   }
 
   applyPercentileFilterLevel(level: { pLow: number; pHigh: number; z?: number }) {
@@ -1974,15 +1993,32 @@ class DataLotto49Advanced {
       return;
     }
 
-    const level = this.currentGame.restaurarFiltrosLevel || { pLow: 0.05, pHigh: 0.95 };
-    const resumen = this.applyPercentileFilterLevel(level);
+    const numUniv = this.getAvailableUniverse('number');
+    const starUniv = this.currentGame.maxStars > 0 ? this.getAvailableUniverse('star') : [];
 
-    this.saveState();
-    this.updateUIFromFilterState();
-    this.updateFilterBadgesFromAudit();
-    this.renderRestaurarFiltrosBlock(resumen);
-    this.showToast(t('restaurarFiltros.aplicado', { pct: Math.round((level.pHigh - level.pLow) * 100) }), 'success');
-    await this.generateCombinations();
+    const nivelJuego = this.currentGame.restaurarFiltrosLevel || { pLow: 0.05, pHigh: 0.95 };
+    const levels = [
+      { ...nivelJuego, levelNum: 0 },
+      { pLow: 0.05, pHigh: 0.95, z: 1.645, levelNum: 1 },
+      { pLow: 0.025, pHigh: 0.975, z: 1.960, levelNum: 2 },
+      { pLow: 0, pHigh: 1, z: 2.576, levelNum: 3 }
+    ];
+
+    const resultado = await this.tryFilterLevelsWithValidation(levels, numUniv, starUniv);
+
+    if (resultado) {
+      this.saveState();
+      this.updateUIFromFilterState();
+      this.updateFilterBadgesFromAudit();
+      this.renderRestaurarFiltrosBlock(resultado.resumen);
+      if (resultado.success) {
+        const pctReal = Math.round((resultado.resumen.pHigh - resultado.resumen.pLow) * 100);
+        this.showToast(t('restaurarFiltros.aplicado', { pct: pctReal }), 'success');
+      } else {
+        this.showToast(t('conflict.resolutorAgotado'), 'error');
+      }
+      await this.generateCombinations();
+    }
   }
 
   renderRestaurarFiltrosBlock(resumen: ReturnType<typeof this.applyPercentileFilterLevel>) {
