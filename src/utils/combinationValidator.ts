@@ -9,7 +9,8 @@ export function isValidCombination(
   currentGame: any,
   filters: any,
   primes: Set<number> = DEFAULT_PRIMES,
-  skipStarCheck: boolean = false
+  skipStarCheck: boolean = false,
+  historicalData: { numbers: number[] }[] = []
 ): boolean {
   if (!currentGame || !filters) return true;
 
@@ -18,6 +19,20 @@ export function isValidCombination(
   
   if (combination.length !== maxNumbers) return false;
   if (maxStars > 0 && stars.length !== maxStars) return false;
+
+  // Filtro de exclusión de coincidencias con categorías principales del histórico
+  if (currentGame.id !== 'nacional' && filters.excludeHistoricalMatches && historicalData && historicalData.length > 0) {
+    const threshold = maxNumbers - 1;
+    const comboSet = new Set(combination);
+    for (const draw of historicalData) {
+      if (!draw.numbers || draw.numbers.length !== maxNumbers) continue;
+      let shared = 0;
+      for (const n of draw.numbers) {
+        if (comboSet.has(n)) shared++;
+      }
+      if (shared >= threshold) return false;
+    }
+  }
 
   if (currentGame.id === 'nacional') {
       const colsCount = [0, 0, 0, 0, 0];
