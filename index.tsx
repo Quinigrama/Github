@@ -5472,6 +5472,7 @@ class DataLotto49Advanced {
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
     this.updateStats();
+    this.updateCorrelationScore();
   }
 
   async switchGame(gameId: string) {
