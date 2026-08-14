@@ -376,7 +376,7 @@ export const GAMES: { [key: string]: GameConfig } = {
     flag: '🇺🇸',
     currency: '$',
     costPerBet: 2.0,
-    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGYYrOpTTcTyUyOM7ggIr7hxrAVZunaAgl9yMX31RR-gDM6PLCOsmclEGtHtvYhjwAhX52btdhAGsm/pub?output=csv',
+    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTldnVc-SYBtpoaZtQpvTL3kZXgjkjgudBHFoX8b_GUaNy096j840hXQY4DSVCiGlvDeSYgfLYJGkfl/pub?output=csv',
     maxNumbers: 5,
     numberRange: 70,
     maxStars: 1,

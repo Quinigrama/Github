@@ -4440,7 +4440,7 @@ class DataLotto49Advanced {
     const starRange = this.currentGame.starRange;
 
     if (isHeader) {
-        const dateKeywords = ['fecha', 'date'];
+        const dateKeywords = ['fecha', 'date', 'sorteo'];
         dateIndex = header.findIndex(h => dateKeywords.some(k => h.includes(k)));
 
         const numberHeaderCandidates: {index: number, name: string}[] = [];
@@ -4449,7 +4449,7 @@ class DataLotto49Advanced {
         header.forEach((h, i) => {
             if (/^(n|bola|num|number|c)[\s_-]*\d+$/i.test(h)) {
                 numberHeaderCandidates.push({index: i, name: h});
-            } else if (/^(s|estrella|star|e|clave|powerbal|powerball|pb)[\s_-]*\d*$/i.test(h) || h.includes('clave') || h.includes('estrella') || h.includes('star') || h.includes('sueño') || h.includes('suno') || h.includes('powerbal') || h.includes('powerball') || h.includes('pb')) {
+            } else if (/^(s|estrella|star|e|clave|powerbal|powerball|pb)[\s_-]*\d*$/i.test(h) || h.includes('clave') || h.includes('estrella') || h.includes('star') || h.includes('sueño') || h.includes('suno') || h.includes('powerbal') || h.includes('powerball') || h.includes('pb') || h.includes('mega ball') || h.includes('megaball') || h.includes('mega')) {
                 starHeaderCandidates.push({index: i, name: h});
             } else if (h.includes('complementario') || h === 'c') {
                 complementarioIndex = i;
