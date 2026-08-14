@@ -21,8 +21,7 @@ export function isValidCombination(
   if (maxStars > 0 && stars.length !== maxStars) return false;
 
   // Filtro de exclusión de coincidencias con categorías principales del histórico
-  if (currentGame.id !== 'nacional' && filters.excludeHistoricalMatches && historicalData && historicalData.length > 0) {
-    const threshold = maxNumbers - 1;
+  if (currentGame.id !== 'nacional' && (filters.excludeHistoricalMatchFull || filters.excludeHistoricalMatchNearFull) && historicalData && historicalData.length > 0) {
     const comboSet = new Set(combination);
     for (const draw of historicalData) {
       if (!draw.numbers || draw.numbers.length !== maxNumbers) continue;
@@ -30,7 +29,8 @@ export function isValidCombination(
       for (const n of draw.numbers) {
         if (comboSet.has(n)) shared++;
       }
-      if (shared >= threshold) return false;
+      if (filters.excludeHistoricalMatchFull && shared === maxNumbers) return false;
+      if (filters.excludeHistoricalMatchNearFull && shared === maxNumbers - 1) return false;
     }
   }
 
