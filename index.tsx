@@ -202,6 +202,8 @@ interface Filters {
   entropyIntervalos: { min: number; max: number };
   geometric: { exclude: string[]; favor: string[] };
   positionRange?: PositionRangeFilter;
+  excludeHistoricalMatchFull?: boolean;
+  excludeHistoricalMatchNearFull?: boolean;
   // Star filters
   starSum: { min: number; max: number };
   starParImpar: string[];
@@ -1369,6 +1371,13 @@ class DataLotto49Advanced {
       return;
     }
 
+    if (groupKey === 'excludeHistoricalMatches') {
+      titleEl.textContent = t('filter.excludeHistoricalMatches.infoTitulo');
+      bodyEl.innerHTML = t('filter.excludeHistoricalMatches.infoTexto');
+      this.toggleModal('filterInfoExpandedModal', true);
+      return;
+    }
+
     titleEl.textContent = t(`filterInfo.${groupKey}.modalTitle`);
 
     const theory = t(`filterInfo.${groupKey}.modalTheory`);
@@ -1748,7 +1757,7 @@ class DataLotto49Advanced {
       for (let attempt = 0; attempt < 500; attempt++) {
         const combo = generateRandomCombination(numUniv, maxNumbers);
         const stars = maxStars > 0 ? generateRandomCombination(starUniv, maxStars) : [];
-        if (validateCombination(combo, stars, this.currentGame, this.filters, this.primes)) {
+        if (validateCombination(combo, stars, this.currentGame, this.filters, this.primes, false, this.historicalData)) {
           validFound = true;
           break;
         }
@@ -2884,6 +2893,8 @@ class DataLotto49Advanced {
       agrupDecenas: '#agrupDecenasOptions',
       desviacion: '#desviacionMin',
       positionRange: '#positionRangeFilterGroup',
+      excludeHistoricalMatchFull: '#excludeHistoricalFilterGroup',
+      excludeHistoricalMatchNearFull: '#excludeHistoricalFilterGroup',
       entropyTerminaciones: '#entropyTerminacionesMin',
       entropyIntervalos: '#entropyIntervalosMin',
       geometric: '#geometricOptions',
@@ -2961,6 +2972,12 @@ class DataLotto49Advanced {
       }
       if (filters.gapPercentilUmbral === undefined) {
           filters.gapPercentilUmbral = 90;
+      }
+      if (filters.excludeHistoricalMatchFull === undefined) {
+          filters.excludeHistoricalMatchFull = false;
+      }
+      if (filters.excludeHistoricalMatchNearFull === undefined) {
+          filters.excludeHistoricalMatchNearFull = false;
       }
       return filters;
   }
@@ -3431,6 +3448,7 @@ class DataLotto49Advanced {
     setRangeVal('nashMaxScore', this.filters.nashMaxScore ?? 10.0);
 
     this.renderPositionRangeFilterOptions();
+    this.renderExcludeHistoricalFilterOptions();
     if (this.filters.positionRange) {
       const posCb = document.getElementById('positionRangeEnabled') as HTMLInputElement;
       if (posCb) posCb.checked = !!this.filters.positionRange.enabled;
@@ -3507,6 +3525,8 @@ class DataLotto49Advanced {
     
     setChecked('useMarkovSwitch', this.filters.useMarkov);
     setChecked('useNashSwitch', this.filters.useNash);
+    setChecked('excludeHistoricalMatchFull', !!this.filters.excludeHistoricalMatchFull);
+    setChecked('excludeHistoricalMatchNearFull', !!this.filters.excludeHistoricalMatchNearFull);
     setChecked('useRegressionSwitch', this.filters.useRegression);
     setChecked('useGapPercentilSwitch', !!this.filters.gapPercentilEnabled);
     setRangeVal('gapPercentilUmbral', this.filters.gapPercentilUmbral ?? 90);
@@ -5473,7 +5493,7 @@ class DataLotto49Advanced {
 
       let validCount = 0;
       for (const combo of subCombinations) {
-        if (isValidCombination(combo, [], this.currentGame, this.filters, this.primes, true)) {
+        if (isValidCombination(combo, [], this.currentGame, this.filters, this.primes, true, this.historicalData)) {
           validCount++;
         }
       }
@@ -6154,6 +6174,9 @@ class DataLotto49Advanced {
 
     // 15. Position Range Options (Estadísticos de Orden)
     this.renderPositionRangeFilterOptions();
+
+    // 16. Exclude Historical Matches Options
+    this.renderExcludeHistoricalFilterOptions();
   }
 
 
@@ -6622,6 +6645,80 @@ class DataLotto49Advanced {
         this.toggleModal('positionRangeInfoModal', false);
       }
     };
+  }
+
+  renderExcludeHistoricalFilterOptions() {
+    const standardContainer = document.getElementById('standardFiltersContainer');
+    let groupEl = document.getElementById('excludeHistoricalFilterGroup');
+
+    if (this.currentGame.id === 'nacional') {
+      if (groupEl) groupEl.style.display = 'none';
+      return;
+    }
+
+    const geometricGroup = document.getElementById('geometricOptions')?.closest('.filter-group');
+
+    if (!groupEl && standardContainer) {
+      groupEl = document.createElement('div');
+      groupEl.id = 'excludeHistoricalFilterGroup';
+      groupEl.className = 'filter-group exclude-historical-filter-group';
+      groupEl.setAttribute('data-filter-level', 'expert');
+      if (geometricGroup) {
+        standardContainer.insertBefore(groupEl, geometricGroup);
+      } else {
+        standardContainer.appendChild(groupEl);
+      }
+    } else if (groupEl && standardContainer && geometricGroup) {
+      if (groupEl.nextElementSibling !== geometricGroup) {
+        standardContainer.insertBefore(groupEl, geometricGroup);
+      }
+    }
+
+    if (groupEl) {
+      groupEl.style.display = 'block';
+
+      const maxNumbers = this.currentGame.maxNumbers;
+      const isFullChecked = !!this.filters.excludeHistoricalMatchFull;
+      const isNearFullChecked = !!this.filters.excludeHistoricalMatchNearFull;
+
+      const labelFull = t('filter.excludeHistoricalMatches.labelFull', { n: maxNumbers });
+      const labelNearFull = t('filter.excludeHistoricalMatches.labelNearFull', { n: maxNumbers, 'n-1': maxNumbers - 1 });
+
+      groupEl.innerHTML = `
+        <div class="filter-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span>📜 ${t('filter.excludeHistoricalMatches.titulo')}</span>
+            <button type="button" class="position-range-info-btn filter-info-btn" id="excludeHistoricalInfoBtn" title="${t('filter.excludeHistoricalMatches.infoTitulo')}">
+              ℹ️
+            </button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <label class="switch-toggle" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: normal; cursor: pointer;">
+            <input type="checkbox" id="excludeHistoricalMatchFull" ${isFullChecked ? 'checked' : ''} />
+            <span>${labelFull}</span>
+          </label>
+          <label class="switch-toggle" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: normal; cursor: pointer;">
+            <input type="checkbox" id="excludeHistoricalMatchNearFull" ${isNearFullChecked ? 'checked' : ''} />
+            <span>${labelNearFull}</span>
+          </label>
+        </div>
+      `;
+
+      document.getElementById('excludeHistoricalInfoBtn')?.addEventListener('click', () => {
+        this.renderExpandedFilterModal('excludeHistoricalMatches');
+      });
+
+      document.getElementById('excludeHistoricalMatchFull')?.addEventListener('change', () => {
+        this.updateFilterStateFromUI();
+        this.updateFilterBadgesFromAudit();
+      });
+
+      document.getElementById('excludeHistoricalMatchNearFull')?.addEventListener('change', () => {
+        this.updateFilterStateFromUI();
+        this.updateFilterBadgesFromAudit();
+      });
+    }
   }
 
 
@@ -7848,6 +7945,8 @@ class DataLotto49Advanced {
       this.filters.ai.regressionBonus = getVal('regressionBonus');
 
       if (this.currentGame.id !== 'nacional') {
+          this.filters.excludeHistoricalMatchFull = getChecked('excludeHistoricalMatchFull');
+          this.filters.excludeHistoricalMatchNearFull = getChecked('excludeHistoricalMatchNearFull');
           const posEnabled = getChecked('positionRangeEnabled');
           const confEl = document.getElementById('positionRangeConfidence') as HTMLSelectElement;
           const confVal = confEl ? parseFloat(confEl.value) : 1.645;
@@ -7880,6 +7979,8 @@ class DataLotto49Advanced {
       } else {
           delete this.filters.positionRange;
           delete this.filters.starPositionRange;
+          delete this.filters.excludeHistoricalMatchFull;
+          delete this.filters.excludeHistoricalMatchNearFull;
       }
 
       if (this.currentGame.id === 'nacional') {
@@ -8850,8 +8951,8 @@ class DataLotto49Advanced {
     return runFindValidCombinations(universe, count, maxAttempts, this.currentGame, this.filters, this.primes);
   }
   
-  isValidCombination(combination: number[], stars: number[] = []): boolean {
-    return validateCombination(combination, stars, this.currentGame, this.filters, this.primes);
+  isValidCombination(combination: number[], stars: number[] = [], customHistoricalData?: { numbers: number[] }[]): boolean {
+    return validateCombination(combination, stars, this.currentGame, this.filters, this.primes, false, customHistoricalData ?? this.historicalData);
   }
 
   generateRandomCombination(universe: number[], count: number): number[] {
@@ -13220,8 +13321,9 @@ class DataLotto49Advanced {
                   await new Promise(resolve => setTimeout(resolve, 0));
               }
 
-              // Validar el sorteo ganador real frente a los filtros activos en la UI
-              const isPassed = this.isValidCombination(draw.numbers, draw.stars || []);
+              // Validar el sorteo ganador real frente a los filtros activos en la UI (excluyendo el propio sorteo del histórico)
+              const historyExcludingSelf = this.historicalData ? this.historicalData.filter(d => d !== draw) : [];
+              const isPassed = this.isValidCombination(draw.numbers, draw.stars || [], historyExcludingSelf);
               if (isPassed) {
                   passedDrawsCount++;
               }
