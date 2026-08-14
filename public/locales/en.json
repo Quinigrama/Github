@@ -786,6 +786,7 @@
   "toast.baseDatosActualizada": "✅ {game} database updated ({count} draws)",
   "toast.seleccionaSistemaReducido": "Select a valid reduced system first.",
   "toast.insuficientesNumerosDisponibles": "Only {available} numbers are available after your active filters, but this system needs {needed}. Check your exclusions.",
+  "toast.numerosBasePorCobertura": "✨ Pool of {count} numbers selected: {pct}% of its derived combinations pass your active filters.",
   "toast.mejoresNumerosBase": "✨ Selected the {count} best base numbers based on historical statistics.",
   "toast.numerosBaseEquilibrados": "✨ Generated {count} balanced base numbers (Load data for real statistical analysis).",
   "toast.cambiadoA": "Switched to {game}",

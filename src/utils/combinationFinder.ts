@@ -8,7 +8,11 @@ export const DEFAULT_TOLERANCE_LEVELS: { [key: number]: number } = {
   8: 0.50,
   9: 0.35,
   10: 0.25,
-  11: 0.20
+  11: 0.20,
+  12: 0.16,
+  13: 0.13,
+  14: 0.11,
+  15: 0.09
 };
 
 export function findValidCombinations(

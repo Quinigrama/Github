@@ -8,12 +8,13 @@ export function isValidCombination(
   stars: number[] = [],
   currentGame: any,
   filters: any,
-  primes: Set<number> = DEFAULT_PRIMES
+  primes: Set<number> = DEFAULT_PRIMES,
+  skipStarCheck: boolean = false
 ): boolean {
   if (!currentGame || !filters) return true;
 
   const maxNumbers = currentGame.maxNumbers;
-  const maxStars = currentGame.maxStars;
+  const maxStars = skipStarCheck ? 0 : currentGame.maxStars;
   
   if (combination.length !== maxNumbers) return false;
   if (maxStars > 0 && stars.length !== maxStars) return false;

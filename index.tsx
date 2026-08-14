@@ -52,8 +52,9 @@ import {
   orderedPercentileExclusion,
   nominalActivationSet
 } from './src/utils/roberTheorem';
-import { isValidCombination as validateCombination } from './src/utils/combinationValidator';
+import { isValidCombination as validateCombination, isValidCombination } from './src/utils/combinationValidator';
 import {
+  DEFAULT_TOLERANCE_LEVELS,
   findValidCombinations as runFindValidCombinations,
   findValidSuperset as runFindValidSuperset,
   findAndRankWinningCombinations as runFindAndRankWinningCombinations
@@ -5412,7 +5413,7 @@ class DataLotto49Advanced {
     selectionTitle.textContent = t('main.seleccionNumeros', { game: this.currentGame.name });
   }
 
-  selectAiBase() {
+  async selectAiBase() {
     const select = document.getElementById('reducedSystemSelect') as HTMLSelectElement;
     const gameId = this.currentGame.id;
     const systems = REDUCED_SYSTEMS[gameId] || [];
@@ -5425,6 +5426,7 @@ class DataLotto49Advanced {
     }
 
     const countNeeded = system.baseNumbersCount;
+    const maxNumbers = this.currentGame.maxNumbers;
     this.clearSelections(false);
     this.syncExclusionsWithFilters();
 
@@ -5432,42 +5434,65 @@ class DataLotto49Advanced {
     const isNacional = this.currentGame.id === 'nacional';
     const startNum = isNacional ? 10 : 1;
 
-    const hasData = this.numberStats && Object.values(this.numberStats).some(stat => stat.frequency > 0);
-
-    let candidatePool: number[];
-    if (hasData) {
-      candidatePool = Object.keys(this.numberStats)
-        .map(num => parseInt(num))
-        .filter(n => !this.excludedNumbers.has(n))
-        .sort((a, b) => {
-          const freqA = this.numberStats[a]?.frequency || 0;
-          const freqB = this.numberStats[b]?.frequency || 0;
-          return freqB - freqA;
-        });
-    } else {
-      const pool: number[] = [];
-      for (let i = startNum; i <= range; i++) {
-        if (!this.excludedNumbers.has(i)) pool.push(i);
-      }
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      candidatePool = pool;
+    const universe: number[] = [];
+    for (let i = startNum; i <= range; i++) {
+      if (!this.excludedNumbers.has(i)) universe.push(i);
     }
 
-    if (candidatePool.length < countNeeded) {
-      this.showToast(t('toast.insuficientesNumerosDisponibles', { available: candidatePool.length, needed: countNeeded }), 'warning');
+    if (universe.length < countNeeded) {
+      this.showToast(t('toast.insuficientesNumerosDisponibles', { available: universe.length, needed: countNeeded }), 'warning');
       return;
     }
 
-    const selectedList = candidatePool.slice(0, countNeeded);
-    selectedList.forEach(num => this.selectedNumbers.add(num));
+    const threshold = DEFAULT_TOLERANCE_LEVELS[countNeeded] || 0.5;
+    const maxAttempts = 2000;
 
-    this.showToast(
-      hasData ? t('toast.mejoresNumerosBase', { count: countNeeded }) : t('toast.numerosBaseEquilibrados', { count: countNeeded }),
-      hasData ? 'success' : 'info'
-    );
+    let bestPool: number[] = [];
+    let bestPct = -1;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (attempt % 100 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+
+      const shuffled = [...universe];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      const candidatePool = shuffled.slice(0, countNeeded).sort((a, b) => a - b);
+
+      let subCombinations = getCombinations(candidatePool, maxNumbers);
+      if (subCombinations.length > 50000) {
+        const sample: number[][] = [];
+        for (let i = 0; i < 5000; i++) {
+          sample.push(subCombinations[Math.floor(Math.random() * subCombinations.length)]);
+        }
+        subCombinations = sample;
+      }
+
+      let validCount = 0;
+      for (const combo of subCombinations) {
+        if (isValidCombination(combo, [], this.currentGame, this.filters, this.primes, true)) {
+          validCount++;
+        }
+      }
+      const pct = validCount / subCombinations.length;
+
+      if (pct > bestPct) {
+        bestPct = pct;
+        bestPool = candidatePool;
+      }
+
+      if (pct >= threshold) {
+        break;
+      }
+    }
+
+    bestPool.forEach(num => this.selectedNumbers.add(num));
+
+    const pctDisplay = Math.round(bestPct * 100);
+    this.showToast(t('toast.numerosBasePorCobertura', { count: countNeeded, pct: pctDisplay }), 'success');
 
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
