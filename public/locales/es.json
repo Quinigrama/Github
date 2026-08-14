@@ -785,6 +785,7 @@
   "main.bgBadgeSorteos": "✅ {count} sorteos",
   "toast.baseDatosActualizada": "✅ Base de datos de {game} actualizada ({count} sorteos)",
   "toast.seleccionaSistemaReducido": "Selecciona un sistema reducido válido primero.",
+  "toast.insuficientesNumerosDisponibles": "Solo hay {available} números disponibles tras aplicar tus filtros activos, pero este sistema necesita {needed}. Revisa tus exclusiones.",
   "toast.mejoresNumerosBase": "✨ Seleccionados los {count} mejores números base según estadísticas históricas.",
   "toast.numerosBaseEquilibrados": "✨ Generados {count} números base equilibrados (Carga datos para un análisis estadístico real).",
   "toast.cambiadoA": "Cambiado a {game}",

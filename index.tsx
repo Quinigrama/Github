@@ -669,6 +669,14 @@ export function getGreedyCovering(N: number, K: number, T: number, C: number): n
 
 function renderLayoutGrid(grid: HTMLElement, layout: GridLayout, numberRange: number, startAt: number, type: 'number' | 'star' = 'number') {
   const dims = getLayoutDimensions(layout, numberRange, startAt);
+  const container = grid.parentElement as HTMLElement;
+  const containerWidth = container ? container.clientWidth : 380;
+  const gap = 6;
+  const padding = 28; // 14px a cada lado, debe coincidir con el padding real de .numbers-grid/.stars-grid en index.css
+  const available = containerWidth - padding - (gap * (dims.columns - 1));
+  const rawSize = available / dims.columns;
+  const ballSize = Math.max(24, Math.min(44, rawSize));
+  grid.style.setProperty('--ball-size', `${ballSize}px`);
   grid.style.display = 'grid';
   grid.style.gridTemplateColumns = `repeat(${dims.columns}, var(--ball-size))`;
   grid.style.gridTemplateRows = `repeat(${dims.rows}, var(--ball-size))`;
@@ -5410,55 +5418,60 @@ class DataLotto49Advanced {
     const systems = REDUCED_SYSTEMS[gameId] || [];
     const selectedId = select?.value;
     const system = systems.find(s => s.id === selectedId);
-    
+
     if (!system) {
       this.showToast(t('toast.seleccionaSistemaReducido'), 'warning');
       return;
     }
-    
+
     const countNeeded = system.baseNumbersCount;
     this.clearSelections(false);
-    
+    this.syncExclusionsWithFilters();
+
+    const range = this.currentGame.numberRange;
+    const isNacional = this.currentGame.id === 'nacional';
+    const startNum = isNacional ? 10 : 1;
+
     const hasData = this.numberStats && Object.values(this.numberStats).some(stat => stat.frequency > 0);
-    
-    let selectedList: number[] = [];
+
+    let candidatePool: number[];
     if (hasData) {
-      const sortedNumbers = Object.keys(this.numberStats)
+      candidatePool = Object.keys(this.numberStats)
         .map(num => parseInt(num))
+        .filter(n => !this.excludedNumbers.has(n))
         .sort((a, b) => {
-          const scoreA = this.numberStats[a]?.score || 0;
-          const scoreB = this.numberStats[b]?.score || 0;
           const freqA = this.numberStats[a]?.frequency || 0;
           const freqB = this.numberStats[b]?.frequency || 0;
-          return (scoreB + freqB) - (scoreA + freqA);
+          return freqB - freqA;
         });
-      selectedList = sortedNumbers.slice(0, countNeeded);
-      this.showToast(t('toast.mejoresNumerosBase', { count: countNeeded }), 'success');
     } else {
-      const range = this.currentGame.numberRange;
-      const isNacional = this.currentGame.id === 'nacional';
-      const startNum = isNacional ? 10 : 1;
-      
       const pool: number[] = [];
-      for (let i = startNum; i <= range; i++) pool.push(i);
-      
+      for (let i = startNum; i <= range; i++) {
+        if (!this.excludedNumbers.has(i)) pool.push(i);
+      }
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      
-      selectedList = pool.slice(0, countNeeded);
-      this.showToast(t('toast.numerosBaseEquilibrados', { count: countNeeded }), 'info');
+      candidatePool = pool;
     }
-    
-    selectedList.forEach(num => {
-      this.selectedNumbers.add(num);
-    });
-    
+
+    if (candidatePool.length < countNeeded) {
+      this.showToast(t('toast.insuficientesNumerosDisponibles', { available: candidatePool.length, needed: countNeeded }), 'warning');
+      return;
+    }
+
+    const selectedList = candidatePool.slice(0, countNeeded);
+    selectedList.forEach(num => this.selectedNumbers.add(num));
+
+    this.showToast(
+      hasData ? t('toast.mejoresNumerosBase', { count: countNeeded }) : t('toast.numerosBaseEquilibrados', { count: countNeeded }),
+      hasData ? 'success' : 'info'
+    );
+
     this.updateGridNumberStates();
     this.updateSelectedDisplay();
     this.updateStats();
-    this.updateCorrelationScore();
   }
 
   async switchGame(gameId: string) {
