@@ -17,6 +17,7 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --ball-size: clamp(26px, 7vw, 40px);
 }
 
 * {
@@ -463,18 +464,17 @@ body.dark-mode .selection-mode-label {
   animation: shake 0.5s ease-in-out;
 }
 
-.numbers-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  max-width: 480px; /* Evita que la matriz de bolas se estire excesivamente en pantallas grandes o tablets */
-  width: 100%;
-  margin: 0 auto;
-}
-
+.numbers-grid,
 .stars-grid {
-  max-width: 410px; /* Evita que la matriz de estrellas se estire excesivamente en pantallas grandes */
-  width: 100%;
+  display: grid;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(196, 74, 74, 0.5);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(196, 74, 74, 0.04);
+  width: fit-content;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -500,14 +500,9 @@ body.dark-mode .selection-mode-label {
   }
 }
 
-@media(min-width: 480px) {
-  .numbers-grid {
-    gap: 6px;
-  }
-}
-
 .number-ball {
-  width: 100%;
+  width: var(--ball-size);
+  height: var(--ball-size);
   aspect-ratio: 1;
   border-radius: 50%;
   display: flex;
@@ -520,7 +515,12 @@ body.dark-mode .selection-mode-label {
   background: linear-gradient(135deg, #fafafa, #f0f0f0);
   position: relative;
   font-size: clamp(0.7rem, 2.5vw, 1rem);
-  min-height: 35px;
+  box-sizing: border-box;
+}
+
+.number-ball.grid-gap {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .number-ball:hover {
@@ -3008,7 +3008,6 @@ textarea.modal-input {
   
   .stars-grid {
     gap: 4px !important;
-    grid-template-columns: repeat(auto-fit, minmax(28px, 1fr)) !important;
   }
   
   /* Make all number selection balls shrink to fit parent containers */

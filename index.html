@@ -136,11 +136,13 @@
             </linearGradient>
           </defs>
           <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-bonoloto)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 20,20 C 18,25 19,30 23,34" stroke="url(#green-gradient-bonoloto)" stroke-width="2.5" stroke-linecap="round" fill="none" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(90 20 20)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(180 20 20)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(270 20 20)" />
+          <g transform="translate(20, 20) scale(0.78) translate(-20, -20)">
+            <path d="M 20,20 C 18,25 19,30 23,34" stroke="url(#green-gradient-bonoloto)" stroke-width="2.5" stroke-linecap="round" fill="none" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(90 20 20)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(180 20 20)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-bonoloto)" transform="rotate(270 20 20)" />
+          </g>
           <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
         </svg>
         Bonoloto
@@ -646,7 +648,7 @@
 
                     <!-- GRUPO: Variedad de Terminaciones -->
                     <div class="filter-group" data-filter-level="expert" title="Filtra por el número de terminaciones distintas." data-i18n-title="filters.variedadTerm.tooltip">
-                        <div class="filter-title" data-i18n="filters.variedadTerm.titulo">#️⃣ Variedad de Terminaciones</div>
+                        <div class="filter-title"><span data-i18n="filters.variedadTerm.titulo">#️⃣ Variedad de Terminaciones</span> <span class="filter-stats-icon" data-filter-stats="variedadTerm" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="terminacionesDistintasOptions">
                              <div class="filter-chip" data-value="2">2</div>
                              <div class="filter-chip" data-value="3">3</div>
@@ -658,7 +660,7 @@
 
                     <!-- GRUPO: Entropía de Terminaciones -->
                     <div class="filter-group" data-filter-level="expert" title="Mide la distribución y variedad de las cifras terminales usando la Entropía de Shannon. Un valor más alto indica terminaciones más dispersas y diversas." data-i18n-title="filters.entropiaTerm.tooltip">
-                        <div class="filter-title" data-i18n="filters.entropiaTerm.titulo">🌀 Entropía (Terminaciones)</div>
+                        <div class="filter-title"><span data-i18n="filters.entropiaTerm.titulo">🌀 Entropía (Terminaciones)</span> <span class="filter-stats-icon" data-filter-stats="entropiaTerm" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="entropyTerminacionesMin" class="entropy-value" value="1.000" min="0.000" max="2.600" step="0.001">
                             <span data-i18n="filters.rangoA">a</span>
@@ -695,7 +697,7 @@
                     </div>
 
                     <div class="filter-group" title="Proporción de números bajos y altos." data-i18n-title="filters.bajosAltos.tooltip">
-                        <div class="filter-title" data-i18n="filters.bajosAltos.titulo">📊 Bajos/Altos (Números)</div>
+                        <div class="filter-title"><span data-i18n="filters.bajosAltos.titulo">📊 Bajos/Altos (Números)</span> <span class="filter-stats-icon" data-filter-stats="bajosAltos" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="bajosAltosOptions">
                              <div class="filter-chip" data-value="6/0" data-i18n="chip.bajosAltos.6/0">6/0</div>
                              <div class="filter-chip" data-value="5/1" data-i18n="chip.bajosAltos.5/1">5/1</div>
@@ -709,7 +711,7 @@
 
                     <!-- GRUPO: Filtros Estructurales -->
                     <div class="filter-group" title="Cantidad de números primos." data-i18n-title="filters.primos.tooltip">
-                        <div class="filter-title" data-i18n="filters.primos.titulo">🔢 Números Primos</div>
+                        <div class="filter-title"><span data-i18n="filters.primos.titulo">🔢 Números Primos</span> <span class="filter-stats-icon" data-filter-stats="primos" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                              <span data-i18n="filters.primos.entre">Entre</span>
                              <input type="number" id="primosMin" value="1" min="0" max="6">
@@ -739,7 +741,7 @@
 
                     <!-- GRUPO: Entropía de Intervalos -->
                     <div class="filter-group" data-filter-level="expert" title="Mide la variación y desigualdad de los intervalos (distancias) entre números ordenados usando la Entropía de Shannon. Evita que los números estén espaciados de forma sospechosamente regular o irregular." data-i18n-title="filters.entropiaInt.tooltip">
-                        <div class="filter-title" data-i18n="filters.entropiaInt.titulo">🌀 Entropía (Intervalos)</div>
+                        <div class="filter-title"><span data-i18n="filters.entropiaInt.titulo">🌀 Entropía (Intervalos)</span> <span class="filter-stats-icon" data-filter-stats="entropiaInt" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="entropyIntervalosMin" class="entropy-value" value="1.000" min="0.000" max="2.400" step="0.001">
                             <span data-i18n="filters.rangoA">a</span>
@@ -752,7 +754,7 @@
                     </div>
                     
                     <div class="filter-group" title="Distancia mínima y máxima entre números adyacentes." data-i18n-title="filters.distancia.tooltip">
-                        <div class="filter-title" data-i18n="filters.distancia.titulo">↔️ Distancia entre Números</div>
+                        <div class="filter-title"><span data-i18n="filters.distancia.titulo">↔️ Distancia entre Números</span> <span class="filter-stats-icon" data-filter-stats="distancia" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="distanciaMin" value="1" min="1" max="44">
                             <span data-i18n="filters.rangoA">a</span>
@@ -779,14 +781,14 @@
 
                     <!-- GRUPO: Excluir Decenas -->
                     <div class="filter-group" title="Excluye todos los números de la decena seleccionada." data-i18n-title="filters.excluirDecenas.tooltip">
-                        <div class="filter-title" data-i18n="filters.excluirDecenas.titulo">🚫 Excluir Decenas</div>
+                        <div class="filter-title"><span data-i18n="filters.excluirDecenas.titulo">🚫 Excluir Decenas</span> <span class="filter-stats-icon" data-filter-stats="decenasExclusion" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="filter-options" id="excluirDecenasOptions">
                             <!-- Chips generados dinámicamente por juego en renderFilterOptions() -->
                         </div>
                     </div>
 
                     <div class="filter-group" title="La suma de todos los dígitos individuales." data-i18n-title="filters.sumaDigitos.tooltip">
-                        <div class="filter-title" data-i18n="filters.sumaDigitos.titulo">∑ Suma de Dígitos</div>
+                        <div class="filter-title"><span data-i18n="filters.sumaDigitos.titulo">∑ Suma de Dígitos</span> <span class="filter-stats-icon" data-filter-stats="sumaDigitos" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="sumaDigitosMin" value="28" min="21" max="63">
                             <span data-i18n="filters.rangoA">a</span>
@@ -797,7 +799,7 @@
 
                     <!-- GRUPO: Filtros Estadísticos Avanzados -->
                     <div class="filter-group" data-filter-level="expert" title="Mide la dispersión de los números." data-i18n-title="filters.desviacion.tooltip">
-                        <div class="filter-title" data-i18n="filters.desviacion.titulo">📈 Desviación Estándar</div>
+                        <div class="filter-title"><span data-i18n="filters.desviacion.titulo">📈 Desviación Estándar</span> <span class="filter-stats-icon" data-filter-stats="desviacion" title="Ver estadísticas" style="cursor: pointer; margin-left: 6px; font-size: 0.85em; opacity: 0.7;">📊</span></div>
                         <div class="range-control">
                             <input type="number" id="desviacionMin" value="12.0" min="1" max="24" step="0.1">
                             <span data-i18n="filters.rangoA">a</span>

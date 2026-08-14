@@ -30,6 +30,9 @@ import {
   subscribeToPenias
 } from './src/services/peniaService';
 import {
+  GridLayout,
+  getLayoutDimensions,
+  getNumberAtPosition,
   getNumberCoords,
   isLine,
   isDiagonal,
@@ -664,6 +667,31 @@ export function getGreedyCovering(N: number, K: number, T: number, C: number): n
   return selectedIndices.map(idx => candidates[idx]);
 }
 
+function renderLayoutGrid(grid: HTMLElement, layout: GridLayout, numberRange: number, startAt: number, type: 'number' | 'star' = 'number') {
+  const dims = getLayoutDimensions(layout, numberRange, startAt);
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${dims.columns}, var(--ball-size))`;
+  grid.style.gridTemplateRows = `repeat(${dims.rows}, var(--ball-size))`;
+  grid.innerHTML = '';
+  for (let row = 0; row < dims.rows; row++) {
+    for (let col = 0; col < dims.columns; col++) {
+      const n = getNumberAtPosition(row, col, layout, startAt, numberRange);
+      const cell = document.createElement('div');
+      cell.style.gridRow = String(row + 1);
+      cell.style.gridColumn = String(col + 1);
+      if (n === null) {
+        cell.className = type === 'star' ? 'number-ball star-ball grid-gap' : 'number-ball grid-gap';
+      } else {
+        cell.className = type === 'star' ? 'number-ball star-ball' : 'number-ball';
+        cell.dataset.number = String(n);
+        cell.dataset.type = type;
+        cell.innerHTML = `${n}<span class="number-icon"></span>`;
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
 // Clase principal de la aplicación
 class DataLotto49Advanced {
   getNumberCoords(n: number) {
@@ -1117,11 +1145,13 @@ class DataLotto49Advanced {
             </linearGradient>
           </defs>
           <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-bonoloto)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 20,20 C 18,25 19,30 23,34" stroke="url(#green-gradient-header-bonoloto)" stroke-width="2.5" stroke-linecap="round" fill="none" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(90 20 20)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(180 20 20)" />
-          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(270 20 20)" />
+          <g transform="translate(20, 20) scale(0.78) translate(-20, -20)">
+            <path d="M 20,20 C 18,25 19,30 23,34" stroke="url(#green-gradient-header-bonoloto)" stroke-width="2.5" stroke-linecap="round" fill="none" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(90 20 20)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(180 20 20)" />
+            <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(270 20 20)" />
+          </g>
           <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
         </svg>
         `;
@@ -2073,6 +2103,42 @@ class DataLotto49Advanced {
         titleEl.innerHTML = `📊 ${t('filterStats.tituloConsecutivos')}`;
         html = this.buildConsecutivosStatsHtml(windowSize);
         break;
+      case 'bajosAltos':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloBajosAltos')}`;
+        html = this.buildBajosAltosStatsHtml(windowSize);
+        break;
+      case 'decenasExclusion':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloDecenasExclusion')}`;
+        html = this.buildDecenasExclusionStatsHtml(windowSize);
+        break;
+      case 'variedadTerm':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloVariedadTerm')}`;
+        html = this.buildVariedadTerminacionesStatsHtml(windowSize);
+        break;
+      case 'primos':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloPrimos')}`;
+        html = this.buildPrimosStatsHtml(windowSize);
+        break;
+      case 'entropiaInt':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloEntropiaInt')}`;
+        html = this.buildEntropiaIntervalosStatsHtml(windowSize);
+        break;
+      case 'entropiaTerm':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloEntropiaTerm')}`;
+        html = this.buildEntropiaTerminacionesStatsHtml(windowSize);
+        break;
+      case 'distancia':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloDistancia')}`;
+        html = this.buildDistanciaStatsHtml(windowSize);
+        break;
+      case 'sumaDigitos':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloSumaDigitos')}`;
+        html = this.buildSumaDigitosStatsHtml(windowSize);
+        break;
+      case 'desviacion':
+        titleEl.innerHTML = `📊 ${t('filterStats.tituloDesviacion')}`;
+        html = this.buildDesviacionStatsHtml(windowSize);
+        break;
       default:
         return;
     }
@@ -2429,6 +2495,364 @@ class DataLotto49Advanced {
 
     html += `</tbody></table>`;
     return html;
+  }
+
+  buildBajosAltosStatsHtml(windowSize: number): string {
+    const k = this.currentGame.maxNumbers || 6;
+    const numberRange = this.currentGame.numberRange || 49;
+    const midPoint = Math.floor(numberRange / 2);
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+
+    const totalLowsInUniverse = midPoint;
+    const totalHighsInUniverse = numberRange - midPoint;
+    const totalWays = this.nCr(numberRange, k);
+
+    const fullCounts: Record<string, number> = {};
+    const recentCounts: Record<string, number> = {};
+
+    for (let l = k; l >= 0; l--) {
+      const cat = `${l}/${k - l}`;
+      fullCounts[cat] = 0;
+      recentCounts[cat] = 0;
+    }
+
+    this.historicalData.forEach(draw => {
+      const lows = draw.numbers.filter(n => n <= midPoint).length;
+      const cat = `${lows}/${k - lows}`;
+      if (fullCounts[cat] !== undefined) fullCounts[cat]++;
+    });
+
+    recentData.forEach(draw => {
+      const lows = draw.numbers.filter(n => n <= midPoint).length;
+      const cat = `${lows}/${k - lows}`;
+      if (recentCounts[cat] !== undefined) recentCounts[cat]++;
+    });
+
+    const categoriesData = [];
+    for (let l = k; l >= 0; l--) {
+      const cat = `${l}/${k - l}`;
+      const ways = this.nCr(totalLowsInUniverse, l) * this.nCr(totalHighsInUniverse, k - l);
+      const theoPct = totalWays > 0 ? (ways / totalWays) * 100 : 0;
+      const fullPct = totalDraws > 0 ? (fullCounts[cat] / totalDraws) * 100 : 0;
+      const recentPct = recentDrawsCount > 0 ? (recentCounts[cat] / recentDrawsCount) * 100 : 0;
+      categoriesData.push({ cat, theoPct, fullPct, recentPct });
+    }
+
+    const last10 = this.historicalData.slice(-10).map(draw => {
+      const lows = draw.numbers.filter(n => n <= midPoint).length;
+      return `${lows}/${k - lows}`;
+    });
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colCategoria')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colTeorico')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    categoriesData.forEach(item => {
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${item.cat}</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.recentPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center; color: #64748b;">${item.theoPct.toFixed(1)}%</td>
+        </tr>
+      `;
+    });
+
+    html += `
+      </tbody></table>
+      <div style="margin-top: 14px; font-weight: 600; font-size: 0.85rem; color: #1e293b;">${t('filterStats.secuenciaReciente')}</div>
+      <div style="margin-top: 6px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #334155;">
+        ${last10.join(', ')}
+      </div>
+    `;
+
+    return html;
+  }
+
+  buildDecenasExclusionStatsHtml(windowSize: number): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+    const numberRange = this.currentGame.numberRange || 49;
+    const numDecades = Math.ceil(numberRange / 10);
+
+    const decadesData = [];
+    for (let d = 0; d < numDecades; d++) {
+      const startNum = d * 10 + 1;
+      const endNum = Math.min((d + 1) * 10, numberRange);
+      const label = `${startNum}-${endNum}`;
+
+      let fullCount = 0;
+      let lastSeenIdx = -1;
+      this.historicalData.forEach((draw, idx) => {
+        if (draw.numbers.some(n => Math.floor((n - 1) / 10) === d)) {
+          fullCount++;
+          lastSeenIdx = idx;
+        }
+      });
+
+      let recentCount = 0;
+      recentData.forEach(draw => {
+        if (draw.numbers.some(n => Math.floor((n - 1) / 10) === d)) {
+          recentCount++;
+        }
+      });
+
+      const fullPct = totalDraws > 0 ? (fullCount / totalDraws) * 100 : 0;
+      const recentPct = recentDrawsCount > 0 ? (recentCount / recentDrawsCount) * 100 : 0;
+      const drawsSince = lastSeenIdx >= 0 ? (totalDraws - 1 - lastSeenIdx) : totalDraws;
+
+      decadesData.push({ label, fullPct, recentPct, drawsSince });
+    }
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colDecena')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colSinAparecer')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    decadesData.forEach(item => {
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${item.label}</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${item.recentPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600; color: ${item.drawsSince > 10 ? '#dc2626' : '#1e293b'};">${item.drawsSince}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  buildVariedadTerminacionesStatsHtml(windowSize: number): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+    const maxNumbers = this.currentGame.maxNumbers || 6;
+
+    const fullCounts: Record<number, number> = {};
+    const recentCounts: Record<number, number> = {};
+
+    for (let v = 1; v <= maxNumbers; v++) {
+      fullCounts[v] = 0;
+      recentCounts[v] = 0;
+    }
+
+    this.historicalData.forEach(draw => {
+      const uniqueEndings = new Set(draw.numbers.map(n => Math.abs(n) % 10)).size;
+      if (fullCounts[uniqueEndings] !== undefined) fullCounts[uniqueEndings]++;
+    });
+
+    recentData.forEach(draw => {
+      const uniqueEndings = new Set(draw.numbers.map(n => Math.abs(n) % 10)).size;
+      if (recentCounts[uniqueEndings] !== undefined) recentCounts[uniqueEndings]++;
+    });
+
+    const last10 = this.historicalData.slice(-10).map(draw => {
+      return new Set(draw.numbers.map(n => Math.abs(n) % 10)).size;
+    });
+
+    let html = `
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">
+        <span><strong>${t('filterStats.historicoCompleto', { n: totalDraws })}</strong></span>
+        <span><strong>${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</strong></span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colVariedad')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecHist')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.colFrecReciente')}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    for (let v = maxNumbers; v >= 1; v--) {
+      const fullPct = totalDraws > 0 ? (fullCounts[v] / totalDraws) * 100 : 0;
+      const recentPct = recentDrawsCount > 0 ? (recentCounts[v] / recentDrawsCount) * 100 : 0;
+      html += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 6px 8px; text-align: center; font-weight: 600;">${v}</td>
+          <td style="padding: 6px 8px; text-align: center;">${fullPct.toFixed(1)}%</td>
+          <td style="padding: 6px 8px; text-align: center;">${recentPct.toFixed(1)}%</td>
+        </tr>
+      `;
+    }
+
+    html += `
+      </tbody></table>
+      <div style="margin-top: 14px; font-weight: 600; font-size: 0.85rem; color: #1e293b;">${t('filterStats.secuenciaReciente')}</div>
+      <div style="margin-top: 6px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #334155;">
+        ${last10.join(', ')}
+      </div>
+    `;
+
+    return html;
+  }
+
+  private buildContinuousMetricStatsHtml(
+    allValues: number[],
+    windowSize: number,
+    decimals: number = 0
+  ): string {
+    const totalDraws = this.historicalData.length;
+    const recentData = this.historicalData.slice(-windowSize);
+    const recentDrawsCount = recentData.length;
+    const recentValues = allValues.slice(-recentDrawsCount);
+
+    const minFull = Math.min(...allValues);
+    const maxFull = Math.max(...allValues);
+    const avgFull = allValues.reduce((a, b) => a + b, 0) / totalDraws;
+
+    const minRecent = Math.min(...recentValues);
+    const maxRecent = Math.max(...recentValues);
+    const avgRecent = recentValues.reduce((a, b) => a + b, 0) / recentDrawsCount;
+
+    const lastVal = allValues[allValues.length - 1];
+    const countLessOrEqual = allValues.filter(v => v <= lastVal).length;
+    const percentile = (countLessOrEqual / totalDraws) * 100;
+
+    const last10Values = allValues.slice(-10);
+
+    const fmt = (v: number) => decimals > 0 ? v.toFixed(decimals) : String(Math.round(v));
+    const fmtAvg = (v: number) => decimals > 0 ? v.toFixed(decimals) : v.toFixed(1);
+
+    return `
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 12px;">
+        <thead>
+          <tr style="background: #f1f5f9; color: #334155;">
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: left;">${t('filterStats.colCategoria')}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.historicoCompleto', { n: totalDraws })}</th>
+            <th style="padding: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">${t('filterStats.ventanaReciente', { n: recentDrawsCount })}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">${t('filterStats.colMin')}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmt(minFull)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmt(minRecent)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">${t('filterStats.colMedia')}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmtAvg(avgFull)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmtAvg(avgRecent)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6px 8px; font-weight: 600;">${t('filterStats.colMax')}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmt(maxFull)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${fmt(maxRecent)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="padding: 10px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; font-size: 0.85rem; margin-bottom: 12px;">
+        📌 <strong>${t('filterStats.percentilUltimo', { p: percentile.toFixed(1) })}</strong> (Valor: <strong>${fmt(lastVal)}</strong>)
+      </div>
+
+      <div style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">${t('filterStats.ultimos10Valores')}</div>
+      <div style="margin-top: 6px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #334155;">
+        ${last10Values.map(v => fmt(v)).join(', ')}
+      </div>
+    `;
+  }
+
+  buildPrimosStatsHtml(windowSize: number): string {
+    const allValues = this.historicalData.map(d => d.numbers.filter(n => this.primes.has(n)).length);
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 0);
+  }
+
+  buildEntropiaIntervalosStatsHtml(windowSize: number): string {
+    const calculateIntervalsEntropy = (nums: number[]) => {
+      const sorted = [...nums].sort((a, b) => a - b);
+      const intervalCounts: Record<number, number> = {};
+      for (let idx = 0; idx < sorted.length - 1; idx++) {
+        const diff = sorted[idx + 1] - sorted[idx];
+        intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
+      }
+      const numIntervals = nums.length - 1;
+      if (numIntervals <= 0) return 0;
+      return -Object.values(intervalCounts).reduce((s, countVal) => {
+        const p = countVal / numIntervals;
+        return s + p * Math.log2(p);
+      }, 0);
+    };
+    const allValues = this.historicalData.map(d => calculateIntervalsEntropy(d.numbers));
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 3);
+  }
+
+  buildEntropiaTerminacionesStatsHtml(windowSize: number): string {
+    const calculateEndingsEntropy = (nums: number[]) => {
+      const endingCounts: Record<number, number> = {};
+      nums.forEach(n => {
+        const ending = Math.abs(n) % 10;
+        endingCounts[ending] = (endingCounts[ending] || 0) + 1;
+      });
+      return -Object.values(endingCounts).reduce((s, countVal) => {
+        const p = countVal / nums.length;
+        return s + p * Math.log2(p);
+      }, 0);
+    };
+    const allValues = this.historicalData.map(d => calculateEndingsEntropy(d.numbers));
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 3);
+  }
+
+  buildDistanciaStatsHtml(windowSize: number): string {
+    const getDist = (nums: number[]) => {
+      const s = [...nums].sort((a, b) => a - b);
+      let minD = Infinity;
+      for (let i = 0; i < s.length - 1; i++) {
+        const diff = s[i + 1] - s[i];
+        if (diff < minD) minD = diff;
+      }
+      return minD === Infinity ? 1 : minD;
+    };
+    const allValues = this.historicalData.map(d => getDist(d.numbers));
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 0);
+  }
+
+  buildSumaDigitosStatsHtml(windowSize: number): string {
+    const getDigitSum = (nums: number[]) => nums.reduce((s, n) => s + (n < 10 ? n : Math.floor(n / 10) + (n % 10)), 0);
+    const allValues = this.historicalData.map(d => getDigitSum(d.numbers));
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 0);
+  }
+
+  buildDesviacionStatsHtml(windowSize: number): string {
+    const getStdDev = (nums: number[]) => {
+      const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+      const variance = nums.reduce((s, n) => s + Math.pow(n - mean, 2), 0) / nums.length;
+      return Math.sqrt(variance);
+    };
+    const allValues = this.historicalData.map(d => getStdDev(d.numbers));
+    return this.buildContinuousMetricStatsHtml(allValues, windowSize, 2);
   }
 
   updateFilterBadgesFromAudit() {
@@ -4827,42 +5251,45 @@ class DataLotto49Advanced {
       selectionTitle.textContent = t('main.seleccionNumeros', { game: this.currentGame.name });
     }
 
-    grid.style.gridTemplateColumns = `repeat(${this.currentGame.gridCols}, 1fr)`;
-
     const isNacional = this.currentGame.id === 'nacional';
     if (isNacional) {
       grid.classList.add('game-nacional');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = `repeat(${this.currentGame.gridCols}, 1fr)`;
+      grid.style.gridTemplateRows = '';
+      const startNum = 10;
+
+      // Main Numbers Grid for Nacional
+      for (let i = startNum; i <= this.currentGame.numberRange; i++) {
+        if (i % 10 === 0) {
+          const rowLabels = [
+            "1ª Cifra (Decena de millar)",
+            "2ª Cifra (Unidad de millar)",
+            "3ª Cifra (Centena)",
+            "4ª Cifra (Decena)",
+            "5ª Cifra (Unidad - Reintegro)"
+          ];
+          const labelIdx = Math.floor(i / 10) - 1;
+          if (labelIdx >= 0 && labelIdx < 5) {
+            const label = document.createElement('div');
+            label.style.cssText = 'grid-column: span 10; margin-top: 12px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; text-align: left; padding-left: 2px;';
+            label.textContent = rowLabels[labelIdx];
+            grid.appendChild(label);
+          }
+        }
+
+        const ball = document.createElement('div');
+        ball.classList.add('number-ball');
+        ball.dataset.number = String(i);
+        ball.dataset.type = 'number';
+        ball.innerHTML = `${i % 10}<span class="number-icon"></span>`;
+        grid.appendChild(ball);
+      }
     } else {
       grid.classList.remove('game-nacional');
-    }
-
-    const startNum = isNacional ? 10 : 1;
-
-    // Main Numbers Grid
-    for (let i = startNum; i <= this.currentGame.numberRange; i++) {
-      if (isNacional && i % 10 === 0) {
-        const rowLabels = [
-          "1ª Cifra (Decena de millar)",
-          "2ª Cifra (Unidad de millar)",
-          "3ª Cifra (Centena)",
-          "4ª Cifra (Decena)",
-          "5ª Cifra (Unidad - Reintegro)"
-        ];
-        const labelIdx = Math.floor(i / 10) - 1;
-        if (labelIdx >= 0 && labelIdx < 5) {
-          const label = document.createElement('div');
-          label.style.cssText = 'grid-column: span 10; margin-top: 12px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; text-align: left; padding-left: 2px;';
-          label.textContent = rowLabels[labelIdx];
-          grid.appendChild(label);
-        }
+      if (this.currentGame.numbersLayout) {
+        renderLayoutGrid(grid, this.currentGame.numbersLayout, this.currentGame.numberRange, this.currentGame.numbersStartAt ?? 1, 'number');
       }
-
-      const ball = document.createElement('div');
-      ball.classList.add('number-ball');
-      ball.dataset.number = String(i);
-      ball.dataset.type = 'number';
-      ball.innerHTML = `${isNacional ? i % 10 : i}<span class="number-icon"></span>`;
-      grid.appendChild(ball);
     }
 
     // Stars Grid (if applicable)
@@ -4888,16 +5315,10 @@ class DataLotto49Advanced {
           }
       }
 
-      const isGordo = this.currentGame.id === 'gordo';
-      const startIdx = isGordo ? 0 : 1;
-      const endIdx = isGordo ? this.currentGame.starRange - 1 : this.currentGame.starRange;
-      for (let i = startIdx; i <= endIdx; i++) {
-        const ball = document.createElement('div');
-        ball.classList.add('number-ball', 'star-ball');
-        ball.dataset.number = String(i);
-        ball.dataset.type = 'star';
-        ball.innerHTML = `${i}<span class="number-icon"></span>`;
-        starsGrid.appendChild(ball);
+      if (this.currentGame.secondaryLayout) {
+        const secStartAt = this.currentGame.secondaryStartAt ?? 1;
+        const secRange = secStartAt === 0 ? this.currentGame.starRange - 1 : this.currentGame.starRange;
+        renderLayoutGrid(starsGrid, this.currentGame.secondaryLayout, secRange, secStartAt, 'star');
       }
     } else if (starsGridContainer) {
       starsGridContainer.style.display = 'none';

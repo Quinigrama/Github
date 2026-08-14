@@ -1,3 +1,53 @@
+export type GridLayout =
+  | { type: 'decade-column' }
+  | { type: 'column-chunk'; chunkSize: number }
+  | { type: 'sequential'; columns: number }
+  | { type: 'wrap-offset'; columns: number; rowOffsets: number[] };
+
+export function getLayoutDimensions(layout: GridLayout, numberRange: number, startAt: number): { columns: number; rows: number } {
+  if (layout.type === 'decade-column') {
+    return { columns: Math.floor(numberRange / 10) + 1, rows: 10 };
+  }
+  if (layout.type === 'column-chunk') {
+    return { columns: Math.ceil(numberRange / layout.chunkSize), rows: layout.chunkSize };
+  }
+  if (layout.type === 'sequential') {
+    const count = numberRange - startAt + 1;
+    return { columns: layout.columns, rows: Math.ceil(count / layout.columns) };
+  }
+  // wrap-offset
+  let remaining = numberRange - startAt + 1;
+  let rows = 0;
+  for (let row = 0; row < 20 && remaining > 0; row++) {
+    const offset = layout.rowOffsets[row] ?? 0;
+    remaining -= (layout.columns - offset);
+    rows++;
+  }
+  return { columns: layout.columns, rows };
+}
+
+export function getNumberAtPosition(row: number, col: number, layout: GridLayout, startAt: number, numberRange: number): number | null {
+  let n: number;
+  if (layout.type === 'decade-column') {
+    n = col * 10 + row;
+    if (n === 0) return null;
+  } else if (layout.type === 'column-chunk') {
+    n = col * layout.chunkSize + row + 1;
+  } else if (layout.type === 'sequential') {
+    n = row * layout.columns + col + startAt;
+  } else {
+    const offset = layout.rowOffsets[row] ?? 0;
+    if (col < offset) return null;
+    let base = startAt;
+    for (let r = 0; r < row; r++) {
+      base += layout.columns - (layout.rowOffsets[r] ?? 0);
+    }
+    n = base + (col - offset);
+  }
+  if (n < startAt || n > numberRange) return null;
+  return n;
+}
+
 export function getNumberCoords(n: number, gridCols: number): { row: number; col: number } {
   return { row: Math.floor((n - 1) / gridCols), col: (n - 1) % gridCols };
 }

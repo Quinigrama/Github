@@ -1008,5 +1008,21 @@
   "filterStats.colCategoria": "Category",
   "filterStats.colTeorico": "% Theoretical",
   "filterStats.secuenciaReciente": "Sequence of the last 10 categories:",
-  "filterStats.colPatron": "Pattern"
+  "filterStats.colPatron": "Pattern",
+  "filterStats.tituloBajosAltos": "Statistics — Low/High",
+  "filterStats.tituloDecenasExclusion": "Statistics — Decades",
+  "filterStats.tituloVariedadTerm": "Statistics — Ending Variety",
+  "filterStats.tituloPrimos": "Statistics — Prime Numbers",
+  "filterStats.tituloEntropiaInt": "Statistics — Entropy (Intervals)",
+  "filterStats.tituloEntropiaTerm": "Statistics — Entropy (Endings)",
+  "filterStats.tituloDistancia": "Statistics — Distance Between Numbers",
+  "filterStats.tituloSumaDigitos": "Statistics — Digit Sum",
+  "filterStats.tituloDesviacion": "Statistics — Standard Deviation",
+  "filterStats.colDecena": "Decade",
+  "filterStats.colVariedad": "Distinct Endings Count",
+  "filterStats.colMin": "Minimum",
+  "filterStats.colMedia": "Average",
+  "filterStats.colMax": "Maximum",
+  "filterStats.percentilUltimo": "The last loaded draw falls in the {p} percentile of the full history.",
+  "filterStats.ultimos10Valores": "Last 10 values:"
 }

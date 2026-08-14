@@ -1008,5 +1008,21 @@
   "filterStats.colCategoria": "Categoría",
   "filterStats.colTeorico": "% Teórico",
   "filterStats.secuenciaReciente": "Secuencia de las últimas 10 categorías:",
-  "filterStats.colPatron": "Patrón"
+  "filterStats.colPatron": "Patrón",
+  "filterStats.tituloBajosAltos": "Estadísticas — Bajos/Altos",
+  "filterStats.tituloDecenasExclusion": "Estadísticas — Decenas",
+  "filterStats.tituloVariedadTerm": "Estadísticas — Variedad de Terminaciones",
+  "filterStats.tituloPrimos": "Estadísticas — Números Primos",
+  "filterStats.tituloEntropiaInt": "Estadísticas — Entropía (Intervalos)",
+  "filterStats.tituloEntropiaTerm": "Estadísticas — Entropía (Terminaciones)",
+  "filterStats.tituloDistancia": "Estadísticas — Distancia entre Números",
+  "filterStats.tituloSumaDigitos": "Estadísticas — Suma de Dígitos",
+  "filterStats.tituloDesviacion": "Estadísticas — Desviación Estándar",
+  "filterStats.colDecena": "Decena",
+  "filterStats.colVariedad": "Nº Terminaciones Distintas",
+  "filterStats.colMin": "Mínimo",
+  "filterStats.colMedia": "Media",
+  "filterStats.colMax": "Máximo",
+  "filterStats.percentilUltimo": "El último sorteo cargado cae en el percentil {p} del histórico completo.",
+  "filterStats.ultimos10Valores": "Últimos 10 valores:"
 }

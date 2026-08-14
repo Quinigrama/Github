@@ -1,3 +1,5 @@
+import { GridLayout } from "./src/utils/geometry";
+
 export interface FilterBounds {
   min: number;
   max: number;
@@ -56,6 +58,10 @@ export interface GameConfig {
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   restaurarFiltrosLevel?: { pLow: number; pHigh: number };
+  numbersLayout?: GridLayout;
+  numbersStartAt?: number;
+  secondaryLayout?: GridLayout;
+  secondaryStartAt?: number;
 
   getTheoreticalLimits(): GameTheoreticalLimits;
   getDefaultFilters(): any;
@@ -155,6 +161,10 @@ export class BaseGameConfig implements GameConfig {
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   restaurarFiltrosLevel?: { pLow: number; pHigh: number };
+  numbersLayout?: GridLayout;
+  numbersStartAt?: number;
+  secondaryLayout?: GridLayout;
+  secondaryStartAt?: number;
 
   constructor(opts: {
     id: string;
@@ -177,6 +187,10 @@ export class BaseGameConfig implements GameConfig {
     jackpotThresholds?: { excellent: number; good: number };
     customFilterLimits?: Partial<GameFilterLimits>;
     restaurarFiltrosLevel?: { pLow: number; pHigh: number };
+    numbersLayout?: GridLayout;
+    numbersStartAt?: number;
+    secondaryLayout?: GridLayout;
+    secondaryStartAt?: number;
   }) {
     this.id = opts.id;
     this.name = opts.name;
@@ -198,6 +212,10 @@ export class BaseGameConfig implements GameConfig {
     this.jackpotThresholds = opts.jackpotThresholds || { excellent: 5000000, good: 2000000 };
     this.customFilterLimits = opts.customFilterLimits;
     this.restaurarFiltrosLevel = opts.restaurarFiltrosLevel;
+    this.numbersLayout = opts.numbersLayout;
+    this.numbersStartAt = opts.numbersStartAt;
+    this.secondaryLayout = opts.secondaryLayout;
+    this.secondaryStartAt = opts.secondaryStartAt;
   }
 
   get drawDays(): number[] {
@@ -332,6 +350,8 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 26,
     starName: 'Powerball',
     gridCols: 10,
+    numbersLayout: { type: 'wrap-offset', columns: 16, rowOffsets: [2, 0, 0, 0, 0] },
+    secondaryLayout: { type: 'wrap-offset', columns: 16, rowOffsets: [5, 0] },
     allowedDays: [1, 3, 6],
     theoreticalProbabilities: { '5': 0.0000085, '4': 0.0028, '3': 0.17, '<=2': 99.82 },
     jackpotThresholds: { excellent: 200000000, good: 100000000 },
@@ -363,6 +383,8 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 25,
     starName: 'Mega Ball',
     gridCols: 10,
+    numbersLayout: { type: 'wrap-offset', columns: 16, rowOffsets: [4, 0, 0, 0, 0] },
+    secondaryLayout: { type: 'wrap-offset', columns: 16, rowOffsets: [1, 0] },
     allowedDays: [2, 5],
     theoreticalProbabilities: { '5': 0.0000033, '4': 0.0011, '3': 0.068, '<=2': 99.93 },
     jackpotThresholds: { excellent: 200000000, good: 100000000 },
@@ -394,6 +416,9 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 0,
     starName: '',
     gridCols: 7,
+    numbersLayout: { type: 'decade-column' },
+    secondaryLayout: { type: 'sequential', columns: 10 },
+    secondaryStartAt: 0,
     allowedDays: [0, 1, 2, 3, 4, 5, 6],
     theoreticalProbabilities: { '6': 0.00000715, '5': 0.00184, '4': 0.0969, '3': 1.765, '<=2': 98.136 },
     jackpotThresholds: { excellent: 2000000, good: 1000000 },
@@ -426,6 +451,9 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 0,
     starName: 'Reintegro',
     gridCols: 7,
+    numbersLayout: { type: 'decade-column' },
+    secondaryLayout: { type: 'sequential', columns: 10 },
+    secondaryStartAt: 0,
     allowedDays: [1, 4, 6],
     theoreticalProbabilities: { '6': 0.00000715, '5': 0.00184, '4': 0.0969, '3': 1.765, '<=2': 98.136 },
     jackpotThresholds: { excellent: 10000000, good: 5000000 },
@@ -457,6 +485,9 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 10,
     starName: 'Número Clave',
     gridCols: 9,
+    numbersLayout: { type: 'decade-column' },
+    secondaryLayout: { type: 'sequential', columns: 5 },
+    secondaryStartAt: 0,
     allowedDays: [0],
     theoreticalProbabilities: { '5': 0.000032, '4': 0.0077, '3': 0.372, '<=2': 99.62 },
     jackpotThresholds: { excellent: 15000000, good: 7000000 },
@@ -488,6 +519,8 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 12,
     starName: 'Estrellas',
     gridCols: 10,
+    numbersLayout: { type: 'column-chunk', chunkSize: 9 },
+    secondaryLayout: { type: 'column-chunk', chunkSize: 4 },
     allowedDays: [2, 5],
     theoreticalProbabilities: { '5': 0.000047, '4': 0.0106, '3': 0.467, '<=2': 99.52 },
     jackpotThresholds: { excellent: 50000000, good: 25000000 },
@@ -519,6 +552,8 @@ export const GAMES: { [key: string]: GameConfig } = {
     starRange: 5,
     starName: 'Sueño',
     gridCols: 10,
+    numbersLayout: { type: 'sequential', columns: 5 },
+    secondaryLayout: { type: 'sequential', columns: 3 },
     allowedDays: [1, 4],
     theoreticalProbabilities: { '6': 0.000026, '5': 0.0053, '4': 0.219, '3': 3.118, '<=2': 96.657 },
     jackpotThresholds: { excellent: 20000, good: 10000 },
