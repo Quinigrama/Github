@@ -14819,15 +14819,9 @@ contrato legal ni gestiona fondos monetarios.
           author: 'Comprobador de Sorteos'
         });
 
-        this.sendTelemetry('validate_ticket', {
-          gameId: valData.gameId,
-          allHits: valData.allHits,
-          maxHits: valData.maxHits,
-          maxStars: 0,
-          prizeNotice: `Peña "${peña.name}": ${valData.maxHits} aciertos (Premio de ${prizeAmount} €)`,
-          drawDate: ticket.drawDate || 'Comprobador Peña',
-          combinationsCount: valData.allHits.length
-        });
+        // Telemetría eliminada intencionadamente: este comprobador usa un sorteo ALEATORIO simulado
+        // (no el histórico real), por lo que enviar sus resultados a las estadísticas de producción
+        // contaminaría los datos reales de validaciones.
       }
     });
 
