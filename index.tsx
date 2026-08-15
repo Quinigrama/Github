@@ -8028,6 +8028,9 @@ class DataLotto49Advanced {
       <p style="text-align: center; font-size: 0.85rem; color: #475569; margin-top: 6px; font-weight: 600;">
         ${t('filters.nash.histogramPassPct', { pct: passPct })}
       </p>
+      <p style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+        ${t('filters.nash.histogramMapHint')}
+      </p>
     `;
   }
 
