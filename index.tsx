@@ -9419,13 +9419,15 @@ class DataLotto49Advanced {
 
     // Telemetry
     const metrics = this.calculateTicketMetrics(savedTicketCopy);
+    const activeFavorites = Array.from(this.favoriteNumbers || []);
     this.sendTelemetry('save_ticket', {
         gameId: metrics.gameId,
         combinationsCount: metrics.combinationsCount,
         betType: metrics.betType,
         numbersCount: metrics.numbersCount,
         starsCount: metrics.starsCount,
-        drawDate: savedTicketCopy.drawDate || 'Desconocida'
+        drawDate: savedTicketCopy.drawDate || 'Desconocida',
+        favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined
     });
 
     this.currentTicket = null;
@@ -14762,13 +14764,15 @@ contrato legal ni gestiona fondos monetarios.
 
     // Telemetry - Explicit ticket save to Peña
     const metrics = this.calculateTicketMetrics(this.currentTicket);
+    const activeFavorites = Array.from(this.favoriteNumbers || []);
     this.sendTelemetry('save_ticket', {
       gameId: metrics.gameId,
       combinationsCount: metrics.combinationsCount,
       betType: metrics.betType,
       numbersCount: metrics.numbersCount,
       starsCount: metrics.starsCount,
-      drawDate: this.currentTicket.drawDate || 'Desconocida'
+      drawDate: this.currentTicket.drawDate || 'Desconocida',
+      favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined
     });
 
     // Add visual alert
