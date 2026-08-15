@@ -7992,9 +7992,9 @@ class DataLotto49Advanced {
     `;
 
     const xTicksHTML = `
-      <text x="${marginLeft}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="start">${minScore.toFixed(1)}</text>
-      <text x="${(marginLeft + chartW / 2).toFixed(1)}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="middle">${((minScore + maxScore) / 2).toFixed(1)}</text>
-      <text x="${svgWidth - marginRight}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="end">${maxScore.toFixed(1)}</text>
+      <text x="${marginLeft}" y="${svgHeight - 16}" font-size="11" fill="#64748b" text-anchor="start">${minScore.toFixed(1)}</text>
+      <text x="${(marginLeft + chartW / 2).toFixed(1)}" y="${svgHeight - 16}" font-size="11" fill="#64748b" text-anchor="middle">${((minScore + maxScore) / 2).toFixed(1)}</text>
+      <text x="${svgWidth - marginRight}" y="${svgHeight - 16}" font-size="11" fill="#64748b" text-anchor="end">${maxScore.toFixed(1)}</text>
     `;
 
     // % de combinaciones simuladas dentro del rango [nashMinScore, nashMaxScore]
@@ -8007,13 +8007,23 @@ class DataLotto49Advanced {
     const passPct = totalSamples > 0 ? Math.round((passCount / totalSamples) * 100) : 0;
 
     container.innerHTML = `
+      <p style="text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; margin: 0 0 4px 0;">
+        ${t('filters.nash.histogramTitle')}
+      </p>
       <div style="width: 100%; overflow-x: auto;">
         <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 300px; display: block; background: #ffffff; font-family: system-ui, sans-serif;">
           ${axesHTML}
           ${barsHTML}
           ${thresholdLinesHTML}
           ${xTicksHTML}
+          <text x="${(marginLeft + chartW / 2).toFixed(1)}" y="${svgHeight - 2}" font-size="10" fill="#94a3b8" text-anchor="middle">${t('filters.nash.axisX')}</text>
+          <text x="12" y="${(marginTop + chartH / 2).toFixed(1)}" font-size="10" fill="#94a3b8" text-anchor="middle" transform="rotate(-90, 12, ${(marginTop + chartH / 2).toFixed(1)})">${t('filters.nash.axisY')}</text>
         </svg>
+      </div>
+      <div style="display: flex; justify-content: center; gap: 14px; font-size: 0.72rem; color: #64748b; margin-top: 4px; flex-wrap: wrap;">
+        <span>🟩 ${t('filters.nash.legendRange')}</span>
+        <span>┃ ${t('filters.nash.legendThreshold')}</span>
+        <span>▬ ${t('filters.nash.legendDistribution')}</span>
       </div>
       <p style="text-align: center; font-size: 0.85rem; color: #475569; margin-top: 6px; font-weight: 600;">
         ${t('filters.nash.histogramPassPct', { pct: passPct })}
