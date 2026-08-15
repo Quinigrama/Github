@@ -60,6 +60,7 @@ export interface GameConfig {
   restaurarFiltrosLevel?: { pLow: number; pHigh: number };
   numbersLayout?: GridLayout;
   numbersStartAt?: number;
+  startAt?: number;
   secondaryLayout?: GridLayout;
   secondaryStartAt?: number;
 

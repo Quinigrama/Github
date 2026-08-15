@@ -34,6 +34,8 @@ import {
   getLayoutDimensions,
   getNumberAtPosition,
   getNumberCoords,
+  buildCoordsLookup,
+  getCoordsLookup,
   isLine,
   isDiagonal,
   isSpaced,
@@ -706,6 +708,12 @@ function renderLayoutGrid(grid: HTMLElement, layout: GridLayout, numberRange: nu
 // Clase principal de la aplicación
 class DataLotto49Advanced {
   getNumberCoords(n: number) {
+    if (this.currentGame?.numbersLayout) {
+      const startAt = this.currentGame.numbersStartAt ?? this.currentGame.startAt ?? 1;
+      const lookup = getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt);
+      const c = lookup.get(n);
+      if (c) return c;
+    }
     return getNumberCoords(n, this.currentGame?.gridCols || 10);
   }
   
@@ -11103,10 +11111,18 @@ class DataLotto49Advanced {
 
   // ===== HELPERS UI & GEOMETRIC/AI =====
   hasGeometricPattern(combination: number[], patternsToExclude: string[]): boolean {
-      return hasGeometricPattern(combination, patternsToExclude, this.currentGame?.gridCols || 10);
+      const startAt = this.currentGame?.numbersStartAt ?? this.currentGame?.startAt ?? 1;
+      const coordsLookup = this.currentGame?.numbersLayout
+          ? getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt)
+          : (this.currentGame?.gridCols || 10);
+      return hasGeometricPattern(combination, patternsToExclude, coordsLookup);
   }
   isSpaced(combination: number[]): boolean {
-      return isSpaced(combination, this.currentGame?.gridCols || 10);
+      const startAt = this.currentGame?.numbersStartAt ?? this.currentGame?.startAt ?? 1;
+      const coordsLookup = this.currentGame?.numbersLayout
+          ? getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt)
+          : (this.currentGame?.gridCols || 10);
+      return isSpaced(combination, coordsLookup);
   }
   isLine(coords: {row: number, col: number}[]): boolean {
       return isLine(coords);

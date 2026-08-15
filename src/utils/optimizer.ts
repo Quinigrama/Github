@@ -1,5 +1,5 @@
 import { getCombinationStats } from './combinatorial';
-import { isSpaced, getNumberCoords, isLine } from './geometry';
+import { isSpaced, getNumberCoords, isLine, getCoordsLookup } from './geometry';
 import { getPopularityWeight, getNashScoreAverage } from './popularity';
 import { getSumTrendScore, getNumberTrendScore } from './regression';
 
@@ -12,7 +12,7 @@ export interface OptimizationContext {
   favoriteStars: Set<number>;
   filters: any;
   historicalData: any[];
-  currentGame: { maxNumbers: number; numberRange: number; starRange: number; gridCols?: number };
+  currentGame: { maxNumbers: number; numberRange: number; starRange: number; gridCols?: number; numbersLayout?: any; startAt?: number };
   primes: Set<number>;
 }
 
@@ -83,8 +83,13 @@ export function calculateOptimizationScore(
     }
   }
 
-  if (context.filters?.geometric?.favor?.includes('espaciados') && isSpaced(combination, context.currentGame?.gridCols || 10)) {
-    score += 15;
+  if (context.filters?.geometric?.favor?.includes('espaciados')) {
+    const coordsLookup = context.currentGame?.numbersLayout
+      ? getCoordsLookup(context.currentGame.numbersLayout, context.currentGame.numberRange, context.currentGame.startAt ?? 1)
+      : (context.currentGame?.gridCols || 10);
+    if (isSpaced(combination, coordsLookup)) {
+      score += 15;
+    }
   }
   if (context.filters?.useMarkov) {
     score += getMarkovScore(combination, context.filters, context.historicalData);

@@ -1,4 +1,4 @@
-import { generateRandomCombination, hasGeometricPattern, isSpaced } from './geometry';
+import { generateRandomCombination, hasGeometricPattern, isSpaced, getCoordsLookup } from './geometry';
 
 export interface AuditResultCategory {
   name: string;
@@ -23,6 +23,9 @@ export function runFilterAudit(
     starRange: number;
     gridCols: number;
     id: string;
+    numbersLayout?: any;
+    numbersStartAt?: number;
+    startAt?: number;
   },
   filters: any,
   primes: Set<number>
@@ -226,11 +229,14 @@ export function runFilterAudit(
     if (hasGeomActive) {
       results.geometric.count++;
       let comboPassed = true;
+      const coordsLookup = currentGame.numbersLayout
+        ? getCoordsLookup(currentGame.numbersLayout, currentGame.numberRange, currentGame.startAt ?? currentGame.numbersStartAt ?? 1)
+        : (currentGame.gridCols || 7);
       if (filters.geometric.exclude && filters.geometric.exclude.length > 0) {
-        if (hasGeometricPattern(combo, filters.geometric.exclude, currentGame.gridCols)) comboPassed = false;
+        if (hasGeometricPattern(combo, filters.geometric.exclude, coordsLookup)) comboPassed = false;
       }
       if (filters.geometric.favor && filters.geometric.favor.includes('espaciados')) {
-        if (!isSpaced(combo, currentGame.gridCols)) comboPassed = false;
+        if (!isSpaced(combo, coordsLookup)) comboPassed = false;
       }
       if (comboPassed) results.geometric.passed++;
     }

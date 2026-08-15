@@ -1,4 +1,4 @@
-import { hasGeometricPattern, isSpaced } from './geometry';
+import { hasGeometricPattern, isSpaced, getCoordsLookup } from './geometry';
 import { passesNashStrictFilter } from './optimizer';
 
 const DEFAULT_PRIMES = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]);
@@ -396,11 +396,14 @@ export function isValidCombination(
 
   // 12. GEOMÉTRICOS: grid loops
   if (filters.geometric) {
+      const coordsLookup = currentGame.numbersLayout
+          ? getCoordsLookup(currentGame.numbersLayout, currentGame.numberRange, currentGame.numbersStartAt ?? currentGame.startAt ?? 1)
+          : (currentGame.gridCols || 7);
       if (filters.geometric.exclude && filters.geometric.exclude.length > 0) {
-          if (hasGeometricPattern(combination, filters.geometric.exclude, currentGame.gridCols || 7)) return false;
+          if (hasGeometricPattern(combination, filters.geometric.exclude, coordsLookup)) return false;
       }
       if (filters.geometric.favor && filters.geometric.favor.includes('espaciados')) {
-          if (!isSpaced(combination, currentGame.gridCols || 7)) return false;
+          if (!isSpaced(combination, coordsLookup)) return false;
       }
   }
 
