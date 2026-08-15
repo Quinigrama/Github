@@ -136,6 +136,7 @@
   "filters.nash.switch": "Optimización Nash (Anti-Popular)",
   "filters.nash.label": "Factor Anti-Popularidad:",
   "filters.nash.strictModeSwitch": "Modo estricto (Filtro duro)",
+  "filters.nash.histogramPassPct": "Con este ajuste, aprox. el {pct}% de las combinaciones posibles quedarían dentro del rango.",
   "filters.nash.minLabel": "CR Mínimo:",
   "filters.nash.maxLabel": "CR Máximo:",
   "filters.nash.viewMapButton": "🗺️ Ver Mapa de Popularidad",

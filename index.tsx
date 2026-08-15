@@ -44,7 +44,7 @@ import { runFilterAudit } from './src/utils/filterAudit';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
-import { getPopularityWeight } from './src/utils/popularity';
+import { getPopularityWeight, getNashScoreAverage } from './src/utils/popularity';
 import { getSumSeriesWithRegression } from './src/utils/regression';
 import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
 import { construirMatrizPares, rankingPares, rankingTrios } from './src/utils/coocurrencia';
@@ -715,6 +715,7 @@ class DataLotto49Advanced {
 
     // FIX: Declared all class properties with their correct types to resolve property-does-not-exist errors.
     selectedNumbers: Set<number>;
+    reducedBaseNumbers: Set<number>;
     selectedStars: Set<number>; // New for Euromillones
     suggestedNumbers: Set<number>; // New for Big Data
     suggestedStars: Set<number>; // New for Euromillones Big Data
@@ -768,6 +769,7 @@ class DataLotto49Advanced {
     officialDrawsPage: number = 1;
     officialDrawsPageSize: number = 20;
     officialDrawsSearchQuery: string = '';
+    nashScoreDistributionCache: { gameId: string; binEdges: number[]; counts: number[] } | null = null;
 
     // New Correlation UI elements
     correlationScoreContainer: HTMLElement | null = null;
@@ -856,6 +858,7 @@ class DataLotto49Advanced {
   constructor() {
     // Estado del sistema
     this.selectedNumbers = new Set();
+    this.reducedBaseNumbers = new Set();
     this.selectedStars = new Set();
     this.suggestedNumbers = new Set();
     this.suggestedStars = new Set();
@@ -909,6 +912,7 @@ class DataLotto49Advanced {
     this.analysisPeriod = 100;
     this.dataLoaded = false;
     this.dataType = 'none';
+    this.nashScoreDistributionCache = null;
     this.toastQueue = [];
     this.isToastShowing = false;
     this.currentToastTimer = null;
@@ -1674,6 +1678,7 @@ class DataLotto49Advanced {
     this.excludedTerminaciones.clear();
     this.excludedTerminacionesSnapshot.clear();
     this.selectedNumbers.clear();
+    this.reducedBaseNumbers.clear();
     this.favoriteNumbers.clear();
     this.hotNumbers.clear();
     this.coldNumbers.clear();
@@ -3555,6 +3560,9 @@ class DataLotto49Advanced {
     if (strictSliders) {
       strictSliders.style.display = this.filters.nashStrictMode ? 'block' : 'none';
     }
+    if (this.filters.nashStrictMode) {
+      this.renderNashScoreHistogram();
+    }
 
     if (this.currentGame.id === 'nacional') {
       // Inputs and select elements
@@ -5161,12 +5169,18 @@ class DataLotto49Advanced {
     for (let i = startNum; i <= this.currentGame.numberRange; i++) {
       const ball = document.querySelector(`.number-ball[data-number="${i}"][data-type="number"]`);
       if (ball) {
-        ball.classList.remove('hot', 'cold', 'absent', 'suggested', 'favorite', 'excluded');
+        ball.classList.remove('hot', 'cold', 'absent', 'suggested', 'favorite', 'excluded', 'base-reduced');
         
         if (this.selectedNumbers.has(i)) {
           ball.classList.add('selected');
         } else {
           ball.classList.remove('selected');
+        }
+
+        if (this.reducedBaseNumbers.has(i)) {
+          ball.classList.add('base-reduced');
+        } else {
+          ball.classList.remove('base-reduced');
         }
 
         const icon = ball.querySelector('.number-icon');
@@ -5531,6 +5545,7 @@ class DataLotto49Advanced {
     }
 
     this.currentGame = GAMES[gameId];
+    this.nashScoreDistributionCache = null;
     
     // Load filters for the new game
     this.filters = this.normalizeFilters(this.gameFilters[gameId], gameId);
@@ -7335,6 +7350,9 @@ class DataLotto49Advanced {
       if (strictSliders) {
         strictSliders.style.display = isChecked ? 'block' : 'none';
       }
+      if (isChecked) {
+        this.renderNashScoreHistogram();
+      }
       this.saveState();
     });
 
@@ -7345,6 +7363,9 @@ class DataLotto49Advanced {
         const displayEl = document.getElementById(`${id}Value`);
         if (displayEl) displayEl.textContent = el.value;
         this.updateFilterStateFromUI();
+        if (this.filters.nashStrictMode) {
+          this.renderNashScoreHistogram();
+        }
       });
     };
 
@@ -7885,6 +7906,119 @@ class DataLotto49Advanced {
     }
 
     this.toggleModal('popularityMapModal', true);
+  }
+
+  computeNashScoreDistribution(): { gameId: string; binEdges: number[]; counts: number[] } {
+    const game = this.currentGame;
+    if (this.nashScoreDistributionCache?.gameId === game.id) return this.nashScoreDistributionCache;
+
+    const N = game.numberRange;
+    const k = game.maxNumbers;
+    const samples = 20000;
+    const scores: number[] = [];
+    for (let i = 0; i < samples; i++) {
+      const pool = Array.from({ length: N }, (_, idx) => idx + 1);
+      const combo: number[] = [];
+      for (let j = 0; j < k; j++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        combo.push(pool[idx]);
+        pool.splice(idx, 1);
+      }
+      scores.push(getNashScoreAverage(combo, N));
+    }
+    scores.sort((a, b) => a - b);
+
+    const binSize = 0.2;
+    const minScore = Math.floor(scores[0] / binSize) * binSize;
+    const maxScore = Math.ceil(scores[scores.length - 1] / binSize) * binSize;
+    const binEdges: number[] = [];
+    for (let b = minScore; b <= maxScore; b += binSize) binEdges.push(Number(b.toFixed(2)));
+
+    const counts = new Array(binEdges.length - 1).fill(0);
+    scores.forEach(s => {
+      let idx = Math.floor((s - minScore) / binSize);
+      if (idx >= counts.length) idx = counts.length - 1;
+      if (idx < 0) idx = 0;
+      counts[idx]++;
+    });
+
+    const result = { gameId: game.id, binEdges, counts };
+    this.nashScoreDistributionCache = result;
+    return result;
+  }
+
+  renderNashScoreHistogram() {
+    const container = document.getElementById('nashScoreHistogramContainer');
+    if (!container || !this.filters.nashStrictMode) return;
+
+    const { binEdges, counts } = this.computeNashScoreDistribution();
+    const maxCount = Math.max(...counts);
+    const minScore = binEdges[0];
+    const maxScore = binEdges[binEdges.length - 1];
+
+    const svgWidth = 800;
+    const svgHeight = 260;
+    const marginTop = 20;
+    const marginBottom = 40;
+    const marginLeft = 45;
+    const marginRight = 20;
+    const chartW = svgWidth - marginLeft - marginRight;
+    const chartH = svgHeight - marginTop - marginBottom;
+
+    const scaleX = (score: number) => marginLeft + ((score - minScore) / (maxScore - minScore)) * chartW;
+    const barWidth = chartW / counts.length;
+
+    const barsHTML = counts.map((c, i) => {
+      const barH = (c / maxCount) * chartH;
+      const x = marginLeft + i * barWidth;
+      const y = marginTop + chartH - barH;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barWidth - 1).toFixed(1)}" height="${barH.toFixed(1)}" fill="#94a3b8" opacity="0.75" />`;
+    }).join('');
+
+    const minLine = this.filters.nashMinScore ?? 0;
+    const maxLine = this.filters.nashMaxScore ?? 10;
+    const minX = scaleX(Math.max(minScore, minLine));
+    const maxX = scaleX(Math.min(maxScore, maxLine));
+
+    const thresholdLinesHTML = `
+      <line x1="${minX.toFixed(1)}" y1="${marginTop}" x2="${minX.toFixed(1)}" y2="${marginTop + chartH}" stroke="#dc2626" stroke-width="2" stroke-dasharray="4" />
+      <line x1="${maxX.toFixed(1)}" y1="${marginTop}" x2="${maxX.toFixed(1)}" y2="${marginTop + chartH}" stroke="#dc2626" stroke-width="2" stroke-dasharray="4" />
+      <rect x="${minX.toFixed(1)}" y="${marginTop}" width="${(maxX - minX).toFixed(1)}" height="${chartH}" fill="#10b981" opacity="0.12" />
+    `;
+
+    const axesHTML = `
+      <line x1="${marginLeft}" y1="${marginTop}" x2="${marginLeft}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+      <line x1="${marginLeft}" y1="${marginTop + chartH}" x2="${svgWidth - marginRight}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
+    `;
+
+    const xTicksHTML = `
+      <text x="${marginLeft}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="start">${minScore.toFixed(1)}</text>
+      <text x="${(marginLeft + chartW / 2).toFixed(1)}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="middle">${((minScore + maxScore) / 2).toFixed(1)}</text>
+      <text x="${svgWidth - marginRight}" y="${svgHeight - 12}" font-size="11" fill="#64748b" text-anchor="end">${maxScore.toFixed(1)}</text>
+    `;
+
+    // % de combinaciones simuladas dentro del rango [nashMinScore, nashMaxScore]
+    const totalSamples = counts.reduce((a, b) => a + b, 0);
+    let passCount = 0;
+    counts.forEach((c, i) => {
+      const binCenter = binEdges[i];
+      if (binCenter >= minLine && binCenter <= maxLine) passCount += c;
+    });
+    const passPct = totalSamples > 0 ? Math.round((passCount / totalSamples) * 100) : 0;
+
+    container.innerHTML = `
+      <div style="width: 100%; overflow-x: auto;">
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 300px; display: block; background: #ffffff; font-family: system-ui, sans-serif;">
+          ${axesHTML}
+          ${barsHTML}
+          ${thresholdLinesHTML}
+          ${xTicksHTML}
+        </svg>
+      </div>
+      <p style="text-align: center; font-size: 0.85rem; color: #475569; margin-top: 6px; font-weight: 600;">
+        ${t('filters.nash.histogramPassPct', { pct: passPct })}
+      </p>
+    `;
   }
 
   // ===== FILTROS (Reactivados y completos) =====
@@ -8444,6 +8578,7 @@ class DataLotto49Advanced {
   clearSelections(fullClear: boolean) {
     this.selectedNumbers.clear();
     this.selectedStars.clear();
+    this.reducedBaseNumbers.clear();
     this.suggestedNumbers.clear();
     this.suggestedStars.clear();
     document.querySelectorAll('.number-ball.figure-selection').forEach(b => b.classList.remove('figure-selection'));
@@ -8474,7 +8609,7 @@ class DataLotto49Advanced {
       this.favoriteStars.clear();
       
       document.querySelectorAll('.number-ball').forEach(b => {
-          b.classList.remove('excluded', 'hot', 'cold', 'absent', 'suggested', 'favorite');
+          b.classList.remove('excluded', 'hot', 'cold', 'absent', 'suggested', 'favorite', 'base-reduced');
           const icon = b.querySelector('.number-icon');
           if (icon) icon.textContent = '';
       });
@@ -8482,6 +8617,7 @@ class DataLotto49Advanced {
     }
     document.querySelectorAll('.number-ball.selected').forEach(b => b.classList.remove('selected'));
     document.querySelectorAll('.number-ball.suggested').forEach(b => b.classList.remove('suggested'));
+    document.querySelectorAll('.number-ball.base-reduced').forEach(b => b.classList.remove('base-reduced'));
     this.clearGridHighlights();
     this.updateSelectedDisplay();
     this.updateStats();
@@ -8821,6 +8957,7 @@ class DataLotto49Advanced {
           this.showLoading('Generando combinación reducida...');
           
           const baseNumbersSorted = Array.from(this.selectedNumbers).sort((a, b) => a - b);
+          this.reducedBaseNumbers = new Set(baseNumbersSorted);
           selectedSystemName = system.name;
           
           const selectedStarsArr = Array.from(this.selectedStars);
@@ -9169,8 +9306,13 @@ class DataLotto49Advanced {
     // Highlight picks
     if (finalCombinations.length > 0) {
         // Set as active selection
-        this.selectedNumbers = new Set(finalCombinations[0]);
-        this.selectedStars = new Set(starsCombinations[0] || []);
+        if (strategy === 'reducida') {
+            this.selectedNumbers = new Set(this.reducedBaseNumbers);
+            this.selectedStars = new Set(starsCombinations[0] || []);
+        } else {
+            this.selectedNumbers = new Set(finalCombinations[0]);
+            this.selectedStars = new Set(starsCombinations[0] || []);
+        }
 
         finalCombinations[0].forEach(num => {
             const ball = document.querySelector(`.number-ball[data-number="${num}"][data-type="number"]`);

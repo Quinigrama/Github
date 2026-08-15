@@ -539,6 +539,51 @@ body.dark-mode .selection-mode-label {
   100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); border-color: rgba(37, 99, 235, 1); }
 }
 
+.number-ball.hot {
+  border-color: #ff5722;
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  color: #d32f2f;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
+}
+
+.number-ball.cold {
+  border-color: #03a9f4;
+  background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
+  color: #0277bd;
+  box-shadow: 0 0 10px rgba(3, 169, 244, 0.3);
+}
+
+.number-ball.absent {
+  border-color: #78909c;
+  background: linear-gradient(135deg, #cfd8dc, #b0bec5);
+  color: #37474f;
+  box-shadow: 0 0 10px rgba(120, 144, 156, 0.3);
+}
+
+/* NEW FAVORITE BALL STYLE */
+.number-ball.favorite {
+    border-color: #fbc02d;
+    background: linear-gradient(135deg, #fff9c4, #fff59d);
+    color: #f57f17;
+    box-shadow: 0 0 12px rgba(253, 216, 53, 0.4);
+    z-index: 3; /* Higher than suggested */
+}
+/* Allow combo suggested + favorite */
+.number-ball.favorite.suggested {
+    border-color: var(--bigdata); /* Keep suggested border to show Big Data hit */
+    background: linear-gradient(135deg, #fff9c4, #e3f2fd); /* Blend gold and blue */
+}
+
+/* Updated EXCLUDED style for better visibility */
+.number-ball.excluded {
+  background: #616161; /* Darker gray */
+  border-color: #212121;
+  color: #e0e0e0;
+  opacity: 1; /* Removed transparency to make it clearer */
+  cursor: not-allowed;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Inner shadow for "pressed/disabled" look */
+}
+
 .number-ball.selected {
   background: linear-gradient(135deg, #ffd700, #ffa000);
   border-color: #ff8f00;
@@ -587,49 +632,9 @@ body.dark-mode .selection-mode-label {
     color: #d32f2f;
 }
 
-.number-ball.hot {
-  border-color: #ff5722;
-  background: linear-gradient(135deg, #ffebee, #ffcdd2);
-  color: #d32f2f;
-  box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
-}
-
-.number-ball.cold {
-  border-color: #03a9f4;
-  background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
-  color: #0277bd;
-  box-shadow: 0 0 10px rgba(3, 169, 244, 0.3);
-}
-
-.number-ball.absent {
-  border-color: #78909c;
-  background: linear-gradient(135deg, #cfd8dc, #b0bec5);
-  color: #37474f;
-  box-shadow: 0 0 10px rgba(120, 144, 156, 0.3);
-}
-
-/* NEW FAVORITE BALL STYLE */
-.number-ball.favorite {
-    border-color: #fbc02d;
-    background: linear-gradient(135deg, #fff9c4, #fff59d);
-    color: #f57f17;
-    box-shadow: 0 0 12px rgba(253, 216, 53, 0.4);
-    z-index: 3; /* Higher than suggested */
-}
-/* Allow combo suggested + favorite */
-.number-ball.favorite.suggested {
-    border-color: var(--bigdata); /* Keep suggested border to show Big Data hit */
-    background: linear-gradient(135deg, #fff9c4, #e3f2fd); /* Blend gold and blue */
-}
-
-/* Updated EXCLUDED style for better visibility */
-.number-ball.excluded {
-  background: #616161; /* Darker gray */
-  border-color: #212121;
-  color: #e0e0e0;
-  opacity: 1; /* Removed transparency to make it clearer */
-  cursor: not-allowed;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Inner shadow for "pressed/disabled" look */
+.number-ball.base-reduced {
+  outline: 3px dashed #0d9488;
+  outline-offset: 2px;
 }
 
 .number-ball .number-icon {

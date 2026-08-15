@@ -136,6 +136,7 @@
   "filters.nash.switch": "Nash Optimization (Anti-Popular)",
   "filters.nash.label": "Anti-Popularity Factor:",
   "filters.nash.strictModeSwitch": "Strict Mode (Hard filter)",
+  "filters.nash.histogramPassPct": "With this setting, approx. {pct}% of possible combinations would fall within the range.",
   "filters.nash.minLabel": "Min CR:",
   "filters.nash.maxLabel": "Max CR:",
   "filters.nash.viewMapButton": "🗺️ View Popularity Map",
