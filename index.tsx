@@ -1524,6 +1524,46 @@ class DataLotto49Advanced {
     );
   }
 
+  getFilterAuditDisplayName(key: string, fallbackName?: string): string {
+    const keyMap: Record<string, string> = {
+      sum: 'filters.sumaTotal.titulo',
+      terminacionesDistintas: 'filters.variedadTerm.titulo',
+      parImpar: 'filters.parImpar.titulo',
+      bajosAltos: 'filters.bajosAltos.titulo',
+      primos: 'filters.primos.titulo',
+      distancia: 'filters.distancia.titulo',
+      sumaDigitos: 'filters.sumaDigitos.titulo',
+      consecutivos: 'filters.consecutivos.titulo',
+      agrupDecenas: 'filters.decenas.titulo',
+      desviacion: 'filters.desviacion.titulo',
+      positionRange: 'filter.positionRange.title',
+      entropyTerminaciones: 'filters.entropiaTerm.titulo',
+      entropyIntervalos: 'filters.entropiaInt.titulo',
+      geometric: 'filters.geometricos.titulo',
+      excluirDecenas: 'filters.excluirDecenas.titulo',
+      excluirTerminaciones: 'filters.excluirTerm.titulo',
+      excluirStarDecades: 'filters.excluirDecenas.titulo',
+      starSum: 'filters.starSuma.titulo',
+      starParImpar: 'filters.starParImpar.titulo',
+      starBajosAltos: 'filters.starBajosAltos.titulo',
+      starSumaDigitos: 'filters.starSumaDigitos.titulo',
+      starPrimos: 'filters.starPrimos.titulo',
+      starDistancia: 'filters.starDistancia.titulo',
+      starConsecutivos: 'filters.starConsecutivos.titulo',
+      starPositionRange: 'filter.positionRange.starTitle',
+      excluirStarTerminaciones: 'filters.excluirTerm.titulo'
+    };
+
+    const i18nKey = keyMap[key];
+    if (i18nKey) {
+      const translated = t(i18nKey);
+      if (translated && !translated.startsWith('[')) {
+        return translated;
+      }
+    }
+    return fallbackName || key;
+  }
+
   displayFilterFailureDiagnostics() {
     const ticketDiv = document.getElementById('ticket');
     if (!ticketDiv) return;
@@ -1599,10 +1639,12 @@ class DataLotto49Advanced {
           recommendation = t('conflict.rec.star');
         }
 
+        const filterTitle = this.getFilterAuditDisplayName(item.key, item.name);
+
         filtersHtml += `
           <div style="background: ${isCritical ? '#fff5f5' : '#fffaf5'}; border: 1px solid ${isCritical ? '#fecaca' : '#fed7aa'}; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
-              <span style="font-weight: bold; color: #1e293b;">${item.name}</span>
+              <span style="font-weight: bold; color: #1e293b;">${filterTitle}</span>
               <span style="font-weight: 900; color: ${barColor}">${t('conflict.aprueban', { percent: item.percent })}</span>
             </div>
             <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
@@ -2055,7 +2097,6 @@ class DataLotto49Advanced {
       this.updateUIFromFilterState();
       this.updateFilterBadgesFromAudit();
       this.showToast(t('restaurarFiltros.sinHistorico'), 'warning');
-      await this.generateCombinations();
       return;
     }
 
@@ -2083,7 +2124,6 @@ class DataLotto49Advanced {
       } else {
         this.showToast(t('conflict.resolutorAgotado'), 'error');
       }
-      await this.generateCombinations();
     }
   }
 
@@ -7317,6 +7357,12 @@ class DataLotto49Advanced {
       // el HTML generado y no se refrescan solos — hay que volver a renderizarlos aquí.
       this.renderFilterOptions();
       this.initFilterInfoButtons();
+      this.updateFilterBadgesFromAudit();
+
+      const ticketDiv = document.getElementById('ticket');
+      if (ticketDiv && ticketDiv.classList.contains('conflict')) {
+        this.displayFilterFailureDiagnostics();
+      }
     });
 
     // Notification Config Modal Events
