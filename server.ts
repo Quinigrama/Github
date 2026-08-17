@@ -142,6 +142,15 @@ async function startServer() {
             userId,
             timestamp: timestamp || new Date().toISOString()
           };
+
+          // Campos opcionales: solo se incluyen si vienen presentes en el payload,
+          // para no ensuciar el body enviado a Sheets con "undefined" cuando no aplican.
+          if (payload.favoriteNumbers && Array.isArray(payload.favoriteNumbers) && payload.favoriteNumbers.length > 0) {
+            sheetsBody.favoriteNumbers = payload.favoriteNumbers;
+          }
+          if (payload.drawDate) {
+            sheetsBody.drawDate = payload.drawDate;
+          }
         } else if (event === "validate_ticket") {
           sheetsBody = {
             event: "validate_ticket",
