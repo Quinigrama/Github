@@ -1863,15 +1863,14 @@ class DataLotto49Advanced {
 
     const histSums = this.historicalData.map((d: any) => d.numbers.reduce((a: number, b: number) => a + b, 0)).sort((a: number, b: number) => a - b);
     const histPrimes = this.historicalData.map((d: any) => d.numbers.filter((n: number) => this.primes.has(n)).length).sort((a: number, b: number) => a - b);
-    const histDistances = this.historicalData.map((d: any) => {
+    const histDistances: number[] = [];
+    this.historicalData.forEach((d: any) => {
       const s = [...d.numbers].sort((a: number, b: number) => a - b);
-      let minD = Infinity;
       for (let i = 0; i < s.length - 1; i++) {
-        const diff = s[i + 1] - s[i];
-        if (diff < minD) minD = diff;
+        histDistances.push(s[i + 1] - s[i]);
       }
-      return minD === Infinity ? 1 : minD;
-    }).sort((a: number, b: number) => a - b);
+    });
+    histDistances.sort((a: number, b: number) => a - b);
 
     const histDigitSums = this.historicalData.map((d: any) => d.numbers.reduce((s: number, n: number) => s + (n < 10 ? n : Math.floor(n / 10) + (n % 10)), 0)).sort((a: number, b: number) => a - b);
 

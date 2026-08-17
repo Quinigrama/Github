@@ -313,17 +313,16 @@ export function isValidCombination(
       if (primesCount < filters.primos.min || primesCount > filters.primos.max) return false;
   }
 
-  // 6. DISTANCIA: comprobar SOLO la distancia mínima de la combinación, coincidiendo
-  // con la definición usada al calcular el rango histórico en applyPercentileFilterLevel
-  // (que calcula el mínimo por sorteo, no todas las distancias individuales).
+  // 6. DISTANCIA: cada distancia entre números consecutivos (n1-n2, n2-n3, ...) debe
+  // caer dentro de [filters.distancia.min, filters.distancia.max]. El rango histórico
+  // ahora se calcula sobre TODAS las distancias individuales (ver applyPercentileFilterLevel
+  // en index.tsx), no solo el mínimo por sorteo.
   if (filters.distancia) {
       const sortedCombo = [...combination].sort((a,b) => a-b);
-      let minDist = Infinity;
       for (let i = 0; i < sortedCombo.length - 1; i++) {
           const diff = sortedCombo[i+1] - sortedCombo[i];
-          if (diff < minDist) minDist = diff;
+          if (diff < filters.distancia.min || diff > filters.distancia.max) return false;
       }
-      if (minDist !== Infinity && (minDist < filters.distancia.min || minDist > filters.distancia.max)) return false;
   }
 
   // 7. SUMA DÍGITOS: moderately cheap single-pass
