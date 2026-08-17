@@ -1763,8 +1763,10 @@ class DataLotto49Advanced {
       this.updateFilterBadgesFromAudit();
       this.showToast(t('conflict.resolutorExito', { level: 1 }), 'success');
       const ticketDiv = document.getElementById('ticket');
-      if (ticketDiv) ticketDiv.classList.remove('show', 'conflict');
-      await this.generateCombinations();
+      if (ticketDiv) {
+        ticketDiv.classList.remove('show', 'conflict');
+        ticketDiv.innerHTML = '';
+      }
       return;
     }
 
@@ -1783,22 +1785,13 @@ class DataLotto49Advanced {
       const ticketDiv = document.getElementById('ticket');
       if (ticketDiv) {
         ticketDiv.classList.remove('show', 'conflict');
-        ticketDiv.innerHTML = `
-          <div class="ticket-header">
-            <h4>${t('ticket.tituloBoleto')}</h4>
-            <p id="ticketDate"></p>
-          </div>
-          <div style="padding: 20px; text-align: center; color: var(--dark); font-weight: bold;">
-            ⚡ ${t('main.iniciandoLoading')}
-          </div>
-        `;
+        ticketDiv.innerHTML = '';
       }
       if (resultado.success) {
         this.showToast(t('conflict.resolutorExito', { level: resultado.levelUsed }), 'success');
       } else {
         this.showToast(t('conflict.resolutorAgotado'), 'error');
       }
-      await this.generateCombinations();
     }
   }
 
@@ -9090,7 +9083,14 @@ class DataLotto49Advanced {
 
     } catch (error: any) {
         this.showToast(t('toast.errorGenerico', { message: error.message }), 'error');
-        if (error.message && error.message.includes('No se encontró ninguna combinación')) {
+        const esErrorDeCombinacionNoEncontrada = error.message && (
+            error.message.includes('No se encontró') ||
+            error.message.includes('No se encontraron') ||
+            error.message.includes('no se encontró') ||
+            error.message.includes('no se encontraron') ||
+            error.message.includes('flexibilizar los filtros')
+        );
+        if (esErrorDeCombinacionNoEncontrada) {
             try {
                 this.displayFilterFailureDiagnostics();
             } catch (diagErr) {
