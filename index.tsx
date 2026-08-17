@@ -962,7 +962,12 @@ class DataLotto49Advanced {
 
     let anonId = localStorage.getItem('datalotto_anon_id');
     if (!anonId) {
-        anonId = 'usr_' + Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
+        const alfabeto = '0123456789abcdefghijklmnopqrstuvwxyz';
+        let codigo = '';
+        for (let i = 0; i < 8; i++) {
+            codigo += alfabeto[Math.floor(Math.random() * alfabeto.length)];
+        }
+        anonId = 'usr_' + codigo;
         localStorage.setItem('datalotto_anon_id', anonId);
     }
     this.anonymousUserId = anonId;
