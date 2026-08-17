@@ -114,18 +114,18 @@ export function runFilterAudit(
       if (primesCount >= filters.primos.min && primesCount <= filters.primos.max) results.primos.passed++;
     }
 
-    // Distancia
+    // Distancia: comprobar SOLO la distancia minima de la combinacion, coincidiendo con
+    // la definicion usada al calcular el rango historico (applyPercentileFilterLevel) y
+    // con la validacion real en combinationValidator.ts.
     if (filters.distancia) {
       results.distancia.count++;
       const sortedCombo = [...combo].sort((a, b) => a - b);
-      let passDist = true;
+      let minDist = Infinity;
       for (let j = 0; j < sortedCombo.length - 1; j++) {
         const diff = sortedCombo[j + 1] - sortedCombo[j];
-        if (diff < filters.distancia.min || diff > filters.distancia.max) {
-          passDist = false;
-          break;
-        }
+        if (diff < minDist) minDist = diff;
       }
+      const passDist = minDist === Infinity || (minDist >= filters.distancia.min && minDist <= filters.distancia.max);
       if (passDist) results.distancia.passed++;
     }
 
