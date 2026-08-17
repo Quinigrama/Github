@@ -9420,6 +9420,7 @@ class DataLotto49Advanced {
     // Telemetry
     const metrics = this.calculateTicketMetrics(savedTicketCopy);
     const activeFavorites = Array.from(this.favoriteNumbers || []);
+    const activeSecondaryFavorites = Array.from(this.favoriteStars || []);
     this.sendTelemetry('save_ticket', {
         gameId: metrics.gameId,
         combinationsCount: metrics.combinationsCount,
@@ -9427,7 +9428,8 @@ class DataLotto49Advanced {
         numbersCount: metrics.numbersCount,
         starsCount: metrics.starsCount,
         drawDate: savedTicketCopy.drawDate || 'Desconocida',
-        favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined
+        favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined,
+        favoriteSecondaryNumbers: activeSecondaryFavorites.length > 0 ? activeSecondaryFavorites : undefined
     });
 
     this.currentTicket = null;
@@ -14765,6 +14767,7 @@ contrato legal ni gestiona fondos monetarios.
     // Telemetry - Explicit ticket save to Peña
     const metrics = this.calculateTicketMetrics(this.currentTicket);
     const activeFavorites = Array.from(this.favoriteNumbers || []);
+    const activeSecondaryFavorites = Array.from(this.favoriteStars || []);
     this.sendTelemetry('save_ticket', {
       gameId: metrics.gameId,
       combinationsCount: metrics.combinationsCount,
@@ -14772,7 +14775,8 @@ contrato legal ni gestiona fondos monetarios.
       numbersCount: metrics.numbersCount,
       starsCount: metrics.starsCount,
       drawDate: this.currentTicket.drawDate || 'Desconocida',
-      favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined
+      favoriteNumbers: activeFavorites.length > 0 ? activeFavorites : undefined,
+      favoriteSecondaryNumbers: activeSecondaryFavorites.length > 0 ? activeSecondaryFavorites : undefined
     });
 
     // Add visual alert
