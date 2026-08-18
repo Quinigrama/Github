@@ -4986,28 +4986,20 @@ class DataLotto49Advanced {
 
     const chiSquareStarsItem = document.getElementById('chiSquareStarsItem');
     const biasDetectedStarsItem = document.getElementById('biasDetectedStarsItem');
-    const chiSquareCombinedItem = document.getElementById('chiSquareCombinedItem');
-    const biasDetectedCombinedItem = document.getElementById('biasDetectedCombinedItem');
 
     const chiSquareStarsEl = document.getElementById('chiSquareStars');
     const biasDetectedStarsEl = document.getElementById('biasDetectedStars');
-    const chiSquareCombinedEl = document.getElementById('chiSquareCombined');
-    const biasDetectedCombinedEl = document.getElementById('biasDetectedCombined');
 
     const hasStars = this.currentGame.maxStars > 0;
 
     if (hasStars) {
       if (chiSquareStarsItem) chiSquareStarsItem.style.display = '';
       if (biasDetectedStarsItem) biasDetectedStarsItem.style.display = '';
-      if (chiSquareCombinedItem) chiSquareCombinedItem.style.display = '';
-      if (biasDetectedCombinedItem) biasDetectedCombinedItem.style.display = '';
       if (chiSquareLabelEl) chiSquareLabelEl.textContent = t('analyzer.chiSquareNumeros');
       if (biasDetectedLabelEl) biasDetectedLabelEl.textContent = t('analyzer.sesgoDetectadoNumeros');
     } else {
       if (chiSquareStarsItem) chiSquareStarsItem.style.display = 'none';
       if (biasDetectedStarsItem) biasDetectedStarsItem.style.display = 'none';
-      if (chiSquareCombinedItem) chiSquareCombinedItem.style.display = 'none';
-      if (biasDetectedCombinedItem) biasDetectedCombinedItem.style.display = 'none';
       if (chiSquareLabelEl) chiSquareLabelEl.textContent = t('analyzer.chiCuadrado');
       if (biasDetectedLabelEl) biasDetectedLabelEl.textContent = t('analyzer.sesgoDetectado');
     }
@@ -5041,7 +5033,7 @@ class DataLotto49Advanced {
         biasEl.classList.toggle('invalid', biasDetectedNumbers);
         biasEl.classList.toggle('valid', !biasDetectedNumbers);
 
-        // 2. Chi-Square for Stars & Combined (if applicable)
+        // 2. Chi-Square for Stars (if applicable)
         if (hasStars) {
             const isGordo = this.currentGame.id === 'gordo';
             const minStar = isGordo ? 0 : 1;
@@ -5064,19 +5056,6 @@ class DataLotto49Advanced {
                 biasDetectedStarsEl.classList.toggle('invalid', biasDetectedStars);
                 biasDetectedStarsEl.classList.toggle('valid', !biasDetectedStars);
             }
-
-            // 3. Combined Chi-Square
-            const chiSquareCombinedStat = chiSquareNumStat + chiSquareStarStat;
-            const dfCombined = dfNumbers + dfStars;
-            const criticalValueCombined = this.chiSquareCriticalValue(dfCombined, 1.645);
-            const biasDetectedCombined = chiSquareCombinedStat > criticalValueCombined;
-
-            if (chiSquareCombinedEl) chiSquareCombinedEl.textContent = chiSquareCombinedStat.toFixed(2);
-            if (biasDetectedCombinedEl) {
-                biasDetectedCombinedEl.textContent = biasDetectedCombined ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
-                biasDetectedCombinedEl.classList.toggle('invalid', biasDetectedCombined);
-                biasDetectedCombinedEl.classList.toggle('valid', !biasDetectedCombined);
-            }
         }
     } else if (chiSquareEl && biasEl) {
         chiSquareEl.textContent = 'N/A';
@@ -5087,11 +5066,6 @@ class DataLotto49Advanced {
         if (biasDetectedStarsEl) {
             biasDetectedStarsEl.textContent = t('analyzer.datosInsuficientes');
             biasDetectedStarsEl.classList.remove('valid', 'invalid');
-        }
-        if (chiSquareCombinedEl) chiSquareCombinedEl.textContent = 'N/A';
-        if (biasDetectedCombinedEl) {
-            biasDetectedCombinedEl.textContent = t('analyzer.datosInsuficientes');
-            biasDetectedCombinedEl.classList.remove('valid', 'invalid');
         }
     }
     
