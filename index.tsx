@@ -8930,16 +8930,11 @@ class DataLotto49Advanced {
     const multipleOptions = document.getElementById('multipleNumbersOptions') as HTMLElement;
     const reducedOptions = document.getElementById('reducedOptions') as HTMLElement;
     const realTimeStatsSection = document.getElementById('realTimeStatsSection');
-    const generateBtn = document.getElementById('generateBtn');
 
     if(winningOptions) winningOptions.style.display = strategy === 'winning' ? 'block' : 'none';
     if(multipleOptions) multipleOptions.style.display = strategy === 'multiple' ? 'block' : 'none';
     if(reducedOptions) reducedOptions.style.display = strategy === 'reducida' ? 'block' : 'none';
     if(realTimeStatsSection) realTimeStatsSection.style.display = strategy === 'simple' ? 'block' : 'none';
-    
-    if (generateBtn) {
-        generateBtn.innerHTML = `<span>${t('strategy.generarBtn')}</span>`;
-    }
     
     this.clearSelections(false);
     this.updateSelectionTitle();
