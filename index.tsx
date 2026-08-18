@@ -9853,6 +9853,8 @@ class DataLotto49Advanced {
       );
 
       if (ticket.gameId === 'powerball') {
+        const isMultipleTicket = ticket.strategy === 'multiple' ||
+          (ticket.combinations.length > 0 && ticket.combinations[0].length > (GAMES[ticket.gameId]?.maxNumbers || 5));
         const superset = ticket.combinations[0] || [];
         const redSuperset = ticket.stars ? ticket.stars[0] : [1];
         const costData = this.calculateTicketCost(ticket);
@@ -9875,13 +9877,9 @@ class DataLotto49Advanced {
             </tr>
           `).join('');
 
-          combosHTML = `
-            <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-                <span style="background: #be123c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-              </div>
-
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#e11d48' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
@@ -9889,6 +9887,38 @@ class DataLotto49Advanced {
                   ${redSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningRedSet.has(r) ? '#9f1239' : '#fda4af'}; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
+              const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
+              const hitClass = (hits >= 3 || (hits >= 1 && starHits >= 1) || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+
+              const comboBalls = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#e11d48' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningRedSet.has(r) ? '#9f1239' : '#fda4af'}; color: white; font-weight: bold;">${r}</div>`).join('');
+
+              return `
+                <div class="saved-combination" style="margin-bottom: 8px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">${t('tickets.masPB')}</span>
+                    ${starBalls}
+                  </div>
+                  <div class="hit-count ${hitClass}">${hits} + ${starHits}🔴 ${t('tickets.aciertos')}</div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+                <span style="background: #be123c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+              </div>
+
+              ${combinationsListHTML}
 
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
@@ -9911,11 +9941,9 @@ class DataLotto49Advanced {
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
-          combosHTML = `
-            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              </div>
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
@@ -9923,11 +9951,37 @@ class DataLotto49Advanced {
                   ${redSuperset.map(r => `<div class="saved-combination-number" style="background: #e11d48; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+              const comboBalls = combo.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: #e11d48; color: white; font-weight: bold;">${r}</div>`).join('');
+              return `
+                <div class="saved-combination" style="margin-bottom: 6px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #be123c; font-weight: bold; align-self: center;">${t('tickets.masPB')}</span>
+                    ${starBalls}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #9f1239; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.powerball.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              </div>
+              ${combinationsListHTML}
             </div>
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'megamillions') {
+        const isMultipleTicket = ticket.strategy === 'multiple' ||
+          (ticket.combinations.length > 0 && ticket.combinations[0].length > (GAMES[ticket.gameId]?.maxNumbers || 5));
         const superset = ticket.combinations[0] || [];
         const goldSuperset = ticket.stars ? ticket.stars[0] : [1];
         const costData = this.calculateTicketCost(ticket);
@@ -9950,13 +10004,9 @@ class DataLotto49Advanced {
             </tr>
           `).join('');
 
-          combosHTML = `
-            <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-                <span style="background: #ca8a04; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-              </div>
-
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#eab308' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
@@ -9964,6 +10014,38 @@ class DataLotto49Advanced {
                   ${goldSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningGoldSet.has(r) ? '#854d0e' : '#fde047'}; color: ${winningGoldSet.has(r) ? '#fff' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
+              const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
+              const hitClass = (hits >= 3 || (hits >= 1 && starHits >= 1) || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+
+              const comboBalls = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#eab308' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningGoldSet.has(r) ? '#854d0e' : '#fde047'}; color: ${winningGoldSet.has(r) ? '#fff' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('');
+
+              return `
+                <div class="saved-combination" style="margin-bottom: 8px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">${t('tickets.masMB')}</span>
+                    ${starBalls}
+                  </div>
+                  <div class="hit-count ${hitClass}">${hits} + ${starHits}🟡 ${t('tickets.aciertos')}</div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+                <span style="background: #ca8a04; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+              </div>
+
+              ${combinationsListHTML}
 
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
@@ -9986,11 +10068,9 @@ class DataLotto49Advanced {
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
-          combosHTML = `
-            <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              </div>
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
@@ -9998,11 +10078,37 @@ class DataLotto49Advanced {
                   ${goldSuperset.map(r => `<div class="saved-combination-number" style="background: #eab308; color: white; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+              const comboBalls = combo.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: #eab308; color: white; font-weight: bold;">${r}</div>`).join('');
+              return `
+                <div class="saved-combination" style="margin-bottom: 6px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #a16207; font-weight: bold; align-self: center;">${t('tickets.masMB')}</span>
+                    ${starBalls}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.megamillions.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              </div>
+              ${combinationsListHTML}
             </div>
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'euromillones') {
+        const isMultipleTicket = ticket.strategy === 'multiple' ||
+          (ticket.combinations.length > 0 && ticket.combinations[0].length > (GAMES[ticket.gameId]?.maxNumbers || 5));
         const superset = ticket.combinations[0] || [];
         const starSuperset = ticket.stars ? ticket.stars[0] : [1, 2];
         const costData = this.calculateTicketCost(ticket);
@@ -10025,13 +10131,9 @@ class DataLotto49Advanced {
             </tr>
           `).join('');
 
-          combosHTML = `
-            <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-                <span style="background: #eab308; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-              </div>
-
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#2563eb' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
@@ -10039,6 +10141,38 @@ class DataLotto49Advanced {
                   ${starSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningStarSet.has(r) ? '#eab308' : '#fef08a'}; color: ${winningStarSet.has(r) ? '#000' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
+              const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
+              const hitClass = (hits >= 2 || (hits >= 1 && starHits >= 2) || starHits >= 2) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1, 2]);
+
+              const comboBalls = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#2563eb' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningStarSet.has(r) ? '#eab308' : '#fef08a'}; color: ${winningStarSet.has(r) ? '#000' : '#854d0e'}; font-weight: bold;">${r}</div>`).join('');
+
+              return `
+                <div class="saved-combination" style="margin-bottom: 8px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">${t('tickets.masEstrella')}</span>
+                    ${starBalls}
+                  </div>
+                  <div class="hit-count ${hitClass}">${hits} + ${starHits}⭐ ${t('tickets.aciertos')}</div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+                <span style="background: #eab308; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+              </div>
+
+              ${combinationsListHTML}
 
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
@@ -10061,11 +10195,9 @@ class DataLotto49Advanced {
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
-          combosHTML = `
-            <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              </div>
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
@@ -10073,11 +10205,37 @@ class DataLotto49Advanced {
                   ${starSuperset.map(r => `<div class="saved-combination-number" style="background: #eab308; color: #000; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1, 2]);
+              const comboBalls = combo.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: #eab308; color: #000; font-weight: bold;">${r}</div>`).join('');
+              return `
+                <div class="saved-combination" style="margin-bottom: 6px;">
+                  <div class="saved-combination-content" style="flex-wrap: gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #d97706; font-weight: bold; align-self: center;">${t('tickets.masEstrella')}</span>
+                    ${starBalls}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #854d0e; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.euromillones.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              </div>
+              ${combinationsListHTML}
             </div>
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'eurodreams') {
+        const isMultipleTicket = ticket.strategy === 'multiple' ||
+          (ticket.combinations.length > 0 && ticket.combinations[0].length > (GAMES[ticket.gameId]?.maxNumbers || 6));
         const superset = ticket.combinations[0] || [];
         const dreamSuperset = ticket.stars ? ticket.stars[0] : [1];
         const costData = this.calculateTicketCost(ticket);
@@ -10100,13 +10258,9 @@ class DataLotto49Advanced {
             </tr>
           `).join('');
 
-          combosHTML = `
-            <div style="background: #f0f9ff; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-                <span style="background: #38bdf8; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-              </div>
-
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#0284c7' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
@@ -10114,6 +10268,38 @@ class DataLotto49Advanced {
                   ${dreamSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningDreamSet.has(r) ? '#38bdf8' : '#e0f2fe'}; color: ${winningDreamSet.has(r) ? '#fff' : '#0369a1'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
+              const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
+              const hitClass = (hits >= 2 || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+
+              const comboBalls = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#0284c7' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningDreamSet.has(r) ? '#38bdf8' : '#e0f2fe'}; color: ${winningDreamSet.has(r) ? '#fff' : '#0369a1'}; font-weight: bold;">${r}</div>`).join('');
+
+              return `
+                <div class="saved-combination" style="margin-bottom: 8px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #0284c7; font-weight: bold; align-self: center;">+ 🌙:</span>
+                    ${starBalls}
+                  </div>
+                  <div class="hit-count ${hitClass}">${hits} + ${starHits}🌙 ${t('tickets.aciertos')}</div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #f0f9ff; border: 1.5px solid #38bdf8; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+                <span style="background: #38bdf8; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+              </div>
+
+              ${combinationsListHTML}
 
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
@@ -10136,11 +10322,9 @@ class DataLotto49Advanced {
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
-          combosHTML = `
-            <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              </div>
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
@@ -10148,11 +10332,37 @@ class DataLotto49Advanced {
                   ${dreamSuperset.map(r => `<div class="saved-combination-number" style="background: #38bdf8; color: #fff; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+              const comboBalls = combo.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: #38bdf8; color: #fff; font-weight: bold;">${r}</div>`).join('');
+              return `
+                <div class="saved-combination" style="margin-bottom: 6px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #0284c7; font-weight: bold; align-self: center;">+ 🌙:</span>
+                    ${starBalls}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.eurodreams.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              </div>
+              ${combinationsListHTML}
             </div>
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
         }
       } else if (ticket.gameId === 'gordo') {
+        const isMultipleTicket = ticket.strategy === 'multiple' ||
+          (ticket.combinations.length > 0 && ticket.combinations[0].length > (GAMES[ticket.gameId]?.maxNumbers || 5));
         const superset = ticket.combinations[0] || [];
         const claveSuperset = ticket.stars ? ticket.stars[0] : [0];
         const costData = this.calculateTicketCost(ticket);
@@ -10175,13 +10385,9 @@ class DataLotto49Advanced {
             </tr>
           `).join('');
 
-          combosHTML = `
-            <div style="background: #faf5ff; border: 1.5px solid #c084fc; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-                <span style="background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-              </div>
-
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#7e22ce' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('')}
@@ -10189,6 +10395,38 @@ class DataLotto49Advanced {
                   ${claveSuperset.map(r => `<div class="saved-combination-number" style="background: ${winningClaveSet.has(r) ? '#a855f7' : '#f3e8ff'}; color: ${winningClaveSet.has(r) ? '#fff' : '#6b21a8'}; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
+              const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
+              const hitClass = (hits >= 2 || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [0]);
+
+              const comboBalls = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? '#7e22ce' : '#f1f5f9'}; color: ${winningWhiteSet.has(n) ? '#fff' : '#1e293b'};">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningClaveSet.has(r) ? '#a855f7' : '#f3e8ff'}; color: ${winningClaveSet.has(r) ? '#fff' : '#6b21a8'}; font-weight: bold;">${r}</div>`).join('');
+
+              return `
+                <div class="saved-combination" style="margin-bottom: 8px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">${t('tickets.masLlave')}</span>
+                    ${starBalls}
+                  </div>
+                  <div class="hit-count ${hitClass}">${hits} + ${starHits}🔑 ${t('tickets.aciertos')}</div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #faf5ff; border: 1.5px solid #c084fc; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+                <span style="background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+              </div>
+
+              ${combinationsListHTML}
 
               <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
                 <thead>
@@ -10211,11 +10449,9 @@ class DataLotto49Advanced {
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
         } else {
-          combosHTML = `
-            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              </div>
+          let combinationsListHTML = '';
+          if (isMultipleTicket) {
+            combinationsListHTML = `
               <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
                 <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
                   ${superset.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('')}
@@ -10223,6 +10459,30 @@ class DataLotto49Advanced {
                   ${claveSuperset.map(r => `<div class="saved-combination-number" style="background: #a855f7; color: #fff; font-weight: bold;">${r}</div>`).join('')}
                 </div>
               </div>
+            `;
+          } else {
+            combinationsListHTML = ticket.combinations.map((combo, index) => {
+              const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [0]);
+              const comboBalls = combo.map(n => `<div class="saved-combination-number" style="background: #f1f5f9; color: #1e293b;">${n}</div>`).join('');
+              const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: #a855f7; color: #fff; font-weight: bold;">${r}</div>`).join('');
+              return `
+                <div class="saved-combination" style="margin-bottom: 6px;">
+                  <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
+                    ${comboBalls}
+                    <span style="margin: 0 4px; color: #7e22ce; font-weight: bold; align-self: center;">${t('tickets.masLlave')}</span>
+                    ${starBalls}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          combosHTML = `
+            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>${t('tickets.gordo.nombre')} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              </div>
+              ${combinationsListHTML}
             </div>
           `;
           actionsHTML = `${playOnlineHTML}<button class="validate">${t('tickets.validar')}</button>`;
@@ -10298,7 +10558,7 @@ class DataLotto49Advanced {
             const winningNumbersSet = new Set(ticket.validation.winningNumbers);
             const winningStarsSet = new Set(ticket.validation.stars || []);
             
-            combosHTML = ticket.combinations.map((combo, index) => {
+            const combosListHTML = ticket.combinations.map((combo, index) => {
                 const hits = ticket.validation!.hits[index];
                 const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
                 const hitClass = hits >= 3 ? 'high-hits' : hits > 0 ? 'low-hits' : 'no-hits';
@@ -10330,6 +10590,46 @@ class DataLotto49Advanced {
                             <div class="hit-count ${hitClass}">${hits}${starHitsText} ${t('tickets.aciertos')}</div>
                         </div>`;
             }).join('');
+
+            // Tiers summary table for standard games (Bonoloto, Primitiva, Nacional)
+            const winningTiers = getTicketWinningTiers(ticket);
+            let winningTiersTableHTML = '';
+
+            if (winningTiers.length > 0) {
+              const totalWinningBets = winningTiers.reduce((acc, t) => acc + t.count, 0);
+              const tierRows = winningTiers.map(t => `
+                <tr style="background: #eef2ff; font-weight: bold; color: #3730a3;">
+                  <td style="padding: 6px 10px; border: 1px solid #c7d2fe; font-weight: 600;">${t.label}</td>
+                  <td style="padding: 6px 10px; border: 1px solid #c7d2fe; text-align: center; font-weight: 800; font-size: 0.9rem; color: #4338ca;">${t.count}</td>
+                </tr>
+              `).join('');
+
+              winningTiersTableHTML = `
+                <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-top: 10px; margin-bottom: 8px;">
+                  <div style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <span>🏆 ${t('tickets.desgloseCategorias')}</span>
+                    <span style="background: #4f46e5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
+                  </div>
+                  <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
+                    <thead>
+                      <tr style="background: #e0e7ff; color: #3730a3; font-size: 0.8rem;">
+                        <th style="padding: 6px 10px; border: 1px solid #c7d2fe; text-align: left;">${t('tickets.categoria')}</th>
+                        <th style="padding: 6px 10px; border: 1px solid #c7d2fe; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${tierRows}
+                    </tbody>
+                  </table>
+                  <div style="padding: 10px 12px; background: #4f46e5; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
+                    <span>${t('tickets.totalApuestasPremiadas')}</span>
+                    <span style="font-size: 1.1rem; color: #fef08a;">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
+                  </div>
+                </div>
+              `;
+            }
+
+            combosHTML = `${combosListHTML}${winningTiersTableHTML}`;
             actionsHTML = `${playOnlineHTML}<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
           } else {
             combosHTML = ticket.combinations.map((combo, index) => {
