@@ -1049,5 +1049,12 @@
   "filterStats.colMedia": "Average",
   "filterStats.colMax": "Maximum",
   "filterStats.percentilUltimo": "The last loaded draw falls in the {p} percentile of the full history.",
-  "filterStats.ultimos10Valores": "Last 10 values:"
+  "filterStats.ultimos10Valores": "Last 10 values:",
+  "error.generacion.simpleNoEncontrada": "No combination was found that meets all filters.",
+  "error.generacion.limiteEuromillones": "❌ Official limit exceeded: EuroMillions does not allow more than 756 bets per ticket in the official channel (your selection of {numCount} numbers and {starCount} stars generates {totalBets} bets).",
+  "error.generacion.cruzadaEurodreams": "❌ Cross Multiple bet not authorized in EuroDreams. Official SELAE rules allow selecting between 7 and 10 main numbers with 1 Dream, OR 6 main numbers with 2 to 5 Dreams.",
+  "error.generacion.numerosInsuficientes": "Not enough numbers ({available}) for a multiple of {numCount}.",
+  "error.generacion.estrellasInsuficientes": "Not enough stars ({available}) for a multiple of {starCount}.",
+  "error.generacion.sistemaNoValido": "No valid reduction system has been selected or it is not compatible with the active game.",
+  "error.generacion.numerosBaseIncorrectos": "You must select exactly {required} base numbers on the grid. You currently have {current}."
 }

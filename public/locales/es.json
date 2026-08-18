@@ -1049,5 +1049,12 @@
   "filterStats.colMedia": "Media",
   "filterStats.colMax": "Máximo",
   "filterStats.percentilUltimo": "El último sorteo cargado cae en el percentil {p} del histórico completo.",
-  "filterStats.ultimos10Valores": "Últimos 10 valores:"
+  "filterStats.ultimos10Valores": "Últimos 10 valores:",
+  "error.generacion.simpleNoEncontrada": "No se encontró ninguna combinación que cumpla todos los filtros.",
+  "error.generacion.limiteEuromillones": "❌ Límite oficial excedido: Euromillones no permite más de 756 apuestas por boleto en el canal oficial (tu selección de {numCount} números y {starCount} estrellas genera {totalBets} apuestas).",
+  "error.generacion.cruzadaEurodreams": "❌ Apuesta Múltiple Cruzada no autorizada en EuroDreams. La normativa oficial SELAE permite seleccionar entre 7 y 10 números principales con 1 Sueño, O BIEN 6 números principales con 2 a 5 Sueños.",
+  "error.generacion.numerosInsuficientes": "No hay suficientes números ({available}) para una múltiple de {numCount}.",
+  "error.generacion.estrellasInsuficientes": "No hay suficientes estrellas ({available}) para una múltiple de {starCount}.",
+  "error.generacion.sistemaNoValido": "No se ha seleccionado ningún sistema de reducción válido o no es compatible con el juego activo.",
+  "error.generacion.numerosBaseIncorrectos": "Debes seleccionar exactamente {required} números base en la cuadrícula. Actualmente tienes {current}."
 }

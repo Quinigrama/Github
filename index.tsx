@@ -8938,7 +8938,7 @@ class DataLotto49Advanced {
     if(realTimeStatsSection) realTimeStatsSection.style.display = strategy === 'simple' ? 'block' : 'none';
     
     if (generateBtn) {
-        generateBtn.innerHTML = `<span>🤞 Generar Combinación</span>`;
+        generateBtn.innerHTML = `<span>${t('strategy.generarBtn')}</span>`;
     }
     
     this.clearSelections(false);
@@ -9016,7 +9016,9 @@ class DataLotto49Advanced {
               }
           }
           if (!found) {
-              throw new Error('No se encontró ninguna combinación que cumpla todos los filtros.');
+              const err = new Error('No se encontró ninguna combinación que cumpla todos los filtros.');
+              (err as any).i18nKey = 'error.generacion.simpleNoEncontrada';
+              throw err;
           }
       } else if (strategy === 'winning') {
           const generateCount = parseInt((document.getElementById('generateCount') as HTMLInputElement)?.value || '100');
@@ -9035,21 +9037,32 @@ class DataLotto49Advanced {
               const starCombos = this.nCr(starCount, 2);
               const totalBets = numCombos * starCombos;
               if (totalBets > 756) {
-                  throw new Error(`❌ Límite oficial excedido: Euromillones no permite más de 756 apuestas por boleto en el canal oficial (tu selección de ${numCount} números y ${starCount} estrellas genera ${totalBets} apuestas).`);
+                  const err = new Error(`❌ Límite oficial excedido: Euromillones no permite más de 756 apuestas por boleto en el canal oficial (tu selección de ${numCount} números y ${starCount} estrellas genera ${totalBets} apuestas).`);
+                  (err as any).i18nKey = 'error.generacion.limiteEuromillones';
+                  (err as any).i18nParams = { numCount, starCount, totalBets };
+                  throw err;
               }
           }
 
           if (this.currentGame.id === 'eurodreams') {
               if (numCount > 6 && starCount > 1) {
-                  throw new Error(`❌ Apuesta Múltiple Cruzada no autorizada en EuroDreams. La normativa oficial SELAE permite seleccionar entre 7 y 10 números principales con 1 Sueño, O BIEN 6 números principales con 2 a 5 Sueños.`);
+                  const err = new Error(`❌ Apuesta Múltiple Cruzada no autorizada en EuroDreams. La normativa oficial SELAE permite seleccionar entre 7 y 10 números principales con 1 Sueño, O BIEN 6 números principales con 2 a 5 Sueños.`);
+                  (err as any).i18nKey = 'error.generacion.cruzadaEurodreams';
+                  throw err;
               }
           }
 
           if (availableUniverse.length < numCount) {
-              throw new Error(`No hay suficientes números (${availableUniverse.length}) para una múltiple de ${numCount}.`);
+              const err = new Error(`No hay suficientes números (${availableUniverse.length}) para una múltiple de ${numCount}.`);
+              (err as any).i18nKey = 'error.generacion.numerosInsuficientes';
+              (err as any).i18nParams = { available: availableUniverse.length, numCount };
+              throw err;
           }
           if (maxStars > 0 && availableStars.length < starCount) {
-              throw new Error(`No hay suficientes estrellas (${availableStars.length}) para una múltiple de ${starCount}.`);
+              const err = new Error(`No hay suficientes estrellas (${availableStars.length}) para una múltiple de ${starCount}.`);
+              (err as any).i18nKey = 'error.generacion.estrellasInsuficientes';
+              (err as any).i18nParams = { available: availableStars.length, starCount };
+              throw err;
           }
 
           const result = await this.findValidSuperset(availableUniverse, numCount, starCount);
@@ -9064,10 +9077,15 @@ class DataLotto49Advanced {
           const systems = REDUCED_SYSTEMS[gameId] || [];
           const system = systems.find(s => s.id === select?.value);
           if (!system) {
-              throw new Error('No se ha seleccionado ningún sistema de reducción válido o no es compatible con el juego activo.');
+              const err = new Error('No se ha seleccionado ningún sistema de reducción válido o no es compatible con el juego activo.');
+              (err as any).i18nKey = 'error.generacion.sistemaNoValido';
+              throw err;
           }
           if (this.selectedNumbers.size !== system.baseNumbersCount) {
-              throw new Error(`Debes seleccionar exactamente ${system.baseNumbersCount} números base en la cuadrícula. Actualmente tienes ${this.selectedNumbers.size}.`);
+              const err = new Error(`Debes seleccionar exactamente ${system.baseNumbersCount} números base en la cuadrícula. Actualmente tienes ${this.selectedNumbers.size}.`);
+              (err as any).i18nKey = 'error.generacion.numerosBaseIncorrectos';
+              (err as any).i18nParams = { required: system.baseNumbersCount, current: this.selectedNumbers.size };
+              throw err;
           }
           
           this.showLoading('Generando combinación reducida...');
@@ -9134,7 +9152,8 @@ class DataLotto49Advanced {
       }
 
     } catch (error: any) {
-        this.showToast(t('toast.errorGenerico', { message: error.message }), 'error');
+        const displayMessage = error.i18nKey ? t(error.i18nKey, error.i18nParams || {}) : error.message;
+        this.showToast(t('toast.errorGenerico', { message: displayMessage }), 'error');
         const esErrorDeCombinacionNoEncontrada = error.message && (
             error.message.includes('No se encontró') ||
             error.message.includes('No se encontraron') ||
