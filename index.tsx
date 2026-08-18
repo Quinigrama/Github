@@ -5412,7 +5412,7 @@ class DataLotto49Advanced {
           const labelIdx = Math.floor(i / 10) - 1;
           if (labelIdx >= 0 && labelIdx < 5) {
             const label = document.createElement('div');
-            label.style.cssText = 'grid-column: span 10; margin-top: 12px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; text-align: left; padding-left: 2px;';
+            label.style.cssText = 'grid-column: span 10; margin-top: 12px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; text-align: left; padding-left: 2px; overflow-wrap: break-word; white-space: normal;';
             label.textContent = rowLabels[labelIdx];
             grid.appendChild(label);
           }

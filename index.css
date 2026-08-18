@@ -480,11 +480,15 @@ body.dark-mode .selection-mode-label {
 
 /* Custom styles for Lotería Nacional grid to auto-adjust nicely on mobile */
 .numbers-grid.game-nacional {
-  grid-template-columns: repeat(10, 1fr) !important;
+  width: 100% !important;
+  grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
   gap: 4px !important;
+  box-sizing: border-box !important;
 }
 
 .numbers-grid.game-nacional .number-ball {
+  width: 100% !important;
+  height: auto !important;
   min-height: unset !important;
   aspect-ratio: 1 !important;
   font-size: clamp(0.55rem, 2.8vw, 0.95rem) !important;
@@ -495,7 +499,6 @@ body.dark-mode .selection-mode-label {
     gap: 3px !important;
   }
   .numbers-grid.game-nacional .number-ball {
-    min-height: 24px !important;
     font-size: 0.65rem !important;
   }
 }
