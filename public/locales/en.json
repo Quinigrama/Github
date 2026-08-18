@@ -843,6 +843,7 @@
   "toast.boletoGuardado": "✅ Ticket saved",
   "toast.boletoEliminado": "Ticket deleted",
   "toast.boletosValidadosAuto": "✅ {count} ticket(s) have been automatically validated.",
+  "toast.boletosPremiadosAuto": "🥳 Congratulations! Winning tickets: {resumen}",
   "ticket.shareTextTemplate": "My DataLotto ticket:\n{combos}",
   "toast.boletoCopiado": "Ticket copied to clipboard",
   "notif.tituloSorteosHoy": "🗓️ Draws happening today ({day} {date})!",

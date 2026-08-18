@@ -1067,9 +1067,9 @@ export function getTicketValidationData(
   return { allHits, starHits, maxHits, maxStars: maxStarsHit, gameId };
 }
 
-export function getWinningTicketInfo(ticket: Ticket): { isWinning: boolean; prizeSummary: string } {
+export function getTicketWinningTiers(ticket: Ticket): { label: string; count: number }[] {
   if (!ticket.validation) {
-    return { isWinning: false, prizeSummary: '' };
+    return [];
   }
 
   const v = ticket.validation;
@@ -1078,41 +1078,25 @@ export function getWinningTicketInfo(ticket: Ticket): { isWinning: boolean; priz
   if (gameId === 'powerball') {
     const cascade = calculatePowerballCascade(ticket, v.winningNumbers, v.stars || []);
     const winningTiers = cascade.tiers.filter(t => t.count > 0);
-    if (winningTiers.length > 0) {
-      const summaryText = winningTiers.map(t => `${t.count}x (${t.hits}+${t.starHits}🔴)`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return winningTiers.map(t => ({ label: `${t.hits}+${t.starHits}🔴`, count: t.count }));
   } else if (gameId === 'megamillions') {
     const cascade = calculateMegaMillionsCascade(ticket, v.winningNumbers, v.stars || []);
     const winningTiers = cascade.tiers.filter(t => t.count > 0);
-    if (winningTiers.length > 0) {
-      const summaryText = winningTiers.map(t => `${t.count}x (${t.hits}+${t.starHits}🟡)`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return winningTiers.map(t => ({ label: `${t.hits}+${t.starHits}🟡`, count: t.count }));
   } else if (gameId === 'euromillones') {
     const cascade = calculateEuromillonesCascade(ticket, v.winningNumbers, v.stars || []);
     const winningTiers = cascade.tiers.filter(t => t.count > 0);
-    if (winningTiers.length > 0) {
-      const summaryText = winningTiers.map(t => `${t.count}x (${t.hits}+${t.starHits}⭐)`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return winningTiers.map(t => ({ label: `${t.hits}+${t.starHits}⭐`, count: t.count }));
   } else if (gameId === 'eurodreams') {
     const cascade = calculateEurodreamsCascade(ticket, v.winningNumbers, v.stars || []);
     const winningTiers = cascade.tiers.filter(t => t.count > 0);
-    if (winningTiers.length > 0) {
-      const summaryText = winningTiers.map(t => `${t.count}x (${t.hits}+${t.starHits}🌙)`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return winningTiers.map(t => ({ label: `${t.hits}+${t.starHits}🌙`, count: t.count }));
   } else if (gameId === 'gordo') {
     const cascade = calculateGordoCascade(ticket, v.winningNumbers, v.stars || []);
     const winningTiers = cascade.tiers.filter(t => t.count > 0);
-    if (winningTiers.length > 0) {
-      const summaryText = winningTiers.map(t => `${t.count}x (${t.hits}+${t.starHits}🔑)`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return winningTiers.map(t => ({ label: `${t.hits}+${t.starHits}🔑`, count: t.count }));
   } else {
     const tierMap: { [key: string]: number } = {};
-    let totalWinningCombos = 0;
 
     ticket.combinations.forEach((combo, idx) => {
       const hits = v.hits ? v.hits[idx] || 0 : 0;
@@ -1139,15 +1123,19 @@ export function getWinningTicketInfo(ticket: Ticket): { isWinning: boolean; priz
       }
 
       if (isComboWinning) {
-        totalWinningCombos++;
         tierMap[label] = (tierMap[label] || 0) + 1;
       }
     });
 
-    if (totalWinningCombos > 0) {
-      const summaryText = Object.entries(tierMap).map(([lbl, cnt]) => `${cnt}x (${lbl})`).join(', ');
-      return { isWinning: true, prizeSummary: summaryText };
-    }
+    return Object.entries(tierMap).map(([label, count]) => ({ label, count }));
+  }
+}
+
+export function getWinningTicketInfo(ticket: Ticket): { isWinning: boolean; prizeSummary: string } {
+  const tiers = getTicketWinningTiers(ticket);
+  if (tiers.length > 0) {
+    const summaryText = tiers.map(t => `${t.count}x (${t.label})`).join(', ');
+    return { isWinning: true, prizeSummary: summaryText };
   }
 
   return { isWinning: false, prizeSummary: '' };

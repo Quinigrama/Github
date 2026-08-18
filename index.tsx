@@ -17,6 +17,7 @@ import {
   getCommonConsecutivePatterns as getCommonConsecutivePatternsUtil,
   getTicketValidationData as getTicketValidationDataUtil,
   getWinningTicketInfo as getWinningTicketInfoUtil,
+  getTicketWinningTiers,
   getTicketPrizeSummary as getTicketPrizeSummaryUtil,
   classifyNumbers as classifyNumbersUtil
 } from './src/utils/combinatorial';
@@ -10347,6 +10348,7 @@ class DataLotto49Advanced {
     if (!this.historicalData || this.historicalData.length === 0) return;
 
     let validatedCount = 0;
+    const winningTiersMap = new Map<string, number>();
     const historicalDrawsByDate: { [key: string]: { numbers: number[], stars?: number[] } } = {};
     this.historicalData.forEach(draw => {
         const drawDateStr = new Date(draw.date.getTime() - (draw.date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
@@ -10393,6 +10395,10 @@ class DataLotto49Advanced {
             const prizeSummary = this.getTicketPrizeSummary(ticket);
             if (prizeSummary.hasPrize) {
                 ticket.seenWinning = false;
+                const tiers = getTicketWinningTiers(ticket);
+                tiers.forEach(tier => {
+                    winningTiersMap.set(tier.label, (winningTiersMap.get(tier.label) || 0) + tier.count);
+                });
             }
             validatedCount++;
 
@@ -10417,10 +10423,16 @@ class DataLotto49Advanced {
         this.updateSavedTickets();
         this.updateSavedTicketsBadge();
         this.showToast(t('toast.boletosValidadosAuto', { count: validatedCount }), 'success');
+        if (winningTiersMap.size > 0) {
+            const resumenString = Array.from(winningTiersMap.entries())
+                .map(([label, count]) => `${count}x (${label})`)
+                .join(', ');
+            this.showToast(t('toast.boletosPremiadosAuto', { resumen: resumenString }), 'success', 10000);
+        }
     } else {
         this.updateSavedTicketsBadge();
     }
-}
+  }
 
   startValidation(date: string) {
     this.currentValidatingTicket = this.savedTickets.find(t => t.date === date) || null;
@@ -11042,13 +11054,20 @@ class DataLotto49Advanced {
           closeBanner();
         }, 30000);
 
-        playBtn.onclick = () => {
+        banner.onclick = () => {
+          this.toggleModal('jackpotsModal', true);
+          this.fetchAndRenderJackpots();
+        };
+
+        playBtn.onclick = (e) => {
+          e.stopPropagation();
           this.switchGame(highJk.id);
           closeBanner();
         };
 
         if (closeBtn) {
-          closeBtn.onclick = () => {
+          closeBtn.onclick = (e) => {
+            e.stopPropagation();
             closeBanner();
           };
         }
