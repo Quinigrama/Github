@@ -4924,9 +4924,11 @@ class DataLotto49Advanced {
     this.renderGapPercentilChart();
 
     // Frequencies for Numbers
+    const isNacional = this.currentGame.id === 'nacional';
+    const startNum = isNacional ? 10 : 1;
     const frequencies: { [key: number]: number } = {};
-    for (let i = 1; i <= this.currentGame.numberRange; i++) frequencies[i] = 0;
-    this.historicalData.forEach(draw => draw.numbers.forEach(num => {
+    for (let i = startNum; i <= this.currentGame.numberRange; i++) frequencies[i] = 0;
+    this.historicalData.forEach(draw => (draw.numbers || []).forEach(num => {
         if (frequencies[num] !== undefined) frequencies[num]++;
     }));
     const sortedFreq = Object.entries(frequencies).sort((a, b) => b[1] - a[1]);
@@ -4979,43 +4981,118 @@ class DataLotto49Advanced {
     
     const chiSquareEl = document.getElementById('chiSquare');
     const biasEl = document.getElementById('biasDetected');
+    const chiSquareLabelEl = document.getElementById('chiSquareLabel');
+    const biasDetectedLabelEl = document.getElementById('biasDetectedLabel');
+
+    const chiSquareStarsItem = document.getElementById('chiSquareStarsItem');
+    const biasDetectedStarsItem = document.getElementById('biasDetectedStarsItem');
+    const chiSquareCombinedItem = document.getElementById('chiSquareCombinedItem');
+    const biasDetectedCombinedItem = document.getElementById('biasDetectedCombinedItem');
+
+    const chiSquareStarsEl = document.getElementById('chiSquareStars');
+    const biasDetectedStarsEl = document.getElementById('biasDetectedStars');
+    const chiSquareCombinedEl = document.getElementById('chiSquareCombined');
+    const biasDetectedCombinedEl = document.getElementById('biasDetectedCombined');
+
+    const hasStars = this.currentGame.maxStars > 0;
+
+    if (hasStars) {
+      if (chiSquareStarsItem) chiSquareStarsItem.style.display = '';
+      if (biasDetectedStarsItem) biasDetectedStarsItem.style.display = '';
+      if (chiSquareCombinedItem) chiSquareCombinedItem.style.display = '';
+      if (biasDetectedCombinedItem) biasDetectedCombinedItem.style.display = '';
+      if (chiSquareLabelEl) chiSquareLabelEl.textContent = t('analyzer.chiSquareNumeros');
+      if (biasDetectedLabelEl) biasDetectedLabelEl.textContent = t('analyzer.sesgoDetectadoNumeros');
+    } else {
+      if (chiSquareStarsItem) chiSquareStarsItem.style.display = 'none';
+      if (biasDetectedStarsItem) biasDetectedStarsItem.style.display = 'none';
+      if (chiSquareCombinedItem) chiSquareCombinedItem.style.display = 'none';
+      if (biasDetectedCombinedItem) biasDetectedCombinedItem.style.display = 'none';
+      if (chiSquareLabelEl) chiSquareLabelEl.textContent = t('analyzer.chiCuadrado');
+      if (biasDetectedLabelEl) biasDetectedLabelEl.textContent = t('analyzer.sesgoDetectado');
+    }
 
     if (this.historicalData.length >= 50 && chiSquareEl && biasEl) {
-        // Chi-Square for Numbers
-        const expectedFrequency = (this.historicalData.length * this.currentGame.maxNumbers) / this.currentGame.numberRange;
-        let chiSquareStat = 0;
-        for (let i = 1; i <= this.currentGame.numberRange; i++) {
-            chiSquareStat += Math.pow((frequencies[i] || 0) - expectedFrequency, 2) / expectedFrequency;
+        // 1. Chi-Square for Numbers
+        let expectedFrequency = 0;
+        let dfNumbers = 0;
+
+        if (isNacional) {
+            // Lotería Nacional: 5 posiciones independientes con dígitos 0-9 (prob=0.1 por posición)
+            expectedFrequency = this.historicalData.length * 0.1;
+            // 5 pruebas de uniformidad independientes (cada una con 10 dígitos -> df=9), df total = 5 * 9 = 45
+            const df = 45; // df = 45 para Nacional (5 posiciones x 9 grados de libertad)
+            dfNumbers = df;
+        } else {
+            expectedFrequency = (this.historicalData.length * this.currentGame.maxNumbers) / this.currentGame.numberRange;
+            dfNumbers = this.currentGame.numberRange - 1;
         }
 
-        // Chi-Square for Stars (if applicable)
-        if (this.currentGame.maxStars > 0) {
+        let chiSquareNumStat = 0;
+        for (let i = startNum; i <= this.currentGame.numberRange; i++) {
+            chiSquareNumStat += Math.pow((frequencies[i] || 0) - expectedFrequency, 2) / expectedFrequency;
+        }
+
+        const criticalValueNumbers = this.chiSquareCriticalValue(dfNumbers, 1.645);
+        const biasDetectedNumbers = chiSquareNumStat > criticalValueNumbers;
+
+        chiSquareEl.textContent = chiSquareNumStat.toFixed(2);
+        biasEl.textContent = biasDetectedNumbers ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
+        biasEl.classList.toggle('invalid', biasDetectedNumbers);
+        biasEl.classList.toggle('valid', !biasDetectedNumbers);
+
+        // 2. Chi-Square for Stars & Combined (if applicable)
+        if (hasStars) {
             const isGordo = this.currentGame.id === 'gordo';
             const minStar = isGordo ? 0 : 1;
             const maxStar = isGordo ? 9 : this.currentGame.starRange;
-            const starCount = isGordo ? 10 : this.currentGame.starRange;
-            const expectedStarFreq = (this.historicalData.length * this.currentGame.maxStars) / starCount;
+            const starCategoriesCount = isGordo ? 10 : this.currentGame.starRange;
+            const expectedStarFreq = (this.historicalData.length * this.currentGame.maxStars) / starCategoriesCount;
+            
+            let chiSquareStarStat = 0;
             for (let i = minStar; i <= maxStar; i++) {
-                chiSquareStat += Math.pow((starFrequencies[i] || 0) - expectedStarFreq, 2) / expectedStarFreq;
+                chiSquareStarStat += Math.pow((starFrequencies[i] || 0) - expectedStarFreq, 2) / expectedStarFreq;
+            }
+
+            const dfStars = starCategoriesCount - 1;
+            const criticalValueStars = this.chiSquareCriticalValue(dfStars, 1.645);
+            const biasDetectedStars = chiSquareStarStat > criticalValueStars;
+
+            if (chiSquareStarsEl) chiSquareStarsEl.textContent = chiSquareStarStat.toFixed(2);
+            if (biasDetectedStarsEl) {
+                biasDetectedStarsEl.textContent = biasDetectedStars ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
+                biasDetectedStarsEl.classList.toggle('invalid', biasDetectedStars);
+                biasDetectedStarsEl.classList.toggle('valid', !biasDetectedStars);
+            }
+
+            // 3. Combined Chi-Square
+            const chiSquareCombinedStat = chiSquareNumStat + chiSquareStarStat;
+            const dfCombined = dfNumbers + dfStars;
+            const criticalValueCombined = this.chiSquareCriticalValue(dfCombined, 1.645);
+            const biasDetectedCombined = chiSquareCombinedStat > criticalValueCombined;
+
+            if (chiSquareCombinedEl) chiSquareCombinedEl.textContent = chiSquareCombinedStat.toFixed(2);
+            if (biasDetectedCombinedEl) {
+                biasDetectedCombinedEl.textContent = biasDetectedCombined ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
+                biasDetectedCombinedEl.classList.toggle('invalid', biasDetectedCombined);
+                biasDetectedCombinedEl.classList.toggle('valid', !biasDetectedCombined);
             }
         }
-
-        // Adjust critical value based on degrees of freedom (approximate)
-        // df = (numberRange - 1) + (starRange - 1 if applicable)
-        const df = (this.currentGame.numberRange - 1) + (this.currentGame.maxStars > 0 ? (this.currentGame.starRange - 1) : 0);
-        // Critical value for p=0.05, df=48 is 65.17. For df=48+11=59 is ~77.93
-        const criticalValue = df > 50 ? 79.08 : 65.17; 
-        
-        const biasDetected = chiSquareStat > criticalValue;
-        
-        chiSquareEl.textContent = chiSquareStat.toFixed(2);
-        biasEl.textContent = biasDetected ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
-        biasEl.classList.toggle('invalid', biasDetected);
-        biasEl.classList.toggle('valid', !biasDetected);
-    } else if(chiSquareEl && biasEl) {
+    } else if (chiSquareEl && biasEl) {
         chiSquareEl.textContent = 'N/A';
         biasEl.textContent = t('analyzer.datosInsuficientes');
         biasEl.classList.remove('valid', 'invalid');
+
+        if (chiSquareStarsEl) chiSquareStarsEl.textContent = 'N/A';
+        if (biasDetectedStarsEl) {
+            biasDetectedStarsEl.textContent = t('analyzer.datosInsuficientes');
+            biasDetectedStarsEl.classList.remove('valid', 'invalid');
+        }
+        if (chiSquareCombinedEl) chiSquareCombinedEl.textContent = 'N/A';
+        if (biasDetectedCombinedEl) {
+            biasDetectedCombinedEl.textContent = t('analyzer.datosInsuficientes');
+            biasDetectedCombinedEl.classList.remove('valid', 'invalid');
+        }
     }
     
     dataStatsGrid.style.display = 'grid';
