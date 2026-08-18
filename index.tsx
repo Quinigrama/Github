@@ -9846,6 +9846,12 @@ class DataLotto49Advanced {
       let actionsHTML = '';
       const playOnlineHTML = `<button class="play-online-btn-saved">${t('tickets.jugarOnline')}</button>`;
 
+      const gameColors: { [key: string]: { bg: string; border: string; headerText: string; accent: string; rowBg: string } } = {
+        bonoloto:  { bg: '#ecfdf5', border: '#6ee7b7', headerText: '#065f46', accent: '#059669', rowBg: '#d1fae5' },
+        primitiva: { bg: '#fff7ed', border: '#fdba74', headerText: '#9a3412', accent: '#ea580c', rowBg: '#ffedd5' },
+        nacional:  { bg: '#eef2ff', border: '#c7d2fe', headerText: '#3730a3', accent: '#4f46e5', rowBg: '#e0e7ff' },
+      };
+
       // Check if it's a system ticket (Multiple with > 6 numbers)
       const isSystemTicket = ticket.combinations.length > 0 && (
         ticket.combinations[0].length > (GAMES[ticket.gameId || 'bonoloto']?.maxNumbers || 6) ||
@@ -10489,15 +10495,13 @@ class DataLotto49Advanced {
         }
       } else if (isSystemTicket) {
           // === VISUALIZACIÓN MÚLTIPLE ===
+          const colors = gameColors[ticket.gameId || 'bonoloto'] || gameColors.bonoloto;
           const superset = ticket.combinations[0];
           let summaryTableHTML = '';
-          let validationClass = '';
           let validationStatusBtn = `<button class="validate">${t('tickets.validar')}</button>`;
-          let supersetDisplayClass = '';
 
           if (ticket.validation) {
              const winningNumbersSet = new Set(ticket.validation.winningNumbers);
-             validationClass = 'verified';
              validationStatusBtn = `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`;
 
              // Generate breakdown summary
@@ -10511,41 +10515,56 @@ class DataLotto49Advanced {
              const totalMatchesInSuperset = superset.filter(n => winningNumbersSet.has(n)).length;
              
              summaryTableHTML = `
-                <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">
+                <div style="margin-top: 10px; margin-bottom: 8px; font-weight: bold; color: ${colors.accent};">
                     🎯 ${totalMatchesInSuperset} aciertos sobre los ${superset.length} números seleccionados.
                 </div>
-                <table class="validation-summary-table">
-                    <tr>
-                        <th>Aciertos</th>
-                        <th>Cantidad</th>
-                    </tr>
-                    <tr class="${breakdown[6] > 0 ? 'row-highlight' : ''}"><td>6 Aciertos</td><td>${breakdown[6]}</td></tr>
-                    <tr class="${breakdown[5] > 0 ? 'row-highlight' : ''}"><td>5 Aciertos</td><td>${breakdown[5]}</td></tr>
-                    <tr class="${breakdown[4] > 0 ? 'row-highlight' : ''}"><td>4 Aciertos</td><td>${breakdown[4]}</td></tr>
-                    <tr class="${breakdown[3] > 0 ? 'row-highlight' : ''}"><td>3 Aciertos</td><td>${breakdown[3]}</td></tr>
-                     <tr><td>0-2 Aciertos</td><td>${breakdown[0]+breakdown[1]+breakdown[2]}</td></tr>
+                <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
+                    <thead>
+                      <tr style="background: ${colors.rowBg}; color: ${colors.headerText}; font-size: 0.8rem;">
+                          <th style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: left;">Aciertos</th>
+                          <th style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center;">Cantidad</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style="${breakdown[6] > 0 ? `background: ${colors.rowBg}; font-weight: bold; color: ${colors.headerText};` : 'color: #64748b;'}"><td style="padding: 6px 10px; border: 1px solid ${colors.border};">6 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center; font-weight: 800; color: ${breakdown[6] > 0 ? colors.accent : '#64748b'};">${breakdown[6]}</td></tr>
+                      <tr style="${breakdown[5] > 0 ? `background: ${colors.rowBg}; font-weight: bold; color: ${colors.headerText};` : 'color: #64748b;'}"><td style="padding: 6px 10px; border: 1px solid ${colors.border};">5 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center; font-weight: 800; color: ${breakdown[5] > 0 ? colors.accent : '#64748b'};">${breakdown[5]}</td></tr>
+                      <tr style="${breakdown[4] > 0 ? `background: ${colors.rowBg}; font-weight: bold; color: ${colors.headerText};` : 'color: #64748b;'}"><td style="padding: 6px 10px; border: 1px solid ${colors.border};">4 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center; font-weight: 800; color: ${breakdown[4] > 0 ? colors.accent : '#64748b'};">${breakdown[4]}</td></tr>
+                      <tr style="${breakdown[3] > 0 ? `background: ${colors.rowBg}; font-weight: bold; color: ${colors.headerText};` : 'color: #64748b;'}"><td style="padding: 6px 10px; border: 1px solid ${colors.border};">3 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center; font-weight: 800; color: ${breakdown[3] > 0 ? colors.accent : '#64748b'};">${breakdown[3]}</td></tr>
+                      <tr style="color: #64748b;"><td style="padding: 6px 10px; border: 1px solid ${colors.border};">0-2 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.border}; text-align: center; font-weight: 800;">${breakdown[0]+breakdown[1]+breakdown[2]}</td></tr>
+                    </tbody>
                 </table>
              `;
              
              // Highlight matching balls in the main display
              combosHTML = `
-                <div class="system-badge">${t('tickets.multipleDe')} ${superset.length} - ${explodedCombos.length} ${t('tickets.apuestasParentesis')}</div>
-                <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
-                    <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center;">
-                        ${superset.map(n => `<div class="saved-combination-number ${winningNumbersSet.has(n) ? 'selected' : ''}">${n}</div>`).join('')}
-                    </div>
+                <div style="background: ${colors.bg}; border: 1.5px solid ${colors.border}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                  <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <span>${t(`tickets.${ticket.gameId || 'bonoloto'}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
+                    <span style="background: ${colors.accent}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
+                  </div>
+                  <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+                      <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+                          ${superset.map(n => `<div class="saved-combination-number ${winningNumbersSet.has(n) ? 'selected' : ''}">${n}</div>`).join('')}
+                      </div>
+                  </div>
+                  ${summaryTableHTML}
                 </div>
-                ${summaryTableHTML}
              `;
 
           } else {
              // Not validated yet
-              combosHTML = `
-                <div class="system-badge">${t('tickets.multipleDe')} ${superset.length}</div>
-                <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
-                    <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center;">
-                        ${superset.map(n => `<div class="saved-combination-number">${n}</div>`).join('')}
-                    </div>
+             const explodedCombos = this.getCombinations(superset, 6);
+             combosHTML = `
+                <div style="background: ${colors.bg}; border: 1px solid ${colors.border}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                  <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <span>${t(`tickets.${ticket.gameId || 'bonoloto'}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
+                    <span style="background: ${colors.accent}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
+                  </div>
+                  <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
+                      <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+                          ${superset.map(n => `<div class="saved-combination-number">${n}</div>`).join('')}
+                      </div>
+                  </div>
                 </div>
              `;
           }
@@ -10554,11 +10573,6 @@ class DataLotto49Advanced {
 
       } else {
           // === VISUALIZACIÓN ESTÁNDAR (SIMPLE / GANADORA) ===
-          const gameColors: { [key: string]: { bg: string; border: string; headerText: string; accent: string; rowBg: string } } = {
-            bonoloto:  { bg: '#ecfdf5', border: '#6ee7b7', headerText: '#065f46', accent: '#059669', rowBg: '#d1fae5' },
-            primitiva: { bg: '#fff7ed', border: '#fdba74', headerText: '#9a3412', accent: '#ea580c', rowBg: '#ffedd5' },
-            nacional:  { bg: '#eef2ff', border: '#c7d2fe', headerText: '#3730a3', accent: '#4f46e5', rowBg: '#e0e7ff' },
-          };
           const colors = gameColors[ticket.gameId || 'bonoloto'] || gameColors.bonoloto;
           const costData = this.calculateTicketCost(ticket);
 
