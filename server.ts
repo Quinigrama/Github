@@ -2,6 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -497,6 +498,9 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static("dist"));
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(process.cwd(), "dist", "index.html"));
+    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
