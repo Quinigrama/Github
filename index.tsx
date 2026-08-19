@@ -1,7 +1,7 @@
 // ============================================
 // SISTEMA DE ALMACENAMIENTO PERSISTENTE
 // ============================================
-import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames } from "./game-configs";
+import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS } from "./game-configs";
 import { Draw, Ticket, Penia, PeniaAlert, PeniaChatMessage, PositionRangeFilter, PositionRangeConfig } from './src/types';
 import {
   nCr,
@@ -1352,7 +1352,8 @@ class DataLotto49Advanced {
         const gameId = this.currentGame.id;
         const iconSvg = this.getGameIconSvg(gameId);
         const titleText = this.currentGame.titleHeader || 'DataLotto';
-        headerTitle.innerHTML = `${iconSvg} <span>${titleText}</span>`;
+        const nationalFlag = NATIONAL_FLAGS[gameId] || '';
+        headerTitle.innerHTML = `${iconSvg} <span>${titleText}</span> <span>${nationalFlag}</span>`;
     }
   }
 
@@ -3863,7 +3864,8 @@ class DataLotto49Advanced {
         const btn = document.createElement('button');
         btn.className = 'game-select-btn';
         btn.style.cssText = 'flex: 1; padding: 15px; border: 1px solid #673ab7; border-radius: 8px; background: #f3e5f5; cursor: pointer; text-align: left; font-size: 1rem; display: flex; align-items: center; gap: 10px; transition: all 0.2s; font-weight: 600; color: #4a148c;';
-        btn.innerHTML = `<span>${game.flag}</span> <strong>${game.name}</strong>`;
+        const trailingFlag = (game.id === 'eurodreams' || game.id === 'gordo') ? ` <span>${NATIONAL_FLAGS[game.id]}</span>` : '';
+        btn.innerHTML = `<span>${game.flag}</span> <strong>${game.name}</strong>${trailingFlag}`;
         btn.onclick = () => this.loadSpecificGame(game.id as any);
 
         const favBtn = document.createElement('button');
@@ -3912,7 +3914,8 @@ class DataLotto49Advanced {
         const btn = document.createElement('button');
         btn.className = 'modal-btn confirm';
         btn.style.cssText = 'flex: 1; padding: 15px; text-align: left; display: flex; align-items: center; gap: 10px;';
-        btn.innerHTML = `<span>${game.flag}</span> ${game.name}`;
+        const trailingFlag = (game.id === 'eurodreams' || game.id === 'gordo') ? ` <span>${NATIONAL_FLAGS[game.id]}</span>` : '';
+        btn.innerHTML = `<span>${game.flag}</span> ${game.name}${trailingFlag}`;
         btn.onclick = () => this.confirmPlayOnline(game.id as any);
 
         const favBtn = document.createElement('button');
@@ -3941,7 +3944,7 @@ class DataLotto49Advanced {
     const sidebarUL = document.querySelector('#sidebar .sidebar-links');
     if (!sidebarUL) return;
 
-    const gameIds = ['powerball', 'megamillions', 'bonoloto', 'primitiva', 'gordo', 'euromillones', 'eurodreams', 'nacional'];
+    const gameIds = ['powerball', 'megamillions', 'euromillones', 'eurodreams', 'bonoloto', 'primitiva', 'gordo', 'nacional'];
     const gameElements: { [key: string]: HTMLElement } = {};
     
     gameIds.forEach(id => {
@@ -7404,6 +7407,7 @@ class DataLotto49Advanced {
       this.initFilterInfoButtons();
       this.updateFilterBadgesFromAudit();
       this.renderNashScoreHistogram();
+      this.updateSelectionTitle();
 
       const ticketDiv = document.getElementById('ticket');
       if (ticketDiv && ticketDiv.classList.contains('conflict')) {

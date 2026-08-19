@@ -335,6 +335,17 @@ export class BaseGameConfig implements GameConfig {
   }
 }
 
+export const NATIONAL_FLAGS: { [gameId: string]: string } = {
+  powerball: '🇺🇸',
+  megamillions: '🇺🇸',
+  euromillones: '🇪🇺',
+  eurodreams: '🇪🇺',
+  bonoloto: '🇪🇸',
+  primitiva: '🇪🇸',
+  gordo: '🇪🇸',
+  nacional: '🇪🇸',
+};
+
 export const GAMES: { [key: string]: GameConfig } = {
   'powerball': new BaseGameConfig({
     id: 'powerball',
@@ -400,6 +411,72 @@ export const GAMES: { [key: string]: GameConfig } = {
       starPrimos: { min: 0, max: 1 },
       starDistancia: { min: 0, max: 0 },
       terminacionesDistintas: [3, 4, 5]
+    }
+  }),
+  'euromillones': new BaseGameConfig({
+    id: 'euromillones',
+    name: 'Euromillones',
+    fullName: 'Euromillones Europa',
+    titleHeader: 'Euromillones 5/50 ⭐ 2/12',
+    flag: '🇪🇺',
+    currency: '€',
+    costPerBet: 2.50,
+    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9LdJPVydRU1ohhiCuUeVb0nFTnFdZG_4JJhD8K7dJzrhHVOLUNB1SDF4TkbkqXSqrF_LGbhYQGgl6/pub?output=csv',
+    maxNumbers: 5,
+    numberRange: 50,
+    maxStars: 2,
+    starRange: 12,
+    starName: 'Estrellas',
+    gridCols: 10,
+    numbersLayout: { type: 'column-chunk', chunkSize: 9 },
+    secondaryLayout: { type: 'column-chunk', chunkSize: 4 },
+    allowedDays: [2, 5],
+    theoreticalProbabilities: { '5': 0.000047, '4': 0.0106, '3': 0.467, '<=2': 99.52 },
+    jackpotThresholds: { excellent: 50000000, good: 25000000 },
+    customFilterLimits: {
+      sum: { min: 100, max: 160 },
+      sumaDigitos: { min: 23, max: 45 },
+      desviacion: { min: 10.0, max: 22.0 },
+      primos: { min: 0, max: 5 },
+      distancia: { min: 1, max: 25 },
+      starSum: { min: 8, max: 15 },
+      starSumaDigitos: { min: 3, max: 12 },
+      starPrimos: { min: 0, max: 2 },
+      starDistancia: { min: 1, max: 11 },
+      terminacionesDistintas: [3, 4, 5]
+    }
+  }),
+  'eurodreams': new BaseGameConfig({
+    id: 'eurodreams',
+    name: 'EuroDreams',
+    fullName: 'EuroDreams Europa',
+    titleHeader: 'EuroDreams 6/40 🌙 1/5',
+    flag: '🌙',
+    currency: '€',
+    costPerBet: 2.50,
+    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9UhEkG1_cHAMDvBsmhkzqjpismGFGhouomp9PV3QN4YfIAsdvQF4A5d1iOddnjbz8CKkN3xFC-jjf/pub?output=csv',
+    maxNumbers: 6,
+    numberRange: 40,
+    maxStars: 1,
+    starRange: 5,
+    starName: 'Sueño',
+    gridCols: 10,
+    numbersLayout: { type: 'sequential', columns: 5 },
+    secondaryLayout: { type: 'sequential', columns: 3 },
+    allowedDays: [1, 4],
+    theoreticalProbabilities: { '6': 0.000026, '5': 0.0053, '4': 0.219, '3': 3.118, '<=2': 96.657 },
+    jackpotThresholds: { excellent: 20000, good: 10000 },
+    customFilterLimits: {
+      sum: { min: 100, max: 150 },
+      sumaDigitos: { min: 25, max: 48 },
+      desviacion: { min: 9.0, max: 20.0 },
+      primos: { min: 0, max: 6 },
+      distancia: { min: 1, max: 20 },
+      starSum: { min: 1, max: 5 },
+      starSumaDigitos: { min: 1, max: 5 },
+      starPrimos: { min: 0, max: 1 },
+      starDistancia: { min: 0, max: 0 },
+      terminacionesDistintas: [4, 5, 6]
     }
   }),
   'bonoloto': new BaseGameConfig({
@@ -503,72 +580,6 @@ export const GAMES: { [key: string]: GameConfig } = {
       starPrimos: { min: 0, max: 1 },
       starDistancia: { min: 0, max: 0 },
       terminacionesDistintas: [3, 4, 5]
-    }
-  }),
-  'euromillones': new BaseGameConfig({
-    id: 'euromillones',
-    name: 'Euromillones',
-    fullName: 'Euromillones Europa',
-    titleHeader: 'Euromillones 5/50 ⭐ 2/12',
-    flag: '🇪🇺',
-    currency: '€',
-    costPerBet: 2.50,
-    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9LdJPVydRU1ohhiCuUeVb0nFTnFdZG_4JJhD8K7dJzrhHVOLUNB1SDF4TkbkqXSqrF_LGbhYQGgl6/pub?output=csv',
-    maxNumbers: 5,
-    numberRange: 50,
-    maxStars: 2,
-    starRange: 12,
-    starName: 'Estrellas',
-    gridCols: 10,
-    numbersLayout: { type: 'column-chunk', chunkSize: 9 },
-    secondaryLayout: { type: 'column-chunk', chunkSize: 4 },
-    allowedDays: [2, 5],
-    theoreticalProbabilities: { '5': 0.000047, '4': 0.0106, '3': 0.467, '<=2': 99.52 },
-    jackpotThresholds: { excellent: 50000000, good: 25000000 },
-    customFilterLimits: {
-      sum: { min: 100, max: 160 },
-      sumaDigitos: { min: 23, max: 45 },
-      desviacion: { min: 10.0, max: 22.0 },
-      primos: { min: 0, max: 5 },
-      distancia: { min: 1, max: 25 },
-      starSum: { min: 8, max: 15 },
-      starSumaDigitos: { min: 3, max: 12 },
-      starPrimos: { min: 0, max: 2 },
-      starDistancia: { min: 1, max: 11 },
-      terminacionesDistintas: [3, 4, 5]
-    }
-  }),
-  'eurodreams': new BaseGameConfig({
-    id: 'eurodreams',
-    name: 'EuroDreams',
-    fullName: 'EuroDreams Europa',
-    titleHeader: 'EuroDreams 6/40 🌙 1/5',
-    flag: '🌙',
-    currency: '€',
-    costPerBet: 2.50,
-    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9UhEkG1_cHAMDvBsmhkzqjpismGFGhouomp9PV3QN4YfIAsdvQF4A5d1iOddnjbz8CKkN3xFC-jjf/pub?output=csv',
-    maxNumbers: 6,
-    numberRange: 40,
-    maxStars: 1,
-    starRange: 5,
-    starName: 'Sueño',
-    gridCols: 10,
-    numbersLayout: { type: 'sequential', columns: 5 },
-    secondaryLayout: { type: 'sequential', columns: 3 },
-    allowedDays: [1, 4],
-    theoreticalProbabilities: { '6': 0.000026, '5': 0.0053, '4': 0.219, '3': 3.118, '<=2': 96.657 },
-    jackpotThresholds: { excellent: 20000, good: 10000 },
-    customFilterLimits: {
-      sum: { min: 100, max: 150 },
-      sumaDigitos: { min: 25, max: 48 },
-      desviacion: { min: 9.0, max: 20.0 },
-      primos: { min: 0, max: 6 },
-      distancia: { min: 1, max: 20 },
-      starSum: { min: 1, max: 5 },
-      starSumaDigitos: { min: 1, max: 5 },
-      starPrimos: { min: 0, max: 1 },
-      starDistancia: { min: 0, max: 0 },
-      terminacionesDistintas: [4, 5, 6]
     }
   }),
   'nacional': new BaseGameConfig({
