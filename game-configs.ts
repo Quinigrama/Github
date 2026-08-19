@@ -346,6 +346,244 @@ export const NATIONAL_FLAGS: { [gameId: string]: string } = {
   nacional: '🇪🇸',
 };
 
+export interface GameColorPalette {
+  cardBg: string;           // fondo de la tarjeta cuando el ticket está validado
+  cardBorderThick: string;  // borde de la tarjeta validada (normalmente 1.5px)
+  cardBorderThin: string;   // borde de la tarjeta NO validada (normalmente 1px)
+  headerText: string;       // color del texto de cabecera / nombre de categoría con premio
+  accentText: string;       // color usado para el nº de apuestas ganadoras cuando count > 0
+  rowHighlightBg: string;   // fondo de la fila de la tabla de premios cuando esa categoría tiene ganadoras
+  neutralText: string;      // color de texto cuando count === 0 (#64748b en todos los bloques)
+  secondaryEmoji: string;   // emoji de la segunda matriz: 🔴, 🟡, ⭐, 🌙, 🔑, ''
+  badgeBg: string;          // fondo de la etiqueta de cabecera (p. ej. "Desglose por Categorías" / "Múltiple de X")
+  badgeText: string;        // color de texto de la etiqueta de cabecera
+  tableHeaderBg: string;    // fondo del encabezado (thead) de la tabla de desglose
+  tableHeaderColor: string; // color de texto del encabezado (thead) de la tabla de desglose
+  tableBorder: string;      // borde de las celdas de la tabla de premios
+  totalBannerBg: string;    // fondo del banner de total de apuestas premiadas
+  totalBannerText: string;  // color de texto del banner total
+  totalBannerValue: string; // color del número total en el banner
+  ballWinningBg: string;    // fondo del número principal cuando es acierto
+  ballWinningText: string;  // color de texto del número principal cuando es acierto
+  secondaryWinningBg: string;    // fondo del número secundario cuando es acierto
+  secondaryWinningText: string;  // texto del número secundario cuando es acierto
+  secondaryDefaultBg: string;    // fondo del número secundario cuando no es acierto (vista validada)
+  secondaryDefaultText: string;  // texto del número secundario cuando no es acierto
+  secondaryLabelColor: string;   // color del texto "+ PB:", "+ MB:", "+ ⭐:", "+ 🌙:", "+ 🔑:"
+}
+
+export const SHARED_BALL_COLORS = {
+  defaultBg: '#f1f5f9',
+  defaultText: '#1e293b',
+  neutralText: '#64748b',
+  starDefaultBg: '#fbbf24',
+  starDefaultText: '#000000',
+  starWinningGradient: 'linear-gradient(135deg, #ffd700, #ffa000)',
+};
+
+export const GAME_COLORS: { [gameId: string]: GameColorPalette } = {
+  powerball: {
+    cardBg: '#fff1f2',
+    cardBorderThick: '#fecdd3',
+    cardBorderThin: '#fecdd3',
+    headerText: '#9f1239',
+    accentText: '#be123c',
+    rowHighlightBg: '#ffe4e6',
+    neutralText: '#64748b',
+    secondaryEmoji: '🔴',
+    badgeBg: '#be123c',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#ffe4e6',
+    tableHeaderColor: '#881337',
+    tableBorder: '#fecdd3',
+    totalBannerBg: '#9f1239',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#fef08a',
+    ballWinningBg: '#e11d48',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#9f1239',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#fda4af', // Nota: en vista no validada usa #e11d48
+    secondaryDefaultText: '#ffffff',
+    secondaryLabelColor: '#be123c',
+  },
+  megamillions: {
+    cardBg: '#fefce8',
+    cardBorderThick: '#fde047',
+    cardBorderThin: '#fde047',
+    headerText: '#854d0e',
+    accentText: '#ca8a04',
+    rowHighlightBg: '#fefce8',
+    neutralText: '#64748b',
+    secondaryEmoji: '🟡',
+    badgeBg: '#ca8a04',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#fef08a',
+    tableHeaderColor: '#854d0e',
+    tableBorder: '#fde047',
+    totalBannerBg: '#a16207',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#fef08a',
+    ballWinningBg: '#eab308',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#854d0e',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#fde047',
+    secondaryDefaultText: '#854d0e',
+    secondaryLabelColor: '#a16207',
+  },
+  euromillones: {
+    cardBg: '#fefce8',
+    cardBorderThick: '#fde047',
+    cardBorderThin: '#fde047',
+    headerText: '#854d0e',
+    accentText: '#a16207',
+    rowHighlightBg: '#fefce8',
+    neutralText: '#64748b',
+    secondaryEmoji: '⭐',
+    badgeBg: '#eab308',
+    badgeText: '#000000',
+    tableHeaderBg: '#fef08a',
+    tableHeaderColor: '#713f12',
+    tableBorder: '#fde047',
+    totalBannerBg: '#ca8a04',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#ffffff',
+    ballWinningBg: '#2563eb',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#eab308',
+    secondaryWinningText: '#000000',
+    secondaryDefaultBg: '#fef08a',
+    secondaryDefaultText: '#854d0e',
+    secondaryLabelColor: '#d97706',
+  },
+  eurodreams: {
+    cardBg: '#f0f9ff',
+    cardBorderThick: '#38bdf8',
+    cardBorderThin: '#bae6fd', // Borde más claro en no-validado
+    headerText: '#0369a1',
+    accentText: '#0284c7',
+    rowHighlightBg: '#f0f9ff',
+    neutralText: '#64748b',
+    secondaryEmoji: '🌙',
+    badgeBg: '#38bdf8',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#bae6fd',
+    tableHeaderColor: '#0369a1',
+    tableBorder: '#bae6fd', // Nota: en <thead> del código original se usó border: 1px solid #7dd3fc
+    totalBannerBg: '#0284c7',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#ffffff',
+    ballWinningBg: '#0284c7',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#38bdf8',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#e0f2fe',
+    secondaryDefaultText: '#0369a1',
+    secondaryLabelColor: '#0284c7',
+  },
+  gordo: {
+    cardBg: '#faf5ff',
+    cardBorderThick: '#c084fc',
+    cardBorderThin: '#e9d5ff', // Borde más claro en no-validado
+    headerText: '#6b21a8',
+    accentText: '#7e22ce',
+    rowHighlightBg: '#faf5ff',
+    neutralText: '#64748b',
+    secondaryEmoji: '🔑',
+    badgeBg: '#a855f7',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#e9d5ff',
+    tableHeaderColor: '#6b21a8',
+    tableBorder: '#e9d5ff', // Nota: en <thead> del código original se usó border: 1px solid #d8b4fe
+    totalBannerBg: '#7e22ce',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#ffffff',
+    ballWinningBg: '#7e22ce',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#a855f7',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#f3e8ff',
+    secondaryDefaultText: '#6b21a8',
+    secondaryLabelColor: '#7e22ce',
+  },
+  bonoloto: {
+    cardBg: '#ecfdf5',
+    cardBorderThick: '#6ee7b7',
+    cardBorderThin: '#6ee7b7',
+    headerText: '#065f46',
+    accentText: '#059669',
+    rowHighlightBg: '#d1fae5',
+    neutralText: '#64748b',
+    secondaryEmoji: '',
+    badgeBg: '#059669',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#d1fae5',
+    tableHeaderColor: '#065f46',
+    tableBorder: '#6ee7b7',
+    totalBannerBg: '#059669',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#fef08a',
+    ballWinningBg: 'var(--secondary)',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#059669',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#d1fae5',
+    secondaryDefaultText: '#065f46',
+    secondaryLabelColor: '#059669',
+  },
+  primitiva: {
+    cardBg: '#fff7ed',
+    cardBorderThick: '#fdba74',
+    cardBorderThin: '#fdba74',
+    headerText: '#9a3412',
+    accentText: '#ea580c',
+    rowHighlightBg: '#ffedd5',
+    neutralText: '#64748b',
+    secondaryEmoji: '',
+    badgeBg: '#ea580c',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#ffedd5',
+    tableHeaderColor: '#9a3412',
+    tableBorder: '#fdba74',
+    totalBannerBg: '#ea580c',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#fef08a',
+    ballWinningBg: 'var(--secondary)',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#ea580c',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#ffedd5',
+    secondaryDefaultText: '#9a3412',
+    secondaryLabelColor: '#ea580c',
+  },
+  nacional: {
+    cardBg: '#eef2ff',
+    cardBorderThick: '#c7d2fe',
+    cardBorderThin: '#c7d2fe',
+    headerText: '#3730a3',
+    accentText: '#4f46e5',
+    rowHighlightBg: '#e0e7ff',
+    neutralText: '#64748b',
+    secondaryEmoji: '',
+    badgeBg: '#4f46e5',
+    badgeText: '#ffffff',
+    tableHeaderBg: '#e0e7ff',
+    tableHeaderColor: '#3730a3',
+    tableBorder: '#c7d2fe',
+    totalBannerBg: '#4f46e5',
+    totalBannerText: '#ffffff',
+    totalBannerValue: '#fef08a',
+    ballWinningBg: 'var(--secondary)',
+    ballWinningText: '#ffffff',
+    secondaryWinningBg: '#4f46e5',
+    secondaryWinningText: '#ffffff',
+    secondaryDefaultBg: '#e0e7ff',
+    secondaryDefaultText: '#3730a3',
+    secondaryLabelColor: '#4f46e5',
+  },
+};
+
 export const GAMES: { [key: string]: GameConfig } = {
   'powerball': new BaseGameConfig({
     id: 'powerball',
