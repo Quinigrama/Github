@@ -774,6 +774,8 @@
   "notif.titulo": "🗓️ Active Draw Reminders",
   "notif.masterLabel": "Active Draw Reminders",
   "notif.masterDesc": "Get a notice when you open the app on days when your selected games have a draw",
+  "notif.horaLabel": "🕐 Reminder time",
+  "notif.horaDesc": "Time of day to receive draw reminders on draw days",
   "notif.juegosANotificar": "🎯 Games to Notify (with real draw days):",
   "notif.dias.powerball": "Monday, Wednesday, Saturday",
   "notif.dias.megamillions": "Tuesday, Friday",

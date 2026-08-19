@@ -774,6 +774,8 @@
   "notif.titulo": "🗓️ Recordatorios de Sorteos Activos",
   "notif.masterLabel": "Recordatorios de Sorteos Activos",
   "notif.masterDesc": "Recibe un aviso al abrir la app los días que haya sorteos de tus juegos seleccionados",
+  "notif.horaLabel": "🕐 Hora del aviso",
+  "notif.horaDesc": "Hora a la que quieres recibir el recordatorio los días de sorteo",
   "notif.juegosANotificar": "🎯 Juegos a Notificar (con días de sorteo reales):",
   "notif.dias.powerball": "Lunes, Miércoles, Sábado",
   "notif.dias.megamillions": "Martes, Viernes",

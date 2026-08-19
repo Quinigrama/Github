@@ -11,6 +11,8 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/local-notifications": "^8.3.0",
     "dotenv": "^17.3.1",
     "express": "^4.21.2",
     "nodemailer": "^6.10.0"
