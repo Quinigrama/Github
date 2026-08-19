@@ -7403,6 +7403,7 @@ class DataLotto49Advanced {
       this.renderFilterOptions();
       this.initFilterInfoButtons();
       this.updateFilterBadgesFromAudit();
+      this.renderNashScoreHistogram();
 
       const ticketDiv = document.getElementById('ticket');
       if (ticketDiv && ticketDiv.classList.contains('conflict')) {
