@@ -2991,17 +2991,17 @@ class DataLotto49Advanced {
           badge.style.color = '#ef4444';
           badge.style.background = '#fee2e2';
           badge.style.borderColor = '#fca5a5';
-          badge.innerHTML = `🚨 Filtra ${Math.round(100 - item.percent)}%`;
+          badge.innerHTML = `🚨 ${t('filter.activityBadge', { pct: Math.round(100 - item.percent) })}`;
         } else if (isWarning) {
           badge.style.color = '#d97706';
           badge.style.background = '#fef3c7';
           badge.style.borderColor = '#fcd34d';
-          badge.innerHTML = `⚠️ Filtra ${Math.round(100 - item.percent)}%`;
+          badge.innerHTML = `⚠️ ${t('filter.activityBadge', { pct: Math.round(100 - item.percent) })}`;
         } else {
           badge.style.color = '#3b82f6';
           badge.style.background = '#eff6ff';
           badge.style.borderColor = '#93c5fd';
-          badge.innerHTML = `📉 Filtra ${Math.round(100 - item.percent)}%`;
+          badge.innerHTML = `📉 ${t('filter.activityBadge', { pct: Math.round(100 - item.percent) })}`;
         }
 
         titleEl.appendChild(badge);

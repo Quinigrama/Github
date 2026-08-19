@@ -899,6 +899,7 @@
   "filter.positionRange.position": "Posición {n}",
   "filter.positionRange.enabled": "Activar filtro",
   "filter.excludeBadge": "Excluye {pct}%",
+  "filter.activityBadge": "Filtra {pct}%",
   "filter.excludeHistoricalMatches.titulo": "Evitar Coincidencia con Histórico",
   "filter.excludeHistoricalMatches.labelFull": "Evitar coincidir con los {n} números de un sorteo ya salido",
   "filter.excludeHistoricalMatches.labelNearFull": "Evitar coincidir con {n-1} de los {n} números de un sorteo ya salido",

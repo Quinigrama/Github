@@ -899,6 +899,7 @@
   "filter.positionRange.position": "Position {n}",
   "filter.positionRange.enabled": "Enable filter",
   "filter.excludeBadge": "Excludes {pct}%",
+  "filter.activityBadge": "Filters {pct}%",
   "filter.excludeHistoricalMatches.titulo": "Avoid Historical Matches",
   "filter.excludeHistoricalMatches.labelFull": "Avoid matching all {n} numbers of a previous draw",
   "filter.excludeHistoricalMatches.labelNearFull": "Avoid matching {n-1} of {n} numbers of a previous draw",
