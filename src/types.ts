@@ -31,40 +31,6 @@ export interface Ticket {
   seenValidation?: boolean; // Whether user has reviewed/seen the validated ticket
 }
 
-export interface PeniaAlert {
-  id: string;
-  type: 'ticket_created' | 'hit_significant' | 'jackpot_alert' | 'member_joined';
-  title: string;
-  message: string;
-  timestamp: string;
-  author: string;
-  badgeColor?: string;
-}
-
-export interface PeniaChatMessage {
-  id: string;
-  author: string;
-  text: string;
-  timestamp: string;
-  isTicketShare?: boolean;
-  ticketData?: Ticket;
-}
-
-export interface Penia {
-  id: string; // 6-char code e.g. AZ34Y2
-  code: string; // 6-char code e.g. AZ34Y2
-  name: string;
-  gameId: string;
-  creator: string;
-  creatorUid?: string;
-  createdAt: string;
-  members: string[];
-  tickets: Ticket[];
-  alerts: PeniaAlert[];
-  messages: PeniaChatMessage[];
-  totalPrizes?: number;
-}
-
 export interface PositionRangeConfig {
   position: number;
   min: number;

@@ -182,7 +182,7 @@ async function startServer() {
 
       // 2. Send notification ONLY for important wins (4+ hits or key star matches)
       const isImportantPrize = (evt: string, gid: string, p: any): boolean => {
-        if (evt !== 'validate_ticket' && evt !== 'penia_prize') {
+        if (evt !== 'validate_ticket') {
           return false;
         }
 
