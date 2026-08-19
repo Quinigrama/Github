@@ -10001,6 +10001,183 @@ class DataLotto49Advanced {
     }
   }
 
+  renderMultipleTicketCard(ticket: Ticket): string {
+    const gameId = ticket.gameId || 'bonoloto';
+    const colors = GAME_COLORS[gameId] || GAME_COLORS['bonoloto'];
+    const hasSecondaryMatrix = (GAMES[gameId]?.maxStars || 0) > 0;
+    const superset = ticket.combinations[0] || [];
+
+    if (hasSecondaryMatrix) {
+      const costData = this.calculateTicketCost(ticket);
+      const defaultSecondary = gameId === 'euromillones' ? [1, 2] : (gameId === 'gordo' ? [0] : [1]);
+      const secondarySuperset = ticket.stars && ticket.stars[0] ? ticket.stars[0] : defaultSecondary;
+
+      let secondaryLabel = '';
+      if (gameId === 'powerball') secondaryLabel = t('tickets.masPB');
+      else if (gameId === 'megamillions') secondaryLabel = t('tickets.masMB');
+      else if (gameId === 'euromillones') secondaryLabel = t('tickets.masEstrella');
+      else if (gameId === 'eurodreams') secondaryLabel = '+ 🌙:';
+      else if (gameId === 'gordo') secondaryLabel = t('tickets.masLlave');
+
+      if (ticket.validation) {
+        const winningWhiteSet = new Set(ticket.validation.winningNumbers);
+        const winningStarsSet = new Set(ticket.validation.stars || []);
+
+        let cascade: { tiers: { name: string; hits: number; starHits: number; count: number }[] } | null = null;
+        if (gameId === 'powerball') {
+          cascade = this.calculatePowerballCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
+        } else if (gameId === 'megamillions') {
+          cascade = this.calculateMegaMillionsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
+        } else if (gameId === 'euromillones') {
+          cascade = this.calculateEuromillonesCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
+        } else if (gameId === 'eurodreams') {
+          cascade = this.calculateEurodreamsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
+        } else if (gameId === 'gordo') {
+          cascade = this.calculateGordoCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
+        }
+
+        let summaryTableHTML = '';
+        if (cascade) {
+          const tierRows = cascade.tiers.map(tRow => `
+            <tr style="${tRow.count > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}">
+              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.name}</td>
+              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${tRow.hits} + ${tRow.starHits}${colors.secondaryEmoji}</td>
+              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${tRow.count > 0 ? colors.accentText : colors.neutralText};">${tRow.count}</td>
+            </tr>
+          `).join('');
+
+          const totalWinningBets = cascade.tiers.reduce((acc, tRow) => acc + tRow.count, 0);
+
+          summaryTableHTML = `
+            <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
+              <thead>
+                <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
+                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
+                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tierRows}
+              </tbody>
+            </table>
+
+            <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
+              <span>${t('tickets.totalApuestasPremiadas')}</span>
+              <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
+            </div>
+          `;
+        }
+
+        const combinationsListHTML = `
+          <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+            <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+              ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? colors.ballWinningBg : SHARED_BALL_COLORS.defaultBg}; color: ${winningWhiteSet.has(n) ? colors.ballWinningText : SHARED_BALL_COLORS.defaultText};">${n}</div>`).join('')}
+              <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
+              ${secondarySuperset.map(r => `<div class="saved-combination-number" style="background: ${winningStarsSet.has(r) ? colors.secondaryWinningBg : colors.secondaryDefaultBg}; color: ${winningStarsSet.has(r) ? colors.secondaryWinningText : colors.secondaryDefaultText}; font-weight: bold;">${r}</div>`).join('')}
+            </div>
+          </div>
+        `;
+
+        return `
+          <div style="background: ${colors.cardBg}; border: 1.5px solid ${colors.cardBorderThick}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
+            </div>
+            ${combinationsListHTML}
+            ${summaryTableHTML}
+          </div>
+        `;
+
+      } else {
+        const combinationsListHTML = `
+          <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
+            <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+              ${superset.map(n => `<div class="saved-combination-number" style="background: ${SHARED_BALL_COLORS.defaultBg}; color: ${SHARED_BALL_COLORS.defaultText};">${n}</div>`).join('')}
+              <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
+              ${secondarySuperset.map(r => `<div class="saved-combination-number" style="background: ${gameId === 'powerball' ? colors.ballWinningBg : colors.secondaryWinningBg}; color: ${colors.secondaryWinningText}; font-weight: bold;">${r}</div>`).join('')}
+            </div>
+          </div>
+        `;
+
+        return `
+          <div style="background: ${colors.cardBg}; border: 1px solid ${colors.cardBorderThin}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
+            </div>
+            ${combinationsListHTML}
+          </div>
+        `;
+      }
+
+    } else {
+      const explodedCombos = this.getCombinations(superset, 6);
+
+      if (ticket.validation) {
+        const winningNumbersSet = new Set(ticket.validation.winningNumbers);
+        const breakdown = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        explodedCombos.forEach(c => {
+          const hits = c.filter(n => winningNumbersSet.has(n)).length;
+          (breakdown as any)[hits]++;
+        });
+
+        const totalMatchesInSuperset = superset.filter(n => winningNumbersSet.has(n)).length;
+
+        const summaryTableHTML = `
+          <div style="margin-top: 10px; margin-bottom: 8px; font-weight: bold; color: ${colors.accentText};">
+            🎯 ${totalMatchesInSuperset} aciertos sobre los ${superset.length} números seleccionados.
+          </div>
+          <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
+            <thead>
+              <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
+                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">Aciertos</th>
+                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="${breakdown[6] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">6 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[6] > 0 ? colors.accentText : colors.neutralText};">${breakdown[6]}</td></tr>
+              <tr style="${breakdown[5] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">5 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[5] > 0 ? colors.accentText : colors.neutralText};">${breakdown[5]}</td></tr>
+              <tr style="${breakdown[4] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">4 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[4] > 0 ? colors.accentText : colors.neutralText};">${breakdown[4]}</td></tr>
+              <tr style="${breakdown[3] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">3 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[3] > 0 ? colors.accentText : colors.neutralText};">${breakdown[3]}</td></tr>
+              <tr style="color: ${colors.neutralText};"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">0-2 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800;">${breakdown[0] + breakdown[1] + breakdown[2]}</td></tr>
+            </tbody>
+          </table>
+        `;
+
+        return `
+          <div style="background: ${colors.cardBg}; border: 1.5px solid ${colors.cardBorderThick}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span>${t(`tickets.${gameId}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
+              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
+            </div>
+            <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+              <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+                ${superset.map(n => `<div class="saved-combination-number ${winningNumbersSet.has(n) ? 'selected' : ''}">${n}</div>`).join('')}
+              </div>
+            </div>
+            ${summaryTableHTML}
+          </div>
+        `;
+
+      } else {
+        return `
+          <div style="background: ${colors.cardBg}; border: 1px solid ${colors.cardBorderThin}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span>${t(`tickets.${gameId}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
+              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
+            </div>
+            <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
+              <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
+                ${superset.map(n => `<div class="saved-combination-number">${n}</div>`).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+  }
+
   updateSavedTickets() {
     this.updateSavedTicketsStats();
     this.updateHistoryDashboard();
