@@ -5403,11 +5403,11 @@ class DataLotto49Advanced {
       for (let i = startNum; i <= this.currentGame.numberRange; i++) {
         if (i % 10 === 0) {
           const rowLabels = [
-            "1ª Cifra (Decena de millar)",
-            "2ª Cifra (Unidad de millar)",
-            "3ª Cifra (Centena)",
-            "4ª Cifra (Decena)",
-            "5ª Cifra (Unidad - Reintegro)"
+            t('nacional.cifra1'),
+            t('nacional.cifra2'),
+            t('nacional.cifra3'),
+            t('nacional.cifra4'),
+            t('nacional.cifra5')
           ];
           const labelIdx = Math.floor(i / 10) - 1;
           if (labelIdx >= 0 && labelIdx < 5) {
@@ -11700,8 +11700,8 @@ class DataLotto49Advanced {
         <span style="flex: 1; white-space: pre-line;">${message}</span>
         ${showCloseBtn ? `
           <div style="display: flex; gap: 8px; justify-content: center;">
-            ${isError ? `<button id="copyToastBtn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 0.8rem;">Copiar</button>` : ''}
-            <button id="closeToastBtn" style="background: rgba(255,255,255,0.25); border: 1px solid white; color: white; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 0.8rem;">Cerrar</button>
+            ${isError ? `<button id="copyToastBtn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 0.8rem;">${t('toast.copiarBtn')}</button>` : ''}
+            <button id="closeToastBtn" style="background: rgba(255,255,255,0.25); border: 1px solid white; color: white; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 0.8rem;">${t('tickets.cerrar')}</button>
           </div>
         ` : ''}
       </div>

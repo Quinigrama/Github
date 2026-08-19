@@ -2,6 +2,7 @@ import { generateRandomCombination } from './geometry';
 import { getCombinations } from './combinatorial';
 import { isValidCombination } from './combinationValidator';
 import { calculateOptimizationScore, OptimizationContext } from './optimizer';
+import { t } from './i18n';
 
 export const DEFAULT_TOLERANCE_LEVELS: { [key: number]: number } = {
   7: 0.70,
@@ -45,8 +46,9 @@ export async function findValidSuperset(
   primes?: Set<number>,
   onProgress?: (msg: string) => void
 ): Promise<{ superset: number[], stars: number[], validCount: number, totalCount: number } | null> {
-  const label = starCount > currentGame.maxStars ? `Múltiple de ${numCount} + ${starCount}⭐` : `Múltiple de ${numCount}`;
-  onProgress?.(`Buscando ${label}...`);
+  const starSuffix = starCount > currentGame.maxStars ? ` + ${starCount}⭐` : '';
+  const label = t('generacion.buscandoMultiple', { numCount, starSuffix });
+  onProgress?.(t('generacion.buscandoLabel', { label }));
 
   const maxNumbers = currentGame.maxNumbers;
   const maxStars = currentGame.maxStars;
@@ -56,7 +58,7 @@ export async function findValidSuperset(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (attempt % 100 === 0) {
-      onProgress?.(`Intento ${attempt} de ${maxAttempts}...`);
+      onProgress?.(t('generacion.intentoDe', { attempt, maxAttempts }));
       await new Promise(resolve => setTimeout(resolve, 0));
     }
 
@@ -91,7 +93,7 @@ export async function findValidSuperset(
     }
 
     if (validCount >= requiredValidCount) {
-      onProgress?.(`¡Superconjunto válido encontrado!`);
+      onProgress?.(t('generacion.supersetEncontrado'));
       return {
         superset: candidateSuperset.sort((a, b) => a - b),
         stars: candidateStarSuperset.sort((a, b) => a - b),
@@ -101,7 +103,7 @@ export async function findValidSuperset(
     }
   }
 
-  onProgress?.(`Búsqueda finalizada sin éxito.`);
+  onProgress?.(t('generacion.busquedaSinExito'));
   return null;
 }
 
@@ -115,7 +117,7 @@ export async function findAndRankWinningCombinations(
   optimizationContext: OptimizationContext,
   onProgress?: (msg: string) => void
 ): Promise<{ combo: number[], stars: number[] }[]> {
-  onProgress?.(`Buscando ${generateCount} válidas...`);
+  onProgress?.(t('generacion.buscandoNValidas', { generateCount }));
 
   const validPairs: { combo: number[], stars: number[] }[] = [];
   const maxNumbers = currentGame.maxNumbers;
@@ -124,7 +126,7 @@ export async function findAndRankWinningCombinations(
 
   for (let i = 0; i < maxAttempts && validPairs.length < generateCount; i++) {
     if (i % 500 === 0) {
-      onProgress?.(`${validPairs.length} / ${generateCount} encontradas... (Intento ${i})`);
+      onProgress?.(t('generacion.progresoEncontradas', { found: validPairs.length, generateCount, attempt: i }));
       await new Promise(resolve => setTimeout(resolve, 0));
     }
     const combo = generateRandomCombination(universe, maxNumbers, currentGame?.id);
@@ -135,11 +137,13 @@ export async function findAndRankWinningCombinations(
   }
 
   if (validPairs.length === 0) {
-    throw new Error('No se encontraron combinaciones válidas. Intenta flexibilizar los filtros.');
+    const err = new Error('No se encontraron combinaciones válidas. Intenta flexibilizar los filtros.');
+    (err as any).i18nKey = 'generacion.sinCombinacionesValidas';
+    throw err;
   }
 
-  onProgress?.('Puntuando y ordenando...');
-  onProgress?.(`Puntuando ${validPairs.length} combinaciones...`);
+  onProgress?.(t('generacion.puntuandoOrdenando'));
+  onProgress?.(t('generacion.puntuandoNCombinaciones', { count: validPairs.length }));
   await new Promise(resolve => setTimeout(resolve, 0));
 
   const scoredPairs = validPairs.map(pair => ({
