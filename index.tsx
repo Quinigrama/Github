@@ -8991,7 +8991,7 @@ class DataLotto49Advanced {
 
     try {
       if (strategy === 'simple') {
-          this.showLoading('Buscando combinación...');
+          this.showLoading(t('generacion.buscandoCombinacionSimple'));
           const loadingInfo = document.getElementById('loadingInfo');
           let found = false;
           const maxSimpleAttempts = 50000;
@@ -9000,7 +9000,7 @@ class DataLotto49Advanced {
           for (let i = 0; i < maxSimpleAttempts; i++) {
               if (i > 0 && i % chunkSize === 0) {
                   if (loadingInfo) {
-                      loadingInfo.textContent = `Buscando... (${i} intentos probados)`;
+                      loadingInfo.textContent = t('generacion.intentosProbados', { attempts: i });
                   }
                   // Yield execution to the browser event loop to avoid locking the UI thread
                   await new Promise(resolve => setTimeout(resolve, 1));
@@ -9088,7 +9088,7 @@ class DataLotto49Advanced {
               throw err;
           }
           
-          this.showLoading('Generando combinación reducida...');
+          this.showLoading(t('generacion.generandoReducida'));
           
           const baseNumbersSorted = Array.from(this.selectedNumbers).sort((a, b) => a - b);
           this.reducedBaseNumbers = new Set(baseNumbersSorted);
@@ -10131,8 +10131,8 @@ class DataLotto49Advanced {
           <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
             <thead>
               <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">Aciertos</th>
-                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">Cantidad</th>
+                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.aciertosColumna')}</th>
+                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.cantidadColumna')}</th>
               </tr>
             </thead>
             <tbody>
