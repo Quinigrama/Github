@@ -36,6 +36,7 @@ import {
 } from './src/utils/geometry';
 import { runFilterAudit } from './src/utils/filterAudit';
 import { syncNativeNotifications } from './src/services/notificationScheduler';
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './src/config/telegramConfig';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
@@ -11353,37 +11354,7 @@ class DataLotto49Advanced {
       return;
     }
 
-    const sendBtn = document.getElementById('sendContactBtn') as HTMLButtonElement;
-    if (sendBtn) {
-      sendBtn.disabled = true;
-      sendBtn.textContent = t('contact.enviando');
-    }
-
-    try {
-      const targetUrl = this.getApiUrl('/api/contact');
-      const response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, email })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        this.showToast(t('toast.contactoEnviado'), 'success');
-        this.toggleModal('contactModal', false);
-      } else {
-        throw new Error(data.error || t('contact.errorEnviarDefault'));
-      }
-    } catch (error: any) {
-      console.error('Error enviando contacto:', error);
-      let errMsg = error?.message || t('contact.errorEnviarReintentar');
-      if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network request failed')) {
-        errMsg = `No se pudo conectar con el servidor backend (${this.getApiUrl('/api/contact')}). Verifica tu conexión o la URL del servidor en Ajustes.`;
-      }
-      this.showToast(`❌ ${errMsg}`, 'error');
-
-      // Mostrar opción alternativa mailto
+    const showMailtoFallback = () => {
       if (fallbackDiv) {
         fallbackDiv.style.display = 'block';
         const mailtoBtn = document.getElementById('contactMailtoBtn') as HTMLAnchorElement;
@@ -11393,6 +11364,55 @@ class DataLotto49Advanced {
           mailtoBtn.href = `mailto:datalotto49@gmail.com?subject=${subject}&body=${body}`;
         }
       }
+    };
+
+    // 1. Validar si el bot de Telegram está configurado (no contiene 'REEMPLAZAR' y no está vacío)
+    const isConfigured = TELEGRAM_BOT_TOKEN &&
+      TELEGRAM_CHAT_ID &&
+      !TELEGRAM_BOT_TOKEN.includes('REEMPLAZAR') &&
+      !TELEGRAM_CHAT_ID.includes('REEMPLAZAR');
+
+    if (!isConfigured) {
+      this.showToast(`⚠️ ${t('contact.telegramNoConfigurado')}`, 'warning');
+      showMailtoFallback();
+      return;
+    }
+
+    const sendBtn = document.getElementById('sendContactBtn') as HTMLButtonElement;
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = t('contact.enviando');
+    }
+
+    try {
+      const telegramText = `📬 Nuevo mensaje de contacto - DataLotto\n\n` +
+        `👤 Remitente: ${email || "No especificado"}\n\n` +
+        `💬 Mensaje:\n${message}`;
+
+      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramText
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data && data.ok) {
+        this.showToast(t('toast.contactoEnviado'), 'success');
+        this.toggleModal('contactModal', false);
+      } else {
+        throw new Error(data?.description || t('contact.errorEnviarDefault'));
+      }
+    } catch (error: any) {
+      console.error('Error enviando contacto a Telegram:', error);
+      const errMsg = error?.message || t('contact.errorEnviarReintentar');
+      this.showToast(`❌ ${errMsg}`, 'error');
+
+      // Mostrar opción alternativa mailto
+      showMailtoFallback();
     } finally {
       if (sendBtn) {
         sendBtn.disabled = false;

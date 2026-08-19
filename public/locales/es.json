@@ -638,6 +638,7 @@
   "toast.contactoEnviado": "✅ Mensaje enviado correctamente.",
   "contact.errorEnviarDefault": "Error al enviar",
   "contact.errorEnviarReintentar": "Error al enviar el mensaje. Inténtalo de nuevo.",
+  "contact.telegramNoConfigurado": "El bot de Telegram no está configurado (telegramConfig.ts). Puedes contactar mediante el enlace de correo directo a continuación.",
   "common.diasCortos.lunes": "Lun",
   "common.diasCortos.martes": "Mar",
   "common.diasCortos.miercoles": "Mié",

@@ -638,6 +638,7 @@
   "toast.contactoEnviado": "✅ Message sent successfully.",
   "contact.errorEnviarDefault": "Error sending",
   "contact.errorEnviarReintentar": "Error sending the message. Please try again.",
+  "contact.telegramNoConfigurado": "The Telegram bot is not configured (telegramConfig.ts). You can contact us using the direct email link below.",
   "common.diasCortos.lunes": "Mon",
   "common.diasCortos.martes": "Tue",
   "common.diasCortos.miercoles": "Wed",
