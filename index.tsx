@@ -943,14 +943,17 @@ class DataLotto49Advanced {
   }
 
   getApiUrl(path: string): string {
-    // Detect if we are running inside a Capacitor / Cordova mobile app context, standard file context, or local mobile APK
-    const isMobileApp = (window as any).Capacitor || 
+    // Deteccion de app movil restringida a señales inequivocas de Capacitor/Cordova.
+    // Se elimino la comprobacion de hostname === 'localhost'/'127.0.0.1' porque
+    // se demostro (evidencia real de navegador) que puede dispararse por error
+    // en contextos de hosting web normales, rompiendo la telemetria en la app
+    // publicada al forzarla a llamar directamente a la URL de Cloud Run en vez
+    // de la ruta relativa correcta.
+    const isMobileApp = (window as any).Capacitor ||
                         (window as any).cordova ||
-                        window.location.protocol === 'capacitor:' || 
-                        window.location.protocol === 'file:' ||
-                        window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1';
-                        
+                        window.location.protocol === 'capacitor:' ||
+                        window.location.protocol === 'file:';
+
     if (isMobileApp) {
       const customApi = localStorage.getItem('customApiServerUrl')?.trim();
       if (customApi) {
