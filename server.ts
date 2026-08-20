@@ -164,6 +164,12 @@ async function startServer() {
             userId,
             timestamp: timestamp || new Date().toISOString()
           };
+          if (payload.favoriteNumbers && Array.isArray(payload.favoriteNumbers) && payload.favoriteNumbers.length > 0) {
+            sheetsBody.favoriteNumbers = payload.favoriteNumbers;
+          }
+          if (payload.favoriteSecondaryNumbers && Array.isArray(payload.favoriteSecondaryNumbers) && payload.favoriteSecondaryNumbers.length > 0) {
+            sheetsBody.favoriteSecondaryNumbers = payload.favoriteSecondaryNumbers;
+          }
         } else {
           sheetsBody = {
             event,

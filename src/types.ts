@@ -29,6 +29,8 @@ export interface Ticket {
   };
   seenWinning?: boolean; // Whether user has reviewed/seen the winning ticket
   seenValidation?: boolean; // Whether user has reviewed/seen the validated ticket
+  favoriteNumbers?: number[];
+  favoriteSecondaryNumbers?: number[];
 }
 
 export interface PositionRangeConfig {

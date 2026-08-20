@@ -943,17 +943,14 @@ class DataLotto49Advanced {
   }
 
   getApiUrl(path: string): string {
-    // Deteccion de app movil restringida a señales inequivocas de Capacitor/Cordova.
-    // Se elimino la comprobacion de hostname === 'localhost'/'127.0.0.1' porque
-    // se demostro (evidencia real de navegador) que puede dispararse por error
-    // en contextos de hosting web normales, rompiendo la telemetria en la app
-    // publicada al forzarla a llamar directamente a la URL de Cloud Run en vez
-    // de la ruta relativa correcta.
-    const isMobileApp = (window as any).Capacitor ||
+    // Detect if we are running inside a Capacitor / Cordova mobile app context, standard file context, or local mobile APK
+    const isMobileApp = (window as any).Capacitor || 
                         (window as any).cordova ||
-                        window.location.protocol === 'capacitor:' ||
-                        window.location.protocol === 'file:';
-
+                        window.location.protocol === 'capacitor:' || 
+                        window.location.protocol === 'file:' ||
+                        window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1';
+                        
     if (isMobileApp) {
       const customApi = localStorage.getItem('customApiServerUrl')?.trim();
       if (customApi) {
@@ -9323,6 +9320,11 @@ class DataLotto49Advanced {
       this.currentTicket.drawDate = drawDateEl.value;
     }
 
+    const activeFavorites = Array.from(this.favoriteNumbers || []);
+    const activeSecondaryFavorites = Array.from(this.favoriteStars || []);
+    if (activeFavorites.length > 0) this.currentTicket.favoriteNumbers = activeFavorites;
+    if (activeSecondaryFavorites.length > 0) this.currentTicket.favoriteSecondaryNumbers = activeSecondaryFavorites;
+
     const savedTicketCopy = { ...this.currentTicket };
     this.savedTickets.unshift(this.currentTicket);
     this.saveState();
@@ -9330,8 +9332,6 @@ class DataLotto49Advanced {
 
     // Telemetry
     const metrics = this.calculateTicketMetrics(savedTicketCopy);
-    const activeFavorites = Array.from(this.favoriteNumbers || []);
-    const activeSecondaryFavorites = Array.from(this.favoriteStars || []);
     this.sendTelemetry('save_ticket', {
         gameId: metrics.gameId,
         combinationsCount: metrics.combinationsCount,
@@ -10176,12 +10176,16 @@ class DataLotto49Advanced {
             // Telemetry
             let prizeNotice = `${valData.maxHits} aciertos`;
             if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
+            const favNums = ticket.favoriteNumbers || Array.from(this.favoriteNumbers || []);
+            const favSecs = ticket.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
             this.sendTelemetry('validate_ticket', {
                 gameId: valData.gameId,
                 allHits: valData.allHits,
                 maxHits: valData.maxHits,
                 maxStars: valData.maxStars,
                 stars: valData.starHits,
+                favoriteNumbers: favNums.length > 0 ? favNums : undefined,
+                favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
                 prizeNotice: prizeNotice,
                 drawDate: ticket.drawDate || 'Auto-validado',
                 combinationsCount: valData.allHits.length
@@ -10320,12 +10324,16 @@ class DataLotto49Advanced {
         // Telemetry
         let prizeNotice = `${valData.maxHits} aciertos`;
         if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
+        const favNums = ticketToUpdate.favoriteNumbers || Array.from(this.favoriteNumbers || []);
+        const favSecs = ticketToUpdate.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
         this.sendTelemetry('validate_ticket', {
             gameId: valData.gameId,
             allHits: valData.allHits,
             maxHits: valData.maxHits,
             maxStars: valData.maxStars,
             stars: valData.starHits,
+            favoriteNumbers: favNums.length > 0 ? favNums : undefined,
+            favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
             prizeNotice: prizeNotice,
             drawDate: ticketToUpdate.drawDate || 'Desconocida',
             combinationsCount: valData.allHits.length
