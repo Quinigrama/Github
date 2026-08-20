@@ -160,6 +160,7 @@ async function startServer() {
             event: "validate_ticket",
             gameId: gameId || payload.gameId || "bonoloto",
             allHits: payload.allHits || [],
+            starHits: payload.stars || [],
             userId,
             timestamp: timestamp || new Date().toISOString()
           };
