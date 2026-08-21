@@ -962,16 +962,28 @@ class DataLotto49Advanced {
 
   async sendTelemetry(eventType: string, payload: any) {
     try {
-      await fetch(this.getApiUrl('/api/telemetry'), {
+      const body = JSON.stringify({
+        userId: this.anonymousUserId,
+        event: eventType,
+        gameId: this.currentGame.id,
+        payload: payload,
+        timestamp: new Date().toISOString()
+      });
+
+      const url = this.getApiUrl('/api/telemetry');
+      
+      // Try standard application/json first, with resilient fallback to text/plain (CORS simple request)
+      await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: this.anonymousUserId,
-          event: eventType,
-          gameId: this.currentGame.id,
-          payload: payload,
-          timestamp: new Date().toISOString()
-        })
+        body: body
+      }).catch(async (err) => {
+        console.warn('Standard telemetry request failed, retrying via simple request:', err);
+        return fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: body
+        });
       });
     } catch (e) {
       console.warn('Telemetry failed:', e);

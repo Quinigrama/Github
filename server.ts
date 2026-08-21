@@ -10,9 +10,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json({ limit: '10mb' }));
-
-  // CORS Middleware for Mobile/Capacitor connections
+  // 1. Universal CORS Middleware - Must execute FIRST before any body parsers or routes
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
@@ -20,11 +18,45 @@ async function startServer() {
     } else {
       res.setHeader("Access-Control-Allow-Origin", "*");
     }
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE, HEAD");
+    
+    // Echo back requested headers or provide a comprehensive permissive set
+    const reqHeaders = req.headers["access-control-request-headers"];
+    if (reqHeaders) {
+      res.setHeader("Access-Control-Allow-Headers", reqHeaders);
+    } else {
+      res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Access-Control-Request-Method, Access-Control-Request-Headers");
+    }
+    
     res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Max-Age", "86400");
+    res.setHeader("Vary", "Origin, Access-Control-Request-Headers, Access-Control-Request-Method");
+
+    // Fast-path for CORS preflight OPTIONS requests
     if (req.method === "OPTIONS") {
-      return res.sendStatus(200);
+      return res.status(204).end();
+    }
+    next();
+  });
+
+  // Explicit OPTIONS fallback handler
+  app.options("*", (req, res) => {
+    res.status(204).end();
+  });
+
+  // 2. Body Parsers (supporting JSON, text/plain, and urlencoded)
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.text({ type: ['text/plain', 'text/*', 'application/text'], limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Normalize body if sent as text string
+  app.use((req, res, next) => {
+    if (typeof req.body === 'string' && req.body.trim().startsWith('{')) {
+      try {
+        req.body = JSON.parse(req.body);
+      } catch (e) {
+        // Not valid JSON string, leave as is
+      }
     }
     next();
   });
@@ -270,7 +302,7 @@ async function startServer() {
     }
   });
 
-  app.get("/api/jackpots", async (req, res) => {
+  app.all("/api/jackpots", async (req, res) => {
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcKUCZOa3NM7dBYXOzWO94y51x6RFT6jUCrTYpoLBlKAztGTbbxnygcC8pg47RScEMuVquZOX8iLCt/pub?output=csv";
     
     // Fallback data helper
@@ -501,6 +533,11 @@ async function startServer() {
         data: fallbackJackpots
       });
     }
+  });
+
+  // Unmatched API route handler (return JSON 404 instead of HTML SPA)
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({ error: `Ruta API no encontrada: ${req.method} ${req.path}` });
   });
 
   // Vite middleware for development
