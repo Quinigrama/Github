@@ -943,20 +943,17 @@ class DataLotto49Advanced {
   }
 
   getApiUrl(path: string): string {
-    // Detect if we are running inside a Capacitor / Cordova mobile app context, standard file context, or local mobile APK
-    const isMobileApp = (window as any).Capacitor || 
+    // Detect if we are running inside a true hybrid mobile app context (Capacitor / Cordova / file protocol)
+    const isHybridApp = (window as any).Capacitor || 
                         (window as any).cordova ||
                         window.location.protocol === 'capacitor:' || 
-                        window.location.protocol === 'file:' ||
-                        window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1';
+                        window.location.protocol === 'file:';
                         
-    if (isMobileApp) {
+    if (isHybridApp) {
       const customApi = localStorage.getItem('customApiServerUrl')?.trim();
       if (customApi) {
         return `${customApi.replace(/\/+$/, '')}${path}`;
       }
-      // Active Cloud Run backend deployment URL
       const cloudRunUrl = 'https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app';
       return `${cloudRunUrl}${path}`;
     }
@@ -10059,7 +10056,7 @@ class DataLotto49Advanced {
       const playOnlineHTML = `<button class="play-online-btn-saved">${t('tickets.jugarOnline')}</button>`;
 
       const isMultipleTicket = ticket.strategy === 'multiple' ||
-        (ticket.combinations.length > 0 && (
+        (ticket.combinations.length === 1 && (
           ticket.combinations[0].length > (GAMES[ticket.gameId || 'bonoloto']?.maxNumbers || 6) ||
           (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > (GAMES[ticket.gameId || 'bonoloto']?.maxStars || 1))
         ));
@@ -10178,6 +10175,33 @@ class DataLotto49Advanced {
             if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
             const favNums = ticket.favoriteNumbers || Array.from(this.favoriteNumbers || []);
             const favSecs = ticket.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
+            const favCounts: { [num: number]: number } = {};
+            const favSecCounts: { [num: number]: number } = {};
+
+            favNums.forEach((num: number) => {
+                let cnt = 0;
+                if (ticket.strategy === 'multiple' && ticket.combinations.length === 1) {
+                    if (ticket.combinations[0].includes(num)) cnt = valData.allHits.length;
+                } else {
+                    ticket.combinations.forEach((c: number[]) => { if (c.includes(num)) cnt++; });
+                }
+                if (cnt > 0) {
+                    favCounts[num] = cnt;
+                }
+            });
+
+            favSecs.forEach((star: number) => {
+                let cnt = 0;
+                if (ticket.strategy === 'multiple' && ticket.stars && ticket.stars.length === 1) {
+                    if (ticket.stars[0].includes(star)) cnt = valData.allHits.length;
+                } else if (ticket.stars) {
+                    ticket.stars.forEach((s: number[]) => { if (s.includes(star)) cnt++; });
+                }
+                if (cnt > 0) {
+                    favSecCounts[star] = cnt;
+                }
+            });
+
             this.sendTelemetry('validate_ticket', {
                 gameId: valData.gameId,
                 allHits: valData.allHits,
@@ -10186,6 +10210,8 @@ class DataLotto49Advanced {
                 stars: valData.starHits,
                 favoriteNumbers: favNums.length > 0 ? favNums : undefined,
                 favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
+                favoriteCounts: Object.keys(favCounts).length > 0 ? favCounts : undefined,
+                favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
                 prizeNotice: prizeNotice,
                 drawDate: ticket.drawDate || 'Auto-validado',
                 combinationsCount: valData.allHits.length
@@ -10326,6 +10352,33 @@ class DataLotto49Advanced {
         if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
         const favNums = ticketToUpdate.favoriteNumbers || Array.from(this.favoriteNumbers || []);
         const favSecs = ticketToUpdate.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
+        const favCounts: { [num: number]: number } = {};
+        const favSecCounts: { [num: number]: number } = {};
+
+        favNums.forEach((num: number) => {
+            let cnt = 0;
+            if (ticketToUpdate.strategy === 'multiple' && ticketToUpdate.combinations.length === 1) {
+                if (ticketToUpdate.combinations[0].includes(num)) cnt = valData.allHits.length;
+            } else {
+                ticketToUpdate.combinations.forEach((c: number[]) => { if (c.includes(num)) cnt++; });
+            }
+            if (cnt > 0) {
+                favCounts[num] = cnt;
+            }
+        });
+
+        favSecs.forEach((star: number) => {
+            let cnt = 0;
+            if (ticketToUpdate.strategy === 'multiple' && ticketToUpdate.stars && ticketToUpdate.stars.length === 1) {
+                if (ticketToUpdate.stars[0].includes(star)) cnt = valData.allHits.length;
+            } else if (ticketToUpdate.stars) {
+                ticketToUpdate.stars.forEach((s: number[]) => { if (s.includes(star)) cnt++; });
+            }
+            if (cnt > 0) {
+                favSecCounts[star] = cnt;
+            }
+        });
+
         this.sendTelemetry('validate_ticket', {
             gameId: valData.gameId,
             allHits: valData.allHits,
@@ -10334,6 +10387,8 @@ class DataLotto49Advanced {
             stars: valData.starHits,
             favoriteNumbers: favNums.length > 0 ? favNums : undefined,
             favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
+            favoriteCounts: Object.keys(favCounts).length > 0 ? favCounts : undefined,
+            favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
             prizeNotice: prizeNotice,
             drawDate: ticketToUpdate.drawDate || 'Desconocida',
             combinationsCount: valData.allHits.length

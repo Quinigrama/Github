@@ -161,6 +161,7 @@ async function startServer() {
             gameId: gameId || payload.gameId || "bonoloto",
             allHits: payload.allHits || [],
             starHits: payload.stars || [],
+            combinationsCount: payload.combinationsCount || (payload.allHits ? payload.allHits.length : 1),
             userId,
             timestamp: timestamp || new Date().toISOString()
           };
@@ -169,6 +170,12 @@ async function startServer() {
           }
           if (payload.favoriteSecondaryNumbers && Array.isArray(payload.favoriteSecondaryNumbers) && payload.favoriteSecondaryNumbers.length > 0) {
             sheetsBody.favoriteSecondaryNumbers = payload.favoriteSecondaryNumbers;
+          }
+          if (payload.favoriteCounts) {
+            sheetsBody.favoriteCounts = payload.favoriteCounts;
+          }
+          if (payload.favoriteSecondaryCounts) {
+            sheetsBody.favoriteSecondaryCounts = payload.favoriteSecondaryCounts;
           }
         } else {
           sheetsBody = {

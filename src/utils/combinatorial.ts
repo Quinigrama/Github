@@ -133,7 +133,9 @@ export function calculatePowerballCascade(
   let subWhiteCombos: number[][] = [];
   let subRedCombos: number[][] = [];
 
-  const isMultiple = ticket.strategy === 'multiple' || (ticket.combinations.length > 0 && ticket.combinations[0].length > 5);
+  const isMultiple = ticket.strategy === 'multiple' || (
+    ticket.combinations.length === 1 && ticket.combinations[0].length > 5
+  );
 
   if (isMultiple && ticket.combinations.length > 0) {
     const whiteSuperset = ticket.combinations[0];
@@ -244,7 +246,9 @@ export function calculateMegaMillionsCascade(
   let subWhiteCombos: number[][] = [];
   let subGoldCombos: number[][] = [];
 
-  const isMultiple = ticket.strategy === 'multiple' || (ticket.combinations.length > 0 && ticket.combinations[0].length > 5);
+  const isMultiple = ticket.strategy === 'multiple' || (
+    ticket.combinations.length === 1 && ticket.combinations[0].length > 5
+  );
 
   if (isMultiple && ticket.combinations.length > 0) {
     const whiteSuperset = ticket.combinations[0];
@@ -359,10 +363,12 @@ export function calculateEuromillonesCascade(
   let subWhiteCombos: number[][] = [];
   let subStarCombos: number[][] = [];
 
-  const isMultiple = ticket.strategy === 'multiple' || (ticket.combinations.length > 0 && (
-    ticket.combinations[0].length > 5 ||
-    (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 2)
-  ));
+  const isMultiple = ticket.strategy === 'multiple' || (
+    ticket.combinations.length === 1 && (
+      ticket.combinations[0].length > 5 ||
+      (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 2)
+    )
+  );
 
   if (isMultiple && ticket.combinations.length > 0) {
     const whiteSuperset = ticket.combinations[0];
@@ -468,22 +474,19 @@ export function calculateEurodreamsCascade(
   let subWhiteCombos: number[][] = [];
   let subStarCombos: number[][] = [];
 
-  const isMultiple = ticket.strategy === 'multiple' || ticket.strategy === 'reducida' || (ticket.combinations.length > 0 && (
-    ticket.combinations[0].length > 6 ||
-    (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 1)
-  ));
+  const isMultiple = ticket.strategy === 'multiple' || (
+    ticket.combinations.length === 1 && (
+      ticket.combinations[0].length > 6 ||
+      (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 1)
+    )
+  );
 
   if (isMultiple && ticket.combinations.length > 0) {
-    if (ticket.strategy === 'reducida') {
-      subWhiteCombos = ticket.combinations;
-      subStarCombos = (ticket.stars && ticket.stars.length > 0) ? ticket.stars : ticket.combinations.map(() => [1]);
-    } else {
-      const whiteSuperset = ticket.combinations[0];
-      subWhiteCombos = whiteSuperset.length >= 6 ? getCombinations(whiteSuperset, 6) : [whiteSuperset];
+    const whiteSuperset = ticket.combinations[0];
+    subWhiteCombos = whiteSuperset.length >= 6 ? getCombinations(whiteSuperset, 6) : [whiteSuperset];
 
-      const starSuperset = (ticket.stars && ticket.stars.length > 0) ? ticket.stars[0] : [1];
-      subStarCombos = starSuperset.length >= 1 ? getCombinations(starSuperset, 1) : [starSuperset];
-    }
+    const starSuperset = (ticket.stars && ticket.stars.length > 0) ? ticket.stars[0] : [1];
+    subStarCombos = starSuperset.length >= 1 ? getCombinations(starSuperset, 1) : [starSuperset];
   } else {
     subWhiteCombos = ticket.combinations;
     if (ticket.stars && ticket.stars.length > 0) {
@@ -495,10 +498,26 @@ export function calculateEurodreamsCascade(
 
   let totalSubBets = 0;
 
-  for (const wCombo of subWhiteCombos) {
-    const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
-    for (const sCombo of subStarCombos) {
+  if (isMultiple) {
+    for (const wCombo of subWhiteCombos) {
+      const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
+      for (const sCombo of subStarCombos) {
+        totalSubBets++;
+        const sHits = sCombo.filter(s => winningDreamSet.has(s)).length;
+
+        if (wHits === 6 && sHits === 1) counts['6+1']++;
+        else if (wHits === 6 && sHits === 0) counts['6+0']++;
+        else if (wHits === 5) counts['5+0']++;
+        else if (wHits === 4) counts['4+0']++;
+        else if (wHits === 3) counts['3+0']++;
+        else if (wHits === 2) counts['2+0']++;
+      }
+    }
+  } else {
+    subWhiteCombos.forEach((wCombo, idx) => {
       totalSubBets++;
+      const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
+      const sCombo = subStarCombos[idx] || subStarCombos[0] || [1];
       const sHits = sCombo.filter(s => winningDreamSet.has(s)).length;
 
       if (wHits === 6 && sHits === 1) counts['6+1']++;
@@ -507,7 +526,7 @@ export function calculateEurodreamsCascade(
       else if (wHits === 4) counts['4+0']++;
       else if (wHits === 3) counts['3+0']++;
       else if (wHits === 2) counts['2+0']++;
-    }
+    });
   }
 
   let totalPayout = 0;
@@ -575,22 +594,19 @@ export function calculateGordoCascade(
   let subWhiteCombos: number[][] = [];
   let subStarCombos: number[][] = [];
 
-  const isMultiple = ticket.strategy === 'multiple' || ticket.strategy === 'reducida' || (ticket.combinations.length > 0 && (
-    ticket.combinations[0].length > 5 ||
-    (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 1)
-  ));
+  const isMultiple = ticket.strategy === 'multiple' || (
+    ticket.combinations.length === 1 && (
+      ticket.combinations[0].length > 5 ||
+      (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > 1)
+    )
+  );
 
   if (isMultiple && ticket.combinations.length > 0) {
-    if (ticket.strategy === 'reducida') {
-      subWhiteCombos = ticket.combinations;
-      subStarCombos = (ticket.stars && ticket.stars.length > 0) ? ticket.stars : ticket.combinations.map(() => [0]);
-    } else {
-      const whiteSuperset = ticket.combinations[0];
-      subWhiteCombos = whiteSuperset.length >= 5 ? getCombinations(whiteSuperset, 5) : [whiteSuperset];
+    const whiteSuperset = ticket.combinations[0];
+    subWhiteCombos = whiteSuperset.length >= 5 ? getCombinations(whiteSuperset, 5) : [whiteSuperset];
 
-      const starSuperset = (ticket.stars && ticket.stars.length > 0) ? ticket.stars[0] : [0];
-      subStarCombos = starSuperset.length >= 1 ? getCombinations(starSuperset, 1) : [starSuperset];
-    }
+    const starSuperset = (ticket.stars && ticket.stars.length > 0) ? ticket.stars[0] : [0];
+    subStarCombos = starSuperset.length >= 1 ? getCombinations(starSuperset, 1) : [starSuperset];
   } else {
     subWhiteCombos = ticket.combinations;
     if (ticket.stars && ticket.stars.length > 0) {
@@ -602,10 +618,29 @@ export function calculateGordoCascade(
 
   let totalSubBets = 0;
 
-  for (const wCombo of subWhiteCombos) {
-    const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
-    for (const sCombo of subStarCombos) {
+  if (isMultiple) {
+    for (const wCombo of subWhiteCombos) {
+      const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
+      for (const sCombo of subStarCombos) {
+        totalSubBets++;
+        const cHits = sCombo.filter(s => winningClaveSet.has(s)).length;
+
+        if (wHits === 5 && cHits === 1) counts['5+1']++;
+        else if (wHits === 5 && cHits === 0) counts['5+0']++;
+        else if (wHits === 4 && cHits === 1) counts['4+1']++;
+        else if (wHits === 4 && cHits === 0) counts['4+0']++;
+        else if (wHits === 3 && cHits === 1) counts['3+1']++;
+        else if (wHits === 3 && cHits === 0) counts['3+0']++;
+        else if (wHits === 2 && cHits === 1) counts['2+1']++;
+        else if (wHits === 2 && cHits === 0) counts['2+0']++;
+        else if ((wHits === 0 || wHits === 1) && cHits === 1) counts['0+1']++;
+      }
+    }
+  } else {
+    subWhiteCombos.forEach((wCombo, idx) => {
       totalSubBets++;
+      const wHits = wCombo.filter(n => winningWhiteSet.has(n)).length;
+      const sCombo = subStarCombos[idx] || subStarCombos[0] || [0];
       const cHits = sCombo.filter(s => winningClaveSet.has(s)).length;
 
       if (wHits === 5 && cHits === 1) counts['5+1']++;
@@ -617,7 +652,7 @@ export function calculateGordoCascade(
       else if (wHits === 2 && cHits === 1) counts['2+1']++;
       else if (wHits === 2 && cHits === 0) counts['2+0']++;
       else if ((wHits === 0 || wHits === 1) && cHits === 1) counts['0+1']++;
-    }
+    });
   }
 
   let totalPayout = 0;
@@ -1017,8 +1052,11 @@ export function getTicketValidationData(
   const maxStars = game?.maxStars || 0;
 
   const isMultiple = ticket.strategy === 'multiple' || 
-    (ticket.combinations.length > 0 && (ticket.combinations[0].length > maxNumbers || (ticket.combinations[0].length === 5 && maxNumbers === 6))) ||
-    (ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > maxStars);
+    (ticket.combinations.length === 1 && (
+      ticket.combinations[0].length > maxNumbers || 
+      ((gameId === 'bonoloto' || gameId === 'primitiva') && ticket.combinations[0].length === 5)
+    )) ||
+    (ticket.combinations.length === 1 && ticket.stars && ticket.stars.length > 0 && ticket.stars[0].length > maxStars);
 
   let allHits: number[] = [];
   let starHits: number[] | undefined = undefined;
