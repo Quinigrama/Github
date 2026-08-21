@@ -147,8 +147,6 @@ async function startServer() {
         return key ? process.env[key] : null;
       };
 
-      const emailUser = getEnv("EMAIL_USER");
-      const emailPass = getEnv("EMAIL_PASS");
       const googleSheetsUrl = getEnv("GOOGLE_SHEETS_WEBAPP_URL");
 
       const isPlaceholder = (val: string | null | undefined) => {
@@ -157,7 +155,6 @@ async function startServer() {
         return lower.includes("tu-") || lower.includes("example") || lower.includes("placeholder") || lower.trim() === "";
       };
 
-      const hasEmail = emailUser && emailPass && !isPlaceholder(emailUser) && !isPlaceholder(emailPass);
       const hasGoogleSheets = googleSheetsUrl && !isPlaceholder(googleSheetsUrl);
 
       // 1. Send to Google Sheets if configured (anonymous telemetry)
@@ -226,74 +223,7 @@ async function startServer() {
         }).catch(err => console.error("Error sending telemetry to Google Sheets:", err));
       }
 
-      // 2. Send notification ONLY for important wins (4+ hits or key star matches)
-      const isImportantPrize = (evt: string, gid: string, p: any): boolean => {
-        if (evt !== 'validate_ticket') {
-          return false;
-        }
-
-        const maxHits = Number(p.maxHits || 0);
-        let maxStars = Number(p.maxStars || 0);
-        if (!maxStars && Array.isArray(p.stars) && p.stars.length > 0) {
-          maxStars = Math.max(...p.stars.map((s: any) => Number(s) || 0));
-        }
-
-        const game = (gid || p.gameId || '').toLowerCase();
-
-        if (game === 'euromillones') {
-          return maxHits >= 4 || (maxHits >= 3 && maxStars >= 2);
-        } else if (game === 'powerball' || game === 'megamillions' || game === 'gordo' || game === 'eurodreams') {
-          return maxHits >= 4 || (maxHits >= 3 && maxStars >= 1);
-        } else {
-          // bonoloto, primitiva, nacional, etc. (4, 5 o 6 aciertos)
-          return maxHits >= 4;
-        }
-      };
-
-      if (isImportantPrize(event, gameId, payload)) {
-        const gameTitle = (gameId || payload.gameId || 'Lotería').toUpperCase();
-        const resultNotice = payload.prizeNotice || (payload.maxHits + ' aciertos');
-        const drawDate = payload.drawDate || 'No especificada';
-        const combCount = payload.combinationsCount || 1;
-        const isMultiple = payload.isMultiple ? 'Sí' : 'No';
-
-        // Send via Email (Gmail / Nodemailer)
-        if (hasEmail) {
-          try {
-            const cleanedUser = emailUser!.trim();
-            const cleanedPass = emailPass!.trim().replace(/\s+/g, '');
-            const transporter = nodemailer.createTransport({
-              service: 'gmail',
-              auth: {
-                user: cleanedUser,
-                pass: cleanedPass
-              }
-            });
-
-            await transporter.sendMail({
-              from: `"DataLotto Premios" <${cleanedUser}>`,
-              to: "datalotto49@gmail.com",
-              subject: `🎉 ¡PREMIO IMPORTANTE EN DATALOTTO! - ${gameTitle}`,
-              html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                  <h2 style="color: #16a34a; margin-top: 0;">🎉 ¡PREMIO IMPORTANTE EN DATALOTTO! 🏆</h2>
-                  <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
-                    <tr><td style="padding: 8px 0; font-weight: bold;">🎮 Juego:</td><td style="padding: 8px 0;">${gameTitle}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">👤 Usuario ID:</td><td style="padding: 8px 0;"><code>${userId}</code></td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">🎯 Resultado:</td><td style="padding: 8px 0; color: #16a34a; font-weight: bold;">${resultNotice}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">📅 Fecha Sorteo:</td><td style="padding: 8px 0;">${drawDate}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">🎫 Apuestas:</td><td style="padding: 8px 0;">${combCount}</td></tr>
-                    <tr><td style="padding: 8px 0; font-weight: bold;">⚙️ Apuesta Múltiple:</td><td style="padding: 8px 0;">${isMultiple}</td></tr>
-                  </table>
-                  <p style="margin-top: 20px; color: #16a34a; font-size: 1.05rem; font-weight: bold; text-align: center;">✨ ¡Enhorabuena al afortunado! 🥳</p>
-                </div>
-              `
-            });
-          } catch (emailErr) {
-            console.error("Error enviando email de premio importante:", emailErr);
-          }
-        }
-      }
+      // Los avisos de premio importante ahora se envían directamente desde el cliente vía Telegram (ver sendTelegramPrizeAlert en index.tsx).
 
       res.json({ success: true });
     } catch (error: any) {

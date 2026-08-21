@@ -999,6 +999,76 @@ class DataLotto49Advanced {
     }
   }
 
+  getBetTypeDescription(ticket: any, combinationsCount: number): string {
+    const strategy = ticket.strategy || 'simple';
+    if (strategy === 'winning') {
+      return `Estrategia Ganadora ${combinationsCount} apuesta${combinationsCount === 1 ? '' : 's'}`;
+    } else if (strategy === 'multiple') {
+      const numbersCount = ticket.combinations && ticket.combinations.length > 0 ? ticket.combinations[0].length : 0;
+      return `Múltiple combinatoria de ${numbersCount} números`;
+    } else if (strategy === 'reducida') {
+      return `Reducida de ${combinationsCount} apuesta${combinationsCount === 1 ? '' : 's'}`;
+    }
+    return `Simple ${combinationsCount}`;
+  }
+
+  isImportantPrizeClient(gameId: string, maxHits: number, maxStars: number): boolean {
+    const game = (gameId || '').toLowerCase();
+    if (game === 'euromillones') return maxHits >= 4 || (maxHits >= 3 && maxStars >= 2);
+    if (game === 'powerball' || game === 'megamillions' || game === 'gordo' || game === 'eurodreams') {
+      return maxHits >= 4 || (maxHits >= 3 && maxStars >= 1);
+    }
+    return maxHits >= 4;
+  }
+
+  async sendTelegramPrizeAlert(ticket: any, valData: { allHits: number[]; maxHits: number; maxStars: number; gameId: string }, prizeNotice: string, drawDate: string) {
+    if (!this.isImportantPrizeClient(valData.gameId, valData.maxHits, valData.maxStars)) return;
+
+    const isConfigured = TELEGRAM_BOT_TOKEN &&
+      TELEGRAM_CHAT_ID &&
+      !TELEGRAM_BOT_TOKEN.includes('REEMPLAZAR') &&
+      !TELEGRAM_CHAT_ID.includes('REEMPLAZAR');
+    if (!isConfigured) {
+      console.warn('Aviso de premio no enviado: bot de Telegram no configurado.');
+      return;
+    }
+
+    const combinationsCount = valData.allHits.length;
+    const betTypeDesc = this.getBetTypeDescription(ticket, combinationsCount);
+    const countAtMax = valData.allHits.filter(h => h === valData.maxHits).length;
+    const resultLine = combinationsCount > 1
+      ? `${countAtMax} de ${combinationsCount} apuestas con ${prizeNotice}`
+      : prizeNotice;
+    const gameTitle = (valData.gameId || 'Lotería').toUpperCase();
+
+    const telegramText =
+      `🎉 <b>¡PREMIO IMPORTANTE EN DATALOTTO!</b> 🏆\n\n` +
+      `🎮 <b>Juego:</b> ${gameTitle}\n` +
+      `🎫 <b>Apuesta:</b> ${betTypeDesc}\n` +
+      `🎯 <b>Resultado:</b> ${resultLine}\n` +
+      `📅 <b>Fecha Sorteo:</b> ${drawDate}\n` +
+      `👤 <b>Usuario:</b> <code>${this.anonymousUserId}</code>\n\n` +
+      `✨ ¡Enhorabuena al afortunado! 🥳`;
+
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramText,
+          parse_mode: 'HTML'
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data || !data.ok) {
+        console.error('Error enviando aviso de premio a Telegram:', data?.description);
+      }
+    } catch (error) {
+      console.error('Error enviando aviso de premio a Telegram:', error);
+    }
+  }
+
   getGameIconSvg(gameId: string): string {
     switch(gameId) {
       case 'powerball':
@@ -10237,6 +10307,7 @@ class DataLotto49Advanced {
                 drawDate: ticket.drawDate || 'Auto-validado',
                 combinationsCount: valData.allHits.length
             });
+            this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, ticket.drawDate || 'Auto-validado');
         }
     });
 
@@ -10414,6 +10485,7 @@ class DataLotto49Advanced {
             drawDate: ticketToUpdate.drawDate || 'Desconocida',
             combinationsCount: valData.allHits.length
         });
+        this.sendTelegramPrizeAlert(ticketToUpdate, valData, prizeNotice, ticketToUpdate.drawDate || 'Desconocida');
 
         this.toggleModal('validationModal', false);
         this.showToast(t('toast.boletoValidadoManualmente'), 'success');
