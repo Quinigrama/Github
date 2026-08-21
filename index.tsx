@@ -943,21 +943,30 @@ class DataLotto49Advanced {
   }
 
   getApiUrl(path: string): string {
-    // Detect if we are running inside a true hybrid mobile app context (Capacitor / Cordova / file protocol)
-    const isHybridApp = (window as any).Capacitor || 
-                        (window as any).cordova ||
-                        window.location.protocol === 'capacitor:' || 
-                        window.location.protocol === 'file:';
+    // Clean and normalize the incoming path so it always starts with /
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    // Detect if we are running inside a true hybrid mobile app context (Capacitor / Cordova / local app protocol)
+    const isHybridApp = typeof window !== 'undefined' && (
+      (window as any).Capacitor?.isNativePlatform?.() === true ||
+      (window as any).Capacitor?.isNative === true ||
+      Boolean((window as any).cordova) ||
+      window.location.protocol === 'capacitor:' || 
+      window.location.protocol === 'ionic:' || 
+      window.location.protocol === 'file:'
+    );
                         
     if (isHybridApp) {
-      const customApi = localStorage.getItem('customApiServerUrl')?.trim();
+      const customApi = typeof localStorage !== 'undefined' ? localStorage.getItem('customApiServerUrl')?.trim() : null;
       if (customApi) {
-        return `${customApi.replace(/\/+$/, '')}${path}`;
+        return `${customApi.replace(/\/+$/, '')}${normalizedPath}`;
       }
       const cloudRunUrl = 'https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app';
-      return `${cloudRunUrl}${path}`;
+      return `${cloudRunUrl}${normalizedPath}`;
     }
-    return path;
+
+    // In standard browser / web contexts (same-origin), always use the relative path
+    return normalizedPath;
   }
 
   async sendTelemetry(eventType: string, payload: any) {
