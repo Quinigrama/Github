@@ -629,6 +629,14 @@ function renderLayoutGrid(grid: HTMLElement, layout: GridLayout, numberRange: nu
   }
 }
 
+const SECONDARY_LABEL_KEY_BY_GAME: { [gameId: string]: string } = {
+  powerball: 'tickets.masPB',
+  megamillions: 'tickets.masMB',
+  euromillones: 'tickets.masEstrella',
+  eurodreams: 'tickets.masSueno',
+  gordo: 'tickets.masLlave',
+};
+
 // Clase principal de la aplicación
 class DataLotto49Advanced {
   getNumberCoords(n: number) {
@@ -779,6 +787,17 @@ class DataLotto49Advanced {
     winningStars: number[] = []
   ) {
     return calculateGordoCascade(ticket, winningNumbers, winningStars);
+  }
+
+  private getCascadeForGame(gameId: string, ticket: Ticket, winningNumbers: number[], winningStars: number[]) {
+    switch (gameId) {
+      case 'powerball': return this.calculatePowerballCascade(ticket, winningNumbers, winningStars);
+      case 'megamillions': return this.calculateMegaMillionsCascade(ticket, winningNumbers, winningStars);
+      case 'euromillones': return this.calculateEuromillonesCascade(ticket, winningNumbers, winningStars);
+      case 'eurodreams': return this.calculateEurodreamsCascade(ticket, winningNumbers, winningStars);
+      case 'gordo': return this.calculateGordoCascade(ticket, winningNumbers, winningStars);
+      default: return null;
+    }
   }
 
   constructor() {
@@ -9690,12 +9709,8 @@ class DataLotto49Advanced {
           const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
           const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningStarsSet.has(r) ? colors.secondaryWinningBg : colors.secondaryDefaultBg}; color: ${winningStarsSet.has(r) ? colors.secondaryWinningText : colors.secondaryDefaultText}; font-weight: bold;">${r}</div>`).join('');
 
-          let secondaryLabel = '';
-          if (gameId === 'powerball') secondaryLabel = t('tickets.masPB');
-          else if (gameId === 'megamillions') secondaryLabel = t('tickets.masMB');
-          else if (gameId === 'euromillones') secondaryLabel = t('tickets.masEstrella');
-          else if (gameId === 'eurodreams') secondaryLabel = '+ 🌙:';
-          else if (gameId === 'gordo') secondaryLabel = t('tickets.masLlave');
+          const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
+          const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
 
           let hitClass = 'no-hits';
           if (gameId === 'powerball' || gameId === 'megamillions') {
@@ -9736,18 +9751,7 @@ class DataLotto49Advanced {
       let showBreakdownBadge = false;
 
       if (hasSecondaryMatrix) {
-        let cascade: { tiers: { name: string; hits: number; starHits: number; count: number }[] } | null = null;
-        if (gameId === 'powerball') {
-          cascade = this.calculatePowerballCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'megamillions') {
-          cascade = this.calculateMegaMillionsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'euromillones') {
-          cascade = this.calculateEuromillonesCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'eurodreams') {
-          cascade = this.calculateEurodreamsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'gordo') {
-          cascade = this.calculateGordoCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        }
+        const cascade = this.getCascadeForGame(gameId, ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
 
         if (cascade) {
           showBreakdownBadge = true;
@@ -9843,12 +9847,8 @@ class DataLotto49Advanced {
           const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
           const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${gameId === 'powerball' ? colors.ballWinningBg : colors.secondaryWinningBg}; color: ${colors.secondaryWinningText}; font-weight: bold;">${r}</div>`).join('');
 
-          let secondaryLabel = '';
-          if (gameId === 'powerball') secondaryLabel = t('tickets.masPB');
-          else if (gameId === 'megamillions') secondaryLabel = t('tickets.masMB');
-          else if (gameId === 'euromillones') secondaryLabel = t('tickets.masEstrella');
-          else if (gameId === 'eurodreams') secondaryLabel = '+ 🌙:';
-          else if (gameId === 'gordo') secondaryLabel = t('tickets.masLlave');
+          const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
+          const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
 
           return `
             <div class="saved-combination" style="margin-bottom: 6px;">
@@ -9890,29 +9890,14 @@ class DataLotto49Advanced {
       const defaultSecondary = gameId === 'euromillones' ? [1, 2] : (gameId === 'gordo' ? [0] : [1]);
       const secondarySuperset = ticket.stars && ticket.stars[0] ? ticket.stars[0] : defaultSecondary;
 
-      let secondaryLabel = '';
-      if (gameId === 'powerball') secondaryLabel = t('tickets.masPB');
-      else if (gameId === 'megamillions') secondaryLabel = t('tickets.masMB');
-      else if (gameId === 'euromillones') secondaryLabel = t('tickets.masEstrella');
-      else if (gameId === 'eurodreams') secondaryLabel = '+ 🌙:';
-      else if (gameId === 'gordo') secondaryLabel = t('tickets.masLlave');
+      const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
+      const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
 
       if (ticket.validation) {
         const winningWhiteSet = new Set(ticket.validation.winningNumbers);
         const winningStarsSet = new Set(ticket.validation.stars || []);
 
-        let cascade: { tiers: { name: string; hits: number; starHits: number; count: number }[] } | null = null;
-        if (gameId === 'powerball') {
-          cascade = this.calculatePowerballCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'megamillions') {
-          cascade = this.calculateMegaMillionsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'euromillones') {
-          cascade = this.calculateEuromillonesCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'eurodreams') {
-          cascade = this.calculateEurodreamsCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        } else if (gameId === 'gordo') {
-          cascade = this.calculateGordoCascade(ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-        }
+        const cascade = this.getCascadeForGame(gameId, ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
 
         let summaryTableHTML = '';
         if (cascade) {
