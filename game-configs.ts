@@ -584,6 +584,284 @@ export const GAME_COLORS: { [gameId: string]: GameColorPalette } = {
   },
 };
 
+export function getGameIconSvg(gameId: string): string {
+  switch(gameId) {
+    case 'powerball':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="red-sphere-powerball-tsx" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#f87171" />
+            <stop offset="60%" stop-color="#dc2626" />
+            <stop offset="100%" stop-color="#7f1d1d" />
+          </radialGradient>
+          <g id="us-star-pb-tsx">
+            <polygon points="0,-0.8 0.23,-0.25 0.76,-0.25 0.33,0.07 0.49,0.65 0,0.29 -0.49,0.65 -0.33,0.07 -0.76,-0.25 -0.23,-0.25" fill="#ffffff" />
+          </g>
+        </defs>
+
+        <!-- Marco con 3 franjas (roja, blanca, roja) -->
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#dc2626" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#dc2626" stroke-width="0.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+
+        <!-- Esquina azul (cantón de la bandera) -->
+        <path d="M 6,20.5 L 6,7 A 3,3 0 0,1 9,4 L 22.5,4" stroke="#1d4ed8" stroke-width="3.6" fill="none" stroke-linecap="square" />
+
+        <!-- Estrella de la esquina + 4 hacia abajo + 4 hacia la derecha -->
+        <use href="#us-star-pb-tsx" x="7.5" y="5.5" />
+        <use href="#us-star-pb-tsx" x="6" y="8.8" />
+        <use href="#us-star-pb-tsx" x="6" y="11.8" />
+        <use href="#us-star-pb-tsx" x="6" y="14.8" />
+        <use href="#us-star-pb-tsx" x="6" y="17.8" />
+        <use href="#us-star-pb-tsx" x="11.0" y="4" />
+        <use href="#us-star-pb-tsx" x="14.0" y="4" />
+        <use href="#us-star-pb-tsx" x="17.0" y="4" />
+        <use href="#us-star-pb-tsx" x="20.0" y="4" />
+
+        <circle cx="20" cy="20" r="12" fill="url(#red-sphere-powerball-tsx)" />
+        <circle cx="12.8" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="12.8" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">P</text>
+        <circle cx="16.4" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="16.4" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">O</text>
+        <circle cx="20.0" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="20.0" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">W</text>
+        <circle cx="23.6" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="23.6" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">E</text>
+        <circle cx="27.2" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="27.2" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">R</text>
+        <text x="20" y="24.5" font-size="4.5" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#ffffff" letter-spacing="0.8">BALL</text>
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'megamillions':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gold-sphere-megamillions-tsx" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#fde047" />
+            <stop offset="60%" stop-color="#eab308" />
+            <stop offset="100%" stop-color="#854d0e" />
+          </radialGradient>
+          <g id="us-star-mm-tsx">
+            <polygon points="0,-0.8 0.23,-0.25 0.76,-0.25 0.33,0.07 0.49,0.65 0,0.29 -0.49,0.65 -0.33,0.07 -0.76,-0.25 -0.23,-0.25" fill="#ffffff" />
+          </g>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#2563eb" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="#dc2626" stroke-width="0.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 6,20.5 L 6,7 A 3,3 0 0,1 9,4 L 22.5,4" stroke="#1d4ed8" stroke-width="3.6" fill="none" stroke-linecap="square" />
+        <use href="#us-star-mm-tsx" x="7.5" y="5.5" />
+        <use href="#us-star-mm-tsx" x="6" y="8.8" />
+        <use href="#us-star-mm-tsx" x="6" y="11.8" />
+        <use href="#us-star-mm-tsx" x="6" y="14.8" />
+        <use href="#us-star-mm-tsx" x="6" y="17.8" />
+        <use href="#us-star-mm-tsx" x="11.0" y="4" />
+        <use href="#us-star-mm-tsx" x="14.0" y="4" />
+        <use href="#us-star-mm-tsx" x="17.0" y="4" />
+        <use href="#us-star-mm-tsx" x="20.0" y="4" />
+        <circle cx="20" cy="20" r="12" fill="url(#gold-sphere-megamillions-tsx)" />
+        <circle cx="12.8" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="12.8" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">M</text>
+        <circle cx="16.4" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="16.4" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">E</text>
+        <circle cx="20.0" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="20.0" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">G</text>
+        <circle cx="23.6" cy="15.5" r="1.5" fill="#ffffff" />
+        <text x="23.6" y="16.2" font-size="2" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000">A</text>
+        <text x="20" y="24.5" font-size="3.8" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#000000" letter-spacing="0.4">MILLIONS</text>
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'bonoloto':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-bonoloto" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+          <linearGradient id="green-gradient-header-bonoloto" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4ade80" />
+            <stop offset="100%" stop-color="#15803d" />
+          </linearGradient>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-bonoloto)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <g transform="translate(20, 20) scale(0.78) translate(-20, -20)">
+          <path d="M 20,20 C 18,25 19,30 23,34" stroke="url(#green-gradient-header-bonoloto)" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" />
+          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(90 20 20)" />
+          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(180 20 20)" />
+          <path d="M 20,20 C 13,15 11,9 16,6 C 19,4 20,8 20,9 C 20,8 21,4 24,6 C 29,9 27,15 20,20" fill="url(#green-gradient-header-bonoloto)" transform="rotate(270 20 20)" />
+        </g>
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'primitiva':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-primitiva" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+          <radialGradient id="green-sphere-header-primitiva" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#4ade80" />
+            <stop offset="60%" stop-color="#16a34a" />
+            <stop offset="100%" stop-color="#14532d" />
+          </radialGradient>
+          <mask id="primitiva-header-mask">
+            <rect x="0" y="0" width="40" height="40" fill="#ffffff" />
+            <line x1="5" y1="13" x2="35" y2="13" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="16.5" x2="35" y2="16.5" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="20" x2="35" y2="20" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="23.5" x2="35" y2="23.5" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="27" x2="35" y2="27" stroke="#000000" stroke-width="1.5" />
+            <line x1="20" y1="5" x2="20" y2="35" stroke="#000000" stroke-width="1.2" />
+            <path d="M 20,9 Q 13,20 20,31" fill="none" stroke="#000000" stroke-width="1.2" />
+            <path d="M 20,9 Q 27,20 20,31" fill="none" stroke="#000000" stroke-width="1.2" />
+          </mask>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-primitiva)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="20" cy="20" r="11" fill="url(#green-sphere-header-primitiva)" mask="url(#primitiva-header-mask)" />
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'gordo':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-gordo" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+          <radialGradient id="red-sphere-header-gordo" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#fca5a5" />
+            <stop offset="60%" stop-color="#dc2626" />
+            <stop offset="100%" stop-color="#7f1d1d" />
+          </radialGradient>
+          <mask id="gordo-header-mask">
+            <rect x="0" y="0" width="40" height="40" fill="#ffffff" />
+            <line x1="5" y1="13" x2="35" y2="13" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="16.5" x2="35" y2="16.5" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="20" x2="35" y2="20" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="23.5" x2="35" y2="23.5" stroke="#000000" stroke-width="1.5" />
+            <line x1="5" y1="27" x2="35" y2="27" stroke="#000000" stroke-width="1.5" />
+            <line x1="20" y1="5" x2="20" y2="35" stroke="#000000" stroke-width="1.2" />
+            <path d="M 20,9 Q 13,20 20,31" fill="none" stroke="#000000" stroke-width="1.2" />
+            <path d="M 20,9 Q 27,20 20,31" fill="none" stroke="#000000" stroke-width="1.2" />
+          </mask>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-gordo)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="20" cy="20" r="11" fill="url(#red-sphere-header-gordo)" mask="url(#gordo-header-mask)" />
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'euromillones':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-euromillones" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+          <linearGradient id="blue-metallic-header-euromillones" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e40af" />
+            <stop offset="40%" stop-color="#3b82f6" />
+            <stop offset="70%" stop-color="#1d4ed8" />
+            <stop offset="100%" stop-color="#172554" />
+          </linearGradient>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-euromillones)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="20" cy="20" r="12.5" stroke="url(#blue-metallic-header-euromillones)" stroke-width="2.2" fill="none" />
+        <circle cx="20" cy="20" r="7.5" stroke="url(#blue-metallic-header-euromillones)" stroke-width="1.2" fill="none" />
+        <g transform="translate(20, 10)"><polygon points="0,-1.5 0.4,-0.4 1.5,-0.4 0.6,0.3 0.9,1.4 0,0.7 -0.9,1.4 -0.6,0.3 -1.5,-0.4 -0.4,-0.4" fill="#facc15" /></g>
+        <g transform="translate(29.5, 16.9)"><polygon points="0,-1.5 0.4,-0.4 1.5,-0.4 0.6,0.3 0.9,1.4 0,0.7 -0.9,1.4 -0.6,0.3 -1.5,-0.4 -0.4,-0.4" fill="#facc15" /></g>
+        <g transform="translate(25.9, 28.1)"><polygon points="0,-1.5 0.4,-0.4 1.5,-0.4 0.6,0.3 0.9,1.4 0,0.7 -0.9,1.4 -0.6,0.3 -1.5,-0.4 -0.4,-0.4" fill="#facc15" /></g>
+        <g transform="translate(14.1, 28.1)"><polygon points="0,-1.5 0.4,-0.4 1.5,-0.4 0.6,0.3 0.9,1.4 0,0.7 -0.9,1.4 -0.6,0.3 -1.5,-0.4 -0.4,-0.4" fill="#facc15" /></g>
+        <g transform="translate(10.5, 16.9)"><polygon points="0,-1.5 0.4,-0.4 1.5,-0.4 0.6,0.3 0.9,1.4 0,0.7 -0.9,1.4 -0.6,0.3 -1.5,-0.4 -0.4,-0.4" fill="#facc15" /></g>
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'eurodreams':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-eurodreams" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-eurodreams)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <g transform="rotate(0 20 20) translate(0 -6)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#c084fc" /></g>
+        <g transform="rotate(36 20 20) translate(0 -10)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#60a5fa" /></g>
+        <g transform="rotate(72 20 20) translate(0 -6)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#34d399" /></g>
+        <g transform="rotate(108 20 20) translate(0 -10)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#fb923c" /></g>
+        <g transform="rotate(144 20 20) translate(0 -6)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#f43f5e" /></g>
+        <g transform="rotate(180 20 20) translate(0 -10)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#c084fc" /></g>
+        <g transform="rotate(216 20 20) translate(0 -6)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#60a5fa" /></g>
+        <g transform="rotate(252 20 20) translate(0 -10)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#34d399" /></g>
+        <g transform="rotate(288 20 20) translate(0 -6)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#fb923c" /></g>
+        <g transform="rotate(324 20 20) translate(0 -10)"><path d="M 20,20 C 19.2,18.8 19.2,17.2 20,16 C 20.8,17.2 20.8,18.8 20,20" fill="#f43f5e" /></g>
+        <circle cx="20" cy="20" r="2.2" fill="#ffffff" />
+        <circle cx="20" cy="6" r="0.6" fill="#ffffff" />
+        <circle cx="20" cy="34" r="0.6" fill="#ffffff" />
+        <circle cx="6" cy="20" r="0.6" fill="#ffffff" />
+        <circle cx="34" cy="20" r="0.6" fill="#ffffff" />
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    case 'nacional':
+      return `
+      <svg class="game-menu-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gold-gradient-header-nacional" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#BF953F" />
+            <stop offset="25%" stop-color="#FCF6BA" />
+            <stop offset="50%" stop-color="#B38728" />
+            <stop offset="75%" stop-color="#FBF5B7" />
+            <stop offset="100%" stop-color="#AA771C" />
+          </linearGradient>
+          <linearGradient id="blue-flat-header-nacional" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6" />
+            <stop offset="100%" stop-color="#1d4ed8" />
+          </linearGradient>
+        </defs>
+        <path d="M 6,34 L 6,7 A 3,3 0 0,1 9,4 L 31,4 A 3,3 0 0,1 34,7 L 34,34" stroke="url(#gold-gradient-header-nacional)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="20" cy="18" r="10" fill="url(#blue-flat-header-nacional)" />
+        <g stroke="rgba(255,255,255,0.75)" stroke-width="0.8" fill="none">
+          <line x1="20" y1="8" x2="20" y2="28" />
+          <path d="M 13.5,11 A 10,10 0 0,0 13.5,25" />
+          <path d="M 17,8.5 A 10,10 0 0,0 17,27.5" />
+          <path d="M 23,8.5 A 10,10 0 0,1 23,27.5" />
+          <path d="M 26.5,11 A 10,10 0 0,1 26.5,25" />
+        </g>
+        <line x1="8" y1="18" x2="32" y2="18" stroke="url(#blue-flat-header-nacional)" stroke-width="2" stroke-linecap="round" />
+        <rect x="18.5" y="26.5" width="3" height="3" fill="url(#blue-flat-header-nacional)" />
+        <path d="M 15,29 L 25,29 L 27,34 C 27,34 26,34 25,34 L 15,34 C 14,34 13,34 13,34 Z" fill="url(#blue-flat-header-nacional)" />
+        <path d="M 9,9 L 31,31" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />
+      </svg>
+      `;
+    default:
+      return `🎲`;
+  }
+}
+
 export const GAMES: { [key: string]: GameConfig } = {
   'powerball': new BaseGameConfig({
     id: 'powerball',
