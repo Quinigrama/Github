@@ -2013,6 +2013,7 @@
                     <option value="nacional">Lotería Nacional</option>
                 </select>
             </div>
+            <button id="openCleanupTicketsBtn" class="modal-btn" style="margin-left: auto;" title="Limpiar boletos antiguos" data-i18n-title="cleanup.tituloBoton">🗑️</button>
         </div>
         <div class="saved-tickets" id="savedTickets">
             <div style="color:#666; text-align: center; padding: 20px;" data-i18n="tickets.sinBoletos">No tienes boletos guardados</div>
@@ -2021,6 +2022,34 @@
 
       <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding: 15px; flex-shrink: 0; display: flex; justify-content: flex-end; align-items: center;">
         <button class="modal-btn confirm" id="savedTicketsConfirmCloseBtn" style="background-color: var(--primary);" data-i18n="tickets.cerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="cleanupTicketsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 480px; width: 92%;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: var(--primary);" data-i18n="cleanup.titulo">🗑️ Limpiar boletos antiguos</h3>
+        <button class="close-btn" id="cleanupTicketsCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 15px;">
+        <div id="cleanupTicketsSelectStep">
+          <p style="font-size: 0.9rem; color: #475569; margin-top: 0;" data-i18n="cleanup.descripcion">Se borrarán los boletos con fecha de sorteo (o de creación si no la tienen) anterior al periodo elegido. Esta acción no se puede deshacer.</p>
+          <select id="cleanupTicketsPeriodSelect" class="modal-filter-select" style="width: 100%; margin-bottom: 12px;">
+            <option value="90" data-i18n="cleanup.opcion90">Más de 90 días</option>
+            <option value="180" data-i18n="cleanup.opcion180">Más de 180 días</option>
+            <option value="365" data-i18n="cleanup.opcion365">Más de 365 días</option>
+          </select>
+          <button id="cleanupTicketsExportBtn" class="modal-btn" style="width: 100%; margin-bottom: 10px;" data-i18n="cleanup.exportarCsv">📥 Exportar historial a CSV</button>
+          <button id="cleanupTicketsContinueBtn" class="modal-btn confirm" style="width: 100%;" data-i18n="cleanup.continuar">Continuar</button>
+        </div>
+        <div id="cleanupTicketsConfirmStep" style="display: none;">
+          <p id="cleanupTicketsConfirmText" style="font-size: 0.95rem; color: #1e293b; font-weight: 600;"></p>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="cleanupTicketsCancelBtn" class="modal-btn cancel" style="flex: 1;" data-i18n="cleanup.cancelar">Cancelar</button>
+            <button id="cleanupTicketsConfirmBtn" class="modal-btn confirm" style="flex: 1; background-color: #dc2626;" data-i18n="cleanup.confirmarBorrar">Sí, borrar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

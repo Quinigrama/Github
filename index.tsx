@@ -6201,6 +6201,54 @@ class DataLotto49Advanced {
         this.updateSavedTickets();
     });
 
+    document.getElementById('openCleanupTicketsBtn')?.addEventListener('click', () => {
+      const selectStep = document.getElementById('cleanupTicketsSelectStep');
+      const confirmStep = document.getElementById('cleanupTicketsConfirmStep');
+      if (selectStep) selectStep.style.display = '';
+      if (confirmStep) confirmStep.style.display = 'none';
+      this.toggleModal('cleanupTicketsModal', true);
+    });
+
+    document.getElementById('cleanupTicketsCloseBtn')?.addEventListener('click', () => {
+      this.toggleModal('cleanupTicketsModal', false);
+    });
+
+    document.getElementById('cleanupTicketsExportBtn')?.addEventListener('click', () => {
+      this.exportTicketsHistoryToCsv();
+    });
+
+    document.getElementById('cleanupTicketsContinueBtn')?.addEventListener('click', () => {
+      const select = document.getElementById('cleanupTicketsPeriodSelect') as HTMLSelectElement;
+      const days = parseInt(select?.value || '90', 10);
+      const count = this.getOldTicketsCount(days);
+      const confirmText = document.getElementById('cleanupTicketsConfirmText');
+      if (confirmText) {
+        confirmText.textContent = count > 0
+          ? t('cleanup.confirmarTexto', { count, days })
+          : t('cleanup.sinCoincidencias', { days });
+      }
+      const selectStep = document.getElementById('cleanupTicketsSelectStep');
+      const confirmStep = document.getElementById('cleanupTicketsConfirmStep');
+      if (selectStep) selectStep.style.display = 'none';
+      if (confirmStep) confirmStep.style.display = '';
+      const confirmBtn = document.getElementById('cleanupTicketsConfirmBtn') as HTMLButtonElement;
+      if (confirmBtn) confirmBtn.style.display = count > 0 ? '' : 'none';
+    });
+
+    document.getElementById('cleanupTicketsCancelBtn')?.addEventListener('click', () => {
+      const selectStep = document.getElementById('cleanupTicketsSelectStep');
+      const confirmStep = document.getElementById('cleanupTicketsConfirmStep');
+      if (selectStep) selectStep.style.display = '';
+      if (confirmStep) confirmStep.style.display = 'none';
+    });
+
+    document.getElementById('cleanupTicketsConfirmBtn')?.addEventListener('click', () => {
+      const select = document.getElementById('cleanupTicketsPeriodSelect') as HTMLSelectElement;
+      const days = parseInt(select?.value || '90', 10);
+      this.cleanupOldTickets(days);
+      this.toggleModal('cleanupTicketsModal', false);
+    });
+
 
 
     const filterSelect = document.getElementById('nacionalDrawFilterSelect') as HTMLSelectElement;
@@ -8557,6 +8605,63 @@ class DataLotto49Advanced {
     this.saveState();
     this.updateSavedTickets();
     this.showToast(t('toast.boletoEliminado'), 'info');
+  }
+
+  getTicketRelevantDate(ticket: Ticket): Date {
+    if (ticket.drawDate) return new Date(ticket.drawDate + 'T00:00:00');
+    return new Date(ticket.date);
+  }
+
+  getOldTicketsCount(days: number): number {
+    const threshold = new Date();
+    threshold.setDate(threshold.getDate() - days);
+    return this.savedTickets.filter(tk => this.getTicketRelevantDate(tk) < threshold).length;
+  }
+
+  cleanupOldTickets(days: number) {
+    const threshold = new Date();
+    threshold.setDate(threshold.getDate() - days);
+    const before = this.savedTickets.length;
+    this.savedTickets = this.savedTickets.filter(tk => this.getTicketRelevantDate(tk) >= threshold);
+    const removed = before - this.savedTickets.length;
+    this.saveState();
+    this.updateSavedTickets();
+    this.showToast(t('toast.boletosLimpiados', { count: removed }), 'success');
+  }
+
+  exportTicketsHistoryToCsv() {
+    if (this.savedTickets.length === 0) {
+      this.showToast(t('toast.sinBoletosParaExportar'), 'warning');
+      return;
+    }
+    const headers = ['Juego', 'Fecha de creación', 'Fecha de sorteo', 'Estrategia', 'Combinación', 'Estrellas', 'Aciertos', 'Premio'];
+    const rows = this.savedTickets.map(ticket => {
+      const game = GAMES[ticket.gameId]?.fullName || ticket.gameId;
+      const combosStr = ticket.combinations.map(c => c.join('-')).join(' | ');
+      const starsStr = ticket.stars ? ticket.stars.map(s => s.join('-')).join(' | ') : '';
+      const hitsStr = ticket.validation ? ticket.validation.hits.join(',') : '';
+      const prizeStr = ticket.validation ? this.getTicketPrizeSummary(ticket).prizeLabel : 'Sin validar';
+      return [game, ticket.date, ticket.drawDate || '', ticket.strategy, combosStr, starsStr, hitsStr, prizeStr];
+    });
+    const csvLines = [headers, ...rows].map(row =>
+      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    );
+    const csvContent = csvLines.join('\n');
+    try {
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `datalotto_historial_boletos_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.showToast(t('toast.historialExportado'), 'success');
+    } catch (error) {
+      this.showToast(t('toast.errorExportarHistorial'), 'error');
+      console.error('Export CSV error:', error);
+    }
   }
 
   updateSavedTicketsStats() {
