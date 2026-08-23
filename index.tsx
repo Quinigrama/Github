@@ -715,7 +715,7 @@ class DataLotto49Advanced {
     TOLERANCE_LEVELS: { [key: number]: number };
     currentGame: GameConfig;
     anonymousUserId: string;
-    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia' = 'heatmap';
+    vizMode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia' | 'rachas' = 'heatmap';
     selectedGapNumber: number = 1;
     coocurrenciaModo: 'pares' | 'trios' = 'pares';
     vizTarget: 'number' | 'star' = 'number';
@@ -6819,12 +6819,12 @@ class DataLotto49Advanced {
 
 
 
-    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia') => {
-        if ((mode === 'gaps' || mode === 'coocurrencia') && this.currentGame?.id === 'nacional') {
+    const updateVizModeButtons = (mode: 'heatmap' | 'ranking' | 'trend' | 'chi' | 'gaps' | 'coocurrencia' | 'rachas') => {
+        if ((mode === 'gaps' || mode === 'coocurrencia' || mode === 'rachas') && this.currentGame?.id === 'nacional') {
             mode = 'heatmap';
         }
         this.vizMode = mode;
-        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn', 'vizModeGapsBtn', 'vizModeCoocurrenciaBtn'].forEach(id => {
+        ['vizModeHeatmapBtn', 'vizModeRankingBtn', 'vizModeTrendBtn', 'vizModeChiBtn', 'vizModeGapsBtn', 'vizModeCoocurrenciaBtn', 'vizModeRachasBtn'].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) btn.classList.toggle('active', 
                 (id === 'vizModeHeatmapBtn' && mode === 'heatmap') ||
@@ -6832,7 +6832,8 @@ class DataLotto49Advanced {
                 (id === 'vizModeTrendBtn' && mode === 'trend') ||
                 (id === 'vizModeChiBtn' && mode === 'chi') ||
                 (id === 'vizModeGapsBtn' && mode === 'gaps') ||
-                (id === 'vizModeCoocurrenciaBtn' && mode === 'coocurrencia')
+                (id === 'vizModeCoocurrenciaBtn' && mode === 'coocurrencia') ||
+                (id === 'vizModeRachasBtn' && mode === 'rachas')
             );
         });
         this.renderFrequencyChart();
@@ -6844,6 +6845,7 @@ class DataLotto49Advanced {
     document.getElementById('vizModeChiBtn')?.addEventListener('click', () => updateVizModeButtons('chi'));
     document.getElementById('vizModeGapsBtn')?.addEventListener('click', () => updateVizModeButtons('gaps'));
     document.getElementById('vizModeCoocurrenciaBtn')?.addEventListener('click', () => updateVizModeButtons('coocurrencia'));
+    document.getElementById('vizModeRachasBtn')?.addEventListener('click', () => updateVizModeButtons('rachas'));
 
     document.getElementById('filterInfoExpandedModal')?.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).id === 'filterInfoExpandedModal') {
@@ -11140,6 +11142,95 @@ class DataLotto49Advanced {
     `;
   }
 
+  renderRachasOverviewChart() {
+    const container = document.getElementById('frequencyChartContainer');
+    const summary = document.getElementById('dataVizSummary');
+    if (!container) return;
+
+    if (!this.dataLoaded || !this.historicalData || this.historicalData.length < 30) {
+      container.innerHTML = `<div style="color:#666; text-align: center; width: 100%; padding: 40px 10px; font-weight: 500;">⚠️ ${t('dataviz.rachas.sinDatos')}</div>`;
+      if (summary) {
+        summary.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+            <div style="font-weight: 700; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+            <div style="font-size: 0.85rem; color: #64748b;">${t('dataviz.rachas.subtitulo')}</div>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const numberRange = this.currentGame?.numberRange || 49;
+    const analisis = analizarTodosLosNumeros(this.historicalData, numberRange);
+    const ordenado = [...analisis].sort((a, b) => b.huecoActual - a.huecoActual);
+    const minGapsRequeridos = 8;
+
+    if (summary) {
+      summary.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+          <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+          <div style="font-size: 0.82rem; color: #64748b;">${t('dataviz.rachas.subtitulo')}</div>
+        </div>
+      `;
+    }
+
+    let rowsHtml = '';
+    ordenado.forEach((item, idx) => {
+      const insuficiente = item.nGaps < minGapsRequeridos;
+      let badgeBg = '#f1f5f9';
+      let badgeColor = '#334155';
+      if (!insuficiente) {
+        if (item.percentil >= 90) {
+          badgeBg = '#fee2e2';
+          badgeColor = '#b91c1c';
+        } else if (item.percentil <= 10) {
+          badgeBg = '#dcfce7';
+          badgeColor = '#15803d';
+        }
+      }
+
+      rowsHtml += `
+        <tr style="border-bottom: 1px solid #f1f5f9; background: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'}; font-size: 0.88rem;">
+          <td style="padding: 8px 14px; font-weight: 700; color: #1e293b;">
+            <span style="background: var(--primary, #2563eb); color: #fff; padding: 2px 9px; border-radius: 12px; font-size: 0.8rem;">${item.numero}</span>
+          </td>
+          <td style="padding: 8px 14px; text-align: center; font-weight: 600; color: #334155;">${item.huecoActual}</td>
+          <td style="padding: 8px 14px; text-align: center;">
+            ${insuficiente
+              ? `<span style="background: #f1f5f9; color: #94a3b8; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; font-style: italic;">${t('dataviz.rachas.insuficiente')}</span>`
+              : `<span style="background: ${badgeBg}; color: ${badgeColor}; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">${item.percentil}%</span>`
+            }
+          </td>
+          <td style="padding: 8px 14px; text-align: center; color: #64748b;">${item.nGaps}</td>
+        </tr>
+      `;
+    });
+
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #e2e8f0; font-size: 0.78rem; color: #64748b; text-transform: uppercase; text-align: left;">
+                <th style="padding: 8px 14px;">${t('dataviz.rachas.colNumero')}</th>
+                <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colHuecoActual')}</th>
+                <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colPercentil')}</th>
+                <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colHuecos')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-size: 0.82rem; color: #64748b; font-style: italic; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.4;">
+          ${t('dataviz.rachas.aviso')}
+        </div>
+      </div>
+    `;
+  }
+
   renderCoocurrenciaChart() {
     const container = document.getElementById('frequencyChartContainer');
     const summary = document.getElementById('dataVizSummary');
@@ -11318,6 +11409,7 @@ class DataLotto49Advanced {
     const targetSelectorContainer = document.getElementById('vizTargetSelectorContainer');
     const gapsBtn = document.getElementById('vizModeGapsBtn');
     const coocurrenciaBtn = document.getElementById('vizModeCoocurrenciaBtn');
+    const rachasBtn = document.getElementById('vizModeRachasBtn');
 
     if (gapsBtn) {
       gapsBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
@@ -11325,13 +11417,17 @@ class DataLotto49Advanced {
     if (coocurrenciaBtn) {
       coocurrenciaBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
     }
+    if (rachasBtn) {
+      rachasBtn.style.display = this.currentGame?.id === 'nacional' ? 'none' : '';
+    }
 
-    if (this.currentGame?.id === 'nacional' && (this.vizMode === 'gaps' || this.vizMode === 'coocurrencia')) {
+    if (this.currentGame?.id === 'nacional' && (this.vizMode === 'gaps' || this.vizMode === 'coocurrencia' || this.vizMode === 'rachas')) {
       this.vizMode = 'heatmap';
       const heatmapBtn = document.getElementById('vizModeHeatmapBtn');
       if (heatmapBtn) heatmapBtn.classList.add('active');
       if (gapsBtn) gapsBtn.classList.remove('active');
       if (coocurrenciaBtn) coocurrenciaBtn.classList.remove('active');
+      if (rachasBtn) rachasBtn.classList.remove('active');
     }
 
     if (!container) return;
@@ -11354,6 +11450,12 @@ class DataLotto49Advanced {
     if (this.vizMode === 'coocurrencia') {
       if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
       this.renderCoocurrenciaChart();
+      return;
+    }
+
+    if (this.vizMode === 'rachas') {
+      if (targetSelectorContainer) targetSelectorContainer.style.display = 'none';
+      this.renderRachasOverviewChart();
       return;
     }
 
