@@ -41,8 +41,6 @@ import {
   GridLayout,
   getLayoutDimensions,
   getNumberAtPosition,
-  buildCoordsLookup,
-  getCoordsLookup,
   generateRandomCombination
 } from './src/utils/geometry';
 import { runFilterAudit } from './src/utils/filterAudit';
@@ -2183,11 +2181,6 @@ class DataLotto49Advanced {
       this.saveState();
       this.renderFilterPresetsList();
       this.showToast(t('toast.filtroEliminado'), 'info');
-  }
-
-  saveFilterPreset() {
-      // Keep for backward compatibility or remove if not used
-      this.openSaveFilterModal();
   }
 
   loadState() {
