@@ -653,6 +653,44 @@ const SECONDARY_LABEL_KEY_BY_GAME: { [gameId: string]: string } = {
   gordo: 'tickets.masLlave',
 };
 
+interface SecondaryMatrixBehavior {
+  defaultSecondary: number[];
+  getHitClass: (hits: number, starHits: number) => string;
+  calculateCascade: (ticket: Ticket, winningNumbers: number[], winningStars: number[]) => {
+    tiers: { name: string; hits: number; starHits: number; count: number }[];
+    totalPayout?: number;
+    totalSubBets?: number;
+  };
+}
+
+const SECONDARY_MATRIX_BEHAVIOR: { [gameId: string]: SecondaryMatrixBehavior } = {
+  powerball: {
+    defaultSecondary: [1],
+    getHitClass: (hits, starHits) => (hits >= 3 || (hits >= 1 && starHits >= 1) || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'),
+    calculateCascade: (ticket, winningNumbers, winningStars) => calculatePowerballCascade(ticket, winningNumbers, winningStars)
+  },
+  megamillions: {
+    defaultSecondary: [1],
+    getHitClass: (hits, starHits) => (hits >= 3 || (hits >= 1 && starHits >= 1) || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'),
+    calculateCascade: (ticket, winningNumbers, winningStars) => calculateMegaMillionsCascade(ticket, winningNumbers, winningStars)
+  },
+  euromillones: {
+    defaultSecondary: [1, 2],
+    getHitClass: (hits, starHits) => (hits >= 2 || (hits >= 1 && starHits >= 2) || starHits >= 2) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'),
+    calculateCascade: (ticket, winningNumbers, winningStars) => calculateEuromillonesCascade(ticket, winningNumbers, winningStars)
+  },
+  eurodreams: {
+    defaultSecondary: [1],
+    getHitClass: (hits, starHits) => (hits >= 2 || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'),
+    calculateCascade: (ticket, winningNumbers, winningStars) => calculateEurodreamsCascade(ticket, winningNumbers, winningStars)
+  },
+  gordo: {
+    defaultSecondary: [0],
+    getHitClass: (hits, starHits) => (hits >= 2 || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'),
+    calculateCascade: (ticket, winningNumbers, winningStars) => calculateGordoCascade(ticket, winningNumbers, winningStars)
+  }
+};
+
 // Clase principal de la aplicación
 class DataLotto49Advanced {
   getNumberCoords(n: number) {
@@ -765,55 +803,12 @@ class DataLotto49Advanced {
     return calculateTicketCost(ticket, this.currentGame?.id);
   }
 
-  calculatePowerballCascade(
-    ticket: Ticket,
-    winningNumbers: number[],
-    winningStars: number[] = []
-  ) {
-    return calculatePowerballCascade(ticket, winningNumbers, winningStars);
-  }
-
-  calculateMegaMillionsCascade(
-    ticket: Ticket,
-    winningNumbers: number[],
-    winningStars: number[] = []
-  ) {
-    return calculateMegaMillionsCascade(ticket, winningNumbers, winningStars);
-  }
-
-  calculateEuromillonesCascade(
-    ticket: Ticket,
-    winningNumbers: number[],
-    winningStars: number[] = []
-  ) {
-    return calculateEuromillonesCascade(ticket, winningNumbers, winningStars);
-  }
-
-  calculateEurodreamsCascade(
-    ticket: { strategy?: string; combinations: number[][]; stars?: number[][] },
-    winningNumbers: number[],
-    winningStars: number[] = []
-  ) {
-    return calculateEurodreamsCascade(ticket, winningNumbers, winningStars);
-  }
-
-  calculateGordoCascade(
-    ticket: { strategy?: string; combinations: number[][]; stars?: number[][] },
-    winningNumbers: number[],
-    winningStars: number[] = []
-  ) {
-    return calculateGordoCascade(ticket, winningNumbers, winningStars);
-  }
-
-  private getCascadeForGame(gameId: string, ticket: Ticket, winningNumbers: number[], winningStars: number[]) {
-    switch (gameId) {
-      case 'powerball': return this.calculatePowerballCascade(ticket, winningNumbers, winningStars);
-      case 'megamillions': return this.calculateMegaMillionsCascade(ticket, winningNumbers, winningStars);
-      case 'euromillones': return this.calculateEuromillonesCascade(ticket, winningNumbers, winningStars);
-      case 'eurodreams': return this.calculateEurodreamsCascade(ticket, winningNumbers, winningStars);
-      case 'gordo': return this.calculateGordoCascade(ticket, winningNumbers, winningStars);
-      default: return null;
+  getCascadeForGame(gameId: string, ticket: Ticket, winningNumbers: number[], winningStars: number[] = []) {
+    const behavior = SECONDARY_MATRIX_BEHAVIOR[gameId];
+    if (behavior) {
+      return behavior.calculateCascade(ticket, winningNumbers, winningStars);
     }
+    return null;
   }
 
   constructor() {
@@ -8882,20 +8877,15 @@ class DataLotto49Advanced {
         }
 
         if (hasSecondaryMatrix) {
-          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+          const behavior = SECONDARY_MATRIX_BEHAVIOR[gameId];
+          const fallbackStars = behavior ? behavior.defaultSecondary : [1];
+          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : fallbackStars);
           const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningStarsSet.has(r) ? colors.secondaryWinningBg : colors.secondaryDefaultBg}; color: ${winningStarsSet.has(r) ? colors.secondaryWinningText : colors.secondaryDefaultText}; font-weight: bold;">${r}</div>`).join('');
 
           const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
           const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
 
-          let hitClass = 'no-hits';
-          if (gameId === 'powerball' || gameId === 'megamillions') {
-            hitClass = (hits >= 3 || (hits >= 1 && starHits >= 1) || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
-          } else if (gameId === 'euromillones') {
-            hitClass = (hits >= 2 || (hits >= 1 && starHits >= 2) || starHits >= 2) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
-          } else if (gameId === 'eurodreams' || gameId === 'gordo') {
-            hitClass = (hits >= 2 || starHits >= 1) ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits');
-          }
+          const hitClass = behavior ? behavior.getHitClass(hits, starHits) : (hits >= 3 ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'));
 
           return `
             <div class="saved-combination" style="margin-bottom: 8px;">
@@ -8992,7 +8982,9 @@ class DataLotto49Advanced {
         }
 
         if (hasSecondaryMatrix) {
-          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : [1]);
+          const behavior = SECONDARY_MATRIX_BEHAVIOR[gameId];
+          const fallbackStars = behavior ? behavior.defaultSecondary : [1];
+          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : fallbackStars);
           const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${gameId === 'powerball' ? colors.ballWinningBg : colors.secondaryWinningBg}; color: ${colors.secondaryWinningText}; font-weight: bold;">${r}</div>`).join('');
 
           const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
@@ -9035,7 +9027,7 @@ class DataLotto49Advanced {
 
     if (hasSecondaryMatrix) {
       const costData = this.calculateTicketCost(ticket);
-      const defaultSecondary = gameId === 'euromillones' ? [1, 2] : (gameId === 'gordo' ? [0] : [1]);
+      const defaultSecondary = SECONDARY_MATRIX_BEHAVIOR[gameId]?.defaultSecondary || [1];
       const secondarySuperset = ticket.stars && ticket.stars[0] ? ticket.stars[0] : defaultSecondary;
 
       const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
