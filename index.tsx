@@ -41,13 +41,8 @@ import {
   GridLayout,
   getLayoutDimensions,
   getNumberAtPosition,
-  getNumberCoords,
   buildCoordsLookup,
   getCoordsLookup,
-  isLine,
-  isDiagonal,
-  isSpaced,
-  hasGeometricPattern,
   generateRandomCombination
 } from './src/utils/geometry';
 import { runFilterAudit } from './src/utils/filterAudit';
@@ -67,7 +62,6 @@ import {
 import { isValidCombination as validateCombination, isValidCombination } from './src/utils/combinationValidator';
 import {
   DEFAULT_TOLERANCE_LEVELS,
-  findValidCombinations as runFindValidCombinations,
   findValidSuperset as runFindValidSuperset,
   findAndRankWinningCombinations as runFindAndRankWinningCombinations
 } from './src/utils/combinationFinder';
@@ -693,16 +687,6 @@ const SECONDARY_MATRIX_BEHAVIOR: { [gameId: string]: SecondaryMatrixBehavior } =
 
 // Clase principal de la aplicación
 class DataLotto49Advanced {
-  getNumberCoords(n: number) {
-    if (this.currentGame?.numbersLayout) {
-      const startAt = this.currentGame.numbersStartAt ?? this.currentGame.startAt ?? 1;
-      const lookup = getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt);
-      const c = lookup.get(n);
-      if (c) return c;
-    }
-    return getNumberCoords(n, this.currentGame?.gridCols || 10);
-  }
-  
   static APP_STATE_KEY = APP_STATE_KEY;
   static FILTER_PRESET_KEY = FILTER_PRESET_KEY;
 
@@ -8202,10 +8186,6 @@ class DataLotto49Advanced {
     );
   }
 
-  findValidCombinations(universe: number[], count: number, maxAttempts: number): number[][] {
-    return runFindValidCombinations(universe, count, maxAttempts, this.currentGame, this.filters, this.primes);
-  }
-  
   isValidCombination(combination: number[], stars: number[] = [], customHistoricalData?: { numbers: number[] }[]): boolean {
     return validateCombination(combination, stars, this.currentGame, this.filters, this.primes, false, customHistoricalData ?? this.historicalData);
   }
@@ -10200,51 +10180,6 @@ class DataLotto49Advanced {
         });
   }
 
-  exportTickets() {
-    if (this.savedTickets.length === 0) {
-        this.showToast(t('toast.noHayBoletosExportar'), 'warning');
-        return;
-    }
-    try {
-        const dataStr = JSON.stringify(this.savedTickets, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `datalotto49_backup_${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        this.showToast(t('toast.boletosExportados'), 'success');
-    } catch (error) {
-        this.showToast(t('toast.errorExportarBoletos'), 'error');
-        console.error('Export error:', error);
-    }
-  }
-
-
-  // ===== HELPERS UI & GEOMETRIC/AI =====
-  hasGeometricPattern(combination: number[], patternsToExclude: string[]): boolean {
-      const startAt = this.currentGame?.numbersStartAt ?? this.currentGame?.startAt ?? 1;
-      const coordsLookup = this.currentGame?.numbersLayout
-          ? getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt)
-          : (this.currentGame?.gridCols || 10);
-      return hasGeometricPattern(combination, patternsToExclude, coordsLookup);
-  }
-  isSpaced(combination: number[]): boolean {
-      const startAt = this.currentGame?.numbersStartAt ?? this.currentGame?.startAt ?? 1;
-      const coordsLookup = this.currentGame?.numbersLayout
-          ? getCoordsLookup(this.currentGame.numbersLayout, this.currentGame.numberRange, startAt)
-          : (this.currentGame?.gridCols || 10);
-      return isSpaced(combination, coordsLookup);
-  }
-  isLine(coords: {row: number, col: number}[]): boolean {
-      return isLine(coords);
-  }
-  isDiagonal(coords: {row: number, col: number}[]): boolean {
-      return isDiagonal(coords);
-  }
   showLoading(text: string) { 
     const loadingText = document.getElementById('loadingText');
     if (loadingText) loadingText.textContent = text;

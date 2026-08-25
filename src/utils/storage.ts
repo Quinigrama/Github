@@ -20,7 +20,3 @@ export function loadFilterPresetFromStorage(): any | null {
   }
   return null;
 }
-
-export function saveFilterPresetToStorage(filters: any): void {
-  localStorage.setItem(FILTER_PRESET_KEY, JSON.stringify(filters));
-}
