@@ -7351,7 +7351,15 @@ class DataLotto49Advanced {
 
         case 'figure':
             if (type === 'number') {
-              ball.classList.toggle('figure-selection');
+              if (this.selectedNumbers.has(number)) {
+                this.selectedNumbers.delete(number);
+                ball.classList.remove('figure-selection');
+              } else {
+                this.selectedNumbers.add(number);
+                ball.classList.add('figure-selection');
+              }
+              this.updateSelectedDisplay();
+              this.updateStats();
             }
             break;
 
