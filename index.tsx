@@ -1,7 +1,7 @@
 // ============================================
 // SISTEMA DE ALMACENAMIENTO PERSISTENTE
 // ============================================
-import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg } from "./game-configs";
+import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
 import {
   buildTerminacionesStatsHtml,
   buildParImparStatsHtml,
@@ -8816,6 +8816,38 @@ class DataLotto49Advanced {
     }
   }
 
+  renderCascadeSummaryTable(cascade: { tiers: { name: string; hits: number; starHits: number; count: number }[] }, colors: GameColorPalette): string {
+    const tierRows = cascade.tiers.map(tRow => `
+      <tr style="${tRow.count > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}">
+        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.name}</td>
+        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${tRow.hits} + ${tRow.starHits}${colors.secondaryEmoji}</td>
+        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${tRow.count > 0 ? colors.accentText : colors.neutralText};">${tRow.count}</td>
+      </tr>
+    `).join('');
+
+    const totalWinningBets = cascade.tiers.reduce((acc, tRow) => acc + tRow.count, 0);
+
+    return `
+      <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
+        <thead>
+          <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
+            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
+            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
+            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tierRows}
+        </tbody>
+      </table>
+
+      <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
+        <span>${t('tickets.totalApuestasPremiadas')}</span>
+        <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
+      </div>
+    `;
+  }
+
   renderStandardTicketCard(ticket: Ticket): string {
     const gameId = ticket.gameId || 'bonoloto';
     const colors = GAME_COLORS[gameId] || GAME_COLORS['bonoloto'];
@@ -8899,35 +8931,7 @@ class DataLotto49Advanced {
 
         if (cascade) {
           showBreakdownBadge = true;
-          const tierRows = cascade.tiers.map(tRow => `
-            <tr style="${tRow.count > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}">
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.name}</td>
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${tRow.hits} + ${tRow.starHits}${colors.secondaryEmoji}</td>
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${tRow.count > 0 ? colors.accentText : colors.neutralText};">${tRow.count}</td>
-            </tr>
-          `).join('');
-
-          const totalWinningBets = cascade.tiers.reduce((acc, tRow) => acc + tRow.count, 0);
-
-          summaryTableHTML = `
-            <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
-              <thead>
-                <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tierRows}
-              </tbody>
-            </table>
-
-            <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-              <span>${t('tickets.totalApuestasPremiadas')}</span>
-              <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
-            </div>
-          `;
+          summaryTableHTML = this.renderCascadeSummaryTable(cascade, colors);
         }
       } else {
         const winningTiers = getTicketWinningTiers(ticket);
@@ -9045,35 +9049,7 @@ class DataLotto49Advanced {
 
         let summaryTableHTML = '';
         if (cascade) {
-          const tierRows = cascade.tiers.map(tRow => `
-            <tr style="${tRow.count > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}">
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.name}</td>
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${tRow.hits} + ${tRow.starHits}${colors.secondaryEmoji}</td>
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${tRow.count > 0 ? colors.accentText : colors.neutralText};">${tRow.count}</td>
-            </tr>
-          `).join('');
-
-          const totalWinningBets = cascade.tiers.reduce((acc, tRow) => acc + tRow.count, 0);
-
-          summaryTableHTML = `
-            <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
-              <thead>
-                <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tierRows}
-              </tbody>
-            </table>
-
-            <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-              <span>${t('tickets.totalApuestasPremiadas')}</span>
-              <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
-            </div>
-          `;
+          summaryTableHTML = this.renderCascadeSummaryTable(cascade, colors);
         }
 
         const combinationsListHTML = `
