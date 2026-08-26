@@ -6493,9 +6493,6 @@ class DataLotto49Advanced {
     document.getElementById('notificationsCloseBtn')?.addEventListener('click', () => {
         this.toggleModal('notificationsModal', false);
     });
-    document.getElementById('notifCancelBtn')?.addEventListener('click', () => {
-        this.toggleModal('notificationsModal', false);
-    });
     document.getElementById('notifSaveBtn')?.addEventListener('click', () => {
         this.saveNotificationsFromModal();
     });
@@ -6666,10 +6663,6 @@ class DataLotto49Advanced {
         this.toggleModal('officialDrawsModal', false);
     });
 
-    document.getElementById('officialDrawsConfirmCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('officialDrawsModal', false);
-    });
-
     document.getElementById('officialDrawsPrevBtn')?.addEventListener('click', () => {
         if (this.officialDrawsPage > 1) {
             this.officialDrawsPage--;
@@ -6715,15 +6708,7 @@ class DataLotto49Advanced {
         this.toggleModal('bigdataModal', false);
     });
 
-    document.getElementById('bigdataConfirmCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('bigdataModal', false);
-    });
-
     document.getElementById('dataVizCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('dataVizModal', false);
-    });
-
-    document.getElementById('dataVizConfirmCloseBtn')?.addEventListener('click', () => {
         this.toggleModal('dataVizModal', false);
     });
 
@@ -6738,10 +6723,6 @@ class DataLotto49Advanced {
         this.toggleModal('backtestingModal', false);
     });
 
-    document.getElementById('backtestingConfirmCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('backtestingModal', false);
-    });
-
     document.getElementById('sidebarSavedTicketsBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.closeSidebar();
@@ -6750,10 +6731,6 @@ class DataLotto49Advanced {
     });
 
     document.getElementById('savedTicketsCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('savedTicketsModal', false);
-    });
-
-    document.getElementById('savedTicketsConfirmCloseBtn')?.addEventListener('click', () => {
         this.toggleModal('savedTicketsModal', false);
     });
 
@@ -6768,10 +6745,6 @@ class DataLotto49Advanced {
         this.toggleModal('jackpotsModal', false);
     });
 
-    document.getElementById('jackpotsConfirmCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('jackpotsModal', false);
-    });
-
     document.getElementById('sidebarCalculatorBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.closeSidebar();
@@ -6782,10 +6755,6 @@ class DataLotto49Advanced {
     });
 
     document.getElementById('calculatorCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('calculatorModal', false);
-    });
-
-    document.getElementById('calculatorConfirmCloseBtn')?.addEventListener('click', () => {
         this.toggleModal('calculatorModal', false);
     });
 
@@ -6849,10 +6818,6 @@ class DataLotto49Advanced {
     });
 
     document.getElementById('hrCloseBtn')?.addEventListener('click', () => {
-        this.toggleModal('historyOfResultsModal', false);
-    });
-
-    document.getElementById('hrCloseBtn2')?.addEventListener('click', () => {
         this.toggleModal('historyOfResultsModal', false);
     });
 
