@@ -2229,7 +2229,7 @@ body.dark-mode .filter-actions-footer-container #aiFiltersBtn {
   align-items: center;
 }
 
-.validate, .play-online-btn-saved {
+.validate {
   background: var(--success);
   color: white;
   border: none;
@@ -2240,12 +2240,8 @@ body.dark-mode .filter-actions-footer-container #aiFiltersBtn {
   transition: var(--transition);
 }
 
-.validate:hover, .play-online-btn-saved:hover {
+.validate:hover {
     transform: scale(1.05);
-}
-
-.play-online-btn-saved {
-    background: var(--secondary);
 }
 
 .validate.verified {

@@ -322,7 +322,7 @@
       <li class="sidebar-section-header" data-i18n="nav.configuracion">⚙️ Configuración</li>
       <li><a href="#" id="sidebarNotificationsBtn" data-i18n="config.recordatorios">🗓️ Recordatorios de Sorteos</a></li>
       <li><a href="#" id="darkModeToggleBtn"><span data-i18n="config.modoOscuro">🌙 Modo Oscuro</span> <span id="darkModeBadge" style="float: right; font-size: 0.75rem; background: rgba(99,102,241,0.15); color: var(--primary); padding: 2px 8px; border-radius: 10px; font-weight: bold;">OFF</span></a></li>
-      <li><a href="#" id="configUrlsBtn" data-i18n="config.enlaces">🔗 Enlaces a URLs</a></li>
+      <li><a href="#" id="serverConfigBtn" data-i18n="config.servidor">🖥️ Servidor Backend</a></li>
       <li><a href="#" id="contactBtn" data-i18n="config.contacto">✉️ Contacto</a></li>
       <li><a href="#" id="sidebarLanguageBtn" data-i18n="nav.idioma">🌐 Idioma (ES)</a></li>
     </ul>
@@ -1576,39 +1576,6 @@
     </div>
   </div>
 
-  <div class="modal" id="playOnlineModal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>🌐 Jugar Online</h3>
-            <p>Selecciona el juego para abrir la web oficial:</p>
-        </div>
-        <div class="game-selection-list modal-body" id="playOnlineList" style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- Dinámicamente cargado -->
-        </div>
-        <div class="modal-actions">
-            <button class="modal-btn cancel" id="closePlayOnlineModalBtn">Cerrar</button>
-        </div>
-    </div>
-  </div>
-
-  <!-- Modal para Enlace de Juego Vacío -->
-  <div class="modal" id="setUrlPromptModal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>⚠️ Enlace de Juego Vacío</h3>
-            <p id="setUrlPromptMessage">El enlace para Jugar Online está vacío. Escribe el enlace a continuación para este juego:</p>
-        </div>
-        <div class="modal-body" style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
-            <label id="setUrlPromptLabel" style="font-weight: bold; font-size: 0.9rem; color: var(--gray);"></label>
-            <input type="text" id="setUrlPromptInput" class="modal-input" style="width: 100%;" placeholder="https://...">
-        </div>
-        <div class="modal-actions">
-            <button class="modal-btn cancel" id="cancelSetUrlPromptBtn">Cancelar</button>
-            <button class="modal-btn confirm" id="saveSetUrlPromptBtn">Guardar y Jugar</button>
-        </div>
-    </div>
-  </div>
-
   <div class="modal" id="saveFilterModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
@@ -1670,18 +1637,20 @@
     </div>
   </div>
 
-  <div class="modal" id="configUrlsModal" style="display: none;">
+  <div class="modal" id="serverConfigModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 data-i18n="configurls.titulo">🔗 Configurar Enlaces</h3>
-            <p data-i18n="configurls.subtitulo">Modifica las URLs de acceso a los juegos:</p>
+            <h3 data-i18n="configserver.titulo">🖥️ Servidor API Backend</h3>
+            <p data-i18n="configserver.subtitulo">Configuración de servidor para la aplicación móvil (Capacitor / Android):</p>
         </div>
-        <div class="config-urls-form modal-body" id="configUrlsContainer" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
-            <!-- Dinámicamente cargado -->
+        <div class="modal-body" style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
+            <label style="display: block; font-size: 0.85rem; color: var(--gray); font-weight: 600;" data-i18n="configserver.urlLabel">URL del Servidor API:</label>
+            <input type="text" id="customApiServerUrlInput" class="modal-input" style="width: 100%;" placeholder="https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app">
+            <span style="font-size: 0.75rem; color: #64748b;" data-i18n="configserver.ayuda">Si usas la APK en Android, indica la URL de tu servidor backend para enviar correos y telemetría. Deja en blanco para usar la URL por defecto.</span>
         </div>
         <div class="modal-actions">
-            <button class="modal-btn cancel" id="closeConfigUrlsBtn" data-i18n="contact.cancelar">Cancelar</button>
-            <button class="modal-btn confirm" id="saveConfigUrlsBtn" data-i18n="filters.guardarBtn">Guardar</button>
+            <button class="modal-btn cancel" id="closeServerConfigBtn" data-i18n="contact.cancelar">Cancelar</button>
+            <button class="modal-btn confirm" id="saveServerConfigBtn" data-i18n="filters.guardarBtn">Guardar</button>
         </div>
     </div>
   </div>

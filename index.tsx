@@ -712,7 +712,6 @@ class DataLotto49Advanced {
     favoriteNumbers: Set<number>; // New for Favorites
     favoriteStars: Set<number>; // New for Euromillones Favorites
     favoriteGames: Set<string>; // New for Game Database Favorites
-    customGameUrls: { [key: string]: string }; // New for custom URLs
     filterPresets: FilterPreset[]; // New for named filter presets
     gameFilters: { [gameId: string]: Filters }; // NEW: Independent filters per game
     currentSelectionMode: 'excluded' | 'hot' | 'cold' | 'figure' | 'absent' | 'favorites' | null;
@@ -818,15 +817,6 @@ class DataLotto49Advanced {
     this.favoriteStars = new Set();
     this.favoriteGames = new Set();
     this.currentGame = GAMES['powerball'];
-    this.customGameUrls = {
-        powerball: '',
-        bonoloto: '',
-        primitiva: '',
-        euromillones: '',
-        eurodreams: '',
-        gordo: '',
-        nacional: ''
-    };
     this.filterPresets = [];
     this.gameFilters = {};
     
@@ -2091,7 +2081,6 @@ class DataLotto49Advanced {
               excludedTerminacionesSnapshot: Array.from(this.excludedTerminacionesSnapshot.entries()),
               excludedStarDecades: Array.from(this.excludedStarDecades),
               excludedStarDecadesSnapshot: Array.from(this.excludedStarDecadesSnapshot.entries()),
-              customGameUrls: this.customGameUrls, // Persist custom URLs
               filterPresets: this.filterPresets, // Persist filter presets
           };
           saveAppStateToStorage(state);
@@ -2259,9 +2248,6 @@ class DataLotto49Advanced {
                   if (!this.gameHistoricalData[this.currentGame.id]) {
                       this.gameHistoricalData[this.currentGame.id] = [...this.historicalData];
                   }
-              }
-              if (savedState.customGameUrls) {
-                  this.customGameUrls = { ...this.customGameUrls, ...savedState.customGameUrls };
               }
               this.filterPresets = savedState.filterPresets || [];
               console.log("Estado de la aplicación cargado desde localStorage.");
@@ -2911,56 +2897,6 @@ class DataLotto49Advanced {
     });
   }
 
-  renderPlayOnlineList() {
-    const listContainer = document.getElementById('playOnlineList');
-    if (!listContainer) return;
-
-    const GAMES_LIST = getAllGames().map(g => ({ id: g.id, name: g.fullName, flag: g.flag }));
-
-    const sortedGames = [...GAMES_LIST].sort((a, b) => {
-        const aFav = this.favoriteGames.has(a.id);
-        const bFav = this.favoriteGames.has(b.id);
-        if (aFav && !bFav) return -1;
-        if (!aFav && bFav) return 1;
-        return GAMES_LIST.findIndex(x => x.id === a.id) - GAMES_LIST.findIndex(x => x.id === b.id);
-    });
-
-    listContainer.innerHTML = '';
-    sortedGames.forEach(game => {
-        const isFav = this.favoriteGames.has(game.id);
-        const item = document.createElement('div');
-        item.className = 'game-select-item';
-        item.style.cssText = 'display: flex; align-items: center; gap: 10px; width: 100%;';
-        
-        const btn = document.createElement('button');
-        btn.className = 'modal-btn confirm';
-        btn.style.cssText = 'flex: 1; padding: 15px; text-align: left; display: flex; align-items: center; gap: 10px;';
-        const trailingFlag = (game.id === 'eurodreams' || game.id === 'gordo') ? ` <span>${NATIONAL_FLAGS[game.id]}</span>` : '';
-        btn.innerHTML = `<span>${game.flag}</span> ${game.name}${trailingFlag}`;
-        btn.onclick = () => this.confirmPlayOnline(game.id as any);
-
-        const favBtn = document.createElement('button');
-        favBtn.className = `game-fav-btn ${isFav ? 'active' : ''}`;
-        favBtn.innerHTML = isFav ? '⭐' : '☆';
-        favBtn.style.cssText = 'background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 5px;';
-        favBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (this.favoriteGames.has(game.id)) {
-                this.favoriteGames.delete(game.id);
-            } else {
-                this.favoriteGames.add(game.id);
-            }
-            this.saveState();
-            this.renderPlayOnlineList();
-            this.updateSidebarGameOrder();
-        };
-
-        item.appendChild(btn);
-        item.appendChild(favBtn);
-        listContainer.appendChild(item);
-    });
-  }
-
   updateSidebarGameOrder() {
     const sidebarUL = document.querySelector('#sidebar .sidebar-links');
     if (!sidebarUL) return;
@@ -3079,7 +3015,7 @@ class DataLotto49Advanced {
 
   async loadSpecificGame(gameKey: string, isAutoLoad = false) {
     const gameConfig = getGameConfig(gameKey);
-    const rawUrl = this.customGameUrls[gameKey] || gameConfig.csvUrl || '';
+    const rawUrl = gameConfig.csvUrl || '';
     const url = this.convertGoogleSheetsUrlToCsv(rawUrl);
     if (!isAutoLoad) {
       this.toggleModal('gameSelectionModal', false);
@@ -6388,7 +6324,6 @@ class DataLotto49Advanced {
     });
     document.getElementById('shareBtn')?.addEventListener('click', () => this.shareTicket());
     document.getElementById('downloadTxtBtn')?.addEventListener('click', () => this.downloadTicketAsTxt());
-    document.getElementById('playOnlineBtn')?.addEventListener('click', () => this.playTicketOnline(this.currentTicket!));
     document.getElementById('reducedSystemSelect')?.addEventListener('change', () => {
         this.updateReducedSystemInfo();
     });
@@ -6497,10 +6432,13 @@ class DataLotto49Advanced {
         this.saveNotificationsFromModal();
     });
 
-    document.getElementById('configUrlsBtn')?.addEventListener('click', (e) => {
+    document.getElementById('serverConfigBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
-        this.openConfigUrlsModal();
+        this.closeSidebar();
+        this.openServerConfigModal();
     });
+    document.getElementById('closeServerConfigBtn')?.addEventListener('click', () => this.toggleModal('serverConfigModal', false));
+    document.getElementById('saveServerConfigBtn')?.addEventListener('click', () => this.saveServerConfig());
     document.getElementById('contactBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.openContactModal();
@@ -6587,44 +6525,7 @@ class DataLotto49Advanced {
         URL.revokeObjectURL(url);
     });
     
-    document.getElementById('closeConfigUrlsBtn')?.addEventListener('click', () => this.toggleModal('configUrlsModal', false));
-    document.getElementById('saveConfigUrlsBtn')?.addEventListener('click', () => this.saveConfigUrls());
-
-    document.getElementById('cancelSetUrlPromptBtn')?.addEventListener('click', () => this.toggleModal('setUrlPromptModal', false));
-    document.getElementById('saveSetUrlPromptBtn')?.addEventListener('click', () => {
-        const input = document.getElementById('setUrlPromptInput') as HTMLInputElement;
-        const gameKey = (this as any).pendingPlayGameKey;
-        if (!input || !gameKey) return;
-        
-        let val = input.value.trim();
-        if (!val) {
-            this.showToast(t('toast.enlaceInvalido'), 'warning');
-            return;
-        }
-        
-        if (!/^https?:\/\//i.test(val)) {
-            val = 'https://' + val;
-        }
-        
-        this.customGameUrls[gameKey] = val;
-        this.saveState();
-        this.toggleModal('setUrlPromptModal', false);
-        this.showToast(t('toast.enlaceConfigurado'), 'success');
-        
-        // Retry playing online with the new URL!
-        this.confirmPlayOnline(gameKey);
-    });
-
     document.getElementById('closeGameSelectionBtn')?.addEventListener('click', () => this.toggleModal('gameSelectionModal', false));
-    document.getElementById('closePlayOnlineModalBtn')?.addEventListener('click', () => this.toggleModal('playOnlineModal', false));
-    document.querySelectorAll('.play-online-choice-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const game = (e.currentTarget as HTMLElement).dataset.game;
-            if (game === 'bonoloto' || game === 'primitiva') {
-                this.confirmPlayOnline(game);
-            }
-        });
-    });
     document.getElementById('cancelValidationBtn')?.addEventListener('click', () => this.toggleModal('validationModal', false));
     document.getElementById('confirmValidationBtn')?.addEventListener('click', () => this.confirmValidation());
     // FIX: Cast e.target to HTMLInputElement to access files
@@ -9179,7 +9080,6 @@ class DataLotto49Advanced {
 
       let combosHTML = '';
       let actionsHTML = '';
-      const playOnlineHTML = `<button class="play-online-btn-saved">${t('tickets.jugarOnline')}</button>`;
 
       const isMultipleTicket = ticket.strategy === 'multiple' ||
         (ticket.combinations.length === 1 && (
@@ -9191,11 +9091,9 @@ class DataLotto49Advanced {
         ? this.renderMultipleTicketCard(ticket)
         : this.renderStandardTicketCard(ticket);
 
-      actionsHTML = `${playOnlineHTML}${
-        ticket.validation
-          ? `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`
-          : `<button class="validate">${t('tickets.validar')}</button>`
-      }`;
+      actionsHTML = ticket.validation
+        ? `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`
+        : `<button class="validate">${t('tickets.validar')}</button>`;
       
       item.innerHTML = `
         <div class="saved-ticket-header">
@@ -9216,7 +9114,6 @@ class DataLotto49Advanced {
         <div class="saved-combinations">${combosHTML}</div>`;
       
       item.querySelector('.delete-btn')?.addEventListener('click', () => this.deleteTicket(ticket.date));
-      item.querySelector('.play-online-btn-saved')?.addEventListener('click', () => this.playTicketOnline(ticket));
       const validateBtn = item.querySelector('.validate:not(.verified)');
       if(validateBtn) {
           validateBtn.addEventListener('click', () => this.startValidation(ticket.date));
@@ -10072,72 +9969,6 @@ class DataLotto49Advanced {
     return getGameConfig(gameId).flag;
   }
 
-  playTicketOnline(ticket: Ticket) {
-    if (!ticket || ticket.combinations.length === 0) {
-        this.showToast(t('toast.noHayCombinacionesJugar'), 'warning');
-        return;
-    }
-
-    // Store the ticket to play in a temporary property
-    (this as any).pendingPlayTicket = ticket;
-    this.renderPlayOnlineList();
-    this.toggleModal('playOnlineModal', true);
-  }
-
-  confirmPlayOnline(gameKey: 'bonoloto' | 'primitiva' | 'euromillones' | 'eurodreams' | 'gordo') {
-    const ticket = (this as any).pendingPlayTicket as Ticket;
-    if (!ticket) return;
-
-    let lotteryUrl = this.customGameUrls[gameKey] || '';
-    if (!lotteryUrl || lotteryUrl.trim() === '') {
-        // Enlace vacío! Avisamos al usuario y le permitimos escribirlo
-        (this as any).pendingPlayGameKey = gameKey;
-        const names: { [key: string]: string } = {
-            bonoloto: '🇪🇸 Bonoloto España',
-            primitiva: '🇪🇸 Primitiva España',
-            gordo: '🏆 El Gordo',
-            euromillones: '🇪🇺 Euromillones',
-            eurodreams: '🌙 EuroDreams'
-        };
-        const label = document.getElementById('setUrlPromptLabel');
-        if (label) {
-            label.textContent = `${names[gameKey] || gameKey}:`;
-        }
-        const input = document.getElementById('setUrlPromptInput') as HTMLInputElement;
-        if (input) {
-            input.value = '';
-            input.placeholder = 'https://...';
-        }
-        this.toggleModal('setUrlPromptModal', true);
-        return;
-    }
-
-    let combosToPlay = ticket.combinations;
-
-    if (ticket.combinations.length === 1 && ticket.combinations[0].length > 6) {
-        combosToPlay = this.getCombinations(ticket.combinations[0], 6);
-    }
-
-    const formattedCombinations = combosToPlay
-        .map(combo => 
-            combo.sort((a, b) => a - b)
-                 .map(n => String(n).padStart(2, '0'))
-                 .join(' ')
-        )
-        .join('\n');
-
-    navigator.clipboard.writeText(formattedCombinations)
-        .then(() => {
-            window.open(lotteryUrl, '_blank');
-            this.toggleModal('playOnlineModal', false);
-            this.showToast(t('toast.webAbierta'), 'success');
-        })
-        .catch(err => {
-            console.error('Error al copiar al portapapeles:', err);
-            this.showToast(t('toast.errorCopiarCombinaciones'), 'error');
-        });
-  }
-
   showLoading(text: string) { 
     const loadingText = document.getElementById('loadingText');
     if (loadingText) loadingText.textContent = text;
@@ -10384,98 +10215,27 @@ class DataLotto49Advanced {
     this.updateTopTitleVisibility();
   }
 
-  openConfigUrlsModal() {
-    const container = document.getElementById('configUrlsContainer');
-    if (container) {
-        container.innerHTML = '';
-        
-        // Define a map for nice names and flags
-        const names: { [key: string]: string } = {
-            bonoloto: '🇪🇸 Bonoloto',
-            primitiva: '🇪🇸 Primitiva',
-            gordo: '🏆 El Gordo',
-            euromillones: '🇪🇺 Euromillones',
-            eurodreams: '🌙 EuroDreams',
-            nacional: '🇪🇸 Lotería Nacional'
-        };
-
-        Object.keys(this.customGameUrls).forEach(key => {
-            const gameName = names[key] || (key.charAt(0).toUpperCase() + key.slice(1));
-            
-            const group = document.createElement('div');
-            group.className = 'input-group';
-            group.style.display = 'flex';
-            group.style.flexDirection = 'column';
-            group.style.gap = '5px';
-            
-            const label = document.createElement('label');
-            label.style.cssText = 'display: block; font-size: 0.85rem; color: var(--gray); font-weight: 600;';
-            label.textContent = t('configurls.urlLabel', { game: gameName });
-            
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.id = `urlInput_${key}`;
-            input.className = 'modal-input';
-            input.style.width = '100%';
-            input.value = this.customGameUrls[key] || '';
-            input.placeholder = 'https://...';
-            
-            group.appendChild(label);
-            group.appendChild(input);
-            container.appendChild(group);
-        });
-
-        // Configuración de Servidor API Backend para Capacitor / Móvil
-        const apiGroup = document.createElement('div');
-        apiGroup.style.cssText = 'margin-top: 15px; padding-top: 15px; border-top: 2px dashed #e2e8f0; display: flex; flex-direction: column; gap: 5px;';
-        
-        const apiLabel = document.createElement('label');
-        apiLabel.style.cssText = 'display: block; font-size: 0.85rem; color: #2563eb; font-weight: bold;';
-        apiLabel.textContent = '🖥️ Servidor API Backend (Móvil / Capacitor):';
-        
-        const apiHelp = document.createElement('span');
-        apiHelp.style.cssText = 'font-size: 0.75rem; color: #64748b; margin-bottom: 4px;';
-        apiHelp.textContent = 'Si usas la APK en Android, indica la URL de tu servidor backend para enviar correos y telemetría:';
-
-        const apiInput = document.createElement('input');
-        apiInput.type = 'text';
-        apiInput.id = 'urlInput_customApiServer';
-        apiInput.className = 'modal-input';
-        apiInput.style.width = '100%';
-        apiInput.value = localStorage.getItem('customApiServerUrl') || '';
-        apiInput.placeholder = 'https://ais-pre-lcjdwvzchowyi3tetmqfya-7070977073.europe-west2.run.app';
-
-        apiGroup.appendChild(apiLabel);
-        apiGroup.appendChild(apiHelp);
-        apiGroup.appendChild(apiInput);
-        container.appendChild(apiGroup);
-    }
-    
+  openServerConfigModal() {
     this.closeSidebar();
-    this.toggleModal('configUrlsModal', true);
+    const input = document.getElementById('customApiServerUrlInput') as HTMLInputElement | null;
+    if (input) {
+      input.value = localStorage.getItem('customApiServerUrl') || '';
+    }
+    this.toggleModal('serverConfigModal', true);
   }
 
-  saveConfigUrls() {
-    Object.keys(this.customGameUrls).forEach(key => {
-        const input = document.getElementById(`urlInput_${key}`) as HTMLInputElement;
-        if (input) {
-            this.customGameUrls[key] = input.value;
-        }
-    });
-
-    const apiInput = document.getElementById('urlInput_customApiServer') as HTMLInputElement;
-    if (apiInput) {
-      const val = apiInput.value.trim();
+  saveServerConfig() {
+    const input = document.getElementById('customApiServerUrlInput') as HTMLInputElement | null;
+    if (input) {
+      const val = input.value.trim();
       if (val) {
         localStorage.setItem('customApiServerUrl', val);
       } else {
         localStorage.removeItem('customApiServerUrl');
       }
     }
-    
-    this.saveState();
-    this.toggleModal('configUrlsModal', false);
-    this.showToast(t('toast.enlacesGuardados'), 'success');
+    this.toggleModal('serverConfigModal', false);
+    this.showToast(t('toast.servidorGuardado'), 'success');
   }
 
   openContactModal() {
