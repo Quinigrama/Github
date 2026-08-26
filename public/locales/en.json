@@ -719,6 +719,7 @@
   "configserver.urlLabel": "API Server URL:",
   "configserver.ayuda": "If using the APK on Android, enter your backend server URL to send emails and telemetry. Leave empty to use the default URL.",
   "toast.servidorGuardado": "✅ Server configuration saved successfully.",
+  "toast.modoDesarrolladorActivado": "🛠️ Developer options enabled.",
   "contract.titulo": "🛡️ Terms of Use Accepted & Record",
   "contract.subtitulo": "Below is the digitally accepted liability waiver and the securely stored conformity log record:",
   "contract.avisoJuegoResponsable": "Responsible Gambling Notice:",

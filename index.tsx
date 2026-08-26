@@ -6432,6 +6432,22 @@ class DataLotto49Advanced {
         this.saveNotificationsFromModal();
     });
 
+    let versionTapCount = 0;
+    let versionTapTimer: any = null;
+    document.getElementById('sidebarVersionTap')?.addEventListener('click', () => {
+        versionTapCount++;
+        clearTimeout(versionTapTimer);
+        versionTapTimer = setTimeout(() => { versionTapCount = 0; }, 3000);
+        if (versionTapCount >= 7) {
+            versionTapCount = 0;
+            const item = document.getElementById('serverConfigMenuItem');
+            if (item) {
+                item.style.display = 'block';
+                this.showToast(t('toast.modoDesarrolladorActivado'), 'info');
+            }
+        }
+    });
+
     document.getElementById('serverConfigBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.closeSidebar();

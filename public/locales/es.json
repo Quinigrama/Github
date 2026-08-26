@@ -719,6 +719,7 @@
   "configserver.urlLabel": "URL del Servidor API:",
   "configserver.ayuda": "Si usas la APK en Android, indica la URL de tu servidor backend para enviar correos y telemetría. Deja en blanco para usar la URL por defecto.",
   "toast.servidorGuardado": "✅ Configuración del servidor guardada correctamente.",
+  "toast.modoDesarrolladorActivado": "🛠️ Opciones de desarrollador activadas.",
   "contract.titulo": "🛡️ Condiciones de Uso Aceptadas y Registro",
   "contract.subtitulo": "A continuación se detalla la exención de responsabilidad aceptada digitalmente y el registro del log de conformidad almacenado de forma segura:",
   "contract.avisoJuegoResponsable": "Aviso de Juego Responsable:",
