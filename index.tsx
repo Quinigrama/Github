@@ -43,7 +43,7 @@ import {
   getNumberAtPosition,
   generateRandomCombination
 } from './src/utils/geometry';
-import { runFilterAudit, compareFiltersAgainstCombination, FilterComparisonItem } from './src/utils/filterAudit';
+import { runFilterAudit, compareFiltersAgainstCombination, FilterComparisonItem, aggregateFilterStats, FilterAggregateStat } from './src/utils/filterAudit';
 import { syncNativeNotifications } from './src/services/notificationScheduler';
 import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './src/config/telegramConfig';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
@@ -6470,6 +6470,14 @@ class DataLotto49Advanced {
       this.toggleModal('filterStatsModal', false);
     });
 
+    document.getElementById('openFilterStatsAggregateBtn')?.addEventListener('click', () => {
+      this.openFilterStatsAggregateModal();
+    });
+
+    document.getElementById('closeFilterStatsAggregateModalBtn')?.addEventListener('click', () => {
+      this.toggleModal('filterStatsAggregateModal', false);
+    });
+
     document.getElementById('closeFilterComparisonModalBtn')?.addEventListener('click', () => {
       this.toggleModal('filterComparisonModal', false);
     });
@@ -9513,6 +9521,92 @@ class DataLotto49Advanced {
     }
 
     this.toggleModal('filterComparisonModal', true);
+  }
+
+  openFilterStatsAggregateModal() {
+    const eligibleTickets = (this.savedTickets || []).filter(t => 
+      t.gameId !== 'nacional' && 
+      t.validation?.winningNumbers && 
+      t.validation.winningNumbers.length > 0 && 
+      t.filtersSnapshot
+    );
+
+    if (eligibleTickets.length === 0) {
+      this.showToast(t('audit.sinBoletosValidadosSnapshot'), 'warning');
+      return;
+    }
+
+    const allTicketResults: FilterComparisonItem[][] = [];
+    for (const ticket of eligibleTickets) {
+      const gameId = ticket.gameId || 'bonoloto';
+      const game = GAMES[gameId] || this.currentGame;
+      const items = compareFiltersAgainstCombination(
+        ticket.validation!.winningNumbers,
+        ticket.validation!.stars,
+        ticket.filtersSnapshot,
+        game,
+        this.primes
+      );
+      if (items.length > 0) {
+        allTicketResults.push(items);
+      }
+    }
+
+    if (allTicketResults.length === 0) {
+      this.showToast(t('audit.sinBoletosValidadosSnapshot'), 'warning');
+      return;
+    }
+
+    const aggregated = aggregateFilterStats(allTicketResults);
+    const totalPassed = aggregated.reduce((acc, curr) => acc + curr.passedCount, 0);
+    const totalFailed = aggregated.reduce((acc, curr) => acc + curr.failedCount, 0);
+
+    const summaryEl = document.getElementById('filterStatsAggregateSummary');
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 1.25rem; font-weight: bold; color: var(--primary);">${eligibleTickets.length}</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">${t('audit.boletosAuditados')}</div>
+          </div>
+          <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 1.25rem; font-weight: bold; color: #166534;">${totalPassed}</div>
+            <div style="font-size: 0.75rem; color: #166534; font-weight: 500;">${t('audit.totalAciertos')}</div>
+          </div>
+          <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 1.25rem; font-weight: bold; color: #991b1b;">${totalFailed}</div>
+            <div style="font-size: 0.75rem; color: #991b1b; font-weight: 500;">${t('audit.totalFallos')}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const tbody = document.getElementById('filterStatsAggregateTableBody');
+    if (tbody) {
+      tbody.innerHTML = aggregated.map(stat => {
+        const pct = stat.passRate.toFixed(1);
+        const isGood = stat.passRate >= 70;
+        const isMid = stat.passRate >= 40 && stat.passRate < 70;
+        const badgeBg = isGood ? '#dcfce7' : (isMid ? '#fef3c7' : '#fee2e2');
+        const badgeColor = isGood ? '#166534' : (isMid ? '#92400e' : '#991b1b');
+
+        return `
+          <tr style="border-bottom: 1px solid var(--border); font-size: 0.85rem;">
+            <td style="padding: 8px 10px; font-weight: 600;">${stat.name}</td>
+            <td style="padding: 8px 10px; text-align: center; color: var(--text-muted);">${stat.totalEvaluated}</td>
+            <td style="padding: 8px 10px; text-align: center; color: #166534; font-weight: 600;">${stat.passedCount}</td>
+            <td style="padding: 8px 10px; text-align: center; color: #991b1b; font-weight: 600;">${stat.failedCount}</td>
+            <td style="padding: 8px 10px; text-align: center;">
+              <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background: ${badgeBg}; color: ${badgeColor};">
+                ${pct}%
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    this.toggleModal('filterStatsAggregateModal', true);
   }
   shareTicket() {
       if (!this.currentTicket) return;

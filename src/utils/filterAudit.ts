@@ -796,3 +796,46 @@ export function compareFiltersAgainstCombination(
 
   return items;
 }
+
+export interface FilterAggregateStat {
+  id: string;
+  name: string;
+  totalEvaluated: number;
+  passedCount: number;
+  failedCount: number;
+  passRate: number;
+}
+
+export function aggregateFilterStats(allTicketResults: FilterComparisonItem[][]): FilterAggregateStat[] {
+  const statsMap: Record<string, { id: string; name: string; totalEvaluated: number; passedCount: number; failedCount: number; }> = {};
+
+  for (const ticketResults of allTicketResults) {
+    for (const item of ticketResults) {
+      if (!statsMap[item.id]) {
+        statsMap[item.id] = {
+          id: item.id,
+          name: item.name,
+          totalEvaluated: 0,
+          passedCount: 0,
+          failedCount: 0
+        };
+      }
+      statsMap[item.id].totalEvaluated++;
+      if (item.passed) {
+        statsMap[item.id].passedCount++;
+      } else {
+        statsMap[item.id].failedCount++;
+      }
+    }
+  }
+
+  const stats: FilterAggregateStat[] = Object.values(statsMap).map(s => ({
+    ...s,
+    passRate: s.totalEvaluated > 0 ? (s.passedCount / s.totalEvaluated) * 100 : 0
+  }));
+
+  // Ordenados de peor a mejor tasa de acierto (menor porcentaje primero)
+  stats.sort((a, b) => a.passRate - b.passRate || b.failedCount - a.failedCount);
+
+  return stats;
+}
