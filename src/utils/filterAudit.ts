@@ -1,5 +1,13 @@
 import { generateRandomCombination, hasGeometricPattern, isSpaced, getCoordsLookup } from './geometry';
 
+export interface FilterComparisonItem {
+  id: string;
+  name: string;
+  configured: string;
+  actual: string;
+  passed: boolean;
+}
+
 export interface AuditResultCategory {
   name: string;
   count: number;
@@ -352,4 +360,439 @@ export function runFilterAudit(
   }
 
   return { results, actualSampleSize };
+}
+
+export function compareFiltersAgainstCombination(
+  winningNumbers: number[],
+  winningStars: number[] | undefined,
+  filters: any,
+  currentGame: {
+    maxNumbers: number;
+    maxStars: number;
+    numberRange: number;
+    starRange: number;
+    gridCols: number;
+    id: string;
+    numbersLayout?: any;
+    numbersStartAt?: number;
+    startAt?: number;
+  },
+  primes: Set<number>
+): FilterComparisonItem[] {
+  const items: FilterComparisonItem[] = [];
+  if (!winningNumbers || winningNumbers.length === 0 || !filters) return items;
+
+  const maxNumbers = currentGame.maxNumbers || winningNumbers.length;
+  const maxStars = currentGame.maxStars || 0;
+
+  // 1. Rango de Suma Total
+  if (filters.sum) {
+    const sum = winningNumbers.reduce((a, b) => a + b, 0);
+    const passed = sum >= filters.sum.min && sum <= filters.sum.max;
+    items.push({
+      id: 'sum',
+      name: 'Rango de Suma Total',
+      configured: `${filters.sum.min} - ${filters.sum.max}`,
+      actual: `${sum}`,
+      passed
+    });
+  }
+
+  // 2. Variedad de Terminaciones
+  if (filters.terminacionesDistintas && Array.isArray(filters.terminacionesDistintas) && filters.terminacionesDistintas.length > 0) {
+    const uniqueEndings = new Set(winningNumbers.map(n => n % 10)).size;
+    const passed = filters.terminacionesDistintas.includes(uniqueEndings);
+    items.push({
+      id: 'terminacionesDistintas',
+      name: 'Variedad de Terminaciones',
+      configured: filters.terminacionesDistintas.join(', '),
+      actual: `${uniqueEndings} distintas`,
+      passed
+    });
+  }
+
+  // 3. Balance Par/Impar
+  if (filters.parImpar && Array.isArray(filters.parImpar) && filters.parImpar.length > 0) {
+    const evens = winningNumbers.filter(n => n % 2 === 0).length;
+    const key = `${evens}/${maxNumbers - evens}`;
+    const passed = filters.parImpar.includes(key);
+    items.push({
+      id: 'parImpar',
+      name: 'Balance Par/Impar',
+      configured: filters.parImpar.join(', '),
+      actual: key,
+      passed
+    });
+  }
+
+  // 4. Balance Bajos/Altos
+  if (filters.bajosAltos && Array.isArray(filters.bajosAltos) && filters.bajosAltos.length > 0) {
+    const midPoint = Math.floor(currentGame.numberRange / 2);
+    const lows = winningNumbers.filter(n => n <= midPoint).length;
+    const key = `${lows}/${maxNumbers - lows}`;
+    const passed = filters.bajosAltos.includes(key);
+    items.push({
+      id: 'bajosAltos',
+      name: 'Balance Bajos/Altos',
+      configured: filters.bajosAltos.join(', '),
+      actual: key,
+      passed
+    });
+  }
+
+  // 5. Cantidad de Primos
+  if (filters.primos) {
+    const primesCount = winningNumbers.filter(n => primes.has(n)).length;
+    const passed = primesCount >= filters.primos.min && primesCount <= filters.primos.max;
+    items.push({
+      id: 'primos',
+      name: 'Cantidad de Primos',
+      configured: `${filters.primos.min} - ${filters.primos.max}`,
+      actual: `${primesCount}`,
+      passed
+    });
+  }
+
+  // 6. Distancia entre Números
+  if (filters.distancia) {
+    const sorted = [...winningNumbers].sort((a, b) => a - b);
+    let passDist = true;
+    const dists: number[] = [];
+    for (let j = 0; j < sorted.length - 1; j++) {
+      const diff = sorted[j + 1] - sorted[j];
+      dists.push(diff);
+      if (diff < filters.distancia.min || diff > filters.distancia.max) {
+        passDist = false;
+      }
+    }
+    const distRangeStr = dists.length > 0 ? `${Math.min(...dists)} a ${Math.max(...dists)}` : '-';
+    items.push({
+      id: 'distancia',
+      name: 'Distancia entre Números',
+      configured: `${filters.distancia.min} - ${filters.distancia.max}`,
+      actual: distRangeStr,
+      passed: passDist
+    });
+  }
+
+  // 7. Suma de Dígitos
+  if (filters.sumaDigitos) {
+    const digitSum = winningNumbers.reduce((s, num) => s + (num < 10 ? num : (num % 10 + Math.floor(num / 10))), 0);
+    const passed = digitSum >= filters.sumaDigitos.min && digitSum <= filters.sumaDigitos.max;
+    items.push({
+      id: 'sumaDigitos',
+      name: 'Suma de Dígitos',
+      configured: `${filters.sumaDigitos.min} - ${filters.sumaDigitos.max}`,
+      actual: `${digitSum}`,
+      passed
+    });
+  }
+
+  // 8. Bloques Consecutivos
+  if (filters.consecutivos && Array.isArray(filters.consecutivos) && filters.consecutivos.length > 0) {
+    const sorted = [...winningNumbers].sort((a, b) => a - b);
+    let consecutivePattern = '';
+    let count = 1;
+    for (let j = 1; j < sorted.length; j++) {
+      if (sorted[j] === sorted[j - 1] + 1) {
+        count++;
+      } else {
+        consecutivePattern += count;
+        count = 1;
+      }
+    }
+    consecutivePattern += count;
+    const consecPatternSorted = consecutivePattern.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+    const passed = filters.consecutivos.includes(consecPatternSorted);
+    items.push({
+      id: 'consecutivos',
+      name: 'Bloques Consecutivos',
+      configured: filters.consecutivos.join(', '),
+      actual: consecPatternSorted,
+      passed
+    });
+  }
+
+  // 9. Agrupación por Decenas
+  if (filters.agrupDecenas && Array.isArray(filters.agrupDecenas) && filters.agrupDecenas.length > 0) {
+    const tens: Record<number, number> = {};
+    winningNumbers.forEach(n => {
+      const ten = Math.floor((n - 1) / 10);
+      tens[ten] = (tens[ten] || 0) + 1;
+    });
+    const tensGroups = Object.values(tens).sort((a, b) => b - a).join('/');
+    const passed = filters.agrupDecenas.includes(tensGroups);
+    items.push({
+      id: 'agrupDecenas',
+      name: 'Agrupación por Decenas',
+      configured: filters.agrupDecenas.join(', '),
+      actual: tensGroups,
+      passed
+    });
+  }
+
+  // 10. Desviación Estándar
+  if (filters.desviacion) {
+    const sum = winningNumbers.reduce((a, b) => a + b, 0);
+    const mean = sum / maxNumbers;
+    const stdDev = Math.sqrt(winningNumbers.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / maxNumbers);
+    const passed = stdDev >= filters.desviacion.min && stdDev <= filters.desviacion.max;
+    items.push({
+      id: 'desviacion',
+      name: 'Desviación Estándar',
+      configured: `${filters.desviacion.min} - ${filters.desviacion.max}`,
+      actual: stdDev.toFixed(2),
+      passed
+    });
+  }
+
+  // 11. Rango Óptimo por Posición
+  if (currentGame.id !== 'nacional' && filters.positionRange?.enabled && Array.isArray(filters.positionRange.ranges)) {
+    const sorted = [...winningNumbers].sort((a, b) => a - b);
+    const ok = filters.positionRange.ranges.every((r: any) => {
+      const val = sorted[r.position - 1];
+      return val === undefined || (val >= r.min && val <= r.max);
+    });
+    items.push({
+      id: 'positionRange',
+      name: 'Rango Óptimo por Posición',
+      configured: `${filters.positionRange.ranges.length} posiciones`,
+      actual: sorted.join(', '),
+      passed: ok
+    });
+  }
+
+  // 12. Entropía (Terminaciones)
+  if (filters.entropyTerminaciones) {
+    const endingCounts: Record<number, number> = {};
+    winningNumbers.forEach(n => {
+      const ending = n % 10;
+      endingCounts[ending] = (endingCounts[ending] || 0) + 1;
+    });
+    const entropyTerm = -Object.values(endingCounts).reduce((s, countVal) => {
+      const p = countVal / maxNumbers;
+      return s + p * Math.log2(p);
+    }, 0);
+    const passed = entropyTerm >= filters.entropyTerminaciones.min && entropyTerm <= filters.entropyTerminaciones.max;
+    items.push({
+      id: 'entropyTerminaciones',
+      name: 'Entropía (Terminaciones)',
+      configured: `${filters.entropyTerminaciones.min} - ${filters.entropyTerminaciones.max}`,
+      actual: entropyTerm.toFixed(2),
+      passed
+    });
+  }
+
+  // 13. Entropía (Intervalos)
+  if (filters.entropyIntervalos) {
+    const sortedCombo = [...winningNumbers].sort((a, b) => a - b);
+    const intervalCounts: Record<number, number> = {};
+    for (let idx = 0; idx < sortedCombo.length - 1; idx++) {
+      const diff = sortedCombo[idx + 1] - sortedCombo[idx];
+      intervalCounts[diff] = (intervalCounts[diff] || 0) + 1;
+    }
+    const numIntervals = maxNumbers - 1;
+    const entropyInt = -Object.values(intervalCounts).reduce((s, countVal) => {
+      const p = countVal / numIntervals;
+      return s + p * Math.log2(p);
+    }, 0);
+    const passed = entropyInt >= filters.entropyIntervalos.min && entropyInt <= filters.entropyIntervalos.max;
+    items.push({
+      id: 'entropyIntervalos',
+      name: 'Entropía (Intervalos)',
+      configured: `${filters.entropyIntervalos.min} - ${filters.entropyIntervalos.max}`,
+      actual: entropyInt.toFixed(2),
+      passed
+    });
+  }
+
+  // 14. Exclusión Geométrica
+  const hasGeomActive = (filters.geometric &&
+    ((filters.geometric.exclude && filters.geometric.exclude.length > 0) ||
+      (filters.geometric.favor && filters.geometric.favor.length > 0)));
+  if (hasGeomActive) {
+    let comboPassed = true;
+    const coordsLookup = currentGame.numbersLayout
+      ? getCoordsLookup(currentGame.numbersLayout, currentGame.numberRange, currentGame.startAt ?? currentGame.numbersStartAt ?? 1)
+      : (currentGame.gridCols || 7);
+    if (filters.geometric.exclude && filters.geometric.exclude.length > 0) {
+      if (hasGeometricPattern(winningNumbers, filters.geometric.exclude, coordsLookup)) comboPassed = false;
+    }
+    if (filters.geometric.favor && filters.geometric.favor.includes('espaciados')) {
+      if (!isSpaced(winningNumbers, coordsLookup)) comboPassed = false;
+    }
+    items.push({
+      id: 'geometric',
+      name: 'Exclusión Geométrica',
+      configured: `${filters.geometric.exclude?.join(', ') || ''} ${filters.geometric.favor?.includes('espaciados') ? '(Espaciados)' : ''}`.trim(),
+      actual: comboPassed ? 'Válido' : 'Patrón detectado',
+      passed: comboPassed
+    });
+  }
+
+  // 15. Exclusión de Decenas
+  if (filters.excluirDecenas && Array.isArray(filters.excluirDecenas) && filters.excluirDecenas.length > 0) {
+    const hasExcludedDecade = winningNumbers.some(n => {
+      const dec = Math.floor((n - 1) / 10);
+      return filters.excluirDecenas.includes(dec);
+    });
+    const foundDecades = Array.from(new Set(winningNumbers.map(n => Math.floor((n - 1) / 10)).filter(d => filters.excluirDecenas.includes(d))));
+    items.push({
+      id: 'excluirDecenas',
+      name: 'Exclusión de Decenas',
+      configured: filters.excluirDecenas.map((d: number) => `D${d}`).join(', '),
+      actual: foundDecades.length > 0 ? `Contiene D${foundDecades.join(', D')}` : 'Sin decenas excluidas',
+      passed: !hasExcludedDecade
+    });
+  }
+
+  // 16. Exclusión de Terminaciones
+  if (filters.excluirTerminaciones && Array.isArray(filters.excluirTerminaciones) && filters.excluirTerminaciones.length > 0) {
+    const hasExcludedEnding = winningNumbers.some(n => filters.excluirTerminaciones.includes(n % 10));
+    const foundEndings = Array.from(new Set(winningNumbers.map(n => n % 10).filter(t => filters.excluirTerminaciones.includes(t))));
+    items.push({
+      id: 'excluirTerminaciones',
+      name: 'Exclusión de Terminaciones',
+      configured: filters.excluirTerminaciones.map((t: number) => `*${t}`).join(', '),
+      actual: foundEndings.length > 0 ? `Contiene *${foundEndings.join(', *')}` : 'Sin terminaciones excluidas',
+      passed: !hasExcludedEnding
+    });
+  }
+
+  // 17. Stars
+  if (maxStars > 0 && Array.isArray(winningStars) && winningStars.length > 0) {
+    if (filters.excluirStarDecades && Array.isArray(filters.excluirStarDecades) && filters.excluirStarDecades.length > 0) {
+      const hasExcludedStarDecade = winningStars.some(s => {
+        const dec = Math.floor((s - 1) / 10);
+        return filters.excluirStarDecades.includes(dec);
+      });
+      items.push({
+        id: 'excluirStarDecades',
+        name: 'Exclusión de Decenas (Estrellas)',
+        configured: filters.excluirStarDecades.map((d: number) => `D${d}`).join(', '),
+        actual: hasExcludedStarDecade ? 'Contiene decenas excluidas' : 'Sin decenas excluidas',
+        passed: !hasExcludedStarDecade
+      });
+    }
+
+    if (maxStars > 1) {
+      const starSum = winningStars.reduce((a, b) => a + b, 0);
+      if (filters.starSum) {
+        items.push({
+          id: 'starSum',
+          name: 'Suma de Estrellas',
+          configured: `${filters.starSum.min} - ${filters.starSum.max}`,
+          actual: `${starSum}`,
+          passed: starSum >= filters.starSum.min && starSum <= filters.starSum.max
+        });
+      }
+
+      if (filters.starParImpar && Array.isArray(filters.starParImpar) && filters.starParImpar.length > 0) {
+        const starEvens = winningStars.filter(n => n % 2 === 0).length;
+        const starParImparKey = `${starEvens}/${maxStars - starEvens}`;
+        items.push({
+          id: 'starParImpar',
+          name: 'Estrellas Par/Impar',
+          configured: filters.starParImpar.join(', '),
+          actual: starParImparKey,
+          passed: filters.starParImpar.includes(starParImparKey)
+        });
+      }
+
+      if (filters.starBajosAltos && Array.isArray(filters.starBajosAltos) && filters.starBajosAltos.length > 0) {
+        const starMid = Math.floor(currentGame.starRange / 2);
+        const starLows = winningStars.filter(n => n <= starMid).length;
+        const starBajosAltosKey = `${starLows}/${maxStars - starLows}`;
+        items.push({
+          id: 'starBajosAltos',
+          name: 'Estrellas Bajos/Altos',
+          configured: filters.starBajosAltos.join(', '),
+          actual: starBajosAltosKey,
+          passed: filters.starBajosAltos.includes(starBajosAltosKey)
+        });
+      }
+
+      if (filters.starSumaDigitos) {
+        let starDigitSum = 0;
+        winningStars.forEach(s => {
+          const sStr = s.toString();
+          for (let j = 0; j < sStr.length; j++) starDigitSum += parseInt(sStr[j]);
+        });
+        items.push({
+          id: 'starSumaDigitos',
+          name: 'Estrellas Suma de Dígitos',
+          configured: `${filters.starSumaDigitos.min} - ${filters.starSumaDigitos.max}`,
+          actual: `${starDigitSum}`,
+          passed: starDigitSum >= filters.starSumaDigitos.min && starDigitSum <= filters.starSumaDigitos.max
+        });
+      }
+
+      if (filters.starPrimos) {
+        const starPrimosVal = winningStars.filter(n => primes.has(n)).length;
+        items.push({
+          id: 'starPrimos',
+          name: 'Estrellas Primos',
+          configured: `${filters.starPrimos.min} - ${filters.starPrimos.max}`,
+          actual: `${starPrimosVal}`,
+          passed: starPrimosVal >= filters.starPrimos.min && starPrimosVal <= filters.starPrimos.max
+        });
+      }
+
+      if (filters.starConsecutivos && Array.isArray(filters.starConsecutivos) && filters.starConsecutivos.length > 0) {
+        const sortedStars = [...winningStars].sort((a, b) => a - b);
+        let starConsecPattern = '';
+        let sCount = 1;
+        for (let j = 1; j < sortedStars.length; j++) {
+          if (sortedStars[j] === sortedStars[j - 1] + 1) {
+            sCount++;
+          } else {
+            starConsecPattern += sCount;
+            sCount = 1;
+          }
+        }
+        starConsecPattern += sCount;
+        const starConsecPatternSorted = starConsecPattern.split('').sort((a, b) => Number(b) - Number(a)).join('/');
+        items.push({
+          id: 'starConsecutivos',
+          name: 'Estrellas Consecutivas',
+          configured: filters.starConsecutivos.join(', '),
+          actual: starConsecPatternSorted,
+          passed: filters.starConsecutivos.includes(starConsecPatternSorted)
+        });
+      }
+
+      if (filters.starDistancia) {
+        const sortedStars = [...winningStars].sort((a, b) => a - b);
+        let minStarDist = 99;
+        for (let j = 0; j < sortedStars.length - 1; j++) {
+          const d = sortedStars[j + 1] - sortedStars[j];
+          if (d < minStarDist) minStarDist = d;
+        }
+        items.push({
+          id: 'starDistancia',
+          name: 'Estrellas Distancia',
+          configured: `${filters.starDistancia.min} - ${filters.starDistancia.max}`,
+          actual: `${minStarDist}`,
+          passed: minStarDist >= filters.starDistancia.min && minStarDist <= filters.starDistancia.max
+        });
+      }
+
+      if (currentGame.id !== 'nacional' && filters.starPositionRange?.enabled && Array.isArray(filters.starPositionRange.ranges)) {
+        const sortedStars = [...winningStars].sort((a, b) => a - b);
+        const ok = filters.starPositionRange.ranges.every((r: any) => {
+          const val = sortedStars[r.position - 1];
+          return val === undefined || (val >= r.min && val <= r.max);
+        });
+        items.push({
+          id: 'starPositionRange',
+          name: 'Rango Óptimo por Posición (Estrellas)',
+          configured: `${filters.starPositionRange.ranges.length} posiciones`,
+          actual: sortedStars.join(', '),
+          passed: ok
+        });
+      }
+    }
+  }
+
+  return items;
 }

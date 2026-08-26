@@ -43,7 +43,7 @@ import {
   getNumberAtPosition,
   generateRandomCombination
 } from './src/utils/geometry';
-import { runFilterAudit } from './src/utils/filterAudit';
+import { runFilterAudit, compareFiltersAgainstCombination, FilterComparisonItem } from './src/utils/filterAudit';
 import { syncNativeNotifications } from './src/services/notificationScheduler';
 import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './src/config/telegramConfig';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
@@ -6470,6 +6470,13 @@ class DataLotto49Advanced {
       this.toggleModal('filterStatsModal', false);
     });
 
+    document.getElementById('closeFilterComparisonModalBtn')?.addEventListener('click', () => {
+      this.toggleModal('filterComparisonModal', false);
+    });
+    document.getElementById('closeFilterComparisonBottomBtn')?.addEventListener('click', () => {
+      this.toggleModal('filterComparisonModal', false);
+    });
+
     // Nash & Popularity Map Events
     document.getElementById('nashStrictModeSwitch')?.addEventListener('change', (e) => {
       const isChecked = (e.target as HTMLInputElement).checked;
@@ -9110,7 +9117,9 @@ class DataLotto49Advanced {
         : this.renderStandardTicketCard(ticket);
 
       actionsHTML = ticket.validation
-        ? `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`
+        ? ((ticket.gameId !== 'nacional' && ticket.filtersSnapshot && ticket.validation?.winningNumbers)
+            ? `<button class="btn btn-secondary btn-sm compare-filters-btn" data-date="${ticket.date}" style="font-size:0.75rem; padding: 4px 8px;">🔍 ${t('tickets.auditarFiltros') || 'Auditar Filtros'}</button>`
+            : `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`)
         : `<button class="validate">${t('tickets.validar')}</button>`;
       
       item.innerHTML = `
@@ -9135,6 +9144,10 @@ class DataLotto49Advanced {
       const validateBtn = item.querySelector('.validate:not(.verified)');
       if(validateBtn) {
           validateBtn.addEventListener('click', () => this.startValidation(ticket.date));
+      }
+      const compareBtn = item.querySelector('.compare-filters-btn');
+      if (compareBtn) {
+          compareBtn.addEventListener('click', () => this.openFilterComparisonModal(ticket));
       }
       item.querySelector('.toggle-btn')?.addEventListener('click', (e) => {
           const comboDiv = item.querySelector('.saved-combinations') as HTMLElement;
@@ -9442,6 +9455,51 @@ class DataLotto49Advanced {
     } else {
         this.showToast(t('toast.errorBoletoNoEncontrado'), 'error');
     }
+  }
+
+  openFilterComparisonModal(ticket: Ticket) {
+    if (!ticket.validation || !ticket.validation.winningNumbers) {
+      this.showToast(t('audit.sinSnapshot'), 'warning');
+      return;
+    }
+    if (!ticket.filtersSnapshot) {
+      this.showToast(t('audit.sinSnapshot'), 'warning');
+      return;
+    }
+
+    const gameId = ticket.gameId || 'bonoloto';
+    const game = GAMES[gameId] || this.currentGame;
+    const items = compareFiltersAgainstCombination(
+      ticket.validation.winningNumbers,
+      ticket.validation.stars,
+      ticket.filtersSnapshot,
+      game,
+      this.primes
+    );
+
+    const tbody = document.getElementById('filterComparisonTableBody');
+    const subtitleEl = document.getElementById('filterComparisonSubtitle');
+    if (subtitleEl) {
+      const dateStr = ticket.drawDate ? new Date(ticket.drawDate + 'T00:00:00').toLocaleDateString() : new Date(ticket.date).toLocaleDateString();
+      subtitleEl.textContent = `${t('audit.subtituloModal')} - ${game.name} (${dateStr})`;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = items.map(item => `
+        <tr style="border-bottom: 1px solid var(--border); font-size: 0.85rem;">
+          <td style="padding: 8px 10px; font-weight: 600;">${item.name}</td>
+          <td style="padding: 8px 10px; color: var(--text-muted);">${item.configured}</td>
+          <td style="padding: 8px 10px; font-weight: bold;">${item.actual}</td>
+          <td style="padding: 8px 10px; text-align: center;">
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background: ${item.passed ? '#dcfce7' : '#fee2e2'}; color: ${item.passed ? '#166534' : '#991b1b'};">
+              ${item.passed ? '✅ OK' : '❌ Falló'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    this.toggleModal('filterComparisonModal', true);
   }
   shareTicket() {
       if (!this.currentTicket) return;
