@@ -3067,6 +3067,26 @@ textarea.modal-input {
     text-align: center !important;
     box-sizing: border-box !important;
   }
+
+  /* Modales a pantalla completa en móvil (los 9 modales principales) */
+  .modal.modal-fullscreen-mobile {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+
+  .modal.modal-fullscreen-mobile .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 14px 14px 10px 14px !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* New Responsive Mini Draw Card for Big Data Intelligence */
