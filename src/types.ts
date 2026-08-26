@@ -31,6 +31,7 @@ export interface Ticket {
   seenValidation?: boolean; // Whether user has reviewed/seen the validated ticket
   favoriteNumbers?: number[];
   favoriteSecondaryNumbers?: number[];
+  filtersSnapshot?: any;
 }
 
 export interface PositionRangeConfig {

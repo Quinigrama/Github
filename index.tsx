@@ -8369,6 +8369,8 @@ class DataLotto49Advanced {
     if (activeFavorites.length > 0) this.currentTicket.favoriteNumbers = activeFavorites;
     if (activeSecondaryFavorites.length > 0) this.currentTicket.favoriteSecondaryNumbers = activeSecondaryFavorites;
 
+    this.currentTicket.filtersSnapshot = JSON.parse(JSON.stringify(this.filters));
+
     const savedTicketCopy = { ...this.currentTicket };
     this.savedTickets.unshift(this.currentTicket);
     this.saveState();
