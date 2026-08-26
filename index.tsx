@@ -6473,9 +6473,6 @@ class DataLotto49Advanced {
     document.getElementById('closeFilterComparisonModalBtn')?.addEventListener('click', () => {
       this.toggleModal('filterComparisonModal', false);
     });
-    document.getElementById('closeFilterComparisonBottomBtn')?.addEventListener('click', () => {
-      this.toggleModal('filterComparisonModal', false);
-    });
 
     // Nash & Popularity Map Events
     document.getElementById('nashStrictModeSwitch')?.addEventListener('change', (e) => {
@@ -9476,6 +9473,22 @@ class DataLotto49Advanced {
       game,
       this.primes
     );
+
+    const passedCount = items.filter(i => i.passed).length;
+    const failedCount = items.filter(i => !i.passed).length;
+    const summaryEl = document.getElementById('filterComparisonSummary');
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 1.3rem; font-weight: bold; color: #166534;">${passedCount}</div>
+          <div style="font-size: 0.75rem; color: #166534; font-weight: 500;">${t('audit.filtrosAcertados') || 'Filtros Acertados'}</div>
+        </div>
+        <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 1.3rem; font-weight: bold; color: #991b1b;">${failedCount}</div>
+          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 500;">${t('audit.filtrosFallados') || 'Filtros Fallados'}</div>
+        </div>
+      `;
+    }
 
     const tbody = document.getElementById('filterComparisonTableBody');
     const subtitleEl = document.getElementById('filterComparisonSubtitle');

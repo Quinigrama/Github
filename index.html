@@ -1688,8 +1688,8 @@
     </div>
   </div>
 
-  <div class="modal" id="filterComparisonModal" style="display: none;">
-    <div class="modal-content" style="max-width: 650px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+  <div class="modal modal-fullscreen-mobile" id="filterComparisonModal" style="display: none;">
+    <div class="modal-content" style="max-width: 650px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">
         <div>
           <h3 style="margin: 0; font-size: 1.15rem; color: var(--primary);" data-i18n="audit.tituloModal">🔍 Auditoría de Filtros vs. Sorteo</h3>
@@ -1698,6 +1698,7 @@
         <button class="close-btn" id="closeFilterComparisonModalBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; padding: 15px 0; flex: 1;">
+        <div id="filterComparisonSummary" style="display: flex; gap: 12px; margin-bottom: 15px;"></div>
         <div style="overflow-x: auto;">
           <table style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
@@ -1712,9 +1713,6 @@
             </tbody>
           </table>
         </div>
-      </div>
-      <div class="modal-actions" style="border-top: 1px solid #e5e7eb; padding-top: 12px; margin-top: 0;">
-        <button class="modal-btn cancel" id="closeFilterComparisonBottomBtn" data-i18n="tickets.cerrar">Cerrar</button>
       </div>
     </div>
   </div>

@@ -292,6 +292,8 @@
   "audit.sorteoReal": "Actual Draw",
   "audit.resultado": "Result",
   "audit.sinSnapshot": "This ticket does not have a saved filters snapshot.",
+  "audit.filtrosAcertados": "Passed Filters",
+  "audit.filtrosFallados": "Failed Filters",
   "tickets.boletoValidado": "Ticket Validated",
   "tickets.sinAciertosPremiados": "No hits in prize categories",
   "tickets.verificadoCheck": "✓ Verified",

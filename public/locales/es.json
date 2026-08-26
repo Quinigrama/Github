@@ -292,6 +292,8 @@
   "audit.sorteoReal": "Sorteo Real",
   "audit.resultado": "Resultado",
   "audit.sinSnapshot": "Este boleto no contiene una captura de filtros guardada.",
+  "audit.filtrosAcertados": "Filtros Acertados",
+  "audit.filtrosFallados": "Filtros Fallados",
   "tickets.boletoValidado": "Boleto Validado",
   "tickets.sinAciertosPremiados": "Sin aciertos en categorías premiadas",
   "tickets.verificadoCheck": "✓ Verificado",
