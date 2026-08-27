@@ -302,6 +302,7 @@
   "audit.fallos": "Fallos",
   "audit.tasaAcierto": "% Éxito",
   "audit.sinBoletosValidadosSnapshot": "No hay boletos validados con captura de filtros para auditar.",
+  "audit.muestraPequena": "muestra pequeña, dato poco fiable",
   "audit.boletosAuditados": "Boletos Auditados",
   "audit.totalAciertos": "Total Aciertos",
   "audit.totalFallos": "Total Fallos",

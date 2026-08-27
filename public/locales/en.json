@@ -302,6 +302,7 @@
   "audit.fallos": "Failed",
   "audit.tasaAcierto": "% Success",
   "audit.sinBoletosValidadosSnapshot": "No validated tickets with filter snapshot found to audit.",
+  "audit.muestraPequena": "small sample, unreliable",
   "audit.boletosAuditados": "Audited Tickets",
   "audit.totalAciertos": "Total Passed",
   "audit.totalFallos": "Total Failed",
