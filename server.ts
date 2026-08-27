@@ -138,9 +138,9 @@ async function startServer() {
 
   app.post("/api/telemetry", async (req, res) => {
     try {
-      const { userId, event, gameId, payload, timestamp } = req.body;
+      const { event, gameId, payload, timestamp } = req.body;
 
-      console.log(`[Telemetry] User: ${userId}, Event: ${event}, Game: ${gameId}`, payload);
+      console.log(`[Telemetry] Event: ${event}, Game: ${gameId}`, payload);
 
       const getEnv = (name: string) => {
         const key = Object.keys(process.env).find(k => k.toUpperCase() === name.toUpperCase());
@@ -169,7 +169,6 @@ async function startServer() {
             betType: payload.betType || "simple",
             numbersCount: payload.numbersCount ?? 6,
             starsCount: payload.starsCount ?? 0,
-            userId,
             timestamp: timestamp || new Date().toISOString()
           };
 
@@ -191,7 +190,6 @@ async function startServer() {
             allHits: payload.allHits || [],
             starHits: payload.stars || [],
             combinationsCount: payload.combinationsCount || (payload.allHits ? payload.allHits.length : 1),
-            userId,
             timestamp: timestamp || new Date().toISOString()
           };
           if (payload.favoriteNumbers && Array.isArray(payload.favoriteNumbers) && payload.favoriteNumbers.length > 0) {
@@ -211,7 +209,6 @@ async function startServer() {
             event,
             gameId: gameId || payload.gameId,
             ...payload,
-            userId,
             timestamp: timestamp || new Date().toISOString()
           };
         }

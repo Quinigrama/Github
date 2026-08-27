@@ -572,7 +572,6 @@ class DataLotto49Advanced {
   async sendTelemetry(eventType: string, payload: any) {
     try {
       const body = JSON.stringify({
-        userId: this.anonymousUserId,
         event: eventType,
         gameId: this.currentGame.id,
         payload: payload,
@@ -646,8 +645,7 @@ class DataLotto49Advanced {
       `🎮 <b>Juego:</b> ${gameTitle}\n` +
       `🎫 <b>Apuesta:</b> ${betTypeDesc}\n` +
       `🎯 <b>Resultado:</b> ${resultLine}\n` +
-      `📅 <b>Fecha Sorteo:</b> ${drawDate}\n` +
-      `👤 <b>Usuario:</b> <code>${this.anonymousUserId}</code>\n\n` +
+      `📅 <b>Fecha Sorteo:</b> ${drawDate}\n\n` +
       `✨ ¡Enhorabuena al afortunado! 🥳`;
 
     try {
