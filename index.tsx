@@ -7870,7 +7870,7 @@ class DataLotto49Advanced {
 
       actionsHTML = ticket.validation
         ? ((ticket.gameId !== 'nacional' && ticket.filtersSnapshot && ticket.validation?.winningNumbers)
-            ? `<button class="btn btn-secondary btn-sm compare-filters-btn" data-date="${ticket.date}" style="font-size:0.75rem; padding: 4px 8px;">🔍 ${t('tickets.auditarFiltros') || 'Auditar Filtros'}</button>`
+            ? `<button class="validate audit-btn compare-filters-btn" data-date="${ticket.date}">🔍 ${t('tickets.auditarFiltros') || 'Auditar Filtros'}</button>`
             : `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`)
         : `<button class="validate">${t('tickets.validar')}</button>`;
       
