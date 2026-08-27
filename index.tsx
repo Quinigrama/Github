@@ -6,6 +6,7 @@ import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
 import { parseCSVData, parseFlexibleDate } from "./src/utils/csvParser";
+import { parseJackpotsCsvDirectly } from "./src/services/jackpotsFetcher";
 import {
   buildTerminacionesStatsHtml,
   buildParImparStatsHtml,
@@ -8367,119 +8368,6 @@ class DataLotto49Advanced {
       }
   }
 
-  async parseJackpotsCsvDirectly(): Promise<any[]> {
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcKUCZOa3NM7dBYXOzWO94y51x6RFT6jUCrTYpoLBlKAztGTbbxnygcC8pg47RScEMuVquZOX8iLCt/pub?output=csv";
-    const res = await fetch(csvUrl, { method: "GET", headers: { "Accept": "text/csv; charset=utf-8" } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
-    if (lines.length <= 1) throw new Error("CSV vac√≠o");
-
-    const parseCsvRow = (rowStr: string): string[] => {
-      const result: string[] = [];
-      let cur = '';
-      let inQuotes = false;
-      for (let i = 0; i < rowStr.length; i++) {
-        const char = rowStr[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(cur.trim());
-          cur = '';
-        } else {
-          cur += char;
-        }
-      }
-      result.push(cur.trim());
-      return result;
-    };
-
-    const parseBoteNumber = (boteStr: string): number => {
-      if (!boteStr) return 0;
-      const lower = boteStr.toLowerCase();
-      if (lower.includes("no disponible") || lower.includes("consultar")) return 0;
-
-      let multiplier = 1;
-      if (lower.includes("billion") || lower.includes("billon") || lower.includes("bill√≥n")) {
-        multiplier = 1000000000;
-      } else if (lower.includes("million") || lower.includes("millon") || lower.includes("mill√≥n")) {
-        multiplier = 1000000;
-      }
-
-      const cleanStr = lower.replace(/[^0-9,.]/g, "");
-      if (!cleanStr) return 0;
-
-      if (multiplier > 1) {
-        const cleanNum = cleanStr.replace(',', '.');
-        return (parseFloat(cleanNum) || 0) * multiplier;
-      } else {
-        const parts = cleanStr.split(',');
-        const integerPart = parts[0].replace(/\./g, "");
-        return parseInt(integerPart, 10) || 0;
-      }
-    };
-
-    const jackpotsMap: { [id: string]: { id: string; juego: string; bote: number; fecha: string } } = {};
-    for (let i = 1; i < lines.length; i++) {
-      const cols = parseCsvRow(lines[i]);
-      if (cols.length < 3) continue;
-      const juegoName = cols[0];
-      const fecha = cols[1];
-      const boteStr = cols[2];
-      const lowerName = juegoName.toLowerCase();
-
-      let id = "";
-      if (lowerName.includes("powerball") || lowerName.includes("power")) id = "powerball";
-      else if (lowerName.includes("mega") || lowerName.includes("millions")) id = "megamillions";
-      else if (lowerName.includes("euromillones") || (lowerName.includes("euro") && lowerName.includes("mill"))) id = "euromillones";
-      else if (lowerName.includes("primitiva") && !lowerName.includes("gordo")) id = "primitiva";
-      else if (lowerName.includes("gordo")) id = "gordo";
-      else if (lowerName.includes("eurodreams") || lowerName.includes("dreams")) id = "eurodreams";
-      else if (lowerName.includes("bonoloto")) id = "bonoloto";
-      else if (lowerName.includes("nacional")) id = "nacional";
-
-      if (id) {
-        const bote = parseBoteNumber(boteStr);
-        jackpotsMap[id] = { id, juego: juegoName, bote, fecha };
-      }
-    }
-
-    const supportedGameIds = ["powerball", "megamillions", "euromillones", "primitiva", "gordo", "eurodreams", "bonoloto", "nacional"];
-    const gameNames: { [id: string]: string } = {
-      powerball: "Powerball (EE. UU.)",
-      megamillions: "Mega Millions (EE. UU.)",
-      euromillones: "EuroMillones",
-      primitiva: "La Primitiva",
-      gordo: "El Gordo de la Primitiva",
-      eurodreams: "EuroDreams",
-      bonoloto: "BonoLoto",
-      nacional: "Loter√≠a Nacional"
-    };
-
-    const fallbackBotes: { [id: string]: number } = {
-      powerball: 95000000,
-      megamillions: 110000000,
-      euromillones: 89000000,
-      primitiva: 47000000,
-      gordo: 11900000,
-      eurodreams: 7200000,
-      bonoloto: 2800000,
-      nacional: 30000
-    };
-
-    return supportedGameIds.map(id => {
-      if (jackpotsMap[id] && jackpotsMap[id].bote > 0) {
-        return jackpotsMap[id];
-      }
-      return {
-        id,
-        juego: gameNames[id] || id,
-        bote: jackpotsMap[id]?.bote || fallbackBotes[id] || 0,
-        fecha: jackpotsMap[id]?.fecha || t('jackpots.proximoSorteoFallback')
-      };
-    });
-  }
-
   async fetchAndRenderJackpots(force = false) {
     const tableBody = document.getElementById('jackpotsTableBody');
     if (!tableBody) return;
@@ -8509,7 +8397,7 @@ class DataLotto49Advanced {
         }
       } catch (apiErr) {
         console.warn('API jackpots endpoint unreachable, attempting direct Google Sheets fetch:', apiErr);
-        jackpots = await this.parseJackpotsCsvDirectly();
+        jackpots = await parseJackpotsCsvDirectly();
         (this as any).lastJackpotsData = jackpots;
       }
       
@@ -11590,7 +11478,68 @@ class DataLotto49Advanced {
 
       const expVal = balance / totalDraws;
       if (elExpVal) {
-          elExpVal.textContent = t('bacxú§V€n€F}˜WL7$kâñÉÙ°í•¬%‡ Fb¥Ç qW‚∆‘Æ∞;∫A·èı±_ñ!)…uIêz†vgœÃûô9√'íéBmÜ*2·cÔç˝h,I„’`º4ñMx<Y»ŸË/L†”Ü¸	ﬁ©Mºtµíy≠fR¯/ÉÙ“†uÎG&›¬∆—<ëadÿ¥°Ç8AÎ◊ÎnE“π á/ñÍÅ¥Å∑ÇLèñ/™˛
-˚RLT$Xî¸&í Ûı9#ˆËyÂ∞¯ﬁé¿¢fxü‡úÅÿ¶N*zíto˘¸ç’ÔÂCπœe‡õg7}gœÜoÚΩFO ì7®Qõ3^Ä7aã÷⁄“ªjnz.UòOô{'>∞+¸b>H2VoxGzãÑƒ∞◊Fì‘˙≥´=ÈªU‰Æ¨ƒ'a¶zì√ f®¥ñˆˆ·››ûT∫¨n≈⁄û≠ﬁ˜æ»àØ•…*È¸ﬁjÎ⁄å5π†BKò¯>÷†@ª≥E€≥ßò„∫d¸Z'ﬂjÚÒS„s _øB£u–U˘PÔ‡!+ilıÚTΩpYµÀ≤])Œ
-	a"ıÄbh∑πÕ∂KÙ≈èBM ÔŸˆqﬁ¥M(:r`q¥†œYÆÁ˚MPÑâäZêeøŒØ›Ñàyó∂≈BÈAŒ£YÎ∏s≤ÿ]sNÈÀHIK∆yAzq∆Ó;è?PŒYüØSªû∞óHàtÆ}Ã:¶í2öf8D;ØÁ˚«ùÃ_ê›µ\l≈{√gäÆë‰¿XÖy¸l˚s0Ö ªˇroM{*ª∑8ÄƒÎvìÂÏ©¸≠Uﬂÿ.F±ÔJ∞'ìW87‘ÁÔtÕà#‚‘¯~ng@Ü´Ê∆‚‘,µÁçFPí≤˝ç§‹≠ƒ\cq¶0Xáá»ãK¥‰˛V˚^º`œ÷˘˛≠ó†ˇ˚N°·Ìd≥‹Nπﬁˆ&…ÆjdQú'û5”zºZXŒ”ù˘&:é¨—Œ|4Áuπ¿âﬂ;ºØ\&íán.ä˘*(MÛ¢˘Ã,ØÈØálwY∫EÌ6≠|2Î”Ì√áîkf◊ÿZœ äï]l¶˘Ãe/·ä£Óä¢ÓLœ¿xÀ/î¢.àgg&·nK@q}¢Ê/”gl	8e™,L4≤Üôò$÷â\íΩ»G¨_“ÀÊ¿^+ï	)F§&“+D\À)‹ ·ù!2Ø˛‡Ÿõπ>GUR…5 +pw¬/w Ò`ñ÷˜nﬁø[NÈ;ÉB
-Nº_Íﬂ¯E‚äkø~˚O.Ö ‘ á#ögﬂ-,‹⁄@| Üæb)FC#∆¸x¥4[§≠o   ˇˇ ⁄Ô˛≥
+          elExpVal.textContent = t('backtest.economico.valorPorSorteo', { value: `${expVal >= 0 ? '+' : ''}${expVal.toFixed(2)}` });
+          elExpVal.style.color = expVal >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      if (elExpValAdvice) {
+          let adviceText = '';
+          const randomPlayExp = -ticketPrice * 0.45;
+          if (expVal > randomPlayExp) {
+              adviceText = t('backtest.economico.adviceGanador', { expVal: expVal.toFixed(2), randomExp: randomPlayExp.toFixed(2) });
+          } else {
+              adviceText = t('backtest.economico.adviceBajoRetorno');
+          }
+          elExpValAdvice.textContent = adviceText;
+      }
+
+      if (elHitsBreakdown) {
+          elHitsBreakdown.innerHTML = '';
+          const sortedBreakdown = Object.entries(breakdownCounts)
+              .sort((a, b) => {
+                  const hitsA = parseInt(a[0]) || 0;
+                  const hitsB = parseInt(b[0]) || 0;
+                  return hitsB - hitsA;
+              });
+
+          if (sortedBreakdown.length === 0) {
+              elHitsBreakdown.innerHTML = `<div style="color: var(--gray); font-style: italic; text-align: center; padding: 10px;">${t('backtest.economico.sinAciertos')}</div>`;
+          } else {
+              let breakdownHTML = `<table class="validation-summary-table">
+                  <tr>
+                      <th>${t('backtest.economico.colCategoria')}</th>
+                      <th>${t('backtest.economico.colSorteos')}</th>
+                      <th>${t('backtest.economico.colProbabilidad')}</th>
+                  </tr>`;
+              
+              sortedBreakdown.forEach(([label, count]) => {
+                  const prob = ((count / totalDraws) * 100).toFixed(2);
+                  const isHighlight = count > 0 && !label.startsWith('0 ') && !label.startsWith('1 ') && !label.startsWith('2 n¬∫ + 0');
+                  breakdownHTML += `
+                      <tr class="${isHighlight ? 'row-highlight' : ''}">
+                          <td><strong>${label}</strong></td>
+                          <td>${t('backtest.economico.vecesCount', { count })}</td>
+                          <td>${prob}%</td>
+                      </tr>`;
+              });
+              breakdownHTML += `</table>`;
+              elHitsBreakdown.innerHTML = breakdownHTML;
+          }
+      }
+
+      this.showToast(t('toast.backtestEconomicoExito'), 'success');
+  }
+
+}
+
+// Global instance of the app
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  new DataLotto49Advanced();
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    new DataLotto49Advanced();
+  });
+}
+
+// FIX: Add an empty export to treat this file as a module.
+export {};
