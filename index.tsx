@@ -5,6 +5,7 @@ import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
+import { parseCSVData, parseFlexibleDate } from "./src/utils/csvParser";
 import {
   buildTerminacionesStatsHtml,
   buildParImparStatsHtml,
@@ -2577,7 +2578,7 @@ class DataLotto49Advanced {
       loadedFromCache = true;
     } else if (cachedContent) {
       try {
-        const parsedData = this.parseCSVData(cachedContent);
+        const parsedData = parseCSVData(cachedContent, this.currentGame);
         if (parsedData && parsedData.length > 0) {
           this.allHistoricalData = parsedData;
           this.historicalData = parsedData;
@@ -2593,7 +2594,7 @@ class DataLotto49Advanced {
 
     if (!loadedFromCache) {
       const syntheticCSV = generateSyntheticCSV(gameKey);
-      const parsedData = this.parseCSVData(syntheticCSV);
+      const parsedData = parseCSVData(syntheticCSV, this.currentGame);
       this.allHistoricalData = parsedData;
       this.historicalData = parsedData;
       this.gameHistoricalData[gameKey] = parsedData;
@@ -2632,7 +2633,7 @@ class DataLotto49Advanced {
         localStorage.setItem(`datalotto_csv_cache_${gameKey}`, freshContent);
         localStorage.setItem(`datalotto_csv_url_${gameKey}`, url);
         
-        const freshData = this.parseCSVData(freshContent);
+        const freshData = parseCSVData(freshContent, this.currentGame);
         this.gameHistoricalData[gameKey] = freshData;
         this.gameDataTypes[gameKey] = gameKey;
 
@@ -2708,7 +2709,7 @@ class DataLotto49Advanced {
       reader.onload = (e) => {
         try {
           const content = e.target!.result as string;
-          resolve(this.parseCSVData(content));
+          resolve(parseCSVData(content, this.currentGame));
         } catch (error) {
           reject(error);
         }
@@ -2717,456 +2718,6 @@ class DataLotto49Advanced {
       reader.readAsText(file);
     });
   }
-  parseFlexibleDate(dateStr: string): Date | null {
-    if (!dateStr) return null;
-    const clean = dateStr.trim().replace(/^["']|["']$/g, '');
-    
-    // Split by /, - or .
-    const parts = clean.split(/[\/\-\.]/);
-    if (parts.length === 3) {
-      const p0 = parseInt(parts[0], 10);
-      const p1 = parseInt(parts[1], 10);
-      const p2 = parseInt(parts[2], 10);
-
-      if (!isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
-        if (p0 > 1000) {
-          // Format YYYY-MM-DD
-          return new Date(p0, p1 - 1, p2);
-        } else if (p2 > 1000) {
-          // Format DD/MM/YYYY (Spanish standard date)
-          return new Date(p2, p1 - 1, p0);
-        } else if (p2 >= 0 && p2 <= 99) {
-          // Format DD/MM/YY
-          const fullYear = p2 < 50 ? 2000 + p2 : 1900 + p2;
-          return new Date(fullYear, p1 - 1, p0);
-        }
-      }
-    }
-
-    const d = new Date(clean);
-    return isNaN(d.getTime()) ? null : d;
-  }
-
-  parseCSVData(content: string): Draw[] {
-    const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalizedContent.trim().split('\n').filter(line => line.trim());
-    if (lines.length === 0) {
-        return [];
-    }
-
-    const firstLine = lines.shift()!;
-    const header = firstLine.toLowerCase().split(/[,;\t]+/).map(h => h.trim().replace(/^["']|["']$/g, '').trim());
-
-    const isHeader = header.some(h => isNaN(parseInt(h)) && isNaN(this.parseFlexibleDate(h)?.getTime() || NaN));
-    
-    if (!isHeader) {
-        lines.unshift(firstLine); 
-    }
-    
-    if (this.currentGame.id === 'nacional') {
-        const parsedDraws: Draw[] = [];
-        const originalLines = [...lines];
-
-        // Auto-detect if CSV has prize categories
-        let hasPrizeCategories = false;
-        for (let i = 0; i < Math.min(1000, originalLines.length); i++) {
-            const lineClean = originalLines[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-            if (lineClean.includes('1er premio') || lineClean.includes('1o premio') || lineClean.includes('primer premio')) {
-                hasPrizeCategories = true;
-                break;
-            }
-        }
-
-        // 1. Let's parse all lines into columns
-        const rowsParts = originalLines.map(line => line.split(/[,;\t]/));
-        
-        // Find the maximum number of columns across rows
-        let maxCols = 0;
-        rowsParts.forEach(parts => {
-            if (parts.length > maxCols) maxCols = parts.length;
-        });
-
-        // 2. Score each column index to find the winning number column
-        let bestColIdx = -1;
-        let highestScore = -1;
-
-        if (maxCols > 0) {
-            const colScores = Array(maxCols).fill(0);
-            
-            // Header bonus
-            if (isHeader && header) {
-                header.forEach((h, col) => {
-                    const hClean = h.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                    if (hClean.includes('primer') && hClean.includes('premio')) {
-                        colScores[col] += 1000;
-                    } else if (hClean.includes('1') && hClean.includes('premio')) {
-                        colScores[col] += 1000;
-                    } else if (hClean.includes('numero') || hClean.includes('decimo')) {
-                        colScores[col] += 500;
-                    } else if (hClean.includes('combinac') || hClean.includes('resultado')) {
-                        colScores[col] += 400;
-                    } else if (hClean.includes('sorteo') || hClean.includes('fecha') || hClean.includes('date') || hClean.includes('segundo') || hClean.includes('2')) {
-                        colScores[col] -= 500; // negative bonus for columns that are clearly not the 1st prize
-                    }
-                });
-            }
-
-            // Analyze data rows (sample up to 200 rows matching 1st prize if categories are present)
-            const sampleRows = rowsParts.filter(parts => {
-                if (!hasPrizeCategories) return true;
-                const lineClean = parts.join(' ').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                return lineClean.includes('1er premio') || lineClean.includes('1o premio') || lineClean.includes('primer premio');
-            }).slice(0, 200);
-
-            for (let col = 0; col < maxCols; col++) {
-                let validCount = 0;
-                let sumOfVals = 0;
-                const uniqueVals = new Set<number>();
-                let hasLeadingZeroStr = false;
-
-                sampleRows.forEach(parts => {
-                    if (col >= parts.length) return;
-                    const cell = parts[col].trim();
-                    if (!cell) return;
-
-                    // Remove dot separators if formatted like 35.072 or with spaces/quotes
-                    const cleanCell = cell.replace(/[\.\s,'"]+/g, '');
-                    if (/^\d+$/.test(cleanCell)) {
-                        const num = parseInt(cleanCell, 10);
-                        if (num >= 0 && num <= 99999) {
-                            validCount++;
-                            sumOfVals += num;
-                            uniqueVals.add(num);
-                            if (cell.length === 5 && cell.startsWith('0')) {
-                                hasLeadingZeroStr = true;
-                            }
-                        }
-                    }
-                });
-
-                if (validCount > 0) {
-                    const avg = sumOfVals / validCount;
-                    const uniquenessRatio = uniqueVals.size / validCount;
-
-                    let colScore = colScores[col];
-                    if (avg >= 500 && avg <= 99500) {
-                        colScore += 100;
-                    }
-                    if (uniquenessRatio > 0.4) {
-                        colScore += 150;
-                    }
-                    if (hasLeadingZeroStr) {
-                        colScore += 300;
-                    }
-                    colScores[col] = colScore;
-                } else {
-                    colScores[col] = -9999;
-                }
-            }
-
-            for (let col = 0; col < maxCols; col++) {
-                if (colScores[col] > highestScore) {
-                    highestScore = colScores[col];
-                    bestColIdx = col;
-                }
-            }
-        }
-
-        const seenDates = new Set<string>();
-
-        originalLines.forEach((line, i) => {
-            const parts = line.split(/[,;\t]/);
-            if (hasPrizeCategories) {
-                const lineClean = line.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                const matchesFirstPremio = lineClean.includes('1er premio') || lineClean.includes('1o premio') || lineClean.includes('primer premio');
-                if (!matchesFirstPremio) {
-                    return;
-                }
-            }
-
-            let date: Date | null = null;
-            let digits: number[] | null = null;
-
-            for (let j = 0; j < parts.length; j++) {
-                const p = parts[j].trim();
-                if (p.includes('-') || p.includes('/')) {
-                    const d = this.parseFlexibleDate(p);
-                    if (d && !isNaN(d.getTime())) {
-                        date = d;
-                        break;
-                    }
-                }
-            }
-
-            if (bestColIdx > -1 && bestColIdx < parts.length) {
-                const val = parts[bestColIdx].trim();
-                const cleanVal = val.replace(/[\.\s,'"]+/g, '');
-                const num = parseInt(cleanVal, 10);
-                if (num >= 0 && num <= 99999) {
-                    const paddedStr = String(num).padStart(5, '0');
-                    digits = paddedStr.split('').map(Number);
-                }
-            }
-
-            if (!digits) {
-                for (let j = 0; j < parts.length; j++) {
-                    const val = parts[j].trim();
-                    const cleanVal = val.replace(/[\.\s,'"]+/g, '');
-                    if (/^\d+$/.test(cleanVal)) {
-                        const num = parseInt(cleanVal, 10);
-                        if (num >= 0 && num <= 99999 && j !== bestColIdx) {
-                            if (num > 250 && num !== new Date().getFullYear()) {
-                                const paddedStr = String(num).padStart(5, '0');
-                                digits = paddedStr.split('').map(Number);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (digits && digits.length === 5) {
-                let dType: 'navidad' | 'nino' | 'normal' = 'normal';
-                
-                for (let j = 0; j < parts.length; j++) {
-                    const p = parts[j].trim().toLowerCase();
-                    if (p.includes('navidad') || p.includes('navide')) {
-                        dType = 'navidad';
-                        break;
-                    } else if (p.includes('niÃ±o') || p.includes('nino')) {
-                        dType = 'nino';
-                        break;
-                    }
-                }
-                
-                const finalDate = date || new Date(Date.now() - (originalLines.length - i) * 7 * 24 * 60 * 60 * 1000);
-                if (finalDate) {
-                    const month = finalDate.getMonth();
-                    const day = finalDate.getDate();
-                    if (month === 11 && day === 22) {
-                        dType = 'navidad';
-                    } else if (month === 0 && day === 6) {
-                        dType = 'nino';
-                    }
-                }
-
-                const dateStr = finalDate.toISOString().split('T')[0];
-                if (seenDates.has(dateStr)) {
-                    return;
-                }
-                seenDates.add(dateStr);
-
-                const encodedNumbers = digits.map((digit, col) => (col + 1) * 10 + digit);
-                parsedDraws.push({
-                    id: parsedDraws.length + 1,
-                    date: finalDate,
-                    numbers: encodedNumbers,
-                    sum: encodedNumbers.reduce((a, b) => a + b, 0),
-                    drawType: dType
-                });
-            }
-        });
-
-        if (parsedDraws.length > 0) {
-            parsedDraws.sort((a, b) => {
-                const timeA = a.date instanceof Date ? a.date.getTime() : new Date(a.date).getTime();
-                const timeB = b.date instanceof Date ? b.date.getTime() : new Date(b.date).getTime();
-                return timeA - timeB;
-            });
-            parsedDraws.forEach((d, idx) => { d.id = idx + 1; });
-            return parsedDraws;
-        }
-    }
-    
-    let dateIndex = -1;
-    let numberIndices: number[] = [];
-    let starIndices: number[] = [];
-    let complementarioIndex = -1;
-    let reintegroIndex = -1;
-
-    const maxNumbers = this.currentGame.maxNumbers;
-    const maxStars = this.currentGame.maxStars;
-    const numberRange = this.currentGame.numberRange;
-    const starRange = this.currentGame.starRange;
-
-    if (isHeader) {
-        const dateKeywords = ['fecha', 'date', 'sorteo'];
-        dateIndex = header.findIndex(h => dateKeywords.some(k => h.includes(k)));
-
-        const numberHeaderCandidates: {index: number, name: string}[] = [];
-        const starHeaderCandidates: {index: number, name: string}[] = [];
-        
-        header.forEach((h, i) => {
-            if (/^(n|bola|num|number|c)[\s_-]*\d+$/i.test(h)) {
-                numberHeaderCandidates.push({index: i, name: h});
-            } else if (/^(s|estrella|star|e|clave|powerbal|powerball|pb)[\s_-]*\d*$/i.test(h) || h.includes('clave') || h.includes('estrella') || h.includes('star') || h.includes('sueÃ±o') || h.includes('suno') || h.includes('powerbal') || h.includes('powerball') || h.includes('pb') || h.includes('mega ball') || h.includes('megaball') || h.includes('mega')) {
-                starHeaderCandidates.push({index: i, name: h});
-            } else if (h.includes('complementario') || h === 'c') {
-                complementarioIndex = i;
-            } else if (h.includes('reintegro') || h === 'r') {
-                reintegroIndex = i;
-            }
-        });
-        
-        if (numberHeaderCandidates.length >= maxNumbers) {
-            numberHeaderCandidates.sort((a, b) => {
-                const matchA = a.name.match(/\d+$/);
-                const matchB = b.name.match(/\d+$/);
-                const numA = matchA ? parseInt(matchA[0]) : 0;
-                const numB = matchB ? parseInt(matchB[0]) : 0;
-                return numA - numB;
-            });
-            numberIndices = numberHeaderCandidates.map(c => c.index).slice(0, maxNumbers);
-        }
-
-        if (maxStars > 0 && starHeaderCandidates.length >= maxStars) {
-            starHeaderCandidates.sort((a, b) => {
-                const matchA = a.name.match(/\d+$/);
-                const matchB = b.name.match(/\d+$/);
-                const numA = matchA ? parseInt(matchA[0]) : 0;
-                const numB = matchB ? parseInt(matchB[0]) : 0;
-                return numA - numB;
-            });
-            starIndices = starHeaderCandidates.map(c => c.index).slice(0, maxStars);
-        }
-    }
-
-    let parsedResults: Draw[] = [];
-
-    if (numberIndices.length < maxNumbers) {
-        parsedResults = lines.map((line, i) => {
-            const parts = line.split(/[,;\t]+/).map(p => p.trim().replace(/^["']|["']$/g, '').trim());
-            let date: Date | null = null;
-            let startCol = 0;
-
-            if (parts.length > 0) {
-                if (parts[0].includes('-') || parts[0].includes('/') || isNaN(Number(parts[0]))) {
-                    const d = this.parseFlexibleDate(parts[0]);
-                    if (d && !isNaN(d.getTime())) {
-                        date = d;
-                    }
-                    startCol = 1;
-                }
-            }
-            
-            const numericParts = parts.slice(startCol).filter(p => /^\d+$/.test(p.trim())).map(p => parseInt(p.trim(), 10));
-            const numbers = numericParts.filter(n => n >= 1 && n <= numberRange).slice(0, maxNumbers);
-            
-            if (numbers.length < maxNumbers) {
-                return null;
-            }
-
-            let stars: number[] | undefined = undefined;
-            let complementario: number | undefined = undefined;
-            let reintegro: number | undefined = undefined;
-
-            if (maxStars > 0) {
-                const isGordo = this.currentGame.id === 'gordo';
-                const minStar = isGordo ? 0 : 1;
-                const maxStar = isGordo ? 9 : starRange;
-                const starCandidates = numericParts.slice(maxNumbers);
-                stars = starCandidates.filter(n => n >= minStar && n <= maxStar).slice(0, maxStars);
-            } else if (this.currentGame.id !== 'euromillones') {
-                const remainingNumbers = numericParts.slice(maxNumbers);
-                if (remainingNumbers.length >= 1) {
-                    complementario = remainingNumbers[0];
-                }
-                if (remainingNumbers.length >= 2) {
-                    reintegro = remainingNumbers[1];
-                }
-            }
-
-            return {
-                id: i + 1,
-                date: date || new Date(Date.now() - (lines.length - i) * 3.5 * 24 * 60 * 60 * 1000),
-                numbers: numbers.sort((a, b) => a - b),
-                stars: stars,
-                complementario,
-                reintegro,
-                sum: numbers.reduce((a, b) => a + b, 0)
-            };
-        }).filter(Boolean) as Draw[];
-    } else {
-        parsedResults = lines.map((line, i) => {
-            try {
-                const parts = line.split(/[,;\t]+/).map(p => p.trim().replace(/^["']|["']$/g, '').trim());
-                if (parts.length <= Math.max(...numberIndices, dateIndex)) {
-                    return null;
-                }
-                const numbers = numberIndices.map(index => parseInt(parts[index].trim()));
-                if (numbers.some(isNaN)) return null;
-                
-                let stars: number[] | undefined = undefined;
-                if (maxStars > 0 && starIndices.length === maxStars) {
-                    stars = starIndices.map(index => parseInt(parts[index].trim()));
-                    if (stars.some(isNaN)) stars = undefined;
-                } else if (maxStars > 0) {
-                    const usedIndices = new Set([...numberIndices, dateIndex, complementarioIndex, reintegroIndex]);
-                    const isGordo = this.currentGame.id === 'gordo';
-                    const minStar = isGordo ? 0 : 1;
-                    const maxStar = isGordo ? 9 : starRange;
-                    const starCandidates: number[] = [];
-                    parts.forEach((p, idx) => {
-                        if (!usedIndices.has(idx) && /^\d+$/.test(p.trim())) {
-                            const val = parseInt(p.trim(), 10);
-                            if (val >= minStar && val <= maxStar) {
-                                starCandidates.push(val);
-                            }
-                        }
-                    });
-                    if (starCandidates.length >= maxStars) {
-                        stars = starCandidates.slice(0, maxStars);
-                    }
-                }
-
-                let complementario: number | undefined = undefined;
-                if (complementarioIndex > -1 && parts[complementarioIndex]) {
-                    complementario = parseInt(parts[complementarioIndex].trim());
-                    if (isNaN(complementario)) complementario = undefined;
-                }
-
-                let reintegro: number | undefined = undefined;
-                if (reintegroIndex > -1 && parts[reintegroIndex]) {
-                    reintegro = parseInt(parts[reintegroIndex].trim());
-                    if (isNaN(reintegro)) reintegro = undefined;
-                }
-
-                let date: Date;
-                if (dateIndex > -1 && parts[dateIndex]) {
-                    const parsedDate = this.parseFlexibleDate(parts[dateIndex]);
-                    date = (parsedDate && !isNaN(parsedDate.getTime())) ? parsedDate : new Date(Date.now() - (lines.length - i) * 3.5 * 24 * 60 * 60 * 1000);
-                } else {
-                    date = new Date(Date.now() - (lines.length - i) * 3.5 * 24 * 60 * 60 * 1000);
-                }
-                return {
-                    id: i + 1,
-                    date: date,
-                    numbers: numbers.sort((a, b) => a - b),
-                    stars: stars ? stars.sort((a, b) => a - b) : undefined,
-                    complementario,
-                    reintegro,
-                    sum: numbers.reduce((a, b) => a + b, 0)
-                };
-            } catch (error: any) {
-                return null;
-            }
-        }).filter(Boolean) as Draw[];
-    }
-
-    // Sort chronologically ascending (oldest first, newest last)
-    parsedResults.sort((a, b) => {
-        const timeA = a.date instanceof Date ? a.date.getTime() : new Date(a.date).getTime();
-        const timeB = b.date instanceof Date ? b.date.getTime() : new Date(b.date).getTime();
-        return timeA - timeB;
-    });
-
-    parsedResults.forEach((d, idx) => {
-        d.id = idx + 1;
-    });
-
-    return parsedResults;
-  }
-
   updateCalculatorJackpotValue() {
     const jackpotInput = document.getElementById('calcJackpotInput') as HTMLInputElement;
     if (!jackpotInput) return;
@@ -11661,23 +11212,385 @@ class DataLotto49Advanced {
 
       this.updateFilterStateFromUI();
 
-      const periodVal = (document.getElementById('backtestPerixœÄ<ÛrÛF–ïùŠNÆ1	‘räÄ”¥”dË±ª¬Ø%)ñV©\qhQp@4€ºXáÌÃnÕ¾ìÓÖ>ÎC2Oy™ªÑŸìì'ì9İ »ÑàERfX¹Pd÷¹õ¹÷yØòÍÈËãƒWG,fA¾³1KrÏ?§ñ”m~BÄ+àI–“1Ù4&[¤ò`Šëü+¶ì^í‡íÖ?å,Ë`í"Ø
-xÌr¦ô";æÇ°ÀŸø¾ŸŸE™ÿæ<?§9}W’ö„¥9[[¤Å§y…ìGXSšG<ô×jCÅƒöıÛ(	ù ë÷z›ÚB“í/?‹£€µ{r@ó3L/ñ½¾ fÉ(?#İ:Ï+PÌ‹3fñğ)ò@ãØIs#$eBÓŒí'yµÏ[…î®€SÑñ‰q¸9ÏAÊ¸ÉÚ,yÒE¯/º{&Íâà²3~qÌi–·óv+Ç7~¡GQrÄÓœñ¬åuH‹¥)O[#)Ë§iÒ@ç0OÀ&ıK§É®B´›'\¹y’òQÊ²ìOr%,ª ø½©	ê.]	,o‚tÌ.óU@áz|>óìyt¾¤C¹h'ÂöÄCŞæ9OJC£Œc†<­Ü…Ğm[j^]ú~–_Å¡Lbz@ZÃ˜?µt8ÆR}gÂÖ*‰_[#À8–+Bƒ|
-Öø‘ÑÍo		£äæÆàRHÈË£Ÿ§,æ26ºù=!1E/ËCÒŒ‡ñ±a!M5Úg‚_FÁO,r˜j¥"9šÀ†e¨› ¼åsMJ[æ€°Kcš,äE­rì?|½¿`/¬°÷óİ”ÑŸÀ¯&ÇQÏÅn¯µT¼jèO£8gifya\f«gªƒŸƒù¡RËÃÈ+«òaŸIo÷RÅ2™Ş®€^¶géÉø#šĞƒmì„àß£°	A©©?Ë‚ß»âé|ğ "®V@ƒáÑ€Mr°M]¹4°Jq<MÕ MY8Ş÷It‡ÉpA©<¥~à±Ó(ˆXDôhGêbßV1¯¦ iv¤¼Ô‘–.Ü¿>EãiLóÖê8IHg2…è½jâı¿€Ë÷8ZÔõ{ÓE >xvÈ‚)¤WrY]‡rÕw,¿«&¦<út/dÙ(æÛ-Osm+ó‚|÷»éx&…P0Ë¦i
-@¿¥cæWßnÚ»rÚ¸G|gî ç4Š1­PÌŠ­àÙwìïÚ­D`µ#D	Ä@î† zšjQr‡n·Ké˜’ş€ì@¾GY”†0‹Î9¦{àÀm‰4B9Ü¶ZdÁÒgB³Œ…ÂpŸñ©8"£‘ü`Fş2•(ÎäZü9 ¸iS!ç1£	™¼Ãê]Éb
-’Å€e£c~Ã>"åÊ@fEc–!.2…,(±¹ÄÜ
-ªŠYGÙ˜“ó(ƒtJƒ|ÊSĞc`êv)¨WoŸjE…úìáCS &ƒfåq"v˜lTë'JJb§1çi»İ–X’ÿÈ#kr|Ea;Å)iÉ»§gò*Ã¼ˆB(è¶Èû×ˆq¬Ï>¿)ÅÁQˆ¹4DYBî8¤iJç Á<İ3²|Ë8Æ’Âè!J[
-V2ü9é¯»
-±âE/(”	»@€Cd˜SóøìjòŞüø€ò¹ø´pj’šÙèA ?ˆ49…ø¤Ôˆ¨TAh9E3g„p.äTY$ã`?`J"Õş~Ÿ´…Q]1¨‘ˆfñ( ÁÀÍo=§ÈÁ•HN@KGG,>-Ìİlo\ŸúÒ2Û!J#…8ê GÂ„\(£ì0¹M”	Q<ãã!˜	ÖümáKÏ”ÉŸ	GôË/ ¶ã¤Ú©.÷ÑÚ¾ãáÃúÁ™k~ÄŸL³³¶ô%Ò‹”ÌÍzf–39¸ùk2ÌÈ*/yFÓ˜K_¦A/à€1ÁCÓ8”9™¨¿)3Ëft<‰YáûfW¦r•Gbí&+7¤\¸"|àò=BÄ`Az½y&Tºœ÷Fî}"°TºœºÇ)p®äu$RáæC[Æ½,‚w?ŞÂ%¾ ìƒW‘êš³C
-–?ÖM§ş;ZæQC%Ag*È—ÉÆ6éæ¾&±§SîvÛ¾è|5˜»`­#Éğæ™ªı|35LMil>°õjAMç¬^fÑ
-óCBXDº%P;OxNŒ	Û#eéƒ¡?§}+£¦2a,œuÌáıš4y Í	d-¯³óãE”ˆ†¦•úèA»ÎÆäÇi"ºYeûU—E‡ô=SuìTq„-#IÅškKA´QK(ÆÓ\6ä‡$ÛPéd ƒ5w^|ÊDÀÉÏø¦7¿Rjô#MMà*Ï’QQ¬cââœ>`N›¦ÊIªP‰Éá‘§‚–ojÌÔ[ÙÊ:D¥—³PHNP¦2M¬Ö—N¶H7Šo’ñÆå@Õb	¿‹=[¿]ŞÙH]°ñ…V';æÛö`£<0ÏÆ»8øY‚Ğ‚bE½æÍ¨öí6í¡‡®‘‚E½ºğ\½Ëb~ñ:İûy*®OlP*	N@ÖÃ³ºğxPÏ ì2AI
+      const periodVal = (document.getElementById('backtestPeriod') as HTMLSelectElement).value;
+      const modeVal = (document.getElementById('backtestMode') as HTMLSelectElement).value;
 
-6„ív/í*6õñò/–F §d\v©xÄô”~œ{“BÓÔ/^¦Óü¬¶¯^Ôº`;
-ÇªZcØ¾dq_}S´Áõ­d]êdÉvğ0wuƒ8Ë5„«¬CZØVÄXÍ`Ä‚V°ğÖnÖÛ—hóZ/X‡° <Ìn°¾sïr"/'çl†5, »û/ çÙ	Ï‡Lnpƒ|åYÙ’™ÓXj\8YÂŒökîş5'#íÎ®flÌlö±%{}ª¤+Ú‰ÂOµ:äZz¼A=¸Ï˜U-ìÿ-Â¦İIv¡nL¯ŞF	z‘*ËjHM‰–dGô™£Ûˆ‰·‰ÄÏù‹è’…í¾7#f*^[6mÈz€ÎÈùJdë5d&é=HFğ*ÓÌ··ÈÌª[ç4mw»TtPexè2k‹…
-Ÿ|õUï±pªrSH“K½fï*=Ñ:³õ)0Zåt:——&q»É –Ñ}}ÃÍŸ¹®ç}'î¤‹qçR˜õÅ²Ÿ8€zm×f¤\ö¹hZ¥æŠä oÃbi(ŒN¬ğÇÓ«8çÂê4È3g‘[ˆ—³–Dkyš1¡‘üÕI¦·¤·8Ú%	%ëw¤“eòÎáö²¥ôªQ°w!mH?ğ7E·§Ïe‚Âš•JëX"L8ä¬’“@`pX'´Ddz„Šö¥ŒX†}—¯Ò¿_‚*|8$[ù!İ'i~¯ãê<”çåúöÀ¹E5í(èZ+Â¢€ínî#JI9K”ÆÂ'Kq•«¦Oè‡ÅZµêıÓ»<$ˆ­ÏÄõ‡HüÁ#Ç4½êŠï?Ûvp÷4O]Ë¯Î¶\»”éÎhË›=]ƒU· ÚKòbüö`ö2lTÌ Ÿ§Ûõëlñrˆ,PŠÖ6ño~óho6zåÅ‘èø)ª6KÉÍo\AD“D•”¡ìã?}Ğxïá+;æGg¼¸*:Ôjpm£çù)“·u5C6ø§<İ£ÁYÛjlƒbuİÜÜUÍzH—EûŞÿÀ£¤Ùr:;Ñ Á¾ß~rÊ*‰/ÔtíàÏÖîŠ©Áí¦îsE$®ßDV»LByÓ8á,â,!&)ÿ÷ßÿù7ÌPÚëÙ4å!XÌ8Sşò_ó7Œx
-¥€ÿ‡Hş÷×oÕÛÀÅKÏ{òyšMhB„ßİú•v$zF†´½¾ÑïôŸô;wz~ÃÛ$ÌsTPÆÏïLd}rIO.7ÉHbiBh4ÍäKüìüm7‹>²&l)«Ï.X4:Ëñ¾47?Ó)¤:#®µc‘çŞ¶ƒo;ûåµ›±ê´†41åƒ”6HèğQs…ÒÜé½Ñé¯?±„bfVšl@¤¿>W8† ,y­y©6Ê€DI…hWôH„Ì\î†%2Újkàw°ˆßõGO:¿Æ€]›[•Kü‹™UÓP†z8Ø5ƒÑC°€F7Şiä×áöSœJFÛJM!ˆ1D.?G.ğàºrs3©øÂ0gËm.zîú"¢˜ŸÖ3°ºd`'b‡$ÿY†Òen4øLğ0:/ôó±.¤£d@07b©¥b"¶Õ¤r!(
-¤<Q°	ñ/EI7ç“é÷@åœ©¾Üº”@îô½Œ­=P(g˜òR]!Y2D27'[aì÷”Ba7Bn7û[k»®2ş[kÛ¢«©½Ë'³ ¾+/ºÔ0º>$´> r˜®¼áVÓoY#»2H”ÚÏd(…¾•7’PixÚÈP”œ¥cHşR"‡éäPÀ!cHæ)&óâîIíÁ$7ÚÈ}¿ìN•÷–MÁÅ1ˆŞM2®û%D­
-^&«¸O°Ur3jo%¨2£™±¿"2q§óÉ|T'ÓóÀÏÓã«	“ ‡<áx×Úª;>|O£¹…‹Q³¯9s(¾Vš°Œˆ[ÉayÃ‰º(®ÃÕWuÛhİ7–‰sã:MY:%pÇ”¶~²‹í7«ˆ³òh¹Åª›ıÌv¸ÅîÍÚ˜Cø%‘™x"Š…j®ÁÇ #¸Ó¦,¡J0ÖŠác¥WXÀâÉN
-áÌ?Sw"÷Ê»Ì¡·µM»C¯6ü`²İPÒ3\“.zlQ Êí'²€­JZÕø¤àÌ/\w‹…Ü%À0î)ÈáËŒ1BH³;ÄTPhãÛğæ×,7µ§ ­	NcĞL3®\B¤·i#¯úÊÏUÉRİ=ÉQkrÓ!¶Ód›ù]a§p[äz¦OÍîNƒXL@dZ4¤cPÑPï4/ºÊ¬èÂ9Ñşâ)Ñ•gµ¬©ª[LgÙÃÂ¡Jƒ—7:Tk±°…f¯ZPgxÖQ™™8¢‹>qºñO8EÎN±Bl²I×ˆ	goÎpÉ8—VÿgÌ¦Çs‡ù4A°¦f¨-b›™¶º°?ĞWg§?'h¿„÷q7Yæÿ¼*04´ÅØÚÉ¢-Œû<íBcZĞN-õŒ 6Bi’®…ú30àZŞ@XÃM::Ç¬’Š /÷}¡'Ÿ†g*y²ª!Ş=-7ËšŸ'(¬Z§ì·4ufªKC®/’9ç¶3(·ùs\‰%×[ÈQ‚sŞ,k'k”Ë¤â¥iiìI*Y‰ÁÕO.±e%6Ğ£^Óƒ©H(U.Kã@Œ¦aD|ƒß´‘ÃNIXGuÕÃ5¯W&pÊn§P4…9…y&#R2Ÿ–"Íj³4ÑÌóìHôwP–-İ.€±1OüøKÙ$=,©¯×ózãc6¢XOcé0 ±p>L³AßÑ¨¸—êß7‚*êáÁœ%èËÄƒŠ»ñ¯²Şòbp2Ü/@şS@ÍDNo+\qŠ2‰§)©¨²œèëãMD&®!Z.c-‘)ê<Ø¶0áí-²,˜Z‰ÕoAûQæÑ'³˜„µ›¿@¡!3ëñµÁˆ$±˜ß,$sLe]ÀÉ9çq ßãS7Za}ÛJè* ;´øîcó~f0ï8y‡ÙË»Í]Şnæòæ-ïyÖò˜³¼§Ë;ÌWVòœÆ<= ³¿É!ñ:=}Ò†@4/¸â”åR8µÇµ›Q6NBŞ
- c"3Û¥ş—HW#Ô$Í9MÙ4I¹*¹ïñ–Lƒ“‚›ÊØ4+¿Ñçß[!«iÓZŸQl´²âNyTHIº+™]¶K¹­i_ªˆLuÖæ3f3›>çjöF\™HŞ¶|@É=h*¿__r¼Ôb.«¦ëy£æÍ%fÓ,yÃSù[G–Š(BêÂ‚y
-âœ[³ ®®‹¦Ú0q—CjêÇ‰ÌA¥]¢²Åú Áš®~¹ğéù_nØİ±‚pso=«2p»E.—|+B—À¤&ÖB¨&f·S¢rWÚK¶K?ğC–ó4±~bæ8^çà`…ªáøæŒÒ-?F§j'ÔÛP§¯‡ û@JAqie±öÓÙöóQÍUæß;Dûy3zÒ{ç‰\¸¹«†›võMÃ¹›d‡]íêJ”®	K9-!ÅtCïsˆñƒæQs®À5¦PÎ¼¨As¢ Ò¹,Jª_ô˜9ÆÔù_:@©U‡<~FsEW´ú¥¦ü±¹» yƒWœÃHü.ØÃ”æ§ö]š¥TåÄ¢¼iéÈGZŞ-°¼tÅbR>èç¼ÈĞ\Y³!EÙËhtãp”ècMUN uî§‚ÑTÊ³·Q~ÖnõHËkøªßüÕ:Işñ;ş0‡{„r•©B\ë„CÄKùE÷¬ø@ÅÓÆ1	L¨D¯:LÕù]ë%p.KÎXá¹Î>ÿÃç«Ì¥·*ş¯Ş,ºÂİ+DÔ0r€àŸµ5òmÖ“ôS¤iü`3B'“OÄ XQ×eáÕQ.jƒŸıÎYã@ã*ñD«ø!’â–¯ªğ·@^ñ<ç_>Ø‹hCœ5Ö¼d	<ğŞ9¼yebì¹İzşú@EéWœ†,„ƒokö;¾<8Éö‹ı0$4!l<É¯0og¦Mrà"Æ§ÆvkÄON!üD-»mş?   ÿÿ Ç®€
+      let drawsToTest = [...this.historicalData];
+      if (periodVal === 'outside_calibration') {
+          const calibrationWindow = 100;
+          drawsToTest = drawsToTest.slice(0, Math.max(0, drawsToTest.length - calibrationWindow));
+      } else if (periodVal !== 'all') {
+          const limit = parseInt(periodVal);
+          drawsToTest = drawsToTest.slice(-limit);
+      }
+
+      const totalDraws = drawsToTest.length;
+      if (totalDraws === 0) {
+          this.showToast(t('toast.backtestSinSorteos'), 'error');
+          return;
+      }
+
+      const btn = document.getElementById('runBacktestBtn');
+      const progressContainer = document.getElementById('backtestProgressContainer');
+      const progressBar = document.getElementById('backtestProgressBar');
+      const progressText = document.getElementById('backtestProgressText');
+      const resultsDiv = document.getElementById('backtestResults');
+
+      if (btn) (btn as HTMLButtonElement).disabled = true;
+      if (progressContainer) progressContainer.style.display = 'block';
+      if (resultsDiv) resultsDiv.style.display = 'none';
+
+      // Reset y actualizaciÃ³n dinÃ¡mica de etiquetas segÃºn la modalidad
+      const lblTotalDraws = document.getElementById('lblTotalDraws');
+      const lblTicketPrice = document.getElementById('lblTicketPrice');
+      const lblTotalSpent = document.getElementById('lblTotalSpent');
+      const lblTotalWon = document.getElementById('lblTotalWon');
+      const lblBalance = document.getElementById('lblBalance');
+      const lblROI = document.getElementById('lblROI');
+      const btBreakdownTitle = document.getElementById('btBreakdownTitle');
+
+      if (modeVal === 'filters') {
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosHistoricos');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.ganadoresAdmitidos');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.ganadoresExcluidos');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.tasaAceptacion');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.reduccionUniverso');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.eficienciaFiltros');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.registroHistorico');
+      } else {
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosSimulados');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.precioApuesta');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.presupuestoInvertido');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.premiosRecuperados');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.balanceNeto');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.roi');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.desgloseAciertos');
+      }
+
+      const maxNumbers = this.currentGame.maxNumbers;
+      const maxStars = this.currentGame.maxStars;
+      const availableUniverse = this.getAvailableUniverse('number');
+      const availableStars = this.getAvailableUniverse('star');
+
+      // --- Rama 1: AnÃ¡lisis exclusivo de Eficacia de Filtros ---
+      if (modeVal === 'filters') {
+          let passedDrawsCount = 0;
+          const drawDetails: { draw: Draw; passed: boolean }[] = [];
+
+          // Procesar validez de sorteos reales con un ligero delay para dinamismo visual
+          for (let index = 0; index < totalDraws; index++) {
+              const draw = drawsToTest[index];
+
+              const pct = Math.floor(((index + 0.3) / totalDraws) * 100);
+              if (progressBar) progressBar.style.width = `${pct / 2}%`; // Primera mitad de la barra
+              if (progressText) progressText.textContent = `${Math.floor(pct / 2)}%`;
+
+              if (index % 12 === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+
+              // Validar el sorteo ganador real frente a los filtros activos en la UI (excluyendo el propio sorteo del histÃ³rico)
+              const historyExcludingSelf = this.historicalData ? this.historicalData.filter(d => d !== draw) : [];
+              const isPassed = this.isValidCombination(draw.numbers, draw.stars || [], historyExcludingSelf);
+              if (isPassed) {
+                  passedDrawsCount++;
+              }
+              drawDetails.push({ draw, passed: isPassed });
+          }
+
+          // MÃ©tricas Monte Carlo para estimar la tasa de ReducciÃ³n de Universo
+          let sampleCount = 1500;
+          let passedSample = 0;
+          for (let i = 0; i < sampleCount; i++) {
+              if (i % 300 === 0) {
+                  const pctSample = 50 + Math.floor((i / sampleCount) * 50);
+                  if (progressBar) progressBar.style.width = `${pctSample}%`;
+                  if (progressText) progressText.textContent = `${pctSample}%`;
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+              const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
+              const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
+              if (this.isValidCombination(combo, stars)) {
+                  passedSample++;
+              }
+          }
+
+          const passRate = (passedSample / sampleCount) * 100;
+          const reductionRate = 100 - passRate;
+
+          // Factor de eficiencia de rentas: Tasa de acierto sorteo loto / tasa paso aleatorio
+          const p_win = passedDrawsCount / totalDraws;
+          const p_univ = Math.max(passedSample, 1) / sampleCount;
+          const efficiency = p_win / p_univ;
+
+          // Test de permutaciÃ³n: Â¿el resultado real se distingue de lo que darÃ­a el azar
+          // con un filtro que solo redujera el universo en la misma proporciÃ³n?
+          const M = 100;
+          const simulatedCounts: number[] = [];
+          for (let sim = 0; sim < M; sim++) {
+              let simulatedPassed = 0;
+              for (let i = 0; i < totalDraws; i++) {
+                  if (Math.random() < p_univ) simulatedPassed++;
+              }
+              simulatedCounts.push(simulatedPassed);
+          }
+          simulatedCounts.sort((a, b) => a - b);
+          const countBelowOrEqual = simulatedCounts.filter(c => c <= passedDrawsCount).length;
+          const percentile = Math.round((countBelowOrEqual / M) * 100);
+
+          // Renderizar mÃ©tricas en la interfaz
+          const calibrationWarningEl = document.getElementById('backtestCalibrationWarning');
+          if (calibrationWarningEl) {
+              calibrationWarningEl.style.display = (periodVal !== 'outside_calibration') ? 'block' : 'none';
+          }
+
+          const elTotalDraws = document.getElementById('btTotalDraws');
+          const elTicketPrice = document.getElementById('btTicketPrice');
+          const elSpent = document.getElementById('btTotalSpent');
+          const elWon = document.getElementById('btTotalWon');
+          const elBalance = document.getElementById('btBalance');
+          const elROI = document.getElementById('btROI');
+          const elExpVal = document.getElementById('btExpectedValue');
+          const elExpValAdvice = document.getElementById('btExpectedValueAdvice');
+          const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
+
+          if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
+          if (elTicketPrice) elTicketPrice.textContent = t('backtest.filtros.sorteosCount', { count: passedDrawsCount });
+          if (elSpent) elSpent.textContent = t('backtest.filtros.sorteosCount', { count: totalDraws - passedDrawsCount });
+          
+          const passRateWinning = (passedDrawsCount / totalDraws) * 100;
+          if (elWon) elWon.textContent = `${passRateWinning.toFixed(1)} %`;
+          
+          if (elBalance) {
+              elBalance.textContent = `${reductionRate.toFixed(2)} %`;
+              elBalance.style.color = reductionRate >= 90 ? 'var(--success)' : reductionRate >= 60 ? '#d97706' : 'var(--danger)';
+          }
+
+          if (elROI) {
+              elROI.textContent = `${efficiency.toFixed(2)}x`;
+              elROI.style.color = efficiency >= 1.25 ? 'var(--success)' : efficiency >= 0.8 ? '#d97706' : 'var(--danger)';
+          }
+
+          if (elExpVal) {
+              let nivelFiltro: string;
+              let nivelColor: string;
+              if (percentile >= 95) {
+                  nivelFiltro = t('backtest.filtros.nivel.muyAlto', { percentile });
+                  nivelColor = 'var(--success)';
+              } else if (percentile >= 75) {
+                  nivelFiltro = t('backtest.filtros.nivel.alto', { percentile });
+                  nivelColor = '#d97706';
+              } else if (percentile > 25) {
+                  nivelFiltro = t('backtest.filtros.nivel.esperado', { percentile });
+                  nivelColor = 'var(--gray)';
+              } else {
+                  nivelFiltro = t('backtest.filtros.nivel.bajoPercentil', { percentile });
+                  nivelColor = 'var(--danger)';
+              }
+              elExpVal.textContent = t('backtest.filtros.poderFiltroPercentil', { nivel: nivelFiltro });
+              elExpVal.style.color = nivelColor;
+          }
+
+          if (elExpValAdvice) {
+              elExpValAdvice.textContent = t('backtest.filtros.advicePercentil', {
+                  efficiency: efficiency.toFixed(2),
+                  percentile,
+                  M,
+                  passed: passedDrawsCount,
+                  total: totalDraws
+              });
+          }
+
+          if (elHitsBreakdown) {
+              elHitsBreakdown.innerHTML = '';
+              let breakdownHTML = `<table class="validation-summary-table">
+                  <tr>
+                      <th>${t('backtest.filtros.colFecha')}</th>
+                      <th>${t('backtest.filtros.colCombinacion')}</th>
+                      <th>${t('backtest.filtros.colEstado')}</th>
+                  </tr>`;
+
+              // Mostrar solo los Ãºltimos 50 sorteos para mantener Ã³ptimo el renderizado del DOM
+              const drawingsToShow = drawDetails.slice(-50).reverse();
+              drawingsToShow.forEach(({ draw, passed }) => {
+                  const numbersStr = draw.numbers.join(', ');
+                  let starsInfo = '';
+                  if (draw.stars && draw.stars.length > 0) {
+                      const starIcon = this.currentGame.id === 'powerball' ? 'ğŸ”´' : (this.currentGame.id === 'eurodreams' ? 'ğŸŒ™' : (this.currentGame.id === 'gordo' ? 'ğŸ”‘' : 'â­'));
+                      starsInfo = ` | <span style="background: rgba(251,191,36,0.15); color: #d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">${starIcon} ${draw.stars.join('-')}</span>`;
+                  }
+
+                  const badgeHTML = passed 
+                      ? `<span style="background: rgba(16,185,129,0.15); color: var(--success); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.enFiltro')}</span>`
+                      : `<span style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.excluido')}</span>`;
+
+                  breakdownHTML += `
+                      <tr>
+                          <td><strong>${draw.date}</strong></td>
+                          <td>${numbersStr}${starsInfo}</td>
+                          <td>${badgeHTML}</td>
+                      </tr>`;
+              });
+              breakdownHTML += `</table>`;
+
+              if (drawDetails.length > 50) {
+                  breakdownHTML += `<div style="text-align: center; color: var(--gray); font-size: 0.8rem; font-style: italic; margin-top: 10px;">
+                      ${t('backtest.filtros.notaUltimos50')}
+                  </div>`;
+              }
+              elHitsBreakdown.innerHTML = breakdownHTML;
+          }
+
+          if (btn) (btn as HTMLButtonElement).disabled = false;
+          if (progressContainer) progressContainer.style.display = 'none';
+          if (resultsDiv) resultsDiv.style.display = 'block';
+
+          this.showToast(t('toast.backtestFiltrosExito'), 'success');
+          return;
+      }
+
+      // --- Rama 2: SimulaciÃ³n de Apuestas / Boletos (Current / Generative) ---
+      
+      // Determinar precio de boleto mercantil real
+      let ticketPrice = 1.0;
+      if (this.currentGame.id === 'euromillones') {
+          ticketPrice = 2.50;
+      } else if (this.currentGame.id === 'eurodreams') {
+          ticketPrice = 2.50;
+      } else if (this.currentGame.id === 'powerball') {
+          ticketPrice = 2.00;
+      } else if (this.currentGame.id === 'gordo') {
+          ticketPrice = 1.50;
+      } else if (this.currentGame.id === 'nacional') {
+          ticketPrice = 3.00;
+      } else {
+          if (this.dataType === 'bonoloto') {
+              ticketPrice = 0.50;
+          } else {
+              ticketPrice = 1.00;
+          }
+      }
+
+      // Combinaciones a probar
+      let combosToTest: number[][] = [];
+      let starsToTest: number[][] = [];
+
+      if (modeVal === 'current') {
+          if (this.currentTicket) {
+              combosToTest = this.currentTicket.combinations;
+              starsToTest = this.currentTicket.stars || [];
+          } else if (this.selectedNumbers.size === maxNumbers && this.selectedStars.size === maxStars) {
+              combosToTest = [Array.from(this.selectedNumbers).sort((a,b)=>a-b)];
+              starsToTest = [Array.from(this.selectedStars).sort((a,b)=>a-b)];
+          } else {
+              this.showToast(t('toast.backtestSeleccionInvalida', { maxNumbers, maxStars }), 'warning');
+              if (btn) (btn as HTMLButtonElement).disabled = false;
+              if (progressContainer) progressContainer.style.display = 'none';
+              return;
+          }
+      }
+
+      // Restablecer estadÃ­sticas financieras
+      let totalSpent = 0;
+      let totalWon = 0;
+      const breakdownCounts: { [label: string]: number } = {};
+
+      // Bucle de simulaciÃ³n amortizado
+      for (let index = 0; index < totalDraws; index++) {
+          const draw = drawsToTest[index];
+
+          const pct = Math.floor(((index + 1) / totalDraws) * 100);
+          if (progressBar) progressBar.style.width = `${pct}%`;
+          if (progressText) progressText.textContent = `${pct}%`;
+
+          let currentCombo: number[][] = [];
+          let currentStars: number[][] = [];
+
+          if (modeVal === 'generative') {
+              if (index % 5 === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+
+              let found = false;
+              for (let i = 0; i < 1000; i++) {
+                  const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
+                  const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
+                  if (this.isValidCombination(combo, stars)) {
+                      currentCombo = [combo];
+                      currentStars = [stars];
+                      found = true;
+                      break;
+                  }
+              }
+              if (!found) {
+                  currentCombo = [this.generateRandomCombination(availableUniverse, maxNumbers)];
+                  currentStars = [maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : []];
+              }
+          } else {
+              currentCombo = combosToTest;
+              currentStars = starsToTest;
+          }
+
+          const numPlays = currentCombo.length;
+          totalSpent += numPlays * ticketPrice;
+
+          for (let pIdx = 0; pIdx < numPlays; pIdx++) {
+              const combo = currentCombo[pIdx];
+              const stars = currentStars[pIdx] || [];
+
+              const hits = combo.filter(n => draw.numbers.includes(n)).length;
+              const starHits = maxStars > 0 ? stars.filter(s => draw.stars && draw.stars.includes(s)).length : 0;
+
+              const prize = this.calculateDrawPrize(hits, starHits, draw, combo);
+              totalWon += prize;
+
+              let catLabel = `${hits} ${t('tickets.aciertos')}`;
+              if (maxStars > 0) {
+                  const starName = this.currentGame.id === 'powerball' ? t('common.nombreEstrella.powerball') : (this.currentGame.id === 'megamillions' ? t('common.nombreEstrella.megamillions') : (this.currentGame.id === 'eurodreams' ? t('common.nombreEstrella.eurodreams') : (this.currentGame.id === 'gordo' ? t('common.nombreEstrella.gordo') : t('common.nombreEstrella.generico'))));
+                  catLabel = t('backtest.economico.catLabelConEstrellas', { hits, starHits, starName, plural: starHits !== 1 ? 's' : '' });
+              }
+
+              if (prize > 0 || hits >= 2 || (this.currentGame.id === 'gordo' && starHits > 0)) {
+                  breakdownCounts[catLabel] = (breakdownCounts[catLabel] || 0) + 1;
+              }
+          }
+      }
+
+      // Finalizar backtesting financiero y volcar a UI
+      if (btn) (btn as HTMLButtonElement).disabled = false;
+      if (progressContainer) progressContainer.style.display = 'none';
+      if (resultsDiv) resultsDiv.style.display = 'block';
+
+      const elTotalDraws = document.getElementById('btTotalDraws');
+      const elTicketPrice = document.getElementById('btTicketPrice');
+      const elSpent = document.getElementById('btTotalSpent');
+      const elWon = document.getElementById('btTotalWon');
+      const elBalance = document.getElementById('btBalance');
+      const elROI = document.getElementById('btROI');
+      const elExpVal = document.getElementById('btExpectedValue');
+      const elExpValAdvice = document.getElementById('btExpectedValueAdvice');
+      const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
+
+      if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
+      if (elTicketPrice) elTicketPrice.textContent = t('backtest.economico.valorMonetario', { value: ticketPrice.toFixed(2) });
+      if (elSpent) elSpent.textContent = t('backtest.economico.valorMonetario', { value: totalSpent.toFixed(2) });
+      if (elWon) elWon.textContent = t('backtest.economico.valorMonetario', { value: totalWon.toFixed(2) });
+
+      const balance = totalWon - totalSpent;
+      if (elBalance) {
+          elBalance.textContent = t('backtest.economico.valorMonetario', { value: `${balance >= 0 ? '+' : ''}${balance.toFixed(2)}` });
+          elBalance.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      const roi = totalSpent > 0 ? (totalWon / totalSpent) * 100 : 0;
+      if (elROI) {
+          elROI.textContent = `${roi.toFixed(1)}%`;
+          elROI.style.color = roi >= 100 ? 'var(--success)' : roi >= 20 ? '#d97706' : 'var(--danger)';
+      }
+
+      const expVal = balance / totalDraws;
+      if (elExpVal) {
+          elExpVal.textContent = t('bacxœ¤VÛnÛF}÷WL7$k‰–ƒô¡’¥Â%à Fb´‚ qWâÆÔ®°;ºAáõ±_–!)ÉuIz vgÏÌ™9Ã'’Bm†*2ácïıh,IãÕ`¼4–Mx<YÈÙè/L Ó†ü	Ş©Mğ¼tµ’y­fRø/ƒôÒ uëG&İÂÆÑ<‘adØ´¡‚8Aë×ënEÒ¹ ‡/–ê´·‚L–/ªş
+ûRLT$X”ü&’ óõ9#öèyå°øŞÀ¢fxŸàœØ¦N*z’toùüğÕïåC¹Ïeà›g7}gÏ†oò½FOÊ“7¨Q›3^€7a‹ÖÚÒ»jnz.U˜O™{'>°+üb>H2VoxGz‹„Ä°×F“Ôú³«=é»Uä®¬Ä'a¦z“ÃÊf¨´–ööáİİTº¬nÅÚ­Ş÷¾Èˆ¯¥É*éüŞjëÚŒ5¹ BK˜ø>Ö @»³EÛ³§˜ãºdüZ'ßjòñSãs _¿B£uğĞUùPïà!+ilõòT½pYµË²])Î
+	a"õ€bh·¹Í¶KôÅBM ïÙöqŞ´M(:r`q´ ÏY®çûMP„‰ŠZe¿Î¯İ„ˆy—¶ÅBéAÎ£Yë¸s²Ø]sNéËHIKÆyAzqÆî;?PÎYŸ¯S»°—Hˆt®}Ì:¦’2šf8D;¯çûÇÌ_İµ\lÅ{ÃgŠ®‘äÀX…yülûs0… »ÿroM{*»·8€Äëv“åì©ü­UßØ.F±ïJ°'“W87ÔçïtÍˆ#âÔø~ng@†«æÆâÔ,µçFP’²ı¤Ü­Ä\cq¦0X‡‡È‹ğK´äşVû^¼`ÏÖùş­— ÿûN¡áíd³ÜN¹Şö&É®jğdQœ'5Óz¼ZXÎÓù&:¬ÑÎ|4çu¹À‰ß;¼¯\&’‡n.Šù*(Mó¢ùÌ,¯é¯‡lwYºEí6­|2ëÓíÃ‡”kf×ØZÏ Š•]l¦ùÌe/áŠ£îŠ¢îLÏÀxË/”¢.ˆggğ&ánK@q}¢æ/Ógl	8eª,L4²†™˜$Ö‰\’½ÈG¬_ÒËæÀ^+•	)F¤&Ò+D\Ë)Ü á!2¯şàÙ›¹>GURÉ5 +pwÂ/wÊñ`–Ö÷nŞ¿[Né;ƒB
+N¼_êßøEâŠk¿~ûO.… Ô ‡#šgß-,ÜÚ@|Ê†¾b)FC#Æüx´4[¤­o   ÿÿ Úïş³
