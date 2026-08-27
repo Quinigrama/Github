@@ -305,7 +305,6 @@
   "audit.boletosAuditados": "Boletos Auditados",
   "audit.totalAciertos": "Total Aciertos",
   "audit.totalFallos": "Total Fallos",
-  "audit.muestraPequena": "Muestra pequeña (pocos boletos evaluados)",
   "tickets.boletoValidado": "Boleto Validado",
   "tickets.sinAciertosPremiados": "Sin aciertos en categorías premiadas",
   "tickets.verificadoCheck": "✓ Verificado",

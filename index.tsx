@@ -9123,7 +9123,7 @@ class DataLotto49Advanced {
 
       actionsHTML = ticket.validation
         ? ((ticket.gameId !== 'nacional' && ticket.filtersSnapshot && ticket.validation?.winningNumbers)
-            ? `<button class="validate audit-btn compare-filters-btn" data-date="${ticket.date}">ğŸ” ${t('tickets.auditarFiltros') || 'Auditar Filtros'}</button>`
+            ? `<button class="btn btn-secondary btn-sm compare-filters-btn" data-date="${ticket.date}" style="font-size:0.75rem; padding: 4px 8px;">ğŸ” ${t('tickets.auditarFiltros') || 'Auditar Filtros'}</button>`
             : `<button class="validate verified" disabled>${t('tickets.verificado')}</button>`)
         : `<button class="validate">${t('tickets.validar')}</button>`;
       
@@ -9589,14 +9589,10 @@ class DataLotto49Advanced {
         const isMid = stat.passRate >= 40 && stat.passRate < 70;
         const badgeBg = isGood ? '#dcfce7' : (isMid ? '#fef3c7' : '#fee2e2');
         const badgeColor = isGood ? '#166534' : (isMid ? '#92400e' : '#991b1b');
-        const isSmallSample = stat.totalEvaluated < 3;
 
         return `
-          <tr style="border-bottom: 1px solid var(--border); font-size: 0.85rem; ${isSmallSample ? 'opacity: 0.75;' : ''}">
-            <td style="padding: 8px 10px; font-weight: 600;">
-              ${stat.name}
-              ${isSmallSample ? `<span style="display: block; font-size: 0.7rem; font-weight: normal; color: #f59e0b;">âš ï¸ ${t('audit.muestraPequena') || 'Muestra pequeÃ±a'}</span>` : ''}
-            </td>
+          <tr style="border-bottom: 1px solid var(--border); font-size: 0.85rem;">
+            <td style="padding: 8px 10px; font-weight: 600;">${stat.name}</td>
             <td style="padding: 8px 10px; text-align: center; color: var(--text-muted);">${stat.totalEvaluated}</td>
             <td style="padding: 8px 10px; text-align: center; color: #166534; font-weight: 600;">${stat.passedCount}</td>
             <td style="padding: 8px 10px; text-align: center; color: #991b1b; font-weight: 600;">${stat.failedCount}</td>
@@ -11530,53 +11526,1383 @@ class DataLotto49Advanced {
                     <div style="width: 75px; font-size: 0.8rem; font-weight: bold; color: var(--dark); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${formatted}">${formatted}</div>
                     <div style="flex: 1; height: 26px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; display: flex; align-items: center;">
                         <div style="width: ${barWidth}%; height: 100%; background: ${barColor}; border-radius: 6px 0 0 6px; transition: width 0.5s ease-out;"></div>
-                        <span style="position: absolute; left: 8px; font-size: 0.8rem; font-xœì}MsI²Ø]¿¢æcÀˆ JÔŒHQ
-’’fÖ—EÎŒÃ´â©.€=tc»¤8ZaGøğÏûà}ØÓú´G¼ù'ûö'83ë»ººÔî‹ğÃîˆ@wUVVVVfVVVÖO&gåûºßße£lšå;ìËÃ(ÿ1‰Ë3ö˜¶ØÖúbLŸÛa­ó(ow»q”ÿÜi]í²’(»ÅYgÁª}6˜`[ğ_>Fíşı¯w¿CÀÒ,å åóÇ_~,Û­a4ú¹äEÙã£,ÍfÉ(ëó/³EZ¶6ØG@¾í°¤ä³Ş8ç¿cW«G›Å<JßaÏ£Í89¯¾
-<~¿«^uÌwıå¬œMÙİ=ö~`Ş#6t¬Œ’”ç½$…¿;yù‚ípQæêşÿln²=ü°ƒ£oÙÓı“}vôêäÙ‹Gß>{uøL¼»Cø-æqTòƒdò4*£7QÊ§íûxG·W”låÓ<º JÊæ¡Ñ8-f<-{^>›rüzpy·[ºôÓ¤˜O£Ë–¦‡€G—'Ù|%PÃø)~µ˜y^ø¢)ÏËÕÆûTØ€’1kèàïÏ>ó1Åg^›–ór‘§¨åYRôà¿2Ë“Q4Eòö¦< w?b[†Æø©"àğûGÀ¬(/§|ïs9Ï¾xøğá.Cù.½@¶¦ÉHÏ†dc“ğOV¥ÅbœŒ \	³‹ùÃâ´ßz„sD! ÚL~&û½or>ÓsŸpúüqWÎ©–ß¥1)~€Q=†Í‚$ÈØQ:ãq(³ö+vÉ^u—y€H¯ £ qOŞeƒw»U@³$]ƒë€Ûzç¸€šó4æùË$Mp4pÛÙaøkFyÈ§;@Æ<I'¶÷Øáaœå³¨,9p~É‘£¡&!g	¼ÒÏÆŒŞ=1ïzeö"9¾8&ğ0‰w˜üªËuv+í£é´ø¥“l+s­7‹æíÔÇ‘x•—l[¼Šfˆa¨˜t3Şî4ÈJ9‡{gQÑN;ˆÅƒ•ê|Zpx,^‹T ÈñÂè‡hª†{´Èa¸Êo¡v/‰Q$‚B‰FI–FÓPzÿ6è#S¦`f9/	‰½Ï¿ü¨±¹Â9hZM·«Nï§,IÛ-”H¶$ êÂ8çjLZN4JT„ıö·ÌüRÌù˜õ;•A³AZUpd§'z@©}Ãª6êVünÀ„Î£Ún„Æà3¾ÈAyO§ ÛATUz¢I0Êfs!â£<É¨îfß¤W\­Fü¤º»W×cªè;+“ÉU(0ËR¯u©Ÿ?>„1¯"|A®š~å<a8Éo­K`}otêÈ[Ùıt•>8Ã¯æ‡kÖøØa#İQ”ÇŸl¬`á3|§*¤¤*uHê"ÿÒ—f{/Eççÿú‡ú`¢:ºZåìÉàºN…†´èÂ ,æØ)-¿¯jšÄÌ]=ÿŸØ„Ş˜º°w´µ[>Ã*Ğ†C é­­/½Ü*¶ìâ+O/±¦>µõ5Í¿WÌ²Ó2™Á¬è°»Ëê	cÂ©ÁôCı]ËàÙê±7Q™£€c'|6ÏrPİ…|OrQå¯€ZŒà×óSÑ®ÚÒÇ|ÊG`£4Y¿©5*RBT”å\°½B¿°sà~”–m«µŞy4]pß˜ÖH=‡ÅÕ‚§`p;°î:ı™_‚%åıN}aW ûãUµCÀ}×¨jc7iÁ/ûz!‹¦ó³htFCè[;Z$“Dz€]…–‚E¡ª`¶Ñ¸{×š•¥šZZ–EŒÓô••‡°4é#*"º2ÊŒ	V+–‰ 0,ê0”XzÃvZ(L/j±cìªSÊZl9#_±€$Wg¹1Ä{=ü	Æ°ÜŸ^Q;=¬İnGlH–ûğtğÖü©…eo÷7Èz„ùë*øê—BÛk%9BÓSœößu*4ğl«3aV9]úW“½Éd0çY‘”T^’b%¸–H%ã<zPä[t+¥;ìeTõÆÓ,Ë‡MÂáªCºmí¥ƒcŸ©fÇ9gF'Y:inû³*â`CØ…;~w¯:7X™öYôá˜–"ÁU‡7ï”$Î=OLø“
-?kÌAQ\ÍÃ­àëkO@EJÇ—`ø9s,uéO¹@ç::wÙ™ô¨¶ñz4ÑtJãöÅh4Úe³(Ÿ$Ào}†>\c˜ÛmU±Ô«¾:q^//ÌŠ°ÂØ6e”!Ş ©_¬&?Ô§*GA¥ˆú¬<ãëI†¾è êºrÂaõ\Ó«€ÃÏŠ^8ãæ…ê‚BW¬ú~=#zŠ$}Š>Ä§IÔÒîrc{[ví½™’Ä 9ıSÊb>e¿ş2 Ù12!:õı¨æ"2Ù9G	UñÔùö–ø„Ì‘•¤òÀûy]‚Ífª2àd‰€gL‚â­ ½wª{2ÓEÅhÙ4JÓYR".Èq2…u†Pı´Ñæe’¦‹˜“æ•àÃz§õw¸€ LO\eC…iˆŠ}fÚ)t; üúKdheô»#ÖœÆ]ò¾ÃÜ$:Ü5X#5Ÿ°V±xQĞŞP’³ÌmÉóBpv‡YYf3¯}Ÿ5KZ‹ûË-yPÛÿP|/Vƒ¨zƒƒ hÖÕ| ®ªµõ+L 1{JÎŠèœÇ –F?s M¢DíÃİ+¼ªV¼Òÿ¤Lù¹‰ÅÚT¯`N’‡%L—ÿ³éõx\ğJ|ÅôáÃYfGÇ¯•S¹–Cä9iu@KV'Dùy–¿@d¥}Eİ9¯•ÈD°T…i}šÕèÜ,{±ìğzÙ4é\<gÊ¡2+£©äÿ
-×êÇf’T
-yªUSY§f	É™a{ kÜ@ÕÙUzÈƒ½œÇ°rŒUÁÄn@O´Gqq=Mãø„Kş³ê¢°Y–„·ZCÂDÊŒÕdAq7dEEì˜a2RaÇ£Ùu…„úk4íı£ıÌHy¼mIGù»¤ñ|" ìğŒ~fq¶N9Ks^ÒšÁñË #,ä¾Ğ:"­Ó?ÂÔB¶z·ÖNQg-xä¢±ÂâÍ£ì§'fÅüşËbíxåŒø:«½«÷ş*cÇiÌÓúáª0ni/¢<y`Zwï7ƒ!}K#Šè‹AÙ	‘TZ®¬Õ©0kƒûµ†£¢av3WÈÂxÑæWî»¤%hÏ“ĞŸ¸[½Åb4ÉÊ€íe|`¾4c(Ş	è0çJ\	÷Pgs²GA÷ŸÙî»¼©Z÷dâM­’e£¸ÑFış©ÃÕ¨íŠÜdl¾å€q4eQ|«cXb`iÀlzåÅ hÙø(•z¼~Æ×x‹<siê}Ìîİ2uëe¹C`áÔ¹¸<””n­EOÄÑ|>½”Q3`‹@·&—íòrÎÍşşG«ëëƒ“é,»8É€Lm@¼Ä/=‰şÓ@@ÌX9ËÜUgMĞ…k4ŞJ8Åß}#Â’>Ñt´˜¢Ñå,‰#iX‘e‹iÌF`ŸqêyÇïÊ5¶şf{µ»ëît‚F†·ÁTfs@Ã,£Wö™¯è«N8×'İof@@FÁ¨¦1-`HPŞÕÒ~Yn…‘.+WBÇ°¦9íõzNw,?ı6Ì xİ gŞiÂP„Æb2ámÉ)~8EzŸ¾sv%Pƒ©Éós°ÂÎ¹ç°€öÙ[mvÛ®õ ä[>ËÎ¹y«Y›*™~ÛÛrš‡¹ÆTéÅÀw°`L;u+hÿ,s)ØÑbÎg0¥@îXÅ,â¸ºÛ´Õ1´à´¶Dö/&<'İ¡$hœåÉ?Zï¶¹²\ˆz†Ñ#¨âê¬`í@t"ï¸…ƒ©òƒLµ“‡
-™dÅŞ’Êc{•QğVÏX~}Şñî fšÇ2ì3˜!ãh,çîehˆê=VX…×†e,Zà9D¨lÊ8Ñ:¶³ø©7_gm³SåLÉÊ3¥Ê|¹6M‘2)EæXXgÑnmßÅí.!öOÁZ/Ùg)­;>'R\OQ6‘ÉhÁÉ·íís¬<ıÄLŠâÕ'_?W'Ş–-úlTÔ|Ca³¥g]Ít³7š¤ÁŠâŞÚw¾VªLŠ¡5)@]UŞGÖ{‡têd`ªoX¸¡¬a[Ÿo‚\—ODĞ«Vy­ÉÁÕÒN+«—%Z|Ş¾]Ş~¦Ì$ÕÚ„ĞZzÁ²6,Œ;(B{¾ÍY	ùŠ[=Æì9å¢ÌØJËçõ¦µ@·:OzU{*û!áí ®Î¢ó7yZÅ,ö‚uåpš~†#\Fä-9ÈÔG$ÔK<ûó¹> fÙL<m2óe½SôC¦”ïlA õÈUß“~	Ü"ü¬}½Ù…ìÛI½é°Ã`°«½ŸÃ ²~?.ö$æÃ(gÑm2ôÙ•\Ó=ƒ™ëµÆştÚnõdÅî4I.Ø4iuôLœ&8§I¦/`5ĞËi:·[¢™–Í“ò½x‘4Ğó=:É»°„­º»®Ş[ ‘¼
-\G¶‰âØ`"ê]Ù.×³èšN“	zoôà‹Æ§YÁËÒ‹2›L¦üeGS½Î¦_Àee.#Åt;¯Ç¸v…Ué‰JK›¹#‡ï-/Ğ çQ>:³Fêe6Ü7Ñ÷®»5ï	Ä¿Å¶6Õºß¥óEÙÄçxTÇ¬mé§³´%ç’)jÏë±XÖZxIÁ#ĞC~À­ëgÓ•±ûVV±§¢ccaöğLÍ pº÷Lqı½ƒ"<!70­‹{Ë‹¬bPô §Ó	º›$jÍê™ˆõVíÚ3SÇîÊîŞu÷•™›G™Ò`„†IÑ³‹‚Èa:E…`ªˆ>Kê]ùÑ5ˆÇ9f·†v6Nö)Qdyœİ¶ ãŒLûØÎ³SÜË-a<Ì¦Ñ³bÎñí§D|ÆaŠK£%r[¸#Ì¢Å§Ã{˜¥Ù4+³z¬ê‡%Of°v8n‘²Ùü-{¸aßnëXÆ5‘±³e~:
-ø$Ny½6Ï*Êº¢Óë:–c‰Ï²øreÑ~¢j(@i†fÊÚïU°µÃgs„S@=wO@¶vmü;i54Z½˜³İ¡Ãy <£BSİ=b…Ça÷»lQ¥Ælö–¡¬QN¡ôZÆelnìş‡âİİÍåX•xtÔ®xjqT3&ªZÈ‹­ƒë™?TÚø=ö Go11½VĞe^z®Ç))^E¯Ú¢N§.BA>JÍRÌq•›=h)Œ`ÁQq_Öq»'v\¼í°q3)àC÷ÜšlÁ;Í†ÂM ^
-ï­>/&A™dË ÈÁsèÒÖê¿úå!­ë¶«ğƒrĞE?ÖÑJ'Yaf‹gr¤ÅSÊ†?İï)Ö‹İgÇ´OzÁùÏqt	ÏpC]Â|ÄL $€£áÁDï™y/
-«×½˜®5èÒ'—s§ò‘>œ+»@ƒqáÎˆHÊ&£‚d·õŞ†Àyb¯‡¯ôêO™ì ‰Ît²“\z_œ noÒ±¦$Æ;`¶sh;ò™Â^J>+ÌRnjOXË6»$mß·Ô•¤ïh™¿ÜK "VÆÙV‹IJA2GÒ—i£!€u$Ğe*¼HRïê˜üJjOÖY¶
-›×²>NRGB\†Óœú÷}
-R½Uãyš¨ûØ\“ÂÇû LW§©(oVÃ‹²ÌRo§W3èÀ:Ğ_‰òK¡­&¾ú‘™°ç¤ Á°Ù|—Í£QRßõ{Û­¦¢óŒÂ:8Dºß8Óœ.ºã£(7£¨
-­€¢[tuíH‚+3W™Ÿ¦/§±M
-¦ñdjƒÍ‡Îqò'980¦\ëç±ÕŒMÕZO‘)n\c-<bƒ• .4"Ê£4æp›¾¦jøª¶Ğåi¬àIgIÚ¶Z¹Û fÃ’Ø GÙ’ãÂÉn oèÖ•;ß8Z8!ñiA¿m‹gKw¬$¨gYë¨4ÎŞFéDsRŸv˜C¸uoG÷Q’kÇÖsF£ºÔ»™¬·å¼éÜ:ÿ©ˆÃ*;5àvGLËª€Â|e.rVø^»»Ÿ@=|:ÕP£B*¡f^ïíÙXëÔDSmÊp"ÂA«–/¤—A$y‹ £E™µ|YĞ3!Sß†/&›ĞJ`ê¨Ğ¬ªV&‡bëƒE2Y]NÖ¯!xKFHf6?rm”Ön•¹meå¸iE½fyÌó:…‚º³›Ù4‰ÙãÁx{üĞê¿m›zêÕeŒÇ'ê‰mD°°¢g“/‘Àüjxâ°,‰ÇÅ~¤s‰dm»Gí¬rt†‹|qÿëííıRŞnÂ2Ënb¹¤Šæ¸Qpx#ÓÆšö±HŸğœÎ¢
-!TÊ¤IÅW#†qû|Í'X±g0ÂMKVU ²fõ1EsJö‹N#epïåòı²İÇ•î÷@iµ(½k
-~P¥—;ˆ^CMÃøTäŸ²ò&şš“Tü6J)«2°èk.ÖY*¿ÚĞzmQ:•`F9¯É89·ÛtëõÂ‡geŠ•Pë«&…0X>MÎWGO¡•jpó–	Mi ª€jó.OP*pœ7@…ÛÌ qÙ[åOÓHjºÍğ`ÀçâôFñª_ÕÊ0Ø4©¨²7«ğlP,¬À:ê/üÇÊ|¢Ó5æ•oO^´AqyäÖ[:œôŠÛºûIÖ>jc9±yÙ¼5eí:‰ÚVNÛ¶z³¦\[,àGV¬!wã™U58qŠ@[ŞÛü,ay•¿åß`ãğÚ	æ¤î…Z×Y±n‰éÃ¡€PF±*¬IX×P×µÓjÒÚ’4­„ím˜ğkdÀS§•®EqªVGo7k^€Ô¢v•Ğµ›¶V%—ÂÕ|{ë—€Ö’v•9£•dídø×1¹…1©ÛóàÔ§Şi:¾xx?º7üFeÿÅD2GMîİ ;â>VšeKØ¤ro´w¨²mï˜İz‡øÙ…ò_¹‡ßÑÎöåëñ[^,¦e±zØá1&8ã¯&7ÌåA-tl–›EåèŒŠØ¡mVÄ0U"hµm-ÇÖYÓğ¹ ×àİ²Ë5œÃùj¶ç§ı\ÇD‚ã"±‚F$ñFÅÙ0‹ò¸>däÌ#sSÔHª3rëª‚§¡'!bíˆá3nYX¦~° «íQ™òÂƒNí¡ÔÕÌ€çÒ+‰2ä›uRhxÍXÎxs(’¼c¨ì‡Ò›^°	¢+¹2×ù.í2:ç…×9“ê‚~»ö©IÅÑ+ä!Y•†gpÁœi>D	¥Óş;c?¨héFşmªëIl:³‚íUrB7ÚX Ùëï²äÑøçîİ*ÿÕ,»Ig³Üø:¤J¬»r†rwµŒªûq0şU:w¥EÅƒ|zBİ8gNü& Z¡£@9jAZøœƒ,'3PğØa;Y]ÀÌ˜
-›9<o%NÙÕL«¡„×o¤‘sÃ°Ì€>yXìA©Åš ÃñC¨QwHt‘644Á‡ŸÙ#ƒ‡4>$³ÅŒR›t4}áéw‰•XÕ<SÁRÖ‹³¨ §G)¦Ü³££Ö‰:‚«:møµÁ’øC%£¾½..Xpèt§'MoOú»jB+R¶I)I"e`ÁIPÄÉG Ş
-™ Ñ"U0M“@TmM—Ğ³ZÈ’·¡~Ô…ÏUÆªb@l]gRvjØ^Bkàx,añ§ËëøÒ
-ÏË€óDÀ=Á-K:¼ (x%rAH¥İƒ…ÏKŒÔñ|]—00˜ö0Ô¤yÔ­bÒ
-v—©–©Ò:ä¼–\ºŠ~;3ZA\¢A5[İºh`” °(‡µ|3mÒÖ ®¯{–05áºò]óVøYş*ûAóìîÁ;ÍVÔ®%!jCvU‰X¨~¦Škì;¦#ËƒĞ‚´:8;fF}hÄ0¿q4* ÙQ
-¤xüF…E‹˜\%&ñ2X°Öƒ¡kmË¿÷åß{òï£½-üfÒ¬Û­YÄÄÖ.Ñ ¥6…YZÓê•×·µ4‚‹2• —¿AW`ÈÙ%h•A¸Šb¢l÷\öšro4Py84
-Eğ³LõÉA®Ïå*U”Ì‹½0¥­Ç9§ÀïªùËÅÇò*,`
-m¯ÕÀöúÜ_«ûë7à'%jnàŞÒÖ †3­\U<å¾ÄØZP^FŒívNàÉƒ¯–C£¢?E‘“DÄÓ#?˜ ABJ‡wÍé-x?SŞÏùw•@/`ÍÃ,'LÍ!¬	ºş`Bj} ‰ı®-ïUu®î"&Ó<ãY9×¢é›<R€Ÿ%€;Z§íÚÔ»)ñ#ãÎ-B–n'¢a2M h)·›Ş“®Qâ-6ÄÈ•À¸"âVLÑ9Ï1²³ÄÙ.óyfª¢ÌÑi¹6t<K —ã((ÆÍ™ï¶”è"û»À*dù 	5cC®.6Ã³l”šd˜ŠÖ#Î\q(Ã˜á§Bx°z¶_Qõ5íP•®+úl˜dKÆ®`¹i7Ú jî({¢³>Í|‹GåËåù¼—ÈJ4¦&ñELÉl+µ¯µ‡zZjÉí@Éí`Éû’÷ƒ%ïJŞ–æ£_ÿ¬Øjuid	iË ¬œjÿU\şâ+×&^¶çç:ıËšv›ao†fúµà,±aVõuÉWİøAi5çùø Š'Ü[Ñ¨´€!wj°áĞòF}ìFÜTñÎã{ãûã&Yüıáööƒ{»L†„ì°ûóìº¸€Â»y'àìø,u]È+¶”2õ¼â•z>wŞbcÇù#ø8H‹fZ&3^ğRì7i)²WZÛ·Ö+³çÉ·tğëÕæ~ÍÙ/)—yéXVÂ ]Á¡[ÓãÜIe·ú5®È&ñh<â_6lÓ¿ß›<À»†åJìN“”wÇSUa’NÒ.ŞîÀDN›]°oçÔb…·0™*ŞÍ…A˜Ö ox#puMŞ£@ä5¸ï_êä`a¦†åtX:¯~Ìò‚káìòsä’¼|·éCògÛ_şÓÿ¼39ßâ[†ŞÃ‡ƒÑ`ô/€™ÿú‡úÏìË!J>±µm’=>ƒ@×YåF<Ïö3´a¬~Š€.˜?Ê\SZL_Ê`ÃK6?ËÀúß1#ÒUã0ğuW8ˆvbÕ,ŠXüFŒÍöF\ßl}-¦¶ÎŒù€_€:e|İ–éÊs]=®Ø)ñÛà6ÙMq;FÁEùe‡0ğXIÏ¤û«ßÜ6^ø"b&ø'Á!'“›Ô2 îğ&¯¾ñ=øöæ®çeWÙ¡ñ|-ôÃ…>Y«v§Ä{Ë]ë.>ªóYÂk°a¬QóHì0–“ÕNOì6ô…Hãbƒ	Æú‘|P%ªvO¼Ãôx0Û‰Îºå’HEócIµİ†¨ƒ:z°NÕ;ãÆÕáè–(›1¢Ì.áOéç;_=ä ôñè[CáxÌÍV1á•+ÿ‰œp»¿~È„[µX	ı58´=Cş;8,õw·„› ˆPAı^ƒ2Ÿ°ÂËÈï>`Ì0 Îkğ¸AÉ¸!µ±‚¦< ¯ÛØ¬	QQ²Ecóæ ]R	Qw·Ø.a÷AÜ¨ïW‘{®>·›¶Şü~‰‡¯Ê(ää“KÄ¬Z¢VW%ëAıØ­2Ì’{k‚ÆéC0‚†ÊôPUJÊĞÑ–ı)OÜ/HÆ—`iQ0,h†y4âİ!//8OÃ†iÃåÕ»r']ÈPùâŞ×÷ÛÒ×”m°éoŸZ7İ=~½õMeµÍ Á¢Bä•£B˜ÍBÔ‹K€ğ»#óé±™İ´`¬íxÓ+ñ½rÓ«¥â²ßŒÿ”å"rS­ûVG‡?ùxü`<¶Lk~¿-ÜªY<İ¯.¶Ã«'ºÏÔ ±z/ŸK!Õöá®ƒª>§uÆ1ğØ2m3Ñ˜ 8ñƒ*DİŠg¯Ç¾’HøÖxs6¸Íœï|!IªbŠÔ—Õ.,wE­s¡Ñ–AwHá¢ÌCxo¨ñrÿä»gğÏÑáşöüèÅÉ³·Çì·ìõ›“£—Gÿ¿~uĞwTèña–ç|JZóxkz,Ä‰C‹ns¤c½B7Iöcmg¬W¤UÀ
-³IÖ´ØaÍïkƒHD.ëÂ³c\ìu…ì[õ–M·Ú:l’.G,¡üvW_BÏt	yµÑûüsÇŞ°÷†«ïæí®[G!X{ù±‰©ô˜ÌŒÏŞDùæFÙÏ9§€TÕ5ç%<›º%ùÂ1e²”˜GÓg€u™Õ©M¶e[D¢,À³ª×Ÿã}0’²`‚¶íÜ¤ö¢a!v­ªöhÏ­Ü·*‹§]ñTQiËPé ú)ÛÜŸ–vZ˜Y¿Ádn?«©‡©×˜¹…[= ¦ÙEaÕF-¥_«Z4¦èIÌ§«™ªvMÅk˜ÖÓÄGë¡gLİvUl>ÏıcVlÊÆ
-İ¢1jÍYÛ‡»ä¡‰L…É„)»ÚM`j›n/83„–òhi#ÀÏÂè¡şlicNk0ç'¼ô$Â±ºàMA³:|Ö’ï†~¸7@@ŸÀÀ†¸B×î:u)í‹b;Ğ°ElÓ2>\±iS¿ëÖ4n5ëŠiY>Ö£ G‹qcÎ©ÚhûŞyŠ±v4¬ôÈ0l¡@—JÊÊ}®©Şu¼Î<°X7¬½ÜÊåæÀÖWKt¤°î¬tOd"5ÜÂË
-!n	€>Äª°½Ş¹À]ÒĞ}Ÿèı;^Ì"&¨´Ÿ&é¯ÿk–Œ2 Õä×?§À‚°å“¬c‰eq—êbfÏïe—ÍÊıóÉ+ª×¨4h5Š7J·*º@4*¡|ÅÂ†B±˜	]´g*}—-²RînvÙVÿ7ÆtÒÁ*Xî1 ¦+u5(’MºĞ#»Ğ]S¨N/8-<
-6 nQ6=ƒI°*×±4Í¶Ñ4Û=3AY»HX4‡EHÔÑ½¼ÑT58y¶“3›š(ĞK<ôÜhY`)ß®pa¼pí‹.öTk-"/µóìÄŠœóÈ‡Û
-¨[ÔÙ«Ø	d•¾Ù1^Ætê[„+®‚ÈjsíFÈ¾P¦‘«:ÕƒÍÁ~Õ€÷wVP„T1ÃäJ1J«ÜO­ÅV©•šM,©áK„ö3«›.Z×*¼»2%ÍvUò‰û*Ëg˜¨	P…úİA¿OoÕ‚J»•û&ƒ$Ú%:ÖÙ1áË©«ü§LÏu
-ÄÙ7ıY†•íÖïĞxyÙãF0tåª'ªtÕ5U‡FõÕî×T‹F|NûÓNÕPÉy6ÊD,Ÿ(¬:»Oû¢Dºï\[Ù_<ÿ@—‘†Öô®z¥
-uàê7ïw›!DÖYîºrÉ~‘Ä(R«Ğj:ÎºãŞ<•GiA7³u1ûB¼È©Nw»ßgäâã±(Ø‚é¡¹ÙÉ×Û˜ôl8éò^ÒcEÌ~¦l÷e$“I¦Şã“,=pk†è³OcY¥ºxîQ\üîçúA4ú¯—ûş¨í¯yĞgnö1çR¨v«7”Õ“tÒUåÍôàÅ¶ÑHN]	ª,¾h.NÛ7m¤( ò`ş2,ñVeqwÂ*@EIº˜> Ø²Ş?óš:SOøºá@ì¢XÕRwô -q©Š’š5
-+V“äí(:¯Úš!bÇ¦è²3dÏU{÷Å]£×ş¶uñwº¯/©sÆ˜¤óMüÂñ¼MabÔéTó3¯ì0,¿!¶aÍ%»æğ„ Œ:¸nÄ @%¸Š*}‚©p0T %ß!sR&zh’VDÅe:bù"U2Ã’òH%ªĞ²	;²Ä¸— èå“(ÎŠ[µJÌõNÆkñ<Ïr7ûMÍåàVÆqj„n(|g3+„b(c‘A£½T@¼¡Ò5é9:"Í†+fYÌW…şÊ.ƒ-£—˜²$Ÿd'\_ ¿>Dé‚Mg1#[”xà?@Ñd˜ËóË7ƒõşGºÀc(Ü¸që—¹ÎÒ¶ÎìúJöJ3æ®A+LÕô¡æL‘t bv4f_Ñ¢êuÖÁ»Kp:³VôêZ‰jŸlÒÛE¯5ô…kÍ™n³9õ´%(é´ËÁ & 0ÂIEk'Š_©êA´<(^I“_–÷aIÅè%şZjƒ8¶ÁsSã¿ÁÜİº‹D:oj*õ—i=KÑc/«KËië»)/eP2¬¤Sº·"ôfò2K¯„ÎI_×4B)G»×±CÍéPä]Ñ3¤ NALğ%mzƒVñe`LÉòÍ…!½*XåÇ¬qJYÅ”7¢€,¨ÿöõÑ’ºPÂ¯7,rır5=‘ùåê9Ü+ë±¸Vj(…×È¿šö•ìaí¸ìPMş¯fUÊÑ5× í¾“º,óîTĞÍhw<>Y"b;y±cÍ¸®Í—VÿìÃhºhÿ#ÆßY?–€†‰í“K`”ØÌe•ŒÓ±Xm	Pò)!¼ïÓ¯CÊ‚p©:’ı–Àã˜Õî¢F,ußg±N…A—â<ÁPºLóHË7nŸ“éµÃymvœç¨¿/b·n•ç(ÿ	nv”ÂĞ"¯ß/ğY’oùh!ÎØ„é²>?E©W¼¼)'æYò	x/æÅs-šó&5–×zëÅlØ5¢ó(™¢Y!'°ÎŒ’}ß§îZ÷5„â4†€ËRK+€íĞívÙÛh±ÁÛ{ašIÁ8
-À"9Ïh#Äˆ-2#¤`Àjëi:T…¼Ê'znßo÷,•DN6‹ò]	`‡³lÊ£”]bLüé;ç+]“x6*Eçñ_s)À²Š¦¼ È„XAÉ„çØK´­`Õ¡ÕÍ’b–±ó¤X8û˜
-@„œË0ğœ¾>²òÆ¢ûÍ¦ƒîÊã”j¼«œÅ•¦òÈ‹Ii·yEP¿w¯£Î”Kù(Vîzl;•|ºÖªû[Üd[èÀäLĞ“Ê@çF1ÒlÇa”[7&TA;½ãXùU´Õ%Ùb‡|Æ°¢Ã¿aƒ­¦#ÅÑE”Ğu‚È0ˆmêlzÎqÃläè,ŸÕSÜ}©PªrÎ Då¸?,ØˆIS¸‰qšs1.t„g"‡¿œLíïğfp˜T—ÖÈH3O2¡à×?¡Nìù@†M’q‚A•Ç|:VÓİu¨¼57ª"5Ä;ò È;­$‘»IÅšrª™¤ RXÇÑÛövºùßÿÀn±²§j+<´¾ì¨¦«ñ³5Xr¤7_gíÒ§¤ˆîœ›ÕáÊ&/ıß%Ò°`/‘yÙa”O3!+ĞM>¾€F§Æ[a“Ée˜y‚°ˆğ`’ƒm×+cDå1•óÅ¤CRø± Ês0>‰Ä0ƒîõûMSH‹İöv-}˜©V{(r¶«Gµ¹–ÔZGuĞV/Ëàİ´‘¼½F‹,·oñÆ·™=u*êÃ²<*M¹I%ğ†'+·Du6¬˜‡ĞÜ×»]é.ÙEm:Iæğnó4u¦šä<¨üV\Ôv&A…ç<_¦rÁôCD%(Äº¨o'<pÓ‹Ü#zéƒ¿PG`}œÈI-Ãö•°Æ\,¨uñ-€Îp{"BA›U»óIJMÏô±•vµóX¤äÍÒîW›ÁàĞ£
-eĞe$°Ø”`}*z	‹Ù¢Î£öÏÿ—O¥
-4Pt` Æ	m.8Ù^Î@5şúÇ•ZôK”»À¥%´"•†É”Ñ8ı„6TZH!)U%_©Ç,'\T:÷²êÊ–³ƒVz:i’Ù¿‘f¢)¯…(Tb¿<b/éKH€ÊÂ¾V‹•<,!éì‡!ØøÑát5ä¬İŠbÀ:~»Ë•ŸG¡ =(Ö«¯ŒlïD®tá[( qé+¦ÙÅëüF7`ŒJš #„3ÂàbÔÇ7ÊüÉTˆ3›íj» ´!ìòã[°¿xNQ3­ØãÑEãè—Æ”UrŠªEça¥^uQ‚X8JUÃş&Kx£è‰r=cÄCeç8 ‘ùŠîàaò;pVs ?Ø†´Ô,‘ñœÁ6ˆ%®`	àGßY§ª¯à–_°a‰;xX:Ş`»æ³óšS¬K(CÑgşÓf_…$­
-LTƒÄ-oí’i†éu6œ¼Â÷¯÷şÙ¹áEi²q×ÙÇWôõÉ%r'’œ¢š$yvªÊı*Ğ²ôò¥ş¿e­Y{’İeM×šW?Š
-ÆÊª1M†–èùyÀÛˆ†·Ûˆ•çŠ¹¦x¬v:ú×ø ¡9ÇæÓmUsÁ¸—‡ºvãã=öbÄDº’Vt°Êè È¬|@¿ˆ~ıuÿ	UQ)Æ É¼S/]E‡É'ZílÕE
-56İËNbu·ƒ–=Hz[Ûáş¹åú½onÔ;!bÂ¶Z}SáOTi@üèb‡âøi¸”Œ/PÆ^MşU«ÉšIG%z³Å%F‹+¬äPöGf!ˆ›³E+vša¡üõQ®‰¯Úe[7ÄSçõº6m'ytYKØ› 6Œ~ÊŞ(Œ®_hj†•Y*fÇ
-ª`Í*zà"Híï8=¬"ªr%‚Á}¥I¬Â]«²Ê~¿BgD(¬Ó e²e’%÷ª)?™5^¡·/ƒU¤3Ğ×‚¡²ö}õTÒáz?¢ ¤có„Hé¨½V@|è¦	UV–zÿˆbÎ…Uï}nÒ³€DšaÊ­.½&uxJ8¥^‰“û•Áf¢K±éè>”º +ÀMÀ<+tŞˆ0J©Uİ^@o†ráš@'ş¯–É¾l÷õÆy|g²6ÏÙ¯šc	FN¹¤Œ…ÿéë—µû> ¾Š“ìø,S;@ÊC-×¶û^ÎÅn]e"» Lš×±)öjrAÔíè`´.W7@ÿ”%ió…ÈhC×’Œ³ KâG_İ¸Ş¥³>’XşhDk´®ºE#å¯øoÿ-”æûxÕ-»Tá¿ü÷æ
-òº]ü¿’ùó—?şc«êV›<ïÙïës”ä“aÔŞÚl6î=Øè÷Û“±D(e/cÉƒkg,fÓ˜’o(ªbZkXÄ¸wó/30ê(%Ìf'eäÂ
-=iÈzID<Ø|³½1ØzèÅµ¬¼T˜"¥P-qBxôÚ"zùÙ0ÉG¢–TÄO…¶µ(VÓßeıİº÷pãÁ7øè®ß[iKü;+£¡öt×UFµ‰85x?~„1Béä±dSŒ
-ÇÆÅÃæŒŒÀ—˜»ŒOsIªKUY3tcy¥QÜ§U¬J¨‰Š8@I%?•bĞ"s»Ff€×dtò²`Zæt}ÊX/ÇØ“$í–Ù\§ô©¡M˜—R°¾ºu»TÓ^
- IÕ5Œ%‡$6Ùa¿ÖEr¦şõb›Îù,ÿUÃVõeè2jçÙ‡#³@¿K)ºR0º$´µÃD0Şá–Ño˜œä ¥ö¡¼‰VØÄlú+dÈ &çùŒ¿œ‰`:9$8lÆ|„Æ<í=É:t“†ãFô´wªñ®iTş³d:‰¦Ü8~àVo[C\åkËª¸M°Æ¸i†Ú_ª°hš ÖÄ³æoè½*š~˜§{ü‰@›{/*‚Ïß·p®i"ÔQ×¯y`|'=£]É¡Şá4ÙIE—Ùmôöµá\[Îb`'–N<¥m‡ğb‡ÂÍr}RÍYê\ãpe+Ì'@|dm¢2+ÊrIÆ²p6•@O—eÓ{™ÃÎŞã¨;ìT‚Ün×ø4ƒ«cÃeÇ†°	d¹£T,àÉÕc¨eÂ7ÀÔ a~Ú[T|r§`Ü’’Ã«cˆHi÷U
-`5‚…6~ıcQÒNí¸5ÅhxAß­¤öû»ş±Õ§ŸË%‹Ù{Ò	°§˜t}éÕ˜˜b1šRDaiÃhÌ@n YğFñ¢ëÄŠ.,];VË‹ªºFt–ìIUˆ˜C÷øm €Ã*Ls¡^ª*ìÉ:Ñ–I@»Ø§Ûó€SìÙWˆus2bÃÙo.ù„qiüß"6MÏâÓa‹Í[¨Z°1«´
-°?%èµ¥ÕØ…o3’>a'Kóo:ÃM-Ô´×±u°‹>1ns´+:Ñ‚auêõØ¶*!”.ê–ª_¢å¨5¬d7ˆU²T,Åu½¯lãÓ‘Lz2Ïb©#èÛ#]Y<¨?O fµÙ)V©	êVÓÔ¦†(¯Œ¹`µ3‘sZs’N9.ä$Å8oÊ™XÅB¦q÷8¨¨$¬«õ'ëÖLş:qùc°ÉyN¥´e×JİP‘zÚ°€Q&¸•6IAE%]ä"TŞYsBèée“¦I²#Ò2ÎjîrÀ:6ËÒ^
-ıË¹ÊgÕ³×M¾ñŸD¸¦1M ‚Í0]}-DgÅ½’ÿ¾”Zï4AYF;aÇ¿5È¶Ë‹ÃÈd˜]°§
-€ı£Ó†‘Mï3œÅ6Ÿ.òˆLQ9K0¢o€;mC´^ÆŠ!!L2äyœX0·i
-?Şc[&tÙ0ijş±“5Úşxvô©ê,İE]ÿRİCíßêáÅ‡{=Ã˜mĞ$"+–•©È¬2vÉÎ³éŞG*oÖÍVB·´º‹ï6â0o'ó†ñ—7ˆ½¼YÜåõb.o!Şò–c-?Eœå-ÅXŞ ¾ÒHÊóhšå/aÚ€ÜIDŒeĞÙ±Í'+Ä’‚kFY®Ô¦u\»¾ÉÚHÈk5G`ÜÆ\·…æmt-D]Ô‚Ñ”u‘”ë¢ûwÉ2)ˆºé®ĞMWú§øŞSYu¡˜>ĞjŒbM •wˆ;ÏE%!®ÔŠn›ÖKé±o¯‰Ï¬‰Í„Öì8W×7
-ÈDô‹Já@Sñ~kÅğR¯ó\‰,EÍĞy£úÍbÓ<y“å"×‘Ç"‘*‡pÙ@ƒãÖ<ˆë³Ç²¨6s—ƒLNäºHî¢•-®Ï ”éÚ›˜õ~%ÇµBÜ­[µªœ¶Ã$EäUwDq|‡UÈº!›ƒ¦vÜ–ÃBH^i¯Œæë}ËË,O½DWámÈ—‰MÕ_C(İêatrí„|ÛêÔ»ŸË³bıÓÙşù¨úUÚßûÌJoößujoº7•ìJÃÆJ23¡¨ÕM†"<æôˆĞÿo‰C÷B®ywP€çŠ$un­„Ô°óß5€ÒZfÓC¼Ö(Ë“õÃ(0:ÙÜM€ˆTÄ	å[!˜Ò}êï¥yLe.¶£–q¤%t­ø(·M6ÄÅ¤¼p>´‘a‰²ú‰”ß%“³)G‘k!m¼‰ƒğ!§RYü˜”gíVŸµ:5¯õ¯¶XúÏÆÄáÊuB¤~ùÑF4^]tÏÔ©O®ióªéuƒ©j4?¥ëPÑ­Çµùzİ[‰¯r‹^3lHı•_–má>S$ª	¹@ğÌh>…Ù6e	ğ'™iÙo#gÑ|~‡ÁÔº0‹/)#ªÈğìwÉ[¨jKÑ‰VJD¢v¹p«ê)%-ËìşCĞ½ØlŒ±Æ–”Ô AcŠÿòERPØs»õôõK©¥EşXø¶5à‹İ~~ôïvØ~³(e|6//ÑnaS›•Ğ‹’(Œ§Æ9zk(UálÀ;²ØÇ«İÿ  ÿÿ r|Ü0
+                        <span style="position: absolute; left: 8px; font-size: 0.8rem; font-weight: 700; color: ${barWidth > 12 ? '#ffffff' : 'var(--dark)'}; text-shadow: ${barWidth > 12 ? '0 1px 2px rgba(0,0,0,0.4)' : 'none'};">${t('backtest.economico.vecesCount', { count: item.freq })}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+  }
+
+  // ===== BIG DATA INTELLIGENCE =====
+  
+  updateBigDataPanel() {
+      const lastDrawsContainer = document.getElementById('lastDrawsDisplay');
+      const dayTopContainer = document.getElementById('bdDayTopNumbers');
+      const alertsContainer = document.getElementById('bdAlerts');
+      
+      if (!lastDrawsContainer || !dayTopContainer || !alertsContainer) return;
+      
+      if (this.historicalData.length < 2) {
+          lastDrawsContainer.innerHTML = `<div style="color: #999; font-style: italic;">${t('bigdata.datosInsuficientes')}</div>`;
+          dayTopContainer.innerHTML = '<span style="font-size: 0.8rem; color: #999;">-</span>';
+          return;
+      }
+
+      // 1. Contexto Inmediato (N y N-1)
+      const drawN = this.historicalData[this.historicalData.length - 1];
+      const drawNminus1 = this.historicalData[this.historicalData.length - 2];
+      
+      const renderMiniDraw = (draw: Draw, label: string) => {
+          const formattedDate = draw.date instanceof Date ? draw.date.toLocaleDateString() : String(draw.date);
+          const ballsHtml = draw.numbers.map(n => {
+              let className = 'mini-ball';
+              if (this.hotNumbers.has(n)) className += ' hot';
+              else if (this.coldNumbers.has(n)) className += ' cold';
+              const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+              return `<div class="${className}">${displayVal}</div>`;
+          }).join('');
+
+          let starsHtml = '';
+          if (draw.stars && draw.stars.length > 0) {
+              starsHtml = draw.stars.map(s => `<div class="mini-ball star-ball">${s}</div>`).join('');
+          }
+
+          let extraHtml = '';
+          if (this.currentGame.id !== 'euromillones') {
+              if (draw.complementario !== undefined) {
+                  extraHtml += `<div class="mini-ball complementario-ball" title="${t('common.complementario')}">C${draw.complementario}</div>`;
+              }
+              if (draw.reintegro !== undefined) {
+                  extraHtml += `<div class="mini-ball reintegro-ball" title="${t('common.reintegro')}">R${draw.reintegro}</div>`;
+              }
+          }
+
+          return `
+            <div class="mini-draw-card">
+                <div class="mini-draw-header">
+                    <span class="mini-draw-label">${label}</span>
+                    <span class="mini-draw-date">ğŸ“… ${formattedDate}</span>
+                </div>
+                <div class="mini-draw-balls">
+                    <div class="mini-balls-group">${ballsHtml}</div>
+                    ${starsHtml ? `<div class="mini-stars-group">${starsHtml}</div>` : ''}
+                    ${extraHtml ? `<div class="mini-extra-group">${extraHtml}</div>` : ''}
+                </div>
+            </div>
+          `;
+      };
+      
+      lastDrawsContainer.innerHTML = 
+          renderMiniDraw(drawN, t('bigdata.ultimo')) + 
+          renderMiniDraw(drawNminus1, t('bigdata.anterior'));
+
+      // 2. Patrones Temporales
+      this.updateNextDrawDayOptions();
+      const daySelector = document.getElementById('nextDrawDay') as HTMLSelectElement;
+      const selectedDay = parseInt(daySelector.value);
+      
+      const dayFrequencies: { [key: number]: number } = {};
+      const dayStarFrequencies: { [key: number]: number } = {};
+      let dayDrawCount = 0;
+      
+      this.historicalData.forEach(draw => {
+          if (draw.date.getDay() === selectedDay) {
+              dayDrawCount++;
+              draw.numbers.forEach(n => {
+                  dayFrequencies[n] = (dayFrequencies[n] || 0) + 1;
+              });
+              if (draw.stars) {
+                  draw.stars.forEach(s => {
+                      dayStarFrequencies[s] = (dayStarFrequencies[s] || 0) + 1;
+                  });
+              }
+          }
+      });
+
+      if (dayDrawCount > 0) {
+          const sortedDayFreq = Object.entries(dayFrequencies)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 10) // Top 10
+              .map(pair => parseInt(pair[0]));
+              
+          let html = sortedDayFreq.map(n => {
+              let className = 'mini-ball';
+              if (this.hotNumbers.has(n)) className += ' hot';
+              else if (this.coldNumbers.has(n)) className += ' cold';
+              const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+              const positionalName = this.currentGame.id === 'nacional' ? t('bigdata.cifraPosicional', { n: Math.floor(n / 10) }) : '';
+              return `<div class="${className}" title="${t('bigdata.frecuenciaTooltip', { count: dayFrequencies[n], extra: positionalName })}">${displayVal}</div>`;
+          }).join('');
+
+          if (this.currentGame.maxStars > 0) {
+              const sortedDayStarFreq = Object.entries(dayStarFrequencies)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 2)
+                  .map(pair => parseInt(pair[0]));
+              
+              if (sortedDayStarFreq.length > 0) {
+                  html += `<div style="width: 1px; height: 15px; background: #ccc; margin: 0 5px;"></div>`;
+                  html += sortedDayStarFreq.map(s => {
+                      let className = 'mini-ball star-ball';
+                      if (this.hotStars.has(s)) className += ' hot';
+                      else if (this.coldStars.has(s)) className += ' cold';
+                      return `<div class="${className}" title="Frecuencia: ${dayStarFrequencies[s]}">${s}</div>`;
+                  }).join('');
+              }
+          }
+          
+          dayTopContainer.innerHTML = html;
+      } else {
+          dayTopContainer.innerHTML = `<span style="font-size: 0.8rem; color: #999;">${t('bigdata.sinDatosDia')}</span>`;
+      }
+
+      // 3. ValidaciÃ³n del Ãšltimo Sorteo (NEW)
+      let validationHtml = '';
+      if (this.currentGame.id === 'euromillones') {
+          const currentNumbers = Array.from(this.selectedNumbers);
+          const currentStars = Array.from(this.selectedStars);
+          
+          if (currentNumbers.length > 0 || currentStars.length > 0) {
+              const hits = currentNumbers.filter(n => drawN.numbers.includes(n)).length;
+              const starHits = drawN.stars ? currentStars.filter(s => drawN.stars!.includes(s)).length : 0;
+              
+              validationHtml = `
+                <div class="bd-alert ${hits + starHits > 0 ? 'success' : 'info'}" style="margin-bottom: 10px;">
+                    ${t('bigdata.tuSeleccionVsUltimo', { hits, starHits })}
+                </div>
+              `;
+          }
+
+          // Validate saved tickets against last draw
+          const lastDrawDateStr = new Date(drawN.date.getTime() - (drawN.date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+          const ticketsForLast = this.savedTickets.filter(t => t.gameId === 'euromillones' && t.drawDate === lastDrawDateStr);
+          
+          if (ticketsForLast.length > 0) {
+              let totalHits = 0;
+              let totalStarHits = 0;
+              ticketsForLast.forEach(t => {
+                  if (t.validation) {
+                      totalHits += t.validation.hits.reduce((a, b) => a + b, 0);
+                      if (t.validation.starHits) {
+                          totalStarHits += t.validation.starHits.reduce((a, b) => a + b, 0);
+                      }
+                  }
+              });
+              
+              validationHtml += `
+                <div class="bd-alert success">
+                    ${t('bigdata.tusBoletosVsUltimo', { hits: totalHits, starHits: totalStarHits })}
+                </div>
+              `;
+          }
+      }
+
+      // 4. Alertas
+      alertsContainer.innerHTML = validationHtml;
+      
+      // Check double repetition
+      const intersection = drawN.numbers.filter(n => drawNminus1.numbers.includes(n));
+      if (intersection.length > 0) {
+          const displayIntersection = this.currentGame.id === 'nacional' 
+              ? intersection.map(n => `${n % 10}${t('bigdata.cifraPosicional', { n: Math.floor(n / 10) })}`)
+              : intersection;
+          alertsContainer.innerHTML += `
+            <div class="bd-alert warning">
+                ${t('bigdata.dobleRepeticion', { numbers: displayIntersection.join(', ') })}
+            </div>
+          `;
+      }
+      
+      // Check absence warning (if hot number is absent for long)
+      const superHot = Array.from(this.hotNumbers).find(n => (this.numberStats[n].lastSeen < this.historicalData.length - 10));
+      if (superHot) {
+           alertsContainer.innerHTML += `
+            <div class="bd-alert info">
+                ${t('bigdata.calienteAusente', { num: superHot })}
+            </div>
+          `;
+      }
+      
+      // General advice based on N
+      const repeatedInLast = drawN.numbers.filter(n => this.hotNumbers.has(n)).length;
+      if (repeatedInLast > 3) {
+           alertsContainer.innerHTML += `
+            <div class="bd-alert success">
+                ${t('bigdata.ultimoMuyCaliente')}
+            </div>
+          `;
+      }
+  }
+
+  applyBigDataStrategy(type: string) {
+      if (this.historicalData.length < 2) {
+          this.showToast(t('toast.bigdataDatosInsuficientes'), 'warning');
+          return;
+      }
+
+      const lastDraw = this.historicalData[this.historicalData.length - 1];
+      const daySelector = document.getElementById('nextDrawDay') as HTMLSelectElement;
+      const selectedDay = parseInt(daySelector.value);
+
+      // Calculate day hot numbers again (could cache this)
+      const dayFrequencies: { [key: number]: number } = {};
+      this.historicalData.forEach(draw => {
+          if (draw.date.getDay() === selectedDay) {
+              draw.numbers.forEach(n => dayFrequencies[n] = (dayFrequencies[n] || 0) + 1);
+          }
+      });
+      const topDayNumbers = Object.entries(dayFrequencies)
+          .sort((a, b) => b[1] - a[1])
+          .map(p => parseInt(p[0]));
+
+      // Base Candidates: Day Hot + General Hot
+      let candidates = new Set([...topDayNumbers.slice(0, 15), ...Array.from(this.hotNumbers)]);
+      let suggestions: number[] = [];
+
+      if (type === 'conservative') {
+          // 0 Repetitions from last draw
+          // Remove last draw numbers from candidates
+          lastDraw.numbers.forEach(n => candidates.delete(n));
+          
+          // Pick top 6 from remaining
+          suggestions = Array.from(candidates).slice(0, 6);
+          this.showToast(t('toast.bigdataSugerenciaConservadora'), 'info');
+
+      } else if (type === 'balanced') {
+          // 1 Repetition (Best one)
+          // Find hottest number in last draw
+          let bestRepeat = lastDraw.numbers[0];
+          let maxFreq = -1;
+          
+          lastDraw.numbers.forEach(n => {
+              const freq = this.numberStats[n].frequency;
+              if (freq > maxFreq) {
+                  maxFreq = freq;
+                  bestRepeat = n;
+              }
+          });
+          
+          suggestions.push(bestRepeat);
+          
+          // Remove other last draw numbers
+          lastDraw.numbers.forEach(n => {
+              if (n !== bestRepeat) candidates.delete(n);
+          });
+           candidates.delete(bestRepeat); // Don't pick again
+
+          // Fill rest
+          suggestions.push(...Array.from(candidates).slice(0, 5));
+           this.showToast(t('toast.bigdataSugerenciaBalanceada'), 'info');
+
+      } else if (type === 'risk') {
+          // 2 Repetitions
+           // Find top 2 hottest in last draw
+          const sortedLast = [...lastDraw.numbers].sort((a, b) => this.numberStats[b].frequency - this.numberStats[a].frequency);
+          suggestions.push(sortedLast[0], sortedLast[1]);
+          
+           // Remove others
+           lastDraw.numbers.forEach(n => {
+              if (n !== sortedLast[0] && n !== sortedLast[1]) candidates.delete(n);
+          });
+          candidates.delete(sortedLast[0]);
+          candidates.delete(sortedLast[1]);
+
+          // Fill rest
+          suggestions.push(...Array.from(candidates).slice(0, 4));
+           this.showToast(t('toast.bigdataSugerenciaRiesgo'), 'warning');
+      }
+
+      this.suggestedNumbers = new Set(suggestions);
+      this.updateGridNumberStates();
+      
+      // Scroll to grid
+      document.getElementById('numbersGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  showMainApp() {
+    const mainApp = document.getElementById('mainAppContainer');
+    if (mainApp) {
+        mainApp.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Update sidebar active state
+        document.querySelectorAll('.sidebar-links li').forEach(li => li.classList.remove('active'));
+        const activeLi = document.getElementById(`game-${this.currentGame.id}`);
+        if (activeLi) activeLi.classList.add('active');
+    }
+  }
+
+  showBigDataIntelligence() {
+    this.closeSidebar();
+    this.toggleModal('bigdataModal', true);
+  }
+
+  showOfficialDrawsModal() {
+    this.closeSidebar();
+    
+    // Reset search state
+    this.officialDrawsPage = 1;
+    this.officialDrawsSearchQuery = '';
+    const searchInput = document.getElementById('officialDrawsSearchInput') as HTMLInputElement;
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    const gameNameEl = document.getElementById('officialDrawsGameName');
+    if (gameNameEl) {
+        gameNameEl.textContent = `${this.currentGame.name}`;
+    }
+
+    // Toggle header columns depending on current game
+    const extraHeader = document.getElementById('officialDrawsExtraHeader');
+    if (extraHeader) {
+        if (this.currentGame.id === 'euromillones') {
+            extraHeader.textContent = t('officialdraws.extraHeader.estrellas');
+            extraHeader.style.display = '';
+        } else if (this.currentGame.id === 'eurodreams') {
+            extraHeader.textContent = t('officialdraws.extraHeader.sueno');
+            extraHeader.style.display = '';
+        } else if (this.currentGame.id === 'gordo') {
+            extraHeader.textContent = t('officialdraws.extraHeader.clave');
+            extraHeader.style.display = '';
+        } else if (this.currentGame.id === 'powerball') {
+            extraHeader.textContent = t('officialdraws.extraHeader.bolaEspecial');
+            extraHeader.style.display = '';
+        } else if (this.currentGame.id === 'megamillions') {
+            extraHeader.textContent = t('officialdraws.extraHeader.megaBall');
+            extraHeader.style.display = '';
+        } else if (this.currentGame.id === 'bonoloto' || this.currentGame.id === 'primitiva') {
+            extraHeader.textContent = t('officialdraws.extraHeader.compReint');
+            extraHeader.style.display = '';
+        } else {
+            extraHeader.textContent = t('officialdraws.extraHeader.reintegro');
+            extraHeader.style.display = '';
+        }
+    }
+
+    this.updateOfficialDrawsTable();
+    this.toggleModal('officialDrawsModal', true);
+  }
+
+  updateOfficialDrawsTable() {
+    const tableBody = document.getElementById('officialDrawsTableBody');
+    const noDataEl = document.getElementById('officialDrawsNoData');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    const query = this.officialDrawsSearchQuery.trim().toLowerCase();
+    let filtered = this.historicalData;
+
+    if (query) {
+        const parts = query.split(/[,;\s]+/).map(p => p.trim()).filter(p => p);
+        filtered = this.historicalData.filter(draw => {
+            return parts.every(part => {
+                const numVal = parseInt(part);
+                if (!isNaN(numVal)) {
+                    const numInNumbers = draw.numbers.includes(numVal);
+                    const numInStars = draw.stars ? draw.stars.includes(numVal) : false;
+                    const numInComplementario = draw.complementario === numVal;
+                    const numInReintegro = draw.reintegro === numVal;
+                    return numInNumbers || numInStars || numInComplementario || numInReintegro;
+                } else {
+                    const dateStr = draw.date.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toLowerCase();
+                    const drawTypeStr = draw.drawType ? draw.drawType.toLowerCase() : '';
+                    return dateStr.includes(part) || drawTypeStr.includes(part);
+                }
+            });
+        });
+    }
+
+    // Sort newest first
+    const sortedDraws = [...filtered].reverse();
+    const totalItems = sortedDraws.length;
+
+    if (totalItems === 0) {
+        if (noDataEl) noDataEl.style.display = 'block';
+        const infoEl = document.getElementById('officialDrawsPaginationInfo');
+        if (infoEl) infoEl.textContent = t('officialdraws.sinSorteos');
+        const pageEl = document.getElementById('officialDrawsCurrentPage');
+        if (pageEl) pageEl.textContent = t('officialdraws.paginaUnica');
+        
+        // Disable pagination
+        const prevBtn = document.getElementById('officialDrawsPrevBtn') as HTMLButtonElement;
+        const nextBtn = document.getElementById('officialDrawsNextBtn') as HTMLButtonElement;
+        if (prevBtn) {
+            prevBtn.disabled = true;
+            prevBtn.style.opacity = '0.5';
+            prevBtn.style.pointerEvents = 'none';
+        }
+        if (nextBtn) {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.pointerEvents = 'none';
+        }
+        return;
+    }
+
+    if (noDataEl) noDataEl.style.display = 'none';
+
+    const totalPages = Math.ceil(totalItems / this.officialDrawsPageSize) || 1;
+    if (this.officialDrawsPage > totalPages) {
+        this.officialDrawsPage = totalPages;
+    }
+    if (this.officialDrawsPage < 1) {
+        this.officialDrawsPage = 1;
+    }
+
+    const startIndex = (this.officialDrawsPage - 1) * this.officialDrawsPageSize;
+    const endIndex = Math.min(startIndex + this.officialDrawsPageSize, totalItems);
+    const pageItems = sortedDraws.slice(startIndex, endIndex);
+
+    // Update pagination info
+    const infoEl = document.getElementById('officialDrawsPaginationInfo');
+    if (infoEl) {
+        infoEl.textContent = t('officialdraws.mostrandoRango', { start: startIndex + 1, end: endIndex, total: totalItems });
+    }
+    const pageEl = document.getElementById('officialDrawsCurrentPage');
+    if (pageEl) {
+        pageEl.textContent = t('officialdraws.paginaDe', { page: this.officialDrawsPage, total: totalPages });
+    }
+
+    // Prev/Next Button states
+    const prevBtn = document.getElementById('officialDrawsPrevBtn') as HTMLButtonElement;
+    const nextBtn = document.getElementById('officialDrawsNextBtn') as HTMLButtonElement;
+    if (prevBtn) {
+        prevBtn.disabled = this.officialDrawsPage === 1;
+        prevBtn.style.opacity = this.officialDrawsPage === 1 ? '0.5' : '1';
+        prevBtn.style.pointerEvents = this.officialDrawsPage === 1 ? 'none' : 'auto';
+    }
+    if (nextBtn) {
+        nextBtn.disabled = this.officialDrawsPage === totalPages;
+        nextBtn.style.opacity = this.officialDrawsPage === totalPages ? '0.5' : '1';
+        nextBtn.style.pointerEvents = this.officialDrawsPage === totalPages ? 'none' : 'auto';
+    }
+
+    // Build rows
+    pageItems.forEach(draw => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #f1f5f9';
+        
+        // 1. Sorteo #
+        const tdId = document.createElement('td');
+        tdId.style.padding = '12px 15px';
+        tdId.style.fontWeight = 'bold';
+        tdId.style.color = '#475569';
+        tdId.textContent = `#${draw.id}`;
+        row.appendChild(tdId);
+
+        // 2. Fecha
+        const tdDate = document.createElement('td');
+        tdDate.style.padding = '12px 15px';
+        const rawDateStr = draw.date.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        const capitalizedDate = rawDateStr.charAt(0).toUpperCase() + rawDateStr.slice(1);
+        tdDate.textContent = capitalizedDate;
+        row.appendChild(tdDate);
+
+        // 3. CombinaciÃ³n Ganadora
+        const tdBalls = document.createElement('td');
+        tdBalls.style.padding = '12px 15px';
+        
+        const ballsContainer = document.createElement('div');
+        ballsContainer.className = 'mini-balls-group';
+        
+        draw.numbers.forEach(n => {
+            const ballDiv = document.createElement('div');
+            ballDiv.className = 'mini-ball';
+            if (this.hotNumbers.has(n)) ballDiv.className += ' hot';
+            else if (this.coldNumbers.has(n)) ballDiv.className += ' cold';
+            
+            const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+            ballDiv.textContent = String(displayVal);
+            ballsContainer.appendChild(ballDiv);
+        });
+        
+        tdBalls.appendChild(ballsContainer);
+        row.appendChild(tdBalls);
+
+        // 4. Adicional / â­
+        const tdExtra = document.createElement('td');
+        tdExtra.style.padding = '12px 15px';
+
+        const extraContainer = document.createElement('div');
+        extraContainer.className = 'mini-balls-group';
+
+        if ((this.currentGame.id === 'euromillones' || this.currentGame.id === 'eurodreams' || this.currentGame.id === 'gordo' || this.currentGame.id === 'powerball') && draw.stars && draw.stars.length > 0) {
+            draw.stars.forEach(s => {
+                const starDiv = document.createElement('div');
+                starDiv.className = 'mini-ball star-ball';
+                starDiv.textContent = String(s);
+                extraContainer.appendChild(starDiv);
+            });
+        } else if (this.currentGame.id === 'bonoloto' || this.currentGame.id === 'primitiva') {
+            if (draw.complementario !== undefined) {
+                const compDiv = document.createElement('div');
+                compDiv.className = 'mini-ball complementario-ball';
+                compDiv.title = t('common.complementario');
+                compDiv.textContent = `C${draw.complementario}`;
+                extraContainer.appendChild(compDiv);
+            }
+            if (draw.reintegro !== undefined) {
+                const reDiv = document.createElement('div');
+                reDiv.className = 'mini-ball reintegro-ball';
+                reDiv.title = t('common.reintegro');
+                reDiv.textContent = `R${draw.reintegro}`;
+                extraContainer.appendChild(reDiv);
+            }
+        } else if (this.currentGame.id === 'nacional') {
+            if (draw.reintegro !== undefined) {
+                const reDiv = document.createElement('div');
+                reDiv.className = 'mini-ball reintegro-ball';
+                reDiv.title = t('common.reintegro');
+                reDiv.textContent = `R${draw.reintegro}`;
+                extraContainer.appendChild(reDiv);
+            } else {
+                extraContainer.innerHTML = '<span style="color:#94a3b8; font-size:0.8rem;">-</span>';
+            }
+        } else {
+            extraContainer.innerHTML = '<span style="color:#94a3b8; font-size:0.8rem;">-</span>';
+        }
+
+        tdExtra.appendChild(extraContainer);
+        row.appendChild(tdExtra);
+
+        tableBody.appendChild(row);
+    });
+  }
+
+  showHistoryOfResults() {
+    this.closeSidebar();
+    
+    // Set the game filter selection to match the current game or default to 'all'
+    const hrGameFilter = document.getElementById('hrGameFilter') as HTMLSelectElement;
+    if (hrGameFilter) {
+        hrGameFilter.value = this.currentGame.id;
+    }
+
+    this.updateHistoryDashboard();
+    this.toggleModal('historyOfResultsModal', true);
+  }
+
+  updateHistoryDashboard() {
+    const hrGameFilter = document.getElementById('hrGameFilter') as HTMLSelectElement;
+    const hrGameFilterVal = hrGameFilter ? hrGameFilter.value : 'all';
+
+    // Filter tickets
+    const filteredTickets = hrGameFilterVal === 'all'
+      ? this.savedTickets
+      : this.savedTickets.filter(t => t.gameId === hrGameFilterVal);
+
+    // Calculate total combinations generated
+    let totalCombinations = 0;
+    filteredTickets.forEach(ticket => {
+        if (ticket.strategy === 'multiple' && ticket.combinations[0].length > 6) {
+             const n = ticket.combinations[0].length;
+             let combos = 1;
+             for(let i=0; i<6; i++) combos *= (n-i)/(i+1);
+             totalCombinations += Math.round(combos);
+        } else {
+             totalCombinations += ticket.combinations.length;
+        }
+    });
+
+    const elTotal = document.getElementById('hrTotalCombinations');
+    if (elTotal) elTotal.innerHTML = String(totalCombinations);
+
+    // Calculate validated combinations
+    const validatedTickets = filteredTickets.filter(t => t.validation);
+    let validatedCombinations = 0;
+    validatedTickets.forEach(ticket => {
+        validatedCombinations += ticket.validation!.hits.length;
+    });
+
+    const elValidated = document.getElementById('hrValidatedCombinations');
+    if (elValidated) elValidated.innerHTML = String(validatedCombinations);
+
+    // Calculate best combination (maximum hits)
+    let maxHit = 0;
+    let maxHitStars = 0;
+    let hasStarsInBest = false;
+    validatedTickets.forEach(ticket => {
+        ticket.validation!.hits.forEach((hit, idx) => {
+            const stars = ticket.validation!.starHits ? ticket.validation!.starHits[idx] : 0;
+            if (hit > maxHit || (hit === maxHit && stars > maxHitStars)) {
+                maxHit = hit;
+                maxHitStars = stars;
+                if (ticket.validation!.starHits) {
+                    hasStarsInBest = true;
+                }
+            }
+        });
+    });
+
+    const elBest = document.getElementById('hrBestCombination');
+    if (elBest) {
+        if (validatedCombinations > 0) {
+            let bestText = `${maxHit} ${t('tickets.aciertos')}`;
+            if (hasStarsInBest && maxHitStars > 0) {
+                bestText += ` + ${maxHitStars} â­`;
+            }
+            elBest.innerHTML = bestText;
+        } else {
+            elBest.innerHTML = '-';
+        }
+    }
+
+    // Comparison Table Body
+    const tableBody = document.getElementById('hrComparisonTableBody');
+    const warningEl = document.getElementById('hrNoValidationWarning');
+    
+    if (tableBody) {
+        tableBody.innerHTML = '';
+        
+        if (validatedCombinations === 0) {
+            if (warningEl) warningEl.style.display = 'block';
+        } else {
+            if (warningEl) warningEl.style.display = 'none';
+
+            // Count actual hits
+            const actualHitCounts: { [tier: string]: number } = { '6': 0, '5': 0, '4': 0, '3': 0, '<=2': 0 };
+            const validatedCountsByGame: { [gameId: string]: number } = {};
+
+            validatedTickets.forEach(ticket => {
+                const gameId = ticket.gameId || 'bonoloto';
+                const numCombos = ticket.validation!.hits.length;
+                validatedCountsByGame[gameId] = (validatedCountsByGame[gameId] || 0) + numCombos;
+
+                ticket.validation!.hits.forEach(hitCount => {
+                    if (hitCount >= 6) {
+                        actualHitCounts['6']++;
+                    } else if (hitCount === 5) {
+                        actualHitCounts['5']++;
+                    } else if (hitCount === 4) {
+                        actualHitCounts['4']++;
+                    } else if (hitCount === 3) {
+                        actualHitCounts['3']++;
+                    } else {
+                        actualHitCounts['<=2']++;
+                    }
+                });
+            });
+
+            // Adjust tiers depending on active game filter
+            let activeTiers = ['6', '5', '4', '3', '<=2'];
+            if (hrGameFilterVal !== 'all') {
+                const cfg = getGameConfig(hrGameFilterVal);
+                if (cfg && cfg.maxNumbers === 5) {
+                    activeTiers = ['5', '4', '3', '<=2'];
+                }
+            }
+
+            const getTheoreticalProb = (tier: string): number => {
+                if (hrGameFilterVal !== 'all') {
+                    const cfg = getGameConfig(hrGameFilterVal);
+                    return cfg && cfg.theoreticalProbabilities ? (cfg.theoreticalProbabilities[tier] || 0) : 0;
+                }
+                
+                // Weighted average for 'all'
+                let sumWeightedProbs = 0;
+                let totalWeight = 0;
+                Object.entries(validatedCountsByGame).forEach(([gameId, count]) => {
+                    const cfg = getGameConfig(gameId);
+                    if (count > 0 && cfg && cfg.theoreticalProbabilities) {
+                        const prob = cfg.theoreticalProbabilities[tier] || 0;
+                        sumWeightedProbs += count * prob;
+                        totalWeight += count;
+                    }
+                });
+                if (totalWeight > 0) return sumWeightedProbs / totalWeight;
+                return getGameConfig('bonoloto').theoreticalProbabilities[tier] || 0;
+            };
+
+            const tierLabels: { [key: string]: string } = {
+                '6': t('history.tier.6'),
+                '5': t('history.tier.5'),
+                '4': t('history.tier.4'),
+                '3': t('history.tier.3'),
+                '<=2': t('history.tier.menos2')
+            };
+
+            activeTiers.forEach(tier => {
+                const count = actualHitCounts[tier] || 0;
+                const actualFrequency = (count / validatedCombinations) * 100;
+                const theoreticalFrequency = getTheoreticalProb(tier);
+
+                let perfBadge = '';
+                if (count === 0 && theoreticalFrequency === 0) {
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.sinDatos')}</span>`;
+                } else if (actualFrequency > theoreticalFrequency) {
+                    const timesBetter = theoreticalFrequency > 0 ? (actualFrequency / theoreticalFrequency).toFixed(1) : 'N/A';
+                    const percentBetter = theoreticalFrequency > 0 ? (((actualFrequency - theoreticalFrequency) / theoreticalFrequency) * 100).toFixed(0) : '0';
+                    perfBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">${t('history.superior', { timesBetter, percentBetter })}</span>`;
+                } else if (actualFrequency === theoreticalFrequency) {
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.esperado')}</span>`;
+                } else {
+                    const timesWorse = actualFrequency > 0 && theoreticalFrequency > 0 ? (theoreticalFrequency / actualFrequency).toFixed(1) : 'âˆ';
+                    perfBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">ğŸ“‰ ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
+                }
+
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f3f4f6; hover:background-color: #fafafa;">
+                        <td style="padding: 12px 8px; font-weight: 500; color: #111827;">${tierLabels[tier] || tier}</td>
+                        <td style="padding: 12px 8px; text-align: center;">${count}</td>
+                        <td style="padding: 12px 8px; text-align: center; font-weight: 600; color: var(--primary);">${actualFrequency.toFixed(4)}%</td>
+                        <td style="padding: 12px 8px; text-align: center; color: #4b5563;">${theoreticalFrequency.toFixed(4)}%</td>
+                        <td style="padding: 12px 8px; text-align: right;">${perfBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+    }
+
+    // Strategy Distribution
+    const strategyCounts: { [key: string]: { total: number, validated: number, maxHits: number } } = {};
+    const strategyMap: { [key: string]: string } = { simple: t('tickets.strategy.simple'), winning: t('history.estrategiaGanadora'), multiple: t('tickets.strategy.multiple') };
+
+    filteredTickets.forEach(ticket => {
+        const strat = ticket.strategy || 'simple';
+        if (!strategyCounts[strat]) {
+            strategyCounts[strat] = { total: 0, validated: 0, maxHits: 0 };
+        }
+        
+        let combosCount = 0;
+        if (ticket.strategy === 'multiple' && ticket.combinations[0].length > 6) {
+             const n = ticket.combinations[0].length;
+             let combos = 1;
+             for(let i=0; i<6; i++) combos *= (n-i)/(i+1);
+             combosCount = Math.round(combos);
+        } else {
+             combosCount = ticket.combinations.length;
+        }
+
+        strategyCounts[strat].total += combosCount;
+        if (ticket.validation) {
+            strategyCounts[strat].validated += ticket.validation.hits.length;
+            const ticketMax = Math.max(...ticket.validation.hits);
+            if (ticketMax > strategyCounts[strat].maxHits) {
+                strategyCounts[strat].maxHits = ticketMax;
+            }
+        }
+    });
+
+    const elStrategyDist = document.getElementById('hrStrategyDistribution');
+    if (elStrategyDist) {
+        let stratHtml = '';
+        Object.entries(strategyCounts).forEach(([stratKey, data]) => {
+            const name = strategyMap[stratKey] || stratKey;
+            stratHtml += `
+                <div style="background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-weight: 600; color: #374151;">${name}</span>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${t('history.apuestasGeneradas', { total: data.total, validated: data.validated })}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; color: #4b5563; font-weight: 500;">${t('history.mejorResultado')}</div>
+                        <span style="background: #eff6ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">${data.validated > 0 ? `${data.maxHits} ${t('tickets.aciertos')}` : t('history.sinDatos')}</span>
+                    </div>
+                </div>
+            `;
+        });
+        if (!stratHtml) {
+            stratHtml = `<div style="color: #6b7280; font-style: italic; text-align: center; padding: 10px;">${t('history.sinCombinaciones')}</div>`;
+        }
+        elStrategyDist.innerHTML = stratHtml;
+    }
+  }
+
+
+
+  // ============================================
+  // MATHEMATICAL FILTERS & OPTIMIZATION
+  // ============================================
+
+  updateCorrelationScore() {
+    if (!this.correlationScoreContainer || (this.selectedNumbers.size === 0 && this.selectedStars.size === 0)) {
+      if (this.correlationScoreContainer) this.correlationScoreContainer.style.display = 'none';
+      return;
+    }
+
+    this.correlationScoreContainer.style.display = 'block';
+    
+    const selected = Array.from(this.selectedNumbers);
+    const selectedStars = Array.from(this.selectedStars);
+    let score = 50; // Base score
+    let advice = "";
+
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars;
+
+    // 1. Balance Par/Impar
+    const evens = selected.filter(n => n % 2 === 0).length;
+    const idealEvens = Math.floor(maxNumbers / 2);
+    if (evens === idealEvens || evens === idealEvens + 1) score += 15;
+    else if (Math.abs(evens - idealEvens) <= 1) score += 10;
+    else score -= 10;
+
+    // 2. Balance Bajo/Alto
+    const midPoint = Math.floor(this.currentGame.numberRange / 2);
+    const lows = selected.filter(n => n <= midPoint).length;
+    const idealLows = Math.floor(maxNumbers / 2);
+    if (lows === idealLows || lows === idealLows + 1) score += 15;
+    else if (Math.abs(lows - idealLows) <= 1) score += 10;
+    else score -= 10;
+
+    // 3. CorrelaciÃ³n con Calientes/FrÃ­os/Ausentes
+    if (this.dataLoaded) {
+      const hotCount = selected.filter(n => this.hotNumbers.has(n)).length;
+      const coldCount = selected.filter(n => this.coldNumbers.has(n)).length;
+      const neutralCount = selected.filter(n => !this.hotNumbers.has(n) && !this.coldNumbers.has(n)).length;
+
+      const target = this.currentSuggestedProfile;
+      
+      if (hotCount === target.hot) score += 10;
+      else if (Math.abs(hotCount - target.hot) === 1) score += 5;
+      
+      if (coldCount === target.cold) score += 10;
+      else if (Math.abs(coldCount - target.cold) === 1) score += 5;
+
+      if (neutralCount === target.neutral) score += 5;
+
+      // CorrelaciÃ³n de Estrellas
+      if (maxStars > 0 && selectedStars.length === maxStars) {
+          const hotStarCount = selectedStars.filter(s => this.hotStars.has(s)).length;
+          const coldStarCount = selectedStars.filter(s => this.coldStars.has(s)).length;
+          
+          if (target.starHot !== undefined && hotStarCount === target.starHot) score += 5;
+          if (target.starCold !== undefined && coldStarCount === target.starCold) score += 5;
+      }
+    }
+
+    // 4. Suma Total (DinÃ¡mico segÃºn el juego)
+    const totalSum = selected.reduce((a, b) => a + b, 0);
+    const avgNum = (1 + this.currentGame.numberRange) / 2;
+    const idealSum = avgNum * maxNumbers;
+    const sumRange = idealSum * 0.2; // +/- 20%
+    
+    if (totalSum >= (idealSum - sumRange) && totalSum <= (idealSum + sumRange)) score += 10;
+    else if (totalSum < (idealSum - sumRange * 2) || totalSum > (idealSum + sumRange * 2)) score -= 15;
+
+    // 5. Estrellas (si aplica)
+    if (maxStars > 0 && selectedStars.length === maxStars) {
+        const starEvens = selectedStars.filter(n => n % 2 === 0).length;
+        const starMid = Math.floor(this.currentGame.starRange / 2);
+        const starLows = selectedStars.filter(n => n <= starMid).length;
+
+        // Balance Par/Impar Estrellas
+        if (maxStars === 2) {
+            if (starEvens === 1) score += 10; // 1P/1I es ideal
+            else score += 5;
+        }
+
+        // Balance Bajo/Alto Estrellas
+        if (maxStars === 2) {
+            if (starLows === 1) score += 5; // 1B/1A es ideal
+        }
+        
+        // Suma Estrellas
+        const starSum = selectedStars.reduce((a, b) => a + b, 0);
+        const avgStar = (1 + this.currentGame.starRange) / 2;
+        const idealStarSum = avgStar * maxStars;
+        if (Math.abs(starSum - idealStarSum) <= this.currentGame.starRange * 0.5) score += 5;
+    }
+
+    // Normalizar score 0-100
+    score = Math.max(0, Math.min(100, score));
+
+    // Generar consejo
+    if (score >= 80) advice = t('quality.excelente');
+    else if (score >= 60) advice = t('quality.buena');
+    else if (score >= 40) advice = t('quality.aceptable');
+    else advice = t('quality.pocoProbable');
+
+    // Actualizar UI
+    if (this.correlationScoreValue) this.correlationScoreValue.textContent = `${score}%`;
+    if (this.correlationScoreBar) {
+      this.correlationScoreBar.style.width = `${score}%`;
+      this.correlationScoreBar.className = 'h-full transition-all duration-500 rounded-full ' + 
+        (score >= 75 ? 'bg-emerald-500' : score >= 50 ? 'bg-indigo-500' : 'bg-amber-500');
+    }
+    if (this.correlationAdvice) this.correlationAdvice.textContent = advice;
+  }
+
+  updateBacktestUI() {
+      const controls = document.querySelector('.backtesting-controls') as HTMLElement;
+      const actions = document.querySelector('.backtesting-actions') as HTMLElement;
+      const results = document.getElementById('backtestResults') as HTMLElement;
+      const alertNoData = document.getElementById('backtestNoDataAlert') as HTMLElement;
+
+      if (!this.dataLoaded || this.historicalData.length === 0) {
+          if (controls) controls.style.display = 'none';
+          if (actions) actions.style.display = 'none';
+          if (results) results.style.display = 'none';
+          if (alertNoData) alertNoData.style.display = 'block';
+      } else {
+          if (controls) controls.style.display = 'grid';
+          if (actions) actions.style.display = 'block';
+          if (alertNoData) alertNoData.style.display = 'none';
+      }
+  }
+
+  calculateDrawPrize(hits: number, starHits: number, draw: Draw, combo: number[]): number {
+    return calculateDrawPrize(hits, starHits, draw, combo, this.currentGame?.id || '', this.dataType || '');
+  }
+
+  async runBacktest() {
+      // Comprobar si hay datos cargados
+      if (!this.dataLoaded || this.historicalData.length === 0) {
+          this.showToast(t('toast.backtestSinDatos'), 'error');
+          return;
+      }
+
+      this.updateFilterStateFromUI();
+
+      const periodVal = (document.getElementById('backtestPeriod') as HTMLSelectElement).value;
+      const modeVal = (document.getElementById('backtestMode') as HTMLSelectElement).value;
+
+      let drawsToTest = [...this.historicalData];
+      if (periodVal === 'outside_calibration') {
+          const calibrationWindow = 100;
+          drawsToTest = drawsToTest.slice(0, Math.max(0, drawsToTest.length - calibrationWindow));
+      } else if (periodVal !== 'all') {
+          const limit = parseInt(periodVal);
+          drawsToTest = drawsToTest.slice(-limit);
+      }
+
+      const totalDraws = drawsToTest.length;
+      if (totalDraws === 0) {
+          this.showToast(t('toast.backtestSinSorteos'), 'error');
+          return;
+      }
+
+      const btn = document.getElementById('runBacktestBtn');
+      const progressContainer = document.getElementById('backtestProgressContainer');
+      const progressBar = document.getElementById('backtestProgressBar');
+      const progressText = document.getElementById('backtestProgressText');
+      const resultsDiv = document.getElementById('backtestResults');
+
+      if (btn) (btn as HTMLButtonElement).disabled = true;
+      if (progressContainer) progressContainer.style.display = 'block';
+      if (resultsDiv) resultsDiv.style.display = 'none';
+
+      // Reset y actualizaciÃ³n dinÃ¡mica de etiquetas segÃºn la modalidad
+      const lblTotalDraws = document.getElementById('lblTotalDraws');
+      const lblTicketPrice = document.getElementById('lblTicketPrice');
+      const lblTotalSpent = document.getElementById('lblTotalSpent');
+      const lblTotalWon = document.getElementById('lblTotalWon');
+      const lblBalance = document.getElementById('lblBalance');
+      const lblROI = document.getElementById('lblROI');
+      const btBreakdownTitle = document.getElementById('btBreakdownTitle');
+
+      if (modeVal === 'filters') {
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosHistoricos');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.ganadoresAdmitidos');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.ganadoresExcluidos');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.tasaAceptacion');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.reduccionUniverso');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.eficienciaFiltros');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.registroHistorico');
+      } else {
+          if (lblTotalDraws) lblTotalDraws.textContent = t('backtest.lbl.sorteosSimulados');
+          if (lblTicketPrice) lblTicketPrice.textContent = t('backtest.lbl.precioApuesta');
+          if (lblTotalSpent) lblTotalSpent.textContent = t('backtest.lbl.presupuestoInvertido');
+          if (lblTotalWon) lblTotalWon.textContent = t('backtest.lbl.premiosRecuperados');
+          if (lblBalance) lblBalance.textContent = t('backtest.lbl.balanceNeto');
+          if (lblROI) lblROI.textContent = t('backtest.lbl.roi');
+          if (btBreakdownTitle) btBreakdownTitle.textContent = t('backtest.lbl.desgloseAciertos');
+      }
+
+      const maxNumbers = this.currentGame.maxNumbers;
+      const maxStars = this.currentGame.maxStars;
+      const availableUniverse = this.getAvailableUniverse('number');
+      const availableStars = this.getAvailableUniverse('star');
+
+      // --- Rama 1: AnÃ¡lisis exclusivo de Eficacia de Filtros ---
+      if (modeVal === 'filters') {
+          let passedDrawsCount = 0;
+          const drawDetails: { draw: Draw; passed: boolean }[] = [];
+
+          // Procesar validez de sorteos reales con un ligero delay para dinamismo visual
+          for (let index = 0; index < totalDraws; index++) {
+              const draw = drawsToTest[index];
+
+              const pct = Math.floor(((index + 0.3) / totalDraws) * 100);
+              if (progressBar) progressBar.style.width = `${pct / 2}%`; // Primera mitad de la barra
+              if (progressText) progressText.textContent = `${Math.floor(pct / 2)}%`;
+
+              if (index % 12 === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+
+              // Validar el sorteo ganador real frente a los filtros activos en la UI (excluyendo el propio sorteo del histÃ³rico)
+              const historyExcludingSelf = this.historicalData ? this.historicalData.filter(d => d !== draw) : [];
+              const isPassed = this.isValidCombination(draw.numbers, draw.stars || [], historyExcludingSelf);
+              if (isPassed) {
+                  passedDrawsCount++;
+              }
+              drawDetails.push({ draw, passed: isPassed });
+          }
+
+          // MÃ©tricas Monte Carlo para estimar la tasa de ReducciÃ³n de Universo
+          let sampleCount = 1500;
+          let passedSample = 0;
+          for (let i = 0; i < sampleCount; i++) {
+              if (i % 300 === 0) {
+                  const pctSample = 50 + Math.floor((i / sampleCount) * 50);
+                  if (progressBar) progressBar.style.width = `${pctSample}%`;
+                  if (progressText) progressText.textContent = `${pctSample}%`;
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+              const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
+              const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
+              if (this.isValidCombination(combo, stars)) {
+                  passedSample++;
+              }
+          }
+
+          const passRate = (passedSample / sampleCount) * 100;
+          const reductionRate = 100 - passRate;
+
+          // Factor de eficiencia de rentas: Tasa de acierto sorteo loto / tasa paso aleatorio
+          const p_win = passedDrawsCount / totalDraws;
+          const p_univ = Math.max(passedSample, 1) / sampleCount;
+          const efficiency = p_win / p_univ;
+
+          // Test de permutaciÃ³n: Â¿el resultado real se distingue de lo que darÃ­a el azar
+          // con un filtro que solo redujera el universo en la misma proporciÃ³n?
+          const M = 100;
+          const simulatedCounts: number[] = [];
+          for (let sim = 0; sim < M; sim++) {
+              let simulatedPassed = 0;
+              for (let i = 0; i < totalDraws; i++) {
+                  if (Math.random() < p_univ) simulatedPassed++;
+              }
+              simulatedCounts.push(simulatedPassed);
+          }
+          simulatedCounts.sort((a, b) => a - b);
+          const countBelowOrEqual = simulatedCounts.filter(c => c <= passedDrawsCount).length;
+          const percentile = Math.round((countBelowOrEqual / M) * 100);
+
+          // Renderizar mÃ©tricas en la interfaz
+          const calibrationWarningEl = document.getElementById('backtestCalibrationWarning');
+          if (calibrationWarningEl) {
+              calibrationWarningEl.style.display = (periodVal !== 'outside_calibration') ? 'block' : 'none';
+          }
+
+          const elTotalDraws = document.getElementById('btTotalDraws');
+          const elTicketPrice = document.getElementById('btTicketPrice');
+          const elSpent = document.getElementById('btTotalSpent');
+          const elWon = document.getElementById('btTotalWon');
+          const elBalance = document.getElementById('btBalance');
+          const elROI = document.getElementById('btROI');
+          const elExpVal = document.getElementById('btExpectedValue');
+          const elExpValAdvice = document.getElementById('btExpectedValueAdvice');
+          const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
+
+          if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
+          if (elTicketPrice) elTicketPrice.textContent = t('backtest.filtros.sorteosCount', { count: passedDrawsCount });
+          if (elSpent) elSpent.textContent = t('backtest.filtros.sorteosCount', { count: totalDraws - passedDrawsCount });
+          
+          const passRateWinning = (passedDrawsCount / totalDraws) * 100;
+          if (elWon) elWon.textContent = `${passRateWinning.toFixed(1)} %`;
+          
+          if (elBalance) {
+              elBalance.textContent = `${reductionRate.toFixed(2)} %`;
+              elBalance.style.color = reductionRate >= 90 ? 'var(--success)' : reductionRate >= 60 ? '#d97706' : 'var(--danger)';
+          }
+
+          if (elROI) {
+              elROI.textContent = `${efficiency.toFixed(2)}x`;
+              elROI.style.color = efficiency >= 1.25 ? 'var(--success)' : efficiency >= 0.8 ? '#d97706' : 'var(--danger)';
+          }
+
+          if (elExpVal) {
+              let nivelFiltro: string;
+              let nivelColor: string;
+              if (percentile >= 95) {
+                  nivelFiltro = t('backtest.filtros.nivel.muyAlto', { percentile });
+                  nivelColor = 'var(--success)';
+              } else if (percentile >= 75) {
+                  nivelFiltro = t('backtest.filtros.nivel.alto', { percentile });
+                  nivelColor = '#d97706';
+              } else if (percentile > 25) {
+                  nivelFiltro = t('backtest.filtros.nivel.esperado', { percentile });
+                  nivelColor = 'var(--gray)';
+              } else {
+                  nivelFiltro = t('backtest.filtros.nivel.bajoPercentil', { percentile });
+                  nivelColor = 'var(--danger)';
+              }
+              elExpVal.textContent = t('backtest.filtros.poderFiltroPercentil', { nivel: nivelFiltro });
+              elExpVal.style.color = nivelColor;
+          }
+
+          if (elExpValAdvice) {
+              elExpValAdvice.textContent = t('backtest.filtros.advicePercentil', {
+                  efficiency: efficiency.toFixed(2),
+                  percentile,
+                  M,
+                  passed: passedDrawsCount,
+                  total: totalDraws
+              });
+          }
+
+          if (elHitsBreakdown) {
+              elHitsBreakdown.innerHTML = '';
+              let breakdownHTML = `<table class="validation-summary-table">
+                  <tr>
+                      <th>${t('backtest.filtros.colFecha')}</th>
+                      <th>${t('backtest.filtros.colCombinacion')}</th>
+                      <th>${t('backtest.filtros.colEstado')}</th>
+                  </tr>`;
+
+              // Mostrar solo los Ãºltimos 50 sorteos para mantener Ã³ptimo el renderizado del DOM
+              const drawingsToShow = drawDetails.slice(-50).reverse();
+              drawingsToShow.forEach(({ draw, passed }) => {
+                  const numbersStr = draw.numbers.join(', ');
+                  let starsInfo = '';
+                  if (draw.stars && draw.stars.length > 0) {
+                      const starIcon = this.currentGame.id === 'powerball' ? 'ğŸ”´' : (this.currentGame.id === 'eurodreams' ? 'ğŸŒ™' : (this.currentGame.id === 'gordo' ? 'ğŸ”‘' : 'â­'));
+                      starsInfo = ` | <span style="background: rgba(251,191,36,0.15); color: #d97706; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">${starIcon} ${draw.stars.join('-')}</span>`;
+                  }
+
+                  const badgeHTML = passed 
+                      ? `<span style="background: rgba(16,185,129,0.15); color: var(--success); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.enFiltro')}</span>`
+                      : `<span style="background: rgba(239,68,68,0.1); color: var(--danger); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; display: inline-block;">${t('backtest.filtros.excluido')}</span>`;
+
+                  breakdownHTML += `
+                      <tr>
+                          <td><strong>${draw.date}</strong></td>
+                          <td>${numbersStr}${starsInfo}</td>
+                          <td>${badgeHTML}</td>
+                      </tr>`;
+              });
+              breakdownHTML += `</table>`;
+
+              if (drawDetails.length > 50) {
+                  breakdownHTML += `<div style="text-align: center; color: var(--gray); font-size: 0.8rem; font-style: italic; margin-top: 10px;">
+                      ${t('backtest.filtros.notaUltimos50')}
+                  </div>`;
+              }
+              elHitsBreakdown.innerHTML = breakdownHTML;
+          }
+
+          if (btn) (btn as HTMLButtonElement).disabled = false;
+          if (progressContainer) progressContainer.style.display = 'none';
+          if (resultsDiv) resultsDiv.style.display = 'block';
+
+          this.showToast(t('toast.backtestFiltrosExito'), 'success');
+          return;
+      }
+
+      // --- Rama 2: SimulaciÃ³n de Apuestas / Boletos (Current / Generative) ---
+      
+      // Determinar precio de boleto mercantil real
+      let ticketPrice = 1.0;
+      if (this.currentGame.id === 'euromillones') {
+          ticketPrice = 2.50;
+      } else if (this.currentGame.id === 'eurodreams') {
+          ticketPrice = 2.50;
+      } else if (this.currentGame.id === 'powerball') {
+          ticketPrice = 2.00;
+      } else if (this.currentGame.id === 'gordo') {
+          ticketPrice = 1.50;
+      } else if (this.currentGame.id === 'nacional') {
+          ticketPrice = 3.00;
+      } else {
+          if (this.dataType === 'bonoloto') {
+              ticketPrice = 0.50;
+          } else {
+              ticketPrice = 1.00;
+          }
+      }
+
+      // Combinaciones a probar
+      let combosToTest: number[][] = [];
+      let starsToTest: number[][] = [];
+
+      if (modeVal === 'current') {
+          if (this.currentTicket) {
+              combosToTest = this.currentTicket.combinations;
+              starsToTest = this.currentTicket.stars || [];
+          } else if (this.selectedNumbers.size === maxNumbers && this.selectedStars.size === maxStars) {
+              combosToTest = [Array.from(this.selectedNumbers).sort((a,b)=>a-b)];
+              starsToTest = [Array.from(this.selectedStars).sort((a,b)=>a-b)];
+          } else {
+              this.showToast(t('toast.backtestSeleccionInvalida', { maxNumbers, maxStars }), 'warning');
+              if (btn) (btn as HTMLButtonElement).disabled = false;
+              if (progressContainer) progressContainer.style.display = 'none';
+              return;
+          }
+      }
+
+      // Restablecer estadÃ­sticas financieras
+      let totalSpent = 0;
+      let totalWon = 0;
+      const breakdownCounts: { [label: string]: number } = {};
+
+      // Bucle de simulaciÃ³n amortizado
+      for (let index = 0; index < totalDraws; index++) {
+          const draw = drawsToTest[index];
+
+          const pct = Math.floor(((index + 1) / totalDraws) * 100);
+          if (progressBar) progressBar.style.width = `${pct}%`;
+          if (progressText) progressText.textContent = `${pct}%`;
+
+          let currentCombo: number[][] = [];
+          let currentStars: number[][] = [];
+
+          if (modeVal === 'generative') {
+              if (index % 5 === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 0));
+              }
+
+              let found = false;
+              for (let i = 0; i < 1000; i++) {
+                  const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
+                  const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
+                  if (this.isValidCombination(combo, stars)) {
+                      currentCombo = [combo];
+                      currentStars = [stars];
+                      found = true;
+                      break;
+                  }
+              }
+              if (!found) {
+                  currentCombo = [this.generateRandomCombination(availableUniverse, maxNumbers)];
+                  currentStars = [maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : []];
+              }
+          } else {
+              currentCombo = combosToTest;
+              currentStars = starsToTest;
+          }
+
+          const numPlays = currentCombo.length;
+          totalSpent += numPlays * ticketPrice;
+
+          for (let pIdx = 0; pIdx < numPlays; pIdx++) {
+              const combo = currentCombo[pIdx];
+              const stars = currentStars[pIdx] || [];
+
+              const hits = combo.filter(n => draw.numbers.includes(n)).length;
+              const starHits = maxStars > 0 ? stars.filter(s => draw.stars && draw.stars.includes(s)).length : 0;
+
+              const prize = this.calculateDrawPrize(hits, starHits, draw, combo);
+              totalWon += prize;
+
+              let catLabel = `${hits} ${t('tickets.aciertos')}`;
+              if (maxStars > 0) {
+                  const starName = this.currentGame.id === 'powerball' ? t('common.nombreEstrella.powerball') : (this.currentGame.id === 'megamillions' ? t('common.nombreEstrella.megamillions') : (this.currentGame.id === 'eurodreams' ? t('common.nombreEstrella.eurodreams') : (this.currentGame.id === 'gordo' ? t('common.nombreEstrella.gordo') : t('common.nombreEstrella.generico'))));
+                  catLabel = t('backtest.economico.catLabelConEstrellas', { hits, starHits, starName, plural: starHits !== 1 ? 's' : '' });
+              }
+
+              if (prize > 0 || hits >= 2 || (this.currentGame.id === 'gordo' && starHits > 0)) {
+                  breakdownCounts[catLabel] = (breakdownCounts[catLabel] || 0) + 1;
+              }
+          }
+      }
+
+      // Finalizar backtesting financiero y volcar a UI
+      if (btn) (btn as HTMLButtonElement).disabled = false;
+      if (progressContainer) progressContainer.style.display = 'none';
+      if (resultsDiv) resultsDiv.style.display = 'block';
+
+      const elTotalDraws = document.getElementById('btTotalDraws');
+      const elTicketPrice = document.getElementById('btTicketPrice');
+      const elSpent = document.getElementById('btTotalSpent');
+      const elWon = document.getElementById('btTotalWon');
+      const elBalance = document.getElementById('btBalance');
+      const elROI = document.getElementById('btROI');
+      const elExpVal = document.getElementById('btExpectedValue');
+      const elExpValAdvice = document.getElementById('btExpectedValueAdvice');
+      const elHitsBreakdown = document.getElementById('btHitsBreakdownContainer');
+
+      if (elTotalDraws) elTotalDraws.textContent = String(totalDraws);
+      if (elTicketPrice) elTicketPrice.textContent = t('backtest.economico.valorMonetario', { value: ticketPrice.toFixed(2) });
+      if (elSpent) elSpent.textContent = t('backtest.economico.valorMonetario', { value: totalSpent.toFixed(2) });
+      if (elWon) elWon.textContent = t('backtest.economico.valorMonetario', { value: totalWon.toFixed(2) });
+
+      const balance = totalWon - totalSpent;
+      if (elBalance) {
+          elBalance.textContent = t('backtest.economico.valorMonetario', { value: `${balance >= 0 ? '+' : ''}${balance.toFixed(2)}` });
+          elBalance.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      const roi = totalSpent > 0 ? (totalWon / totalSpent) * 100 : 0;
+      if (elROI) {
+          elROI.textContent = `${roi.toFixed(1)}%`;
+          elROI.style.color = roi >= 100 ? 'var(--success)' : roi >= 20 ? '#d97706' : 'var(--danger)';
+      }
+
+      const expVal = balance / totalDraws;
+      if (elExpVal) {
+          elExpVal.textContent = t('backtest.economico.valorPorSorteo', { value: `${expVal >= 0 ? '+' : ''}${expVal.toFixed(2)}` });
+          elExpVal.style.color = expVal >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      if (elExpValAdvice) {
+          let adviceText = '';
+          const randomPlayExp = -ticketPrice * 0.45;
+          if (expVal > randomPlayExp) {
+              adviceText = t('backtest.economico.adviceGanador', { expVal: expVal.toFixed(2), randomExp: randomPlayExp.toFixed(2) });
+          } else {
+              adviceText = t('backtest.economico.adviceBajoRetorno');
+          }
+          elExpValAdvice.textContent = adviceText;
+      }
+
+      if (elHitsBreakdown) {
+          elHitsBreakdown.innerHTML = '';
+          const sortedBreakdown = Object.entries(breakdownCounts)
+              .sort((a, b) => {
+                  const hitsA = parseInt(a[0]) || 0;
+                  const hitsB = parseInt(b[0]) || 0;
+                  return hitsB - hitsA;
+              });
+
+          if (sortedBreakdown.length === 0) {
+              elHitsBreakdown.innerHTML = `<div style="color: var(--gray); font-style: italic; text-align: center; padding: 10px;">${t('backtest.economico.sinAciertos')}</div>`;
+          } else {
+              let breakdownHTML = `<table class="validation-summary-table">
+                  <tr>
+                      <th>${t('backtest.economico.colCategoria')}</th>
+                      <th>${t('backtest.economico.colSorteos')}</th>
+                      <th>${t('backtest.economico.colProbabilidad')}</th>
+                  </tr>`;
+              
+              sortedBreakdown.forEach(([label, count]) => {
+                  const prob = ((count / totalDraws) * 100).toFixed(2);
+                  const isHighlight = count > 0 && !label.startsWith('0 ') && !label.startsWith('1 ') && !label.startsWith('2 nÂº + 0');
+                  breakdownHTML += `
+                      <tr class="${isHighlight ? 'row-highlight' : ''}">
+                          <td><strong>${label}</strong></td>
+                          <td>${t('backtest.economico.vecesCount', { count })}</td>
+                          <td>${prob}%</td>
+                      </tr>`;
+              });
+              breakdownHTML += `</table>`;
+              elHitsBreakdown.innerHTML = breakdownHTML;
+          }
+      }
+
+      this.showToast(t('toast.backtestEconomicoExito'), 'success');
+  }
+
+}
+
+// Global instance of the app
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  new DataLotto49Advanced();
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    new DataLotto49Advanced();
+  });
+}
+
+// FIX: Add an empty export to treat this file as a module.
+export {};

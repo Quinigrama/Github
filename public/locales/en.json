@@ -305,7 +305,6 @@
   "audit.boletosAuditados": "Audited Tickets",
   "audit.totalAciertos": "Total Passed",
   "audit.totalFallos": "Total Failed",
-  "audit.muestraPequena": "Small sample (few evaluated tickets)",
   "tickets.boletoValidado": "Ticket Validated",
   "tickets.sinAciertosPremiados": "No hits in prize categories",
   "tickets.verificadoCheck": "✓ Verified",
