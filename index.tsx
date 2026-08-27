@@ -7893,13 +7893,16 @@ class DataLotto49Advanced {
         <div class="saved-combinations">${combosHTML}</div>`;
       
       item.querySelector('.delete-btn')?.addEventListener('click', () => this.deleteTicket(ticket.date));
-      const validateBtn = item.querySelector('.validate:not(.verified)');
+      const validateBtn = item.querySelector('.validate:not(.verified):not(.compare-filters-btn)');
       if(validateBtn) {
           validateBtn.addEventListener('click', () => this.startValidation(ticket.date));
       }
       const compareBtn = item.querySelector('.compare-filters-btn');
       if (compareBtn) {
-          compareBtn.addEventListener('click', () => this.openFilterComparisonModal(ticket));
+          compareBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.openFilterComparisonModal(ticket);
+          });
       }
       item.querySelector('.toggle-btn')?.addEventListener('click', (e) => {
           const comboDiv = item.querySelector('.saved-combinations') as HTMLElement;
