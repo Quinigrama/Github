@@ -2,6 +2,7 @@
 // SISTEMA DE ALMACENAMIENTO PERSISTENTE
 // ============================================
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
+import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import {
   buildTerminacionesStatsHtml,
   buildParImparStatsHtml,
@@ -194,325 +195,6 @@ interface FilterPreset {
 }
 
 // ===== SISTEMA DE APUESTAS REDUCIDAS COBERTURA MATEMÃTICA =====
-interface ReducedSystem {
-  id: string;
-  name: string;
-  baseNumbersCount: number;
-  combinationsCount: number;
-  description: string;
-}
-
-const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
-  bonoloto: [
-    {
-      id: 'reduced-8-5-5',
-      name: '8 NÃºmeros; garantizados 5 aciertos si caen los 6 (12 apuestas - 6,00 â‚¬)',
-      baseNumbersCount: 8,
-      combinationsCount: 12,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 8 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-10-5-5',
-      name: '10 NÃºmeros; garantizados 5 aciertos si caen los 6 (56 apuestas - 28,00 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 56,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-12-5-5',
-      name: '12 NÃºmeros; garantizados 5 aciertos si caen los 6 (172 apuestas - 86,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 172,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 NÃºmeros; garantizados 4 aciertos si caen los 6 (23 apuestas - 11,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 NÃºmeros; garantizados 4 aciertos si caen los 6 (53 apuestas - 26,50 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-14-4-4',
-      name: '14 NÃºmeros; garantizados 4 aciertos si caen los 6 (107 apuestas - 53,50 â‚¬)',
-      baseNumbersCount: 14,
-      combinationsCount: 107,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    }
-  ],
-  primitiva: [
-    {
-      id: 'reduced-8-5-5',
-      name: '8 NÃºmeros; garantizados 5 aciertos si caen los 6 (12 apuestas - 12,00 â‚¬)',
-      baseNumbersCount: 8,
-      combinationsCount: 12,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 8 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-10-5-5',
-      name: '10 NÃºmeros; garantizados 5 aciertos si caen los 6 (56 apuestas - 56,00 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 56,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-12-5-5',
-      name: '12 NÃºmeros; garantizados 5 aciertos si caen los 6 (172 apuestas - 172,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 172,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 NÃºmeros; garantizados 4 aciertos si caen los 6 (23 apuestas - 23,00 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 NÃºmeros; garantizados 4 aciertos si caen los 6 (53 apuestas - 53,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    },
-    {
-      id: 'reduced-14-4-4',
-      name: '14 NÃºmeros; garantizados 4 aciertos si caen los 6 (107 apuestas - 107,00 â‚¬)',
-      baseNumbersCount: 14,
-      combinationsCount: 107,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 nÃºmeros elegidos estÃ¡n los 6 ganadores.'
-    }
-  ],
-  eurodreams: [
-    {
-      id: 'reduced-8-5-5',
-      name: '8 NÃºmeros; garantizados 5 aciertos si caen los 6 (12 apuestas - 30,00 â‚¬)',
-      baseNumbersCount: 8,
-      combinationsCount: 12,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 8 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    },
-    {
-      id: 'reduced-10-5-5',
-      name: '10 NÃºmeros; garantizados 5 aciertos si caen los 6 (56 apuestas - 140,00 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 56,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    },
-    {
-      id: 'reduced-12-5-5',
-      name: '12 NÃºmeros; garantizados 5 aciertos si caen los 6 (172 apuestas - 430,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 172,
-      description: 'Garantiza al menos un premio de 5 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 NÃºmeros; garantizados 4 aciertos si caen los 6 (23 apuestas - 57,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 NÃºmeros; garantizados 4 aciertos si caen los 6 (53 apuestas - 132,50 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    },
-    {
-      id: 'reduced-14-4-4',
-      name: '14 NÃºmeros; garantizados 4 aciertos si caen los 6 (107 apuestas - 267,50 â‚¬)',
-      baseNumbersCount: 14,
-      combinationsCount: 107,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 nÃºmeros elegidos estÃ¡n los 6 ganadores (1 SueÃ±o fijo).'
-    }
-  ],
-  gordo: [
-    {
-      id: 'reduced-8-4-4',
-      name: '8 NÃºmeros; garantizados 4 aciertos si caen los 5 (23 apuestas - 34,50 â‚¬)',
-      baseNumbersCount: 8,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 8 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 NÃºmeros; garantizados 4 aciertos si caen los 5 (53 apuestas - 79,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 NÃºmeros; garantizados 4 aciertos si caen los 5 (132 apuestas - 198,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 132,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    },
-    {
-      id: 'reduced-10-3-3',
-      name: '10 NÃºmeros; garantizados 3 aciertos si caen los 5 (19 apuestas - 28,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 19,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    },
-    {
-      id: 'reduced-12-3-3',
-      name: '12 NÃºmeros; garantizados 3 aciertos si caen los 5 (33 apuestas - 49,50 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 33,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    },
-    {
-      id: 'reduced-15-3-3',
-      name: '15 NÃºmeros; garantizados 3 aciertos si caen los 5 (62 apuestas - 93,00 â‚¬)',
-      baseNumbersCount: 15,
-      combinationsCount: 62,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 nÃºmeros elegidos estÃ¡n los 5 ganadores (1 Clave fija).'
-    }
-  ],
-  euromillones: [
-    {
-      id: 'reduced-8-4-4',
-      name: '8 NÃºmeros; garantizados 4 aciertos si caen los 5 (23 apuestas - 57,50 â‚¬)',
-      baseNumbersCount: 8,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 8 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 NÃºmeros; garantizados 4 aciertos si caen los 5 (53 apuestas - 132,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 NÃºmeros; garantizados 4 aciertos si caen los 5 (132 apuestas - 330,00 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 132,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    },
-    {
-      id: 'reduced-10-3-3',
-      name: '10 NÃºmeros; garantizados 3 aciertos si caen los 5 (19 apuestas - 47,50 â‚¬)',
-      baseNumbersCount: 10,
-      combinationsCount: 19,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 10 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    },
-    {
-      id: 'reduced-12-3-3',
-      name: '12 NÃºmeros; garantizados 3 aciertos si caen los 5 (33 apuestas - 82,50 â‚¬)',
-      baseNumbersCount: 12,
-      combinationsCount: 33,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 12 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    },
-    {
-      id: 'reduced-15-3-3',
-      name: '15 NÃºmeros; garantizados 3 aciertos si caen los 5 (62 apuestas - 155,00 â‚¬)',
-      baseNumbersCount: 15,
-      combinationsCount: 62,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 nÃºmeros elegidos estÃ¡n los 5 ganadores (2 estrellas fijas).'
-    }
-  ],
-  nacional: [],
-  powerball: [
-    {
-      id: 'reduced-8-4-4',
-      name: '8 Blancas; garantizados 4 aciertos si caen los 5 (23 apuestas)',
-      baseNumbersCount: 8,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 8 nÃºmeros elegidos caen los 5 ganadores.'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (53 apuestas)',
-      baseNumbersCount: 10,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos caen los 5 ganadores.'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (132 apuestas)',
-      baseNumbersCount: 12,
-      combinationsCount: 132,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos caen los 5 ganadores.'
-    },
-    {
-      id: 'reduced-10-3-3',
-      name: '10 Blancas; garantizados 3 aciertos si caen los 5 (19 apuestas)',
-      baseNumbersCount: 10,
-      combinationsCount: 19,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 10 nÃºmeros elegidos caen los 5 ganadores.'
-    },
-    {
-      id: 'reduced-12-3-3',
-      name: '12 Blancas; garantizados 3 aciertos si caen los 5 (33 apuestas)',
-      baseNumbersCount: 12,
-      combinationsCount: 33,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 12 nÃºmeros elegidos caen los 5 ganadores.'
-    },
-    {
-      id: 'reduced-15-3-3',
-      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (62 apuestas)',
-      baseNumbersCount: 15,
-      combinationsCount: 62,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 nÃºmeros elegidos caen los 5 ganadores.'
-    }
-  ],
-  megamillions: [
-    {
-      id: 'reduced-8-4-4',
-      name: '8 Blancas; garantizados 4 aciertos si caen los 5 (23 apuestas - $46.00)',
-      baseNumbersCount: 8,
-      combinationsCount: 23,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 8 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    },
-    {
-      id: 'reduced-10-4-4',
-      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (53 apuestas - $106.00)',
-      baseNumbersCount: 10,
-      combinationsCount: 53,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    },
-    {
-      id: 'reduced-12-4-4',
-      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (132 apuestas - $264.00)',
-      baseNumbersCount: 12,
-      combinationsCount: 132,
-      description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    },
-    {
-      id: 'reduced-10-3-3',
-      name: '10 Blancas; garantizados 3 aciertos si caen los 5 (19 apuestas - $38.00)',
-      baseNumbersCount: 10,
-      combinationsCount: 19,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 10 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    },
-    {
-      id: 'reduced-12-3-3',
-      name: '12 Blancas; garantizados 3 aciertos si caen los 5 (33 apuestas - $66.00)',
-      baseNumbersCount: 12,
-      combinationsCount: 33,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 12 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    },
-    {
-      id: 'reduced-15-3-3',
-      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (62 apuestas - $124.00)',
-      baseNumbersCount: 15,
-      combinationsCount: 62,
-      description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 nÃºmeros elegidos caen los 5 ganadores (1 Mega Ball fija).'
-    }
-  ]
-};
 
 export function getGreedyCovering(N: number, K: number, T: number, C: number): number[][] {
   const targets: number[][] = [];
@@ -11530,55 +11212,370 @@ class DataLotto49Advanced {
                     <div style="width: 75px; font-size: 0.8rem; font-weight: bold; color: var(--dark); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${formatted}">${formatted}</div>
                     <div style="flex: 1; height: 26px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; display: flex; align-items: center;">
                         <div style="width: ${barWidth}%; height: 100%; background: ${barColor}; border-radius: 6px 0 0 6px; transition: width 0.5s ease-out;"></div>
-                        <span style="position: absolutxœì}MsI²Ø]¿¢æcÀˆ JÔŒHQ
-’’fÖ—EÎŒÃ´â©.€=tc»¤8ZaGøğÏûà}ØÓú´G¼ù'ûö'83ë»ººÔî‹ğÃîˆ@wUVVVVfVVVßeS>.wØ7ó»lœ¥e·H~á;¬ßû&ç3ùè‚'“3(ôu¿¿ËFÙ4ËwØ—‡Qşc—gì1l±'¬õÅ˜>-¶ÃZçQŞîvã(ÿ¹ÓºÚe%ÿ Ï¢8»Ví³ÁüÛ‚ÿòÉ0j÷7è½û–f)(Ÿ?şòcÙn£ÑÏ%/Êei6KFYïœxq˜-Ò²µÁ>Šğm‡%%ŸõÆ9ÿ»ê\=Ú,æQúø|mÆÉyõUàñû]ıóªc¾ë/gålÊîî±÷« óY°¡ce”¤<ï%)üûİÉËl€‹2Wwğ?øgs“íá‡}ËîŸì³£W'Ï^¼8úöÙ«ÃgâİÂo1£’$“§Q½‰R>mwØÇ;º½¢dÓ¨(ŸæÑPR6ÆÙh1ãiÙ›ğòÙ”ã×ƒË£¸İÒ¥Ÿ&Å|]¶4=´8º<Éæ+ÆO©ğ«ÅlÈóÂ‡My^®†Ô0Ş§Â„ü“ŒYû³@ÿ{ö™)>óÚì°œ—‹<@-Ï’¢ÿ•YŒ¢)’·7åé¸ûÛ24ÆOg€ß?†`Ey9å{ŸËyöÅÃ‡ÕÌÄÈÖÑ4éÙLblşÉŠ£´XŒ“Qôà@ƒ+Áac1Xœö[p(ÒÀÆéóÇ]9§Z6|—NÄ¤øFô6’ cGéŒÇ	 ÌÚ¯Ø%{Õt\æ"½ŒÄ=m x—ŞíVÍ’tQ®në7âjÎÓ˜ç/“4ÁÑÀmlg‡á¯å!Ÿî ó$tØŞc‡„q–Ï¢²äÀù%G†š8†œ%ğ:JG<3z÷Ä¼ë•Ù‹päøâ˜ÀÃ$Şaò«.×Ù­´7Œ¦Óâ;”N²­TÌµŞ,š·SGâU^²0lñ*š!†- bÒE8Îx»Ó +åîEE;ít, [JTªóiÁà±x	,R"Ç[£¢©îÑ"‡á*¿…Ú½$F‘
-%%YM[@]èıoØ tL}˜‚™å¼$$ö>ÿò£Ææ
-ç i14İ®:½Ÿ²$m·P"Ù’ ¨ãœ«1i9ıAbĞ(QöÛß2óK1çcÖïTÍiUÁA.pè¥jô;T¨~Ø¨[=ò»:j»ƒÏpø"å=‚nQUé‰&Á(›Í…ˆò$£º˜}c^qµñ“Fèî^]]¨¢ï¬LJ|$W¡À,K½ÖA¤~şøÆ¼ŠXhğ¹jú•ó„á$¿µ.i€õ½ÑE¨#oeGôÓUúà¿š®Yãc‡tGQ°±‚…Ïxò5Pœª’ªÔ!©‹üK_ší½0Ÿ?şëşé?‚‰êèZhu–c°W$ƒë:Ò¢ƒ²˜c§´ü¾ªi?0wõü`zk`êÂjÜÑÖnù«@¦·´.¼ôr«Ø²‹¯<]¼ÄšrøÔÖ×4ÿ^m0ËzZLËd³¢Ãî.«'Œ	§vÓD@õw-ƒg«ÇŞDeğÙ<ËAuò=ÉEa”¿j!|0‚_ÏKPLE»jKó)Òdı¦HÔ¨`H	QQ–sÁô
-YüÀÎøQZ¶­ÖzçÑtÁ}cZ#õW‚ÁYìÀºëôg~	Z””÷;õ…]ìWÕ÷]£>j¨İ¤¼ì{è…,:˜ÎÏ¢Ñ¡oíh‘L6èvZ
-…ª‚ÙFãî]_h:V–j>hiIX1NÓwdTVÂÒ¤<:¨ˆèNÈ(3&@X­X&‚Â°¨ÃPbéÛi¡0¼¨Å6Œ±«fL)k±åŒ|Å’\åbÄ@îõğ'ÃpxyDíx8ô°v»m°!YîÃÓÁ;XDğ§Z–a¼İß ëæ;¬«à«_
-m¯y”äMO1|pÚ×©ĞÀ³­Î„Yåté_Mö&“]ÀœgERRyIŠ•àZ"}”Œóè@‘oÑ­”î°—QyÖO³,6	‡«é¶µ—}¦šç|Dœdè¤¹íÏªˆƒaîøİ½êÜ`e4ÚgÑ‡cZŠWŞ¼S’ 8÷<1áO*ü¬1Eq5·‚¯¯=5*k\‚áçÌ±Ô¥?å=;èèÜegÒ£:ØÆ_èÑDÓ)wØ£Ñh—Í¢|’ ¿õøüqan·UÅR¯úêÄy½¼0+Â
-cÛ”Q„xƒ¦~±šüPŸªi”"ê³òŒ{®'ú¢ƒªëÊY‡ÕWpuL¯z?+záŒ›ª
-}\±êûõxè)’ô)úŸ&QK»ËímÙµ÷zdJƒäüõO)‹ù”ıú?È€fÇÈ„èÔ{ö£š‹ÈdçT%TÅOPç#Ø[â#2GV’Ê ïçyt	b4›	¨Ê€“%1	Bˆ·z ôŞ©îÉLKD d7Ò(=NgI‰¸x ÇÉÖBõÓRD›—I:š.bNšW‚ëEœÖß	à‚p0=q”¦!*ö™i§Ğí€òë/‘¡•ÑìXsvwÉûs“èp×`Ô|ÂZÅb4âEA{CI:ÎZ0·%ÏÁÙfe™Í@¾öI|Ö,i-î/´äAmÿCñ½X¢êE6 YWó¸ªÖÖ¯0Äì)9+¢sƒXıÌx4‰µCt¯ğªZñJÿ/2åä&kS½‚9If–0]xşÌ¦×ãqÁK(ñ{Ğ‡g™¿VNåX	ç¤Õ-Y4åçYş‘•öuçD¼RLT"ÁR¦õQhV£s³ìÅ²STÀëeÓ¤sñhœY(‡Ê¬Œ¦’ÿ+\«›IR)ä5¨VMeš%${f„í‚¬qUgWé!ör/ÀÊ1VQc¸=mTĞ6ÅÅõ8h<4	|\Œkàr,ùÏª‹ÂfYŞj	)3V“ÅAÜQ°c†ÉH…f×ê¯Ñ´÷{Œö3#å5ò¶%åï’Æó‰ °Ã3>ú™ÅÙb8å`,ÍyIkÇ/ƒ`°GøBëˆ´NÿWXPÙêİZ;Eµà‘‹Æ
-‹7²Oœ˜óû/?Šµã•3âë¬ö®Şû«Œ§1{Lë‡«Â¸A¦½ˆòäq€iİ½ß†ô-(v@ /e'DRi¹n°V§Â¬î×Š†ØÍ\!ã=F›_¹ï’B” =OBânõ‹9Ğ$+¶—ñMt€ùÒXŒ¡x' Ãœ+q%ÜCqÌyÊİf¸ïò¦jİ“‰78´J–àFõû¤W£¶c(r“±ù–ÆÑ”Eñ9¬a‰Y€¥³é•C| eã£Têñú_ã-òÌM¤©ô1»wËÔ­—å…SÿåâòPRºµ=IGóùôRFÍ€-İš\¶ËË97ûû­®¯"L¦³ìâ$2µñ¿ô$úO0cå,sW5A®Ñx+á÷KúDÓÑbŠF#”³$4¤aE–-¦1}Æ©ç¿+×Ø~ø›í-Ôî¬»SĞ	ŞS™Í³Œ^Ùg¾¢¯N8á\œt¿™= £šÆ´8‚!Av@9xWK3øe¹Fº¬\	Ãšæ´×ë9İ±üôÛ0ƒàuƒy§	C‹É„´%§øáé}úÎÙ•@y ¤&ÏÏÁ
-;çÃ:ØgoµÙU0l?¸Öƒ’où,;çæ­fmªdúmoÈiæS¥ßÁ‚1íÔ-¬ ı7°ÌA¦`D‹9ŸÁ”¹c³ˆãênÓVÇĞşÓÚÙw¼˜ğœ<t‡’ q–G$ÿh½oØæÊr!êQFSŒ Š«#0°F€µ }Ğ‰¼ãz¦Ê2ÕVL*d’!{K*íUFÁ[=cùYôAzÇ»ƒšhË°Ïh,`†Œ£±œ»—¡] ª÷Xa^”±thç¡²)ãxDëØÎâ§Ş|QœµÌN•3%+Ï`”*óåÚ4EÊ¤™caœE»µ}·»„Ø?k½dsœm¤´îøœHq=EÙD&W 'ß¶·Ï±òô;3)ŠWŸ|yRü\x[¶è³QQó…Í–u5ÓÍŞh’+Š{hßùZ©2)†Ö¤ uUyYïÒU¨o©¾aá†°†m}¾ur]>uA¯Zå1 ´&WK;­¬^–hñixûşuyû-˜2“,lTkZ@hé]ËÚ°0î86¢íù6Od%ä+nö³çx”g@Š2c(-Ÿ×›ÖÜê<éTì©ì‡„_´?‚¸:‹ÎÜäi³ØÖ•Ãi6úŒp‘·ä S‘P/AğìÏçú<€˜e3ñ´ÉÌ—EôBNÑ™R¾³|Ô#W}Oú%p3ˆğ³öõ.@ d²o'ô
-¤ÃƒÁ®ö.|Èúı\¸Ø“˜£œE#´ÉĞgWr]L÷fz®×ûÓi»Õ“»Ó$ı¹`Ó¤ÕÑ3qšàTœ&=Z˜¾€Õ@/§éÜn‰fZ6OÊCôâEÒ@Ï÷è$ïÂ¶êîºzoDò*pØB&Šcƒ‰¨we¸\Ï¢Kh:M&è½Ñƒ/Ÿf?P,K/Êl2™ò—YMõ:›~—•¹ŒÓí¼ãÚVI¤'*-mæ¾·¼@œGùèÌ5ª—ÙpßDÜ»ìÖ¼?&ÿØÚxTëN|w”ÎeŸàQ³¶¥ŸÎÒ–œK¦¨=¬ÇbYká%@ù·®ŸMWÆî[YÅŠŒ…yÚÃ3t4ƒÂéŞ80Åô÷Šğ„ÜÀD´.î-/f°ˆAÑƒœN'èn’@¨5«g">TÔ[µkÏL»w(»{×İWf6neJƒ&EÏ.
-Z ‡é~@€]¨"ú,©wåGCÔ ç<šİÚØ8Ù§Dy’åqv[Ø‚Œ32íS`;Ï.xNq/·„ñ0›FÏŠ9Ç·Ÿñ‡),–Èmá0ˆŸïa–fÓ¬ÌZè±ª–<™ÁÚá<º5FÊfó·xîá†}»d¬c×DÆÌ–ùé(à“h8åõÚ<«(ëŠN¯êX%>;ÈâË•Eû‰ª¡  ¥š)kh¿WTÁÖŸidÌNA õÜ=ÙÚµğï¤ÕĞhUôJ`Îv‡çğ8Œ
-Met÷ˆ=‡İï²9D•³Ù[†²F9…"Ğk—±yº±ûŠww7;–cUâÑQ»6â©ÅQÍ˜¨j!/¶®#dzüPiã÷pØƒ½ÅLÄôZA—yéq¸§¤x½j‹:ºø(5K1ÇUnö ¤p0‚GÅ}YÇíØqñ>@¶ÃÆÌü¥€İsk²ï4
-7x)¼·ú¼˜e-ƒ"Ï¡H[«ÿê—‡´z¬Û®ÂÊAıXG+5d…™-Éı‘O1(şt¿?¦X/^tŸÓ>éç?ÇÑ%<Ãext	ó3€ †3½gæ½(¬^côf`ºÖ HŸ\Î.ÈGúp®üíÆ…;#")c˜Œf’İjÔ{ç‰½¾Ò«?e²c€&:/ĞÉ6Nré}q¸Q¼IÇš’ï€ÙÎ1| íÈg
-{9*ù¬0gH¹©=a-Ûì’0´}ßRW’¾£eşr/ŠXgkhX-&)ÉI_¦† Ö‘@—©ğ"IE¼«cò+©=YgÙv(l\Ëú8	H	qNsêß÷)HõVcäiR îcsM
-wìƒ2]¦¢¼Y,Ê2K½^-Ì ë@%Ê/…N´˜øêC>FfÂ“Ãf7XHğ]6FII|×ïm·šŠÎ3
-ÿyvèàDéJ|ãLsºè¢|ÜŒ¢*´ŠnÑÕQ´#	®Ìü]e~J˜¾|@Æ6)˜jÄ“©-6k:ÇÉ/œäàÀ˜r5®ŸÇV36Uk=E¦¸q5¶ğˆV<¸pĞˆ(Ò˜Àmúšª]là«RØB—§±‚G$%iÛjån˜Kb;‚eKH'»¾¡[Wî|ãh5â„Ä§ıVD´--İ±’ e¬£Ò8{¥ÌI}ÚaáÔ½İGI®[ÏêRïf²Ş–ó¦sëHü§"~«ìÔp€Û1-«
-óM”¹LÈYá{-ìî~õğéTCZ©„šy½·g`­SMµ)Ãˆh4­:X¾^‘ä-‚ŒeÖòeY@Ï„tL}¾˜lR@+©£B³ªZt˜Š­É4fyv!8Y¼†à-!™]Øü8Ê1´QrX»Uæ¶••ã¦õb˜å1Ïè
-êFÌnVdÓ$f_ŒãíñC«ÿ¶m6è©#T_xx”1Ÿ¨G$¶ÁÂŠQL¾xDó«á‰ÃV°$û‘Î%’µíµ³ÊÑ2,òÅı¯··<ôKy»	_È,#¸‰å’*šãFÁáŒLkÚ[Ä"}Âs>:‹*„P)“V$_rÄíó5Ÿ`ÅZœÁ7-YUÊšÕÇtÍ)Ø/:”Á½”Ë÷ËvWºß¥Õ¢ô®]H(øA•^î z5ãS‘ÊÈ{˜øk6LRy`ğÛ(¥x®ÊÀ¢¯¹Xcd©üjCëµEéT‚å¼&ãäÜnÓ­×•)VB­¯šÂ`ù49_=…"TªÁÍ[&4¥¨ª9Î»<@¨ÀqŞ n3?€BÄeo•?M7 ©5ê6ÃK€Ÿ‹ÓÅ«~U+Ã`Ó¤¢ÊŞ¬Â³A±<°ë¨¿üñ+ó‰vL×˜OT¾y>ymĞÅ5æ‘[oé<rVĞ+në6î'Yû¨åÄæeóÖ”µcè$j[9mÛêYXÌšrm±€Y±†ÜgşUÕàÄ)my#ló³„åUrü–ƒÃk'˜“ºj]kdÅºA$¦‡BÄª°&a]C]×N«IkH~Ğ0´¶?´aÂ¯‘OVºÅ©Z½İ¬yR‹ÚUB×nÚZ•\
-Wóí­G\ZKÚUæŒV’µ“á_ÇäÆ¤nKÌƒSŸzW¤éøâáıèŞğ;/·ÌãQ“{7Àø„O†€•æ@Ù6©ÜÆíªlÛ;f·Ş!~v¡üWnàáw´³}ùzü–‹iY¬vxŒI Î8Å«ÉsyP›eÆfQ9:£"vhƒ1L•ÃB-d[Ë±u–ã4|.À5x·ìrçp¾Ú…íùi?×ñ…‘à¸H¬ I¼§Qq6Ì¢<®9óÈÜ5R…êÄŒÜ:…ª`ÅÂièIˆX;bøŒƒ[–©,èj{T¦¼ğ S{(u53à¹ôJ¢ùfg^3–3ŞŠ$ï*û¡ô¦lB§èJ.‚Ìu¾‹C»ŒÎyáuÎ¤º ß®}jRqô
-yHVF¥á\0'DšQÂFé´ÿÎÆ*ZFº…‘›êz›BÁ¬`{•ÜƒĞ6Höú»,yô ş¹{·£Êµ‹ÇnÒÙl'w¾©ë®Üƒ¡Ü]m£jÆ~\L •Î]iQgñ ŸĞ@7Î™¿I'€V@è(PZ~ç ËÉ<vØÎBV03¦ÂfÏ[‰Sv5Ój(aÆõiäÜ0,3 ÏD{P*Cñƒ&@ãpüjÔ]¤cƒM°ÁáÁÃgöÈà!Él1£Ô&M_xú]b%V5ÏT°”õâ,*èéQJ§)÷ìè¨µF¢àªN~m°$şPÉ¨o¯‹:ÀéIÓÛS€ş®šĞŠ”mRŠC’HXpÒqòˆ·B&H´HdÓäU[Ó%4Á¬²äm¨uás•±ª†[×™”¶—Ğ8KXüéò:¾ô‚Âó2à<Q'pOpË’/
-^‰\Ri÷`áÃó#u|ŸF×%¦=5iu«˜´‚İeªeªt…9¯%—®¢ßÎŒV—h@ÍV·.% ,Êa-_ÀŒ§@[††´5€+ÅëåLM¸®<E×¼~–¿Ê~Ğ<û£{ğN3…µkIˆÚ]Ubª„Ÿ©âûéÈò ´à ­Î™Q1ÌoÊhv”‚i'Ş¿Qa‘À¢&W‰I¼¬õ EGèZÛòï}ù÷üûho¿™4ëvk1±µƒK4@©Ma–Ö´zåõm-àb Ì_%ÀåoÅÆrvÉ ÚCe®¢Øƒ(Û=—½¦ÜÍT‚Gü,S}grës¹J%óbïLiëãqÎ)pÆ»jşrñ±¼J˜BÛk5°½~÷×jàşúøI‰š¸·´5€áL«WÕÇO¹/1öãŸ”—c»xòà«åĞ¨èOQä$ñôÈ$&HF€Òá]@szŞÏÔ‚·Ás>Æ]%ĞXó0KÇÉÄSsH k‚n†?˜ZŸ hbG¿kË{Uƒ«;ˆÉ4Ïx–cÎµhú&Ï†àg	à…Ái»6õnJAüÈ¸s‹¥Û‰h˜LèZÊí¦÷¤k”xä€1rå0®ˆ8StÎsŒìÁ,q¶ËÄ|DF™ªèstZ®Ï(äå8
-Šqsæ»-%ú†ÈÆş.°
-Y>HDÍØ‡«‹äğ,¥&¦¢õˆ3WÊ0fø©¬^íWÔF}M{ T¥ëŠ>E'&™ç’±+XnÚÍ‡ö¨š;JÆè¬O3ßâQùryşï%²iƒI|SC2ÛJíkí!¤ŞƒVg£Zr;Pr;Xò~ äı`É{’÷‚%…ùè—Ã?+¶ZFYBÚ2ë§Ú—¿øÊµ‰—mÃù¹Nÿ²§¦İfØ„¡Ùƒ~-8‹Cl˜Uı@]òU7~PZÍy>>ˆâ	÷V4êc„-`Èl8´¼Q»7U¼sÁøŞøşøI¸½ıàŞ.“!!;ìşüƒ¸0V„9vó(NÀÙV¹DvH)SÏ+NQ©çyç-¦1vœ?‚ƒ´hÖ¡e2ãÅ/Å~C–"Ûx¥µÍpk½2{|àq{@¿^mî×œı’r™ç˜e%Úº5=®ÁMp°A‘Tv«_ƒàŠlÆ#şµa“Áö7ı{ñm±É¼kX®”1Áî4Iyw<åP&é$íâí¾ Lä´ÙûvN-Vx“©âİ\„iú†7W×ä=
-D^ƒûş¥ÎA^ ffjXN‡¥óêÇ,/¸Î.?×I.ÉëÁw›>$¶ıå?ıÏ›1ó˜ó-¾eè=|8Fÿ˜ù¯ø§ÿÌ¾ü¢ä[Û&éØãs1t=‘UnÄólß8CÆ:à§8à‚Øñó¨Ì5¥Éô¥V0¼dó³¬ÿ3"]5ãÿWw…ƒh'VíèÁ¢ˆEs¥¹ÍöF\ßl}-¦¶ÎŒù€_€:e|İ–éÊs]=®Ø)ñÛà6ÙMq;FÁEùe‡0ğXIÏ¤û«ßÜ6^ø"b&ø'Á!'“›Ô2 îğ&¯¾ñ=øöæ®çeWÙ¡ñ|-ôÃ…>Y«v§Ä{Ë]ë.>ªóYÂk°a¬QóHì0–“ÕNOì6ô…Hãbƒ	Æú‘|P%ªvO¼Ãôx0Û‰Îºå’HEócIµİ†¨ƒ:z°NÕ;ãÆÕáè–(›1¢Ì.áOéç;_=ä ôñè[CáxÌÍV1á•+ÿ‰œp»¿~È„[µX	ı58´=Cş;8,õw·„› ˆPAı^ƒ2Ÿ°ÂËÈï>`Ì0 Îkğ¸AÉ¸!µ±‚¦< ¯ÛØ¬	QQ²Ecóæ ]R	Qw·Ø.a÷AÜ¨ïW‘{®>·›¶Şü~‰‡¯Ê(ää“KÄ¬Z¢VW%ëAıØ­2Ì’{k‚ÆéC0‚†ÊôPUJÊĞÑ–ı)OÜ/HÆ—`iQ0,h†y4âİ!//8OÃ†iÃåÕ»r']ÈPùâŞ×÷ÛÒ×”m°éoŸZ7İ=~½õMeµÍ Á¢Bä•£B˜ÍBÔ‹K€ğ»#óé±™İ´`¬íxÓ+ñ½rÓ«¥â²ßŒÿ”å"rS­ûVG‡?ùxü`<¶Lk~¿-ÜªY<İ¯.¶Ã«'ºÏÔ ±z/ŸK!Õöá®ƒª>§uÆ1ğØ2m3Ñ˜ 8ñƒ*DİŠg¯Ç¾’HøÖxs6¸Íœï|!IªbŠÔ—Õ.,wE­s¡Ñ–AwHá¢ÌCxo¨ñrÿä»gğÏÑáşöüèÅÉ³·Çì·ìõ›“£—Gÿ¿~uĞwTèña–ç|JZóxkz,Ä‰C‹ns¤c½B7Iöcmg¬W¤UÀ
-³IÖ´ØaÍïkƒHD.ëÂ³c\ìu…ì[õ–M·Ú:l’.G,¡üvW_BÏt	yµÑûüsÇŞ°÷†«ïæí®[G!X{ù±‰©ô˜ÌŒÏŞDùæFÙÏ9§€TÕ5ç%<›º%ùÂ1e²”˜GÓg€u™Õ©M¶e[D¢,À³ª×Ÿã}0’²`‚¶íÜ¤ö¢a!v­ªöhÏ­Ü·*‹§]ñTQiËPé ú)ÛÜŸ–vZ˜Y¿Ádn?«©‡©×˜¹…[= ¦ÙEaÕF-¥_«Z4¦èIÌ§«™ªvMÅk˜ÖÓÄGë¡gLİvUl>ÏıcVlÊÆ
-İ¢1jÍYÛ‡»ä¡‰L…É„)»ÚM`j›n/83„–òhi#ÀÏÂè¡şlicNk0ç'¼ô$Â±ºàMA³:|Ö’ï†~¸7@@ŸÀÀ†¸B×î:u)í‹b;Ğ°ElÓ2>\±iS¿ëÖ4n5ëŠiY>Ö£ G‹qcÎ©ÚhûŞyŠ±v4¬ôÈ0l¡@—JÊÊ}®©Şu¼Î<°X7¬½ÜÊåæÀÖWKt¤°î¬tOd"5ÜÂË
-!n	€>Äª°½Ş¹À]ÒĞ}Ÿèı;^Ì"&¨´Ÿ&é¯ÿk–Œ2 Õä×?§À‚°å“¬c‰eq—êbfÏïe—ÍÊıóÉ+ª×¨4h5Š7J·*º@4*¡|ÅÂ†B±˜	]´g*}—-²RînvÙVÿ7ÆtÒÁ*Xî1 ¦+u5(’MºĞ#»Ğ]S¨N/8-<
-6 nQ6=ƒI°*×±4Í¶Ñ4Û=3AY»HX4‡EHÔÑ½¼ÑT58y¶“3›š(ĞK<ôÜhY`)ß®pa¼pí‹.öTk-"/µóìÄŠœóÈ‡Û
-¨[ÔÙ«Ø	d•¾Ù1^Ætê[„+®‚ÈjsíFÈ¾P¦‘«:ÕƒÍÁ~Õ€÷wVP„T1ÃäJ1J«ÜO­ÅV©•šM,©áK„ö3«›.Z×*¼»2%ÍvUò‰û*Ëg˜¨	P…úİA¿OoÕ‚J»•û&ƒ$Ú%:ÖÙ1áË©«ü§LÏu
-ÄÙ7ıY†•íÖïĞxyÙãF0tåª'ªtÕ5U‡FõÕî×T‹F|NûÓNÕPÉy6ÊD,Ÿ(¬:»Oû¢Dºï\[Ù_<ÿ@—‘†Öô®z¥
-uàê7ïw›!DÖYîºrÉ~‘Ä(R«Ğj:ÎºãŞ<•GiA7³u1ûB¼È©Nw»ßgäâã±(Ø‚é¡¹ÙÉ×Û˜ôl8éò^ÒcEÌ~¦l÷e$“I¦Şã“,=pk†è³OcY¥ºxîQ\üîçúA4ú¯—ûş¨í¯yĞgnö1çR¨v«7”Õ“tÒUåÍôàÅ¶ÑHN]	ª,¾h.NÛ7m¤( ò`ş2,ñVeqwÂ*@EIº˜> Ø²Ş?óš:SOøºá@ì¢XÕRwô -q©Š’š5
-+V“äí(:¯Úš!bÇ¦è²3dÏU{÷Å]£×ş¶uñwº¯/©sÆ˜¤óMüÂñ¼MabÔéTó3¯ì0,¿!¶aÍ%»æğ„ Œ:¸nÄ @%¸Š*}‚©p0T %ß!sR&zh’VDÅe:bù"U2Ã’òH%ªĞ²	;²Ä¸— èå“(ÎŠ[µJÌõNÆkñ<Ïr7ûMÍåàVÆqj„n(|g3+„b(c‘A£½T@¼¡Ò5é9:"Í†+fYÌW…şÊ.ƒ-£—˜²$Ÿd'\_ ¿>Dé‚Mg1#[”xà?@Ñd˜ËóË7ƒõşGºÀc(Ü¸që—¹ÎÒ¶ÎìúJöJ3æ®A+LÕô¡æL‘t bv4f_Ñ¢êuÖÁ»Kp:³VôêZ‰jŸlÒÛE¯5ô…kÍ™n³9õ´%(é´ËÁ & 0ÂIEk'Š_©êA´<(^I“_–÷aIÅè%şZjƒ8¶ÁsSã¿ÁÜİº‹D:oj*õ—i=KÑc/«KËië»)/eP2¬¤Sº·"ôfò2K¯„ÎI_×4B)G»×±CÍéPä]Ñ3¤ NALğ%mzƒVñe`LÉòÍ…!½*XåÇ¬qJYÅ”7¢€,¨ÿöõÑ’ºPÂ¯7,rır5=‘ùåê9Ü+ë±¸Vj(…×È¿šö•ìaí¸ìPMş¯fUÊÑ5× í¾“º,óîTĞÍhw<>Y"b;y±cÍ¸®Í—VÿìÃhºhÿ#ÆßY?–€†‰í“K`”ØÌe•ŒÓ±Xm	Pò)!¼ïÓ¯CÊ‚p©:’ı–Àã˜Õî¢F,ußg±N…A—â<ÁPºLóHË7nŸ“éµÃymvœç¨¿/b·n•ç(ÿ	nv”ÂĞ"¯ß/ğY’oùh!ÎØ„é²>?E©W¼¼)'æYò	x/æÅs-šó&5–×zëÅlØ5¢ó(™¢Y!'°ÎŒ’}ß§îZ÷5„â4†€ËRK+€íĞívÙÛh±ÁÛ{ašIÁ8
-À"9Ïh#Äˆ-2#¤`Àjëi:T…¼Ê'znßo÷,•DN6‹ò]	`‡³lÊ£”]bLüé;ç+]“x6*Eçñ_s)À²Š¦¼ È„XAÉ„çØK´­`Õ¡ÕÍ’b–±ó¤X8û˜
-@„œË0ğœ¾>²òÆ¢ûÍ¦ƒîÊã”j¼«œÅ•¦òÈ‹Ii·yEP¿w¯£Î”Kù(Vîzl;•|ºÖªû[Üd[èÀäLĞ“Ê@çF1ÒlÇa”[7&TA;½ãXùU´Õ%Ùb‡|Æ°¢Ã¿aƒ­¦#ÅÑE”Ğu‚È0ˆmêlzÎqÃläè,ŸÕSÜ}©PªrÎ Då¸?,ØˆIS¸‰qšs1.t„g"‡¿œLíïğfp˜T—ÖÈH3O2¡à×?¡Nìù@†M’q‚A•Ç|:VÓİu¨¼57ª"5Ä;ò È;­$‘»IÅšrª™¤ RXÇÑÛövºùßÿÀn±²§j+<´¾ì¨¦«ñ³5Xr¤7_gíÒ§¤ˆîœ›ÕáÊ&/ıß%Ò°`/‘yÙa”O3!+ĞM>¾€F§Æ[a“Ée˜y‚°ˆğ`’ƒm×+cDå1•óÅ¤CRø± Ês0>‰Ä0ƒîõûMSH‹İöv-}˜©V{(r¶«Gµ¹–ÔZGuĞV/Ëàİ´‘¼½F‹,·oñÆ·™=u*êÃ²<*M¹I%ğ†'+·Du6¬˜‡ĞÜ×»]é.ÙEm:Iæğnó4u¦šä<¨üV\Ôv&A…ç<_¦rÁôCD%(Äº¨o'<pÓ‹Ü#zéƒ¿PG`}œÈI-Ãö•°Æ\,¨uñ-€Îp{"BA›U»óIJMÏô±•vµóX¤äÍÒîW›ÁàĞ£
-eĞe$°Ø”`}*z	‹Ù¢Î£öÏÿ—O¥
-4Pt` Æ	m.8Ù^Î@5şúÇ•ZôK”»À¥%´"•†É”Ñ8ı„6TZH!)U%_©Ç,'\T:÷²êÊ–³ƒVz:i’Ù¿‘f¢)¯…(Tb¿<b/éKH€ÊÂ¾V‹•<,!éì‡!ØøÑát5ä¬İŠbÀ:~»Ë•ŸG¡ =(Ö«¯ŒlïD®tá[( qé+¦ÙÅëüF7`ŒJš #„3ÂàbÔÇ7ÊüÉTˆ3›íj» ´!ìòã[°¿xNQ3­ØãÑEãè—Æ”UrŠªEça¥^uQ‚X8JUÃş&Kx£è‰r=cÄCeç8 ‘ùŠîàaò;pVs ?Ø†´Ô,‘ñœÁ6ˆ%®`	àGßY§ª¯à–_°a‰;xX:Ş`»æ³óšS¬K(CÑgşÓf_…$­
-LTƒÄ-oí’i†éu6œ¼Â÷¯÷şÙ¹áEi²q×ÙÇWôõÉ%r'’œ¢š$yvªÊı*Ğ²ôò¥ş¿e­Y{’İeM×šW?Š
-ÆÊª1M†–èùyÀÛˆ†·Ûˆ•çŠ¹¦x¬v:ú×ø ¡9ÇæÓmUsÁ¸—‡ºvãã=öbÄDº’Vt°Êè È¬|@¿ˆ~ıuÿ	UQ)Æ É¼S/]E‡É'ZílÕE
-56İËNbu·ƒ–=Hz[Ûáş¹åú½onÔ;!bÂ¶Z}SáOTi@üèb‡âøi¸”Œ/PÆ^MşU«ÉšIG%z³Å%F‹+¬äPöGf!ˆ›³E+vša¡üõQ®‰¯Úe[7ÄSçõº6m'ytYKØ› 6Œ~ÊŞ(Œ®_hj†•Y*fÇ
-ª`Í*zà"Híï8=¬"ªr%‚Á}¥I¬Â]«²Ê~¿BgD(¬Ó e²e’%÷ª)?™5^¡·/ƒU¤3Ğ×‚¡²ö}õTÒáz?¢ ¤có„Hé¨½V@|è¦	UV–zÿˆbÎ…Uï}nÒ³€DšaÊ­.½&uxJ8¥^‰“û•Áf¢K±éè>”º +ÀMÀ<+tŞˆ0J©Uİ^@o†ráš@'ş¯–É¾l÷õÆy|g²6ÏÙ¯šc	FN¹¤Œ…ÿéë—µû> ¾Š“ìø,S;@ÊC-×¶û^ÎÅn]e"» Lš×±)öjrAÔíè`´.W7@ÿ”%ió…ÈhC×’Œ³ KâG_İ¸Ş¥³>’XşhDk´®ºE#å¯øoÿ-”æûxÕ-»Tá¿ü÷æ
-òº]ü¿’ùó—?şc«êV›<ïÙïës”ä“aÔŞÚl6î=Øè÷Û“±D(e/cÉƒkg,fÓ˜’o(ªbZkXÄ¸wó/30ê(%Ìf'eäÂ
-=iÈzID<Ø|³½1ØzèÅµ¬¼T˜"¥P-qBxôÚ"zùÙ0ÉG¢–TÄO…¶µ(VÓßeıİº÷pãÁ7øè®ß[iKü;+£¡öt×UFµ‰85x?~„1Béä±dSŒ
-ÇÆÅÃæŒŒÀ—˜»ŒOsIªKUY3tcy¥QÜ§U¬J¨‰Š8@I%?•bĞ"s»Ff€×dtò²`Zæt}ÊX/ÇØ“$í–Ù\§ô©¡M˜—R°¾ºu»TÓ^
- IÕ5Œ%‡$6Ùa¿ÖEr¦şõb›Îù,ÿUÃVõeè2jçÙ‡#³@¿K)ºR0º$´µÃD0Şá–Ño˜œä ¥ö¡¼‰VØÄlú+dÈ &çùŒ¿œ‰`:9$8lÆ|„Æ<í=É:t“†ãFô´wªñ®iTş³d:‰¦Ü8~àVo[C\åkËª¸M°Æ¸i†Ú_ª°hš ÖÄ³æoè½*š~˜§{ü‰@›{/*‚Ïß·p®i"ÔQ×¯y`|'=£]É¡Şá4ÙIE—Ùmôöµá\[Îb`'–N<¥m‡ğb‡ÂÍr}RÍYê\ãpe+Ì'@|dm¢2+ÊrIÆ²p6•@O—eÓ{™ÃÎŞã¨;ìT‚Ün×ø4ƒ«cÃeÇ†°	d¹£T,àÉÕc¨eÂ7ÀÔ a~Ú[T|r§`Ü’’Ã«cˆHi÷U
-`5‚…6~ıcQÒNí¸5ÅhxAß­¤öû»ş±Õ§ŸË%‹Ù{Ò	°§˜t}éÕ˜˜b1šRDaiÃhÌ@n YğFñ¢ëÄŠ.,];VË‹ªºFt–ìIUˆ˜C÷øm €Ã*Ls¡^ª*ìÉ:Ñ–I@»Ø§Ûó€SìÙWˆus2bÃÙo.ù„qiüß"6MÏâÓa‹Í[¨Z°1«´
-°?%èµ¥ÕØ…o3’>a'Kóo:ÃM-Ô´×±u°‹>1ns´+:Ñ‚auêõØ¶*!”.ê–ª_¢å¨5¬d7ˆU²T,Åu½¯lãÓ‘Lz2Ïb©#èÛ#]Y<¨?O fµÙ)V©	êVÓÔ¦†(¯Œ¹`µ3‘sZs’N9.ä$Å8oÊ™XÅB¦q÷8¨¨$¬«õ'ëÖLş:qùc°ÉyN¥´e×JİP‘zÚ°€Q&¸•6IAE%]ä"TŞYsBèée“¦I²#Ò2ÎjîrÀ:6ËÒ^
-ıË¹ÊgÕ³×M¾ñŸD¸¦1M ‚Í0]}-DgÅ½’ÿ¾”Zï4AYF;aÇ¿5È¶Ë‹ÃÈd˜]°§
-€ı£Ó†‘Mï3œÅ6Ÿ.òˆLQ9K0¢o€;mC´^ÆŠ!!L2äyœX0·i
-?Şc[&tÙ0ijş±“5Úşxvô©ê,İE]ÿRİCíßêáÅ‡{=Ã˜mĞ$"+–•©È¬2vÉÎ³éŞG*oÖÍVB·´º‹ï6â0o'ó†ñ—7ˆ½¼YÜåõb.o!Şò–c-?Eœå-ÅXŞ ¾ÒHÊóhšå/aÚ€ÜIDŒeĞÙ±Í'+Ä’‚kFY®Ô¦u\»¾ÉÚHÈk5G`ÜÆ\·…æmt-D]Ô‚Ñ”u‘”ë¢ûwÉ2)ˆºé®ĞMWú§øŞSYu¡˜>ĞjŒbM •wˆ;ÏE%!®ÔŠn›ÖKé±o¯‰Ï¬‰Í„Öì8W×7
-ÈDô‹Já@Sñ~kÅğR¯ó\‰,EÍĞy£úÍbÓ<y“å"×‘Ç"‘*‡pÙ@ƒãÖ<ˆë³Ç²¨6s—ƒLNäºHî¢•-®Ï ”éÚ›˜õ~%ÇµBÜ­[µªœ¶Ã$EäUwDq|‡UÈº!›ƒ¦vÜ–ÃBH^i¯Œæë}ËË,O½DWámÈ—‰MÕ_C(İêatrí„|ÛêÔ»ŸË³bıÓÙşù¨úUÚßûÌJoößujoº7•ìJÃÆJ23¡¨ÕM†"<æôˆĞÿo‰C÷B®ywP€çŠ$un­„Ô°óß5€ÒZfÓC¼Ö(Ë“õÃ(0:ÙÜM€ˆTÄ	å[!˜Ò}êï¥yLe.¶£–q¤%t­ø(·M6ÄÅ¤¼p>´‘a‰²ú‰”ß%“³)G‘k!m¼‰ƒğ!§RYü˜”gíVŸµ:5¯õ¯¶XúÏÆÄáÊuB¤~ùÑF4^]tÏÔ©O®ióªéuƒ©j4?¥ëPÑ­Çµùzİ[‰¯r‹^3lHı•_–má>S$ª	¹@ğÌh>…Ù6e	ğ'™iÙo#gÑ|~‡ÁÔº0‹/)#ªÈğìwÉ[¨jKÑ‰VJD¢v¹p«ê)%-ËìşCĞ½ØlŒ±Æ–”Ô AcŠÿòERPØs»õôõK©¥EşXø¶5à‹İ~~ôïvØ~³(e|6//ÑnaS›•Ğ‹’(Œ§Æ9zk(UálÀ;²ØÇ«İÿ  ÿÿ Â·è‚
+                        <span style="position: absolute; left: 8px; font-size: 0.8rem; font-weight: 700; color: ${barWidth > 12 ? '#ffffff' : 'var(--dark)'}; text-shadow: ${barWidth > 12 ? '0 1px 2px rgba(0,0,0,0.4)' : 'none'};">${t('backtest.economico.vecesCount', { count: item.freq })}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+  }
+
+  // ===== BIG DATA INTELLIGENCE =====
+  
+  updateBigDataPanel() {
+      const lastDrawsContainer = document.getElementById('lastDrawsDisplay');
+      const dayTopContainer = document.getElementById('bdDayTopNumbers');
+      const alertsContainer = document.getElementById('bdAlerts');
+      
+      if (!lastDrawsContainer || !dayTopContainer || !alertsContainer) return;
+      
+      if (this.historicalData.length < 2) {
+          lastDrawsContainer.innerHTML = `<div style="color: #999; font-style: italic;">${t('bigdata.datosInsuficientes')}</div>`;
+          dayTopContainer.innerHTML = '<span style="font-size: 0.8rem; color: #999;">-</span>';
+          return;
+      }
+
+      // 1. Contexto Inmediato (N y N-1)
+      const drawN = this.historicalData[this.historicalData.length - 1];
+      const drawNminus1 = this.historicalData[this.historicalData.length - 2];
+      
+      const renderMiniDraw = (draw: Draw, label: string) => {
+          const formattedDate = draw.date instanceof Date ? draw.date.toLocaleDateString() : String(draw.date);
+          const ballsHtml = draw.numbers.map(n => {
+              let className = 'mini-ball';
+              if (this.hotNumbers.has(n)) className += ' hot';
+              else if (this.coldNumbers.has(n)) className += ' cold';
+              const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+              return `<div class="${className}">${displayVal}</div>`;
+          }).join('');
+
+          let starsHtml = '';
+          if (draw.stars && draw.stars.length > 0) {
+              starsHtml = draw.stars.map(s => `<div class="mini-ball star-ball">${s}</div>`).join('');
+          }
+
+          let extraHtml = '';
+          if (this.currentGame.id !== 'euromillones') {
+              if (draw.complementario !== undefined) {
+                  extraHtml += `<div class="mini-ball complementario-ball" title="${t('common.complementario')}">C${draw.complementario}</div>`;
+              }
+              if (draw.reintegro !== undefined) {
+                  extraHtml += `<div class="mini-ball reintegro-ball" title="${t('common.reintegro')}">R${draw.reintegro}</div>`;
+              }
+          }
+
+          return `
+            <div class="mini-draw-card">
+                <div class="mini-draw-header">
+                    <span class="mini-draw-label">${label}</span>
+                    <span class="mini-draw-date">ğŸ“… ${formattedDate}</span>
+                </div>
+                <div class="mini-draw-balls">
+                    <div class="mini-balls-group">${ballsHtml}</div>
+                    ${starsHtml ? `<div class="mini-stars-group">${starsHtml}</div>` : ''}
+                    ${extraHtml ? `<div class="mini-extra-group">${extraHtml}</div>` : ''}
+                </div>
+            </div>
+          `;
+      };
+      
+      lastDrawsContainer.innerHTML = 
+          renderMiniDraw(drawN, t('bigdata.ultimo')) + 
+          renderMiniDraw(drawNminus1, t('bigdata.anterior'));
+
+      // 2. Patrones Temporales
+      this.updateNextDrawDayOptions();
+      const daySelector = document.getElementById('nextDrawDay') as HTMLSelectElement;
+      const selectedDay = parseInt(daySelector.value);
+      
+      const dayFrequencies: { [key: number]: number } = {};
+      const dayStarFrequencies: { [key: number]: number } = {};
+      let dayDrawCount = 0;
+      
+      this.historicalData.forEach(draw => {
+          if (draw.date.getDay() === selectedDay) {
+              dayDrawCount++;
+              draw.numbers.forEach(n => {
+                  dayFrequencies[n] = (dayFrequencies[n] || 0) + 1;
+              });
+              if (draw.stars) {
+                  draw.stars.forEach(s => {
+                      dayStarFrequencies[s] = (dayStarFrequencies[s] || 0) + 1;
+                  });
+              }
+          }
+      });
+
+      if (dayDrawCount > 0) {
+          const sortedDayFreq = Object.entries(dayFrequencies)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 10) // Top 10
+              .map(pair => parseInt(pair[0]));
+              
+          let html = sortedDayFreq.map(n => {
+              let className = 'mini-ball';
+              if (this.hotNumbers.has(n)) className += ' hot';
+              else if (this.coldNumbers.has(n)) className += ' cold';
+              const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+              const positionalName = this.currentGame.id === 'nacional' ? t('bigdata.cifraPosicional', { n: Math.floor(n / 10) }) : '';
+              return `<div class="${className}" title="${t('bigdata.frecuenciaTooltip', { count: dayFrequencies[n], extra: positionalName })}">${displayVal}</div>`;
+          }).join('');
+
+          if (this.currentGame.maxStars > 0) {
+              const sortedDayStarFreq = Object.entries(dayStarFrequencies)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 2)
+                  .map(pair => parseInt(pair[0]));
+              
+              if (sortedDayStarFreq.length > 0) {
+                  html += `<div style="width: 1px; height: 15px; background: #ccc; margin: 0 5px;"></div>`;
+                  html += sortedDayStarFreq.map(s => {
+                      let className = 'mini-ball star-ball';
+                      if (this.hotStars.has(s)) className += ' hot';
+                      else if (this.coldStars.has(s)) className += ' cold';
+                      return `<div class="${className}" title="Frecuencia: ${dayStarFrequencies[s]}">${s}</div>`;
+                  }).join('');
+              }
+          }
+          
+          dayTopContainer.innerHTML = html;
+      } else {
+          dayTopContainer.innerHTML = `<span style="font-size: 0.8rem; color: #999;">${t('bigdata.sinDatosDia')}</span>`;
+      }
+
+      // 3. ValidaciÃ³n del Ãšltimo Sorteo (NEW)
+      let validationHtml = '';
+      if (this.currentGame.id === 'euromillones') {
+          const currentNumbers = Array.from(this.selectedNumbers);
+          const currentStars = Array.from(this.selectedStars);
+          
+          if (currentNumbers.length > 0 || currentStars.length > 0) {
+              const hits = currentNumbers.filter(n => drawN.numbers.includes(n)).length;
+              const starHits = drawN.stars ? currentStars.filter(s => drawN.stars!.includes(s)).length : 0;
+              
+              validationHtml = `
+                <div class="bd-alert ${hits + starHits > 0 ? 'success' : 'info'}" style="margin-bottom: 10px;">
+                    ${t('bigdata.tuSeleccionVsUltimo', { hits, starHits })}
+                </div>
+              `;
+          }
+
+          // Validate saved tickets against last draw
+          const lastDrawDateStr = new Date(drawN.date.getTime() - (drawN.date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+          const ticketsForLast = this.savedTickets.filter(t => t.gameId === 'euromillones' && t.drawDate === lastDrawDateStr);
+          
+          if (ticketsForLast.length > 0) {
+              let totalHits = 0;
+              let totalStarHits = 0;
+              ticketsForLast.forEach(t => {
+                  if (t.validation) {
+                      totalHits += t.validation.hits.reduce((a, b) => a + b, 0);
+                      if (t.validation.starHits) {
+                          totalStarHits += t.validation.starHits.reduce((a, b) => a + b, 0);
+                      }
+                  }
+              });
+              
+              validationHtml += `
+                <div class="bd-alert success">
+                    ${t('bigdata.tusBoletosVsUltimo', { hits: totalHits, starHits: totalStarHits })}
+                </div>
+              `;
+          }
+      }
+
+      // 4. Alertas
+      alertsContainer.innerHTML = validationHtml;
+      
+      // Check double repetition
+      const intersection = drawN.numbers.filter(n => drawNminus1.numbers.includes(n));
+      if (intersection.length > 0) {
+          const displayIntersection = this.currentGame.id === 'nacional' 
+              ? intersection.map(n => `${n % 10}${t('bigdata.cifraPosicional', { n: Math.floor(n / 10) })}`)
+              : intersection;
+          alertsContainer.innerHTML += `
+            <div class="bd-alert warning">
+                ${t('bigdata.dobleRepeticion', { numbers: displayIntersection.join(', ') })}
+            </div>
+          `;
+      }
+      
+      // Check absence warning (if hot number is absent for long)
+      const superHot = Array.from(this.hotNumbers).find(n => (this.numberStats[n].lastSeen < this.historicalData.length - 10));
+      if (superHot) {
+           alertsContainer.innerHTML += `
+            <div class="bd-alert info">
+                ${t('bigdata.calienteAusente', { num: superHot })}
+            </div>
+          `;
+      }
+      
+      // General advice based on N
+      const repeatedInLast = drawN.numbers.filter(n => this.hotNumbers.has(n)).length;
+      if (repeatedInLast > 3) {
+           alertsContainer.innerHTML += `
+            <div class="bd-alert success">
+                ${t('bigdata.ultimoMuyCaliente')}
+            </div>
+          `;
+      }
+  }
+
+  applyBigDataStrategy(type: string) {
+      if (this.historicalData.length < 2) {
+          this.showToast(t('toast.bigdataDatosInsuficientes'), 'warning');
+          return;
+      }
+
+      const lastDraw = this.historicalData[this.historicalData.length - 1];
+      const daySelector = document.getElementById('nextDrawDay') as HTMLSelectElement;
+      const selectedDay = parseInt(daySelector.value);
+
+      // Calculate day hot numbers again (could cache this)
+      const dayFrequencies: { [key: number]: number } = {};
+      this.historicalData.forEach(draw => {
+          if (draw.date.getDay() === selectedDay) {
+              draw.numbers.forEach(n => dayFrequencies[n] = (dayFrequencies[n] || 0) + 1);
+          }
+      });
+      const topDayNumbers = Object.entries(dayFrequencies)
+          .sort((a, b) => b[1] - a[1])
+          .map(p => parseInt(p[0]));
+
+      // Base Candidates: Day Hot + General Hot
+      let candidates = new Set([...topDayNumbers.slice(0, 15), ...Array.from(this.hotNumbers)]);
+      let suggestions: number[] = [];
+
+      if (type === 'conservative') {
+          // 0 Repetitions from last draw
+          // Remove last draw numbers from candidates
+          lastDraw.numbers.forEach(n => candidates.delete(n));
+          
+          // Pick top 6 from remaining
+          suggestions = Array.from(candidates).slice(0, 6);
+          this.showToast(t('toast.bigdataSugerenciaConservadora'), 'info');
+
+      } else if (type === 'balanced') {
+          // 1 Repetition (Best one)
+          // Find hottest number in last draw
+          let bestRepeat = lastDraw.numbers[0];
+          let maxFreq = -1;
+          
+          lastDraw.numbers.forEach(n => {
+              const freq = this.numberStats[n].frequency;
+              if (freq > maxFreq) {
+                  maxFreq = freq;
+                  bestRepeat = n;
+              }
+          });
+          
+          suggestions.push(bestRepeat);
+          
+          // Remove other last draw numbers
+          lastDraw.numbers.forEach(n => {
+              if (n !== bestRepeat) candidates.delete(n);
+          });
+           candidates.delete(bestRepeat); // Don't pick again
+
+          // Fill rest
+          suggestions.push(...Array.from(candidates).slice(0, 5));
+           this.showToast(t('toast.bigdataSugerenciaBalanceada'), 'info');
+
+      } else if (type === 'risk') {
+          // 2 Repetitions
+           // Find top 2 hottest in last draw
+          const sortedLast = [...lastDraw.numbers].sort((a, b) => this.numberStats[b].frequency - this.numberStats[a].frequency);
+          suggestions.push(sortedLast[0], sortedLast[1]);
+          
+           // Remove others
+           lastDraw.numbers.forEach(n => {
+              if (n !== sortedLast[0] && n !== sortedLast[1]) candidates.delete(n);
+          });
+          candidates.delete(sortedLast[0]);
+          candidates.delete(sortedLast[1]);
+
+          // Fill rest
+          suggestions.push(...Array.from(candidates).slice(0, 4));
+           this.showToast(t('toast.bigdataSugerenciaRiesgo'), 'warning');
+      }
+
+      this.suggestedNumbers = new Set(suggestions);
+      this.updateGridNumberStates();
+      
+      // Scroll to grid
+      document.getElementById('numbersGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  showMainApp() {
+    const mainApp = document.getElementById('mainAppContainer');
+    if (mainApp) {
+        mainApp.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Update sidebar active state
+        document.querySelectorAll('.sidebar-links li').forEach(li => li.classList.remove('active'));
+        const activeLi = document.getElementById(`game-${this.currentGame.id}`);
+        if (activeLi) activeLi.classList.add('active');
+    }
+  }
+
+  showBigDataIntelligence() {
+    this.closeSidebar();
+    this.toggleModal('bigdataModal', true);
+  }
+
+  showOfficialDrawsModal() {
+    this.closeSidebar();
+    
+    // Reset search state
+    this.officialDrawsPage = 1;
+    this.officialDrawsSearchQuery = '';
+    const searchInput = document.getElementById('officialDrawsSearchInput') as HTMLInputElement;
+    if (searchInput) {
+      xœì}MsI²Ø}~EÍhfŒ }¢$%í0¬/‹ÔŒÃ²bU@Àitc»¤8ŞíÃ¾øâ>ú0§õi/xú'ûŞOpfVUwUuu ©}/Âæ{;"»³²²²²2³²²²ËOÇ§Gñ|‘÷Îx´lµZ»_1ø¹üŠş'q–³)Ÿ‰—ğ¿§@Éx1qŞ›Šüi$ğ×ƒ‹£ İJ&“pòèIÊÏ³?ª&­ÄNX»DÓaŸè)ş”O{¹ø˜&q(¡£ß~ÊOÃ¬7^¤)<AŒ½şsùÁ"qs“$Ói$Ø©àHæh1‹3ˆ¹ˆƒ0²$f
+	õfŒ:Lù²İªC{Z¶1Gg 2‡‡¯*Ã¶·Ì‹4™…Q”Ä"k™­ğÇ@èp&/)
+¢	*²<QÄ3Mœ_–_D¢„Ù<âÆ´_™ˆ2±œğ |vcdg'_’äi’ÉMQ;ø™ø’ÔÎ“s‘xİÅ£$âO³¹À·_’ğ™€%"Âúº)ÚçñâËÑ=Jâ$Jò¤Å~ûÕOKÎÂ<<ã7&HÉlşF„q~Í±İ1)"¦éÕ×¡©˜‰‰‹yÀsñÊÔŸ'|‰¶ê€rÒß/’€G®¥g­–§A-w=RÅ©Üs|v+«öİB3@"Š“'<çkX¿—ÔÀ´_ÄtX*òEï*.éç½0EúÃÉ‹çŠ©^ˆGAÜ²z:&şoñ}/álw€›ÏQyò¬àr$r6	£\¤"Ğhày’†c@´ªîTêÌoIÃœ§yéuf?ÌÛ›ï6vÿCöşöf§7ãóöœí=bsEG§'{TO‰j¦D7CñÄ–¶dKŞIbzâHiãïU@cö³9Î fâ(Î©…#áÅ<…ÙKş²-ÛtÜE^A|¿\ÌF"EÆ Á½Xş	“9È4¦joãœ—X2úã±ñG!Ûa+)âCĞ0RPy&º‡±ó”›D¼ß­$4ª´|°‹š<‹o mñë¿¢õã¢ï*~¯´ÉG¥qœ§šnü“x"ß·Ø†•-Ÿ:‘ÎNÜ‚¹€ºo[À÷–ÈºOA+}bçBüğx>Ü]Àz„¿€Zf zOË÷X¿f—ŞåZC>}r1·† iQÑÛH‘äVãŒ(Î”BF+Ùntê¼õLõäÒ€Ğ¿—.ûq‹6çà­‚>H³ÜĞv¼©7è»^¯§5Æ{6Xó%§”¢Oråb†ğFë^$âi~jè6¦¶ïzêZÓw
+_µw£(ÿbğSÒÆ“dñšOÃ˜çà%ACÓŞ"YG!]fÂ³0FvŠÄrùµÖ®³m;”>P'\š$¦Â¸Œ¦9ïmZİDTü"ğ$ÌĞö±yÁ
+—v˜ìƒ<^§\314¤‹<ObÕÀåLXûK	¿;ñJRâšõ…	GN›]/”»dÎÇaNr×ï[M ó•cúôÈÁ…ĞŠa[YqÎ
+I—ÃqIT›IÔ@+hƒ®N¢ö‘äÓbı®²>NW? LcŸ/x~Ú‹02•Á¦ÇµÂÇá¯‚ôà tåüì‘ÑÉÕğ=\sIÙ`%ÄOˆü(ÄG ¨ë ‹|ßÀ
+SéŠ8Ğøˆ¥³0n½Ün@³ahlK‘£nñéñ,
+ÇÂÀ¾QôŞÙ-LÊ[Úê„Ô§ıFT´©Û±’¢%ì£â yÃãiBi‡YŒĞğvŠ1*ví˜v®´¨6÷®§ëM=_nÿDĞ°°ÉNØÃ‘Ë²ê  2ßDË¤Eå"3‡ûÌÃ—35fÁgjÖõ^±²Í†®nj^,ªht­:\®’^†‘ô-¢ä‹<i¹ºÌcg|6¦¾WM6 •ĞÔq¡ÙT­ŒÚÏ-Ö‹0
+XšœKI.^o’¤OùøÔ³í•2	MLy§–ƒ’°v+OM/`Õ(FIˆô qœ¡mÌ?‚bÂ€İš&ÃÉcü¦o6è1éR²[yp4˜„ °æ'(DlƒáücË9ó“§§9yÛIøáÆI”àN¨ukûŞpx÷åœ&Üúöí‘Â@ hVñ9ÂÌ´±¥¶)Š[=öLŒOy…¸g\ƒ¾3ÔŒóó'_rÇšÂ7mY5@eÏêR:æó– XvÍ“’öp.İÏÛ}Üé¾NëMémHøA•_ö$:5M#¾w&òN&³X©qøù/1û#y¤Õ‰ÅXs¶ÆÌüjSëô…şÇÇÃØ>‚rºÂ3³O»Gd¢a·àˆ…]èNÓd1÷õnÅª´ê‰«Q´’Ê'áÙêäi¡QmÎ6¡ğzO“\E†z§<kÇÑmÀÄ ÒAâùAq¬ˆjlë‹S%ÔCÆkOP¸’˜G¸ £ß±A0±Ÿ9¶x«å\väa©1ë¦À+„˜‹5-«nÓk§iQQcgUm÷Ø~ÊAÃ>êo¿ÿCe=Ñ‰éë‰à›×“ÓP\aÙí–®#k½â±nãy’qÚ'/›¦ŒÃ?üÁŒ#[©˜lWûîŞß Ò*!k
+¬#èÚjTÃvÓkŸ’0›zNæéË™aS.§‘·ü;"r_Hşkh¶€íßè|ÊöB«+M‚jX7	65uÓ¡‘äa	¹+„Gà@8£i"ÀñÓ•Ÿf#0}¶¦Váv§ÖÏøò cE§âJ§fuü.ˆ¨cµl]etí¡­ÑÈæğÅá¢åšÌ%¤µ¬]eÍF²v1üÿ9¹9©;sğXÏ³9Ç`ØŞ½oh‹µsëÁ6¿3º¿ËpgÖÍÀûŞé÷î§b¶ûÍ£îÃMlğ¨µD<ù	_Œ€ËÒNk_Âd•İy£¿CM§<­·˜ŸœëøU™¤ »§óèdûâÕäÈQ	
+reDI&Ã@Œxª´tœàX€ãt*(_M˜³LDbLÍ<a3O	ÄLmc°#†¥Â¡3j¡Ø­Ó—á3‰®!ºeÂ•Q­cê¿Õ2Íõi>/ò=*Á
+‘I#ŠyOxv:JxÔ§Œœ:lnÊ©bµrFnœCU´rauôØÇ¬9}e€[çáø‘›‘P}<z"ß8Ø©?Ôº…00è¸˜ñ³¢•z³S}£32(ËX˜¤"wº1‚ñ‡</"PtıHEÓ36°ğà]@Ğ˜œB@‡&ÌëK:ƒ+\SÉÛ?%£CÏ{iEz¡²Ò@,Bp'Zè+“¤wı÷¥c|·beTXå·©­£±q`˜dÌ
+İÒ£ á^—…ïÂnßîhøï÷`óØ;›íğöÀµ!UfİVg0°M‰ÉùU7öÓ
+h<ã«î²Pu†Šè„&ºqÍœ¸]Z	´CG£²Ì‚òğ+4{EÖOˆk=°ÄÎ ¶ (WLEÌ,™W ‘QU`ñ®ÛI£äúq•Rğuï4ÌíI©LÅ§ãG_§ö” ­oj¼#ğNÏHÈ}‹†bíÿÎ3†#ëü…§?„yÉĞò™N–2^œòŒÅˆ~ÏÌZk&ê®Û´á¯;uá²LQçÁ„¯€~<(hxû°¿MÜ¯É sĞPŠ3°á¤¨âÔ#Po²ûG&«¼‰l{EÕ×´M8«@†¾õ£.}®2WÕë:—²S#ö
+[ƒÄ#„!Ÿ¶¬ãK7!È¿.=Á”Aì<²¤Ë’ƒ—ìÛOâR’‘æ˜©ã:ø4»6c`2ÍiğôŠ?E¯ ->°ÛL÷L.1 çôdóUÛZÑãâiÙêÖe£€M9ìå3Xñ”hËĞ‘6&p¥|İÓ´DS“®{ÎÓ4RóQøiú2ù±ÙŸd“–é…“p—Y»††¨MÙÕ+ˆP%ıLƒÔwÊ,OBóNĞêèÌœıC3¶€ç°ì¨=ÚN¾y#àl‡}bïrrLj@Ãğ~‡Éƒ q^¶î¶@³m°ÖPı»­ş½£ş}¸·…¿±Ë]Oo3±·ƒt@©Oé–ÖôzéŒm-‹`S İ_­ÀÕß ‹ËP /Ø¥hµC¸Ša÷’l\ú=&õ4 }}<t+Hp8‚?ËLß©šd?{´ÄPö<®´ñãHÎ;Œ÷·oWG?FT©¤–Ğp­†ëw°½VÛëwpg­î,í`d¸ÒêÑUí±'RîjŒıàçªòs»­xĞ{xf4*öS‚œ„2ŸåÔéRJ;¼÷XNgÃûµŞğ6DÎ'xªv[&ñ$œºhj.	`K°ÍğOLmq Iİ¡-Uu.¿ò(D ÿäT$©ÈñÅë4Q‚Ÿ¡€;…*ô.Ûµ¹w]âÊ;7™Ûƒà£0
+aè)·›Ş“­Ñê­â2W™ˆ?• ¸2ãvLüL¤˜ÙJÏ
+™”?(ªÙb¦[ 9ÆfÄ…¤-k‘Ïâz5úYŒóx&)ŒÇ¯Æ;åöCiô˜xÿŞ³Y>IEÍÜ„KVXNÏ²YjÒa:[$sÅ©ôS†?Æƒ×+©ıú¨oiN„ntUÕ§ùdâ$÷\	v…ÊM³{ß™ 5³g©ô':ëóÌõx”‹ĞÏùùL¿ˆÃa’¿H‡©B!¹mykí!¦ŞİVg£
+9ô@½ÛÈm/ää/¤t]Xpü“l«Õiä‘¡¤‡°NqêóW2äãÚ$Ë¦ãü,^ˆxŒn¸Zv›şh¦fúµè	1qVíÉ5İøƒÚj.ÒÉ¦ÂÙÑèŸR9Ğ†Â©Ş}ÛıcvòÁ:ïññ/SŠbî°[“;“íÉİ]&Ø­íÑpx÷Î.S)!;l{ş‘İŸÜe2Í±›ò \€dßÅgåYS‡EòÑ9-Á6V~óˆ6çZR²0~Âåæ\*yá?ÎÁG^^4ÛĞ<œ‰ì@äò¼ÁËKTÃ«½mú{ëåÉ³ğ£Úºøõrs¿æî—ÒË"ã¦x
+Úº5#®¡MJpI"™ìV¿†ÀÅ$OÆâ^)&ƒáışà¦Ää.ˆ‰NıÚaa…±èN"Ma‘Nãnˆé»;™(Ò]ğoçÔcE¶0œ0I)	Ó˜ôg.¯({”ˆ¼†ôık]ƒ"Ê8VjXÎ‡¥ëê§$ÍD¡œmy®Ó\JÖ½ï6]LîjûÛü×æ‰[b«ä÷èÁ`<ÿ+æşÇÿúŸØ·Ÿ|œ|lZÛ08r.'áùcÀEšì—ÁĞ†¹öÄ)<8~zÿ0ONK–(~‡™ÉğJÌOğşwÊéêy˜pü?àC­{ù0t?ÅdQÆâıbfL±/ÕÕ`pë\…wVºøp'®Ú3&štiv‹yÅ¾Èˆß4b´©añ´İíbO/:D#JÅJÚî\~wÓt9ê‹˜íYà_„†”\~ì²Ğ|‡7iõÁ7w(û±>ø~¢C?Z7kõé”|o„kímÀ'}?KF6Jo´|$O2#ÈªÃ¬Õ^ iÜl°,Ä\?Òú D·îÉwàê³sXíÄgË\H¸ël~„ÔÇı~ŒE2@§Ø¬“d`Œ®ãéV$—sD•%lÆ¿£?ß»æÙD<R“Ò·æ£oL…1/·°Å/e:‚
+>š[“ÿ72'ìá¯Ÿ2a·_-W¢øÕ;µ=™Cñˆ·wZŒ„Ud¦WH‰7‹ ş¬A»OØà/¯÷òí^¯çGäğ¹¤<ª!P	®ÏAmlPp×lÖ¤¨hİˆª±ùpĞ„ÔJÔ>-6!Ì1PtßıÏ"gí„úìaš1>zóoÄ^¾Ê¹/È§–ÌY5TmÑ”¼ıÇnU`ˆ<¯×ô0ÏüÎép‚FÚõô:PWJÆĞ²†ÿ)O</'àiQ2,X†9‹îHäçBÄ~Ç´ÆCÂ,¶ét×:*·îÜÛd¯©Ú òLëÑÜòøßíİÑ½­û•İŸ/À‚ñì”ğLºÍRÕãÔKı`é|z\®nÚ0Ö¼é•A¸Ï_¹îˆõVqÙo&~NR™¹©÷}«Ï£%Ÿb2¹;™®µØîó‰!€[5›§íêæièß=!íÎÈ-Ğõ\)©†´{T9­3Ç†«hº‰¥‚ßkB”Âú`Î¯#¾ŠIøöxsìw¸Ë5ß÷ÄBÂ¸¸ˆ)K_ª9ÿàs`lUkå\d«„ ¯Èà¢ÎGxoÙâÅşÉOá?G‡ûÏÙ³£ç'Oß³?°W¯O^ı{xşêåP¥S“4YÍã1ì=ŠÔcY N^Z´AÊ+m˜ë%3s)ÇXwQbÍ`¬B@€‘f\“¬é±Ãšß×&‘È<\ÖÅgæ¸˜û
+5: ÙOS~Ñ›¤ÉÌË++ÈbJC[™0W&fH%ÀAúñ?·<8ÇòÍ7–¿aWßË·»vM ¯Å±ÌÃÓ{½Aè‰x½¿æéæ&F™Ï™ „T=4ÔJ}ñnê–’ËTÅRÁ£§
+y€“(ÏÛÔ&Û2="	øŒ¦ µŞç·±ÒŒä,¸ ƒ¡DS7©?>ÊÒ®Ñ´ÃîÙûFcù´+Ÿj.m•\:à?'›ûQn–…™…Ák,ö`³Zz˜F•[„1r‰"JÎøë>j9ı\bX…Ñ²3ÍOjlö<]•ÉÔ´[6¼‹éj=-lyµF†	¿!ZƒlóYúù÷$ÛÜ_dôw1â1ZÍç	ÌË]êÒD¢Ódüœ­¹0îìjô1],Gæ¹3îÅ‹X¨á×~òPI½´3«7XóS‘;áx1‚ëHçËĞm‘>kè÷’x6@HÏÄú¤¢hİµÚRÙÅĞÓ±Áì²g|¸b×eû®İÚÓ¹Ñ­=+eÏê¹·%9‚öTĞ6PjYØVÅ?T¶4 –ƒUÈ3¾s¥FâP¢“™‚-ß ldA´E{¼¼	±ñ«Ì‚%>RZw’Û72‘öÀJÆ«>iñ >Âª¸ÑÙÈm™*°»1Ñí;^Ì8“WTÚOÂøóÿœ…ãx5ıü×D¶¡bštµL/he®ïT‹±h·ùÑœƒ’m€5:?›¾¤ví.ƒVcHğ t«bd§
+Ë÷Ìï(d‹™´E{e£ïaã²E^ÊíÍ.ÛêWºNE²
+Â=ÒŠFİé¦è¡	t»ª³V½ [TM¯¤ÄÛÁuK3,-Í°W.PÖÎBÆç°	áb”×Zªå§ïd­¦fÊFô/=7zåú6ç¶á£åáî­bEdá)×O¬è9‡}8°-_‚ºÁ½ŠŸ@^éëÍÁ™L«½áAØÚàÒKlá®]‹ØçÚ5²M‘z°9Ø¯’ê‰ãÉ
+ª*!å4ÙÚBÎÒ2•a©lR«7
+11´†«9
+"4²ïY¹k0ùRØZMw×Â@.`ƒ ¢¦V5o©q_&é5	¨ßôûôVo¨Š°r£¬ 	@¢cÜ“á±”†*~NŠµ.Q:»ßï”Û°¼İúó:Ï/zâãfœN»-TUÑônMÓÑBÄ¼¾ÙvM3>s:Ÿ¶šú çÉ8‘¹|XvŸÎE‰uol_Ùİ<ÿˆ…k6êô®úIÀåwv›1pã.w„Ú²Ÿ‡ªÔ*ö†–VÅ…ÓîdEkcf!‚u±úB°H©MwØï3
+ñ‰@¶`yÒ\NÉ½!=M»bÒØ«Ÿ Ã¾ã œ&ú=>áh`éUXÓÇŸ}šË*×ås‡ãrâw¿²î ğñ/°Êßµİ=FÁÓÄ®>F÷åÕr0­ŞH5ãiWÃ—wĞ‚ÄE®¡ºœºV¾i*oÛ7¤h¤êbş2*#‘æòÛ	« •ûØÈƒØğŞ¿v6šE¥çË†sàä.Ê]du§˜¤%!0İPq³£gaÅfŠ½ÍçU{+™Ø19ºì™çÄsÕQOÓ0¸Â¨İ;lëÒoÿR/±±¾gŒE:_§á¯ïÛdeî‚¾Z>ÁÊ+;á7ä1¬~õî}yyB2F_\ğwR"—HºŠ)}Œ¥p0U ¥Ş¡pR%zX­àÙE<fé"Ö:ÃĞêJ%š°²!;¶x– ä¥S$Ù®%=MÎOtàéşR(ãâ$cƒµDš&©]ıÆŒŸQñCŞ9ÆB¿ÏÒd†êÑ	…Pe +h´—*ˆ×]S£#ËlØh–bUì/ vn…£ÄT%ù$9‘w”ñ«öw€¨\p9XÌÄHy>ÚŸ 4¥êş²'Ì`¼ÿ	ÕuòÆmZŒ¿T!ÎÂ#“Ş™	 ä£[í¦ÓqT‰=†š;E*€ŠÕÑ˜ù‰İ®³İ]ÂÓ©È˜±£×Ÿ•¨Éd½	z¥•P|a­µ Êm6—6”¶%ÔÁ†¿¨híBqÕa=àkáğ:LêüÊ¨ŞÅ¥£Søk©bù#¬MÿõÖîîÔ}A–óv¸Ö©r™Õ3=ğ2†´ì’6h(–•”;ÃTá-ÑL‘‡àéå08ëŠ8j9:½,nF#Yw¥X!uµ İ9Á—tèVq,–¡)!}x(J4—ôRj°ËOIã’2À<t4¢‚ò´óêhI[€pÛòƒTğ_@¯Æ'ª¾\½„;°ˆF5°Œ¹Ÿæ£s%sZ;¶8T‹ÿëUÕ¸^&µİÊ–%Î·'5ör¶;œ,Á?•¹"Û°ŠfP×A![~VEÿôã8Z4£ÿ	óïŒ?– †…Ç÷)$0Má2Ğ*Áé¢¶)Å”ßÛ8ÄÏ!%^¼ T%~Kğ	¬j/âqÈÑK}ÃwE¬SĞ¥4O1•.)d¤åº7/ÇáœôÚé¼²8ÎSÜß—¹[7*‰sÔÿ„79ŠajQÖoLù,L²7b¼wlü|Y_Gê¥È¯+‰i~ÙD6ÅZ‹å}“Ïk½Œõr6ÌüŒ‡ºj•A³ï»ïÚ-¹u-DÄêÜ·¥†U ß¡Ûí²7|ÆÙ`‡íƒ¿…Y˜1
+0Ï:µ j‹Ü¥°Ùz–….•ò,SŸòñ¤›ß·{J(/'—›ò]…`‡’$<f—ï0'şİ{ë+}4&‹|TÊÎ¿"åJ€gÅ#‘QfÂ¼ p*R%úV°ëàè5ñY˜ÍvfëÜKÈ”sõÁ#L<§_›
+õsÑİŒær€öÎãµx_¹‹«\å±““Òn‡êAıŞ¾S®ô£¼Z¹ë`2ıTŠéTÃ·Øã&ÛÂ ®dgˆ‘T6—ÈKğG<5¾˜PíıôååWcĞÆTŠ{ĞÊÇ[MWŠù9és‚(0‰}ê$:xà>ò	Œ¶Ïú)¾T8U¹g¢R<–bÄ”«@ÒÄ&¸Ìã”]!ÁB—Èá_A®öÛ#ü28,ª{dD¬™‡‰ÆÈ0ğù/h;^9Pi“äœ`Rå±ˆ&z¹Ûá]×³æ‹ªÈyÄ2ˆòŞUŠ¨Ó¤ì5-9İM˜+Œëèmóf¹ùß~´^ª½â©ûòO­«;ªåjÜj†éÍÙiû“ŠÅi-RÎ®êpé(“ŸÿW<ÌØ^vÈÓ(‘ºÃä3˜`tğpi¼‘>™Ê!Ñ™£3ƒ´í¨L©*	ÎU“¥R*ÔQİƒq™H,†t§ßoZB…Ê)úöAÑ˜Ú'„•jô‡*gXÕ8ºÏµ´ìÔ88ªÃ¶ŠzY†ïf´…}í--±¬rû¿ø63—NÅüoG¥+»¨¤•Şğxå¨Í†‘óà[ûÅi—g¹«@vV[N’Y²Û¼L­¥¦$¿‘j[‹ "sN,S‡‚`ù!¡
+ ±nÔõq<ô¢ğH±õÁ¿PŸsğ>NÔ¢ViûZYc-´ºøP'x<ÁQÑ&Õáüé<Œ) é¸>¦Ñ®cş§ELÑ¬"üjòb3,~T1ˆ‰†Œ$›
+­Ë
+£Â(a30[ä2x´ÃşéÿˆH…¡ÀÒICjÒÑàBàgÀ˜ÆÏ¿s4jüWÚÈ•Ÿ%­"AÃbJh~FŸ-”’T¦/Næ1I‰–Ç•Á½¨†²Õê ^Q4©<¿Qnb	_(Qh"Õ(şò½ _|
+TKü…Y¬ÔañigË9ôáÆŸ"ƒ>9kw ¡œ°Ûïrãç0B@‹cõê£Ø[™+]øÍ—€¸ÀòQrş*}ŠÙ˜ã R.ÈñŒ1¹Ä]õùª>FI#òÎf»Ú/íÒ¶åñø_"¥¬ŠYaØ¥àÑ‡ş&ü×Æ“”UjŠêMça¥]uSëÃíÙ8x *a÷ÅPôX‡1ã¡rrìÑÈbÅpğ(÷Eƒ-<«„‘/lbZVÄ8Á`Å’P°Bğ“¬ÓÍWòJ,ØÄ°$<Ê­h°ÙòéÇùÍ%ÖG9ÀPö¥ÿ4¡Ù×)I«"“ü(ñÈ»É4ã´@­'g…+ü'ê£fmx	í.6aûÄŠ±>µ¥ÓáDÒStA“4ÏNÕ¸_zzVQ@±4ş·¬7ãL²»¬ëZ÷ê'YC¡ô²j\£%‡C1Gá‰6¢ãmwbÔÆ¹d¶+^A[](jbĞåómU:³ÑØµıÆG{ìåˆÉr%ìè`—ÑA•Y¼K€·‚÷îõï’R•LL;õÚU˜b¢ÕÁVC¤0ĞÒ§3GùÑ3HlnĞğèAokèŸ×ïİ¿Öè¤ŠñûRèõE2¨Ë€¸)ÀåõS?”Ê/ĞÎN^MıU£ËšEG½Ùâ³å'¬KÌ¾êÌ gVü4+%Â ùŞ5IæW¤WOíŠ„²­kÒYÔõº2o§)¿¨eìuHñŸ“×š¢«Óç[Dae•ÊÕ±‚)˜'à³ÊØRÿ;Ö«„Ù¡¤}¥E¬Ó]«ºÊ|¿Â`d*¬5gK=dê$CïUK~2c¾|o_x›¨` k}°æ÷ê	Òáú8¢ä¤åóøXiÔ~V@şĞ—&4¬‚úğrÎ¥Uï}S–g4Ã’[]zï-êğĞWpJ¿:•7÷+“	ÂDÅ¦«û uF€ë yšu#ü¨¤VõxC¼	VHehƒøŸÿåá~ö‹ƒ#ŠøÎ8Š¶HÙç¿Ì‚QDm)ÇòêEí¹˜¯ì$9>Mô	P«Äµa¿ÓK…<­«,dAY&Ælc‰½šZĞcıõ0×_€ş9	ã6Ö!÷*;YÑ†>K2I¼"‰?Å§×ûè¬K$Âi¶Â§nÑIùçüoÿ=”æïñê¯ìRƒÿüß›¨ÏíJäÿ…ÜŸ¿ış­jXÿ˜ìùÀ~«¯Q’NG¼½5l6îÜİè÷ÃNY±De§bÉİ+W,%Q@Å74W±,‰1-rŞ»õ½‹,%¬f§t’Â=n¨zILÜİÜn¶8L±=+§¦,)TË‹¿¶ˆ_n5LŠ‘è‚%u#bimÕŒwgÙx·î<Ø¸{ÿ†ëVùÿÂƒUÙP–xx†k£ÚBœ–F¾=Ä¡xúH‰)f…cçòasEF‰àÛO¥š»”‚OsI©Kİ¸èFxmQì§U¬Êh‰†ØÃI­?µa(Tæ°Fgz×Ttrª`ît}ÉX§ÆøÓ0îæÉ¼(éSÃ¿,Åà;½•¶uØòši§âêÎ’Å’FŸl´_ãCreû«åş6İóYšş«‡æËÑUÖÎÓ!ff}WZt¥dt3Ihk‡Édºâ„[e¿aq’ƒ<p”Ú‡êK´úÂ&VÓï)C%br‘ÎÀùK™L¦C”#ÂÃfàÌstæéìIµ¡/iXaäA¯ˆN5~kÿ,Œ"YhÊÎã·nõ†ÆU>bmx7‰¶tnš±ö×Â*=š&Œƒ5é¬ù†·ôN•L7ÍÓ¾şD¨Ëï^TŸ¾oĞ\Ó…o v\óÒ#øVy2F§’£â„³¬N*³¸ÊÓFç¼±pœká¶réÃ=YÚæ|È(¶/İ¬$Îñ£Oª5K]…kPìol¤ùx˜_Y[¨ÌÈ²\R±Ì_MÅ3ÄwË*g™£ÎŞ#Şu*Éö°kJzšÑÕ‰á²kCØŠÜQ,7ğê)¹U¦o€«ÊüÜw¶¨åä:Nã¸!#‡?¶!&y–İ4)@Õ6Úøkğù÷,§“Ú	HkŒÙEá…âÛJúL°¿ë¾‘G}Åsµe)ÏŠØ]_úé@,L±G”‘ÖÏ@(  ¯•/ºN®èÒ<ÑÁò,Ñµsµœ¬ª+dg¹É¤P¥Š9´¯ßz8`ZõZUSgiÖiá™x¬‹™q:ü»'œâÈ&¸C¬[“¾˜Î~CrÉÌK+Ñÿ=rÓôô\#?6Ä¥…šy;3 u‚ı;Â^­çÎÿ5cùCÚÇdiş›îpS5íìZSí¢ËŒ›œíJ‡V¶ ßœ:#6=‚J
+¥Mºaê—äÀ€jyf™İyr•S[ñ¢İ÷¦óii¦b1Ïe#è·‡Ecù ş>^Õ&eï°IMR·^¦&7$¼væ¼ÍNeÍuêÍ*:e…Ãó¼…¯fb•
+UÆİ‘ ¬R°®6\ôVÖ¯“ôv9OÉ¡T¾ìZ¥*Z¯p,`–	o¥O2P<§¹H“wÚ\Úçz™¬iÒìH´*£³Z¸h€Í’¸ÃøR¡ëYõÌ}gSl|&¦÷ÓT ¦	¡ØŒÓĞ×b´vÜ+ÅïkQéığNê2º¨ØñşI6C^f&Áê‚= şOQ6Œ|zWàô,n°y´H9¹¢j•`Fß O"2:†hy¢ŒGBºd(ó¸°`mÓ~´Ç¶Ê2ÒlÃ¢yºûGVÕhóÇñ£ßéÁÒ·¨ë_êïP»_õpòÃ‘aÎ6XYË¨TTîvÁÎ’hï¹®›u½Ğí€®â»‰<Ì›ÉÁ¼fşå5r/¯—wyµœËÈ·¼á\Ë/‘gyC9–×È¯,5å’ô,Ğ;¡Ì¢
+:;¦ûd$ZpÍ,Ë•ú4®k×wY›	y¥îİ™¶(ä¿ğ@º¡6iŞlÊºLÊuÉı€§d’ÌDÛt[Ú¦Ëâ™§øÁ1Yu©˜.ÒjbM¢•s‰;MBÍ%©®ô5ß6—*"b~9¼&?³&7z3ó\íØˆ/!É{$/(ùMåû­ÓKÁ­²47}÷ês4WÈMsDäu’ÊZGˆ(Bª"TMâÍ[s0®/Ë²ÚÊo9¨âDv¢‹’.ÚÙâşL×<\À²¨Û•×šp»mÕ«²úö³\‚¨OİÇ%òVaë†êºÚ±{ö+5b•§½2aX¯÷È“4v
+A\z¦·¡^&vU3}©t«§Ñ©½Êm`šSçû\ëŞÎvïGÕïÒĞÿŞgFy3ş®ÿ¾Sû¥û²ÑÙhÔØHU&”­º²K_†‚#œêÿ-c±ï»ATƒ+~;È#sY[_­¤Ôˆó¿h¥±;L¢Cü¬Q’†ë§QZhŠbs×A"K‡Tl…dJû©{–æUùa;:iÙWZ|Ÿµ“?:l“Œp3©>8ï;È0TYıB
+³Âéi„ÉQÇZ(Ÿ ¿ÄAôPP)Ï~
+óÓv«ÏZšWƒúW[,ş§¿ba
+å:)RZ¿ıd/MÎ»§ú²§Ÿisªˆèu“©j,¿ £ë\P’¢['Îkóçuo$¿Ê½bÚşWı²ì÷©fQMÊ ‚ÿÇŠæ¬¶ˆ… Ÿä¦%ü9ãóùW”¦÷u@YpAQUb@‚w¿sÑB;PE7Z©‰>åÂ£ª'Tü5Ï“í`{±Û s-Y Œ%şóçaFiÏíÖ“W/”•–õcaâÛÆúmÀ/'NûÙÑ¿ÛaûAÀxÌÄl_ ßÊ–6Ëa9qoŒÖP©Âø€_)°O—»ÿ  ÿÿ êªiú
