@@ -4,6 +4,7 @@
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
+import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
 import {
   buildTerminacionesStatsHtml,
   buildParImparStatsHtml,
@@ -239,7 +240,7 @@ const SECONDARY_LABEL_KEY_BY_GAME: { [gameId: string]: string } = {
   gordo: 'tickets.masLlave',
 };
 
-interface SecondaryMatrixBehavior {
+export interface SecondaryMatrixBehavior {
   defaultSecondary: number[];
   getHitClass: (hits: number, starHits: number) => string;
   calculateCascade: (ticket: Ticket, winningNumbers: number[], winningStars: number[]) => {
@@ -8215,348 +8216,6 @@ class DataLotto49Advanced {
     }
   }
 
-  renderCascadeSummaryTable(cascade: { tiers: { name: string; hits: number; starHits: number; count: number }[] }, colors: GameColorPalette): string {
-    const tierRows = cascade.tiers.map(tRow => `
-      <tr style="${tRow.count > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}">
-        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.name}</td>
-        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${tRow.hits} + ${tRow.starHits}${colors.secondaryEmoji}</td>
-        <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${tRow.count > 0 ? colors.accentText : colors.neutralText};">${tRow.count}</td>
-      </tr>
-    `).join('');
-
-    const totalWinningBets = cascade.tiers.reduce((acc, tRow) => acc + tRow.count, 0);
-
-    return `
-      <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
-        <thead>
-          <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
-            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.aciertosRequeridos')}</th>
-            <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tierRows}
-        </tbody>
-      </table>
-
-      <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-        <span>${t('tickets.totalApuestasPremiadas')}</span>
-        <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
-      </div>
-    `;
-  }
-
-  renderStandardTicketCard(ticket: Ticket): string {
-    const gameId = ticket.gameId || 'bonoloto';
-    const colors = GAME_COLORS[gameId] || GAME_COLORS['bonoloto'];
-    const costData = this.calculateTicketCost(ticket);
-    const hasSecondaryMatrix = (GAMES[gameId]?.maxStars || 0) > 0;
-
-    let combinationsListHTML = '';
-    let summaryTableHTML = '';
-
-    if (ticket.validation) {
-      const winningWhiteSet = new Set(ticket.validation.winningNumbers);
-      const winningStarsSet = new Set(ticket.validation.stars || []);
-
-      combinationsListHTML = ticket.combinations.map((combo, index) => {
-        const hits = ticket.validation!.hits ? ticket.validation!.hits[index] : 0;
-        const starHits = ticket.validation!.starHits ? ticket.validation!.starHits[index] : 0;
-
-        let comboHTML = '';
-        if (gameId === 'nacional') {
-          const digits = [0, 0, 0, 0, 0];
-          combo.forEach(n => {
-            const col = Math.floor(n / 10) - 1;
-            if (col >= 0 && col < 5) digits[col] = n % 10;
-          });
-          comboHTML = digits.map((digit, col) => {
-            const encodedNum = (col + 1) * 10 + digit;
-            const isSelected = winningWhiteSet.has(encodedNum);
-            return `<div class="saved-combination-number ${isSelected ? 'selected' : ''}" style="border-radius: 4px; font-weight: bold; background: ${isSelected ? colors.ballWinningBg : SHARED_BALL_COLORS.defaultBg}; border: 1px solid #cbd5e1; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; color: ${isSelected ? colors.ballWinningText : SHARED_BALL_COLORS.defaultText};">${digit}</div>`;
-          }).join('');
-        } else {
-          comboHTML = combo.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? colors.ballWinningBg : SHARED_BALL_COLORS.defaultBg}; color: ${winningWhiteSet.has(n) ? colors.ballWinningText : SHARED_BALL_COLORS.defaultText};">${n}</div>`).join('');
-        }
-
-        if (hasSecondaryMatrix) {
-          const behavior = SECONDARY_MATRIX_BEHAVIOR[gameId];
-          const fallbackStars = behavior ? behavior.defaultSecondary : [1];
-          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : fallbackStars);
-          const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${winningStarsSet.has(r) ? colors.secondaryWinningBg : colors.secondaryDefaultBg}; color: ${winningStarsSet.has(r) ? colors.secondaryWinningText : colors.secondaryDefaultText}; font-weight: bold;">${r}</div>`).join('');
-
-          const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
-          const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
-
-          const hitClass = behavior ? behavior.getHitClass(hits, starHits) : (hits >= 3 ? 'high-hits' : (hits > 0 ? 'low-hits' : 'no-hits'));
-
-          return `
-            <div class="saved-combination" style="margin-bottom: 8px;">
-              <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
-                ${comboHTML}
-                <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
-                ${starBalls}
-              </div>
-              <div class="hit-count ${hitClass}">${hits} + ${starHits}${colors.secondaryEmoji} ${t('tickets.aciertos')}</div>
-            </div>
-          `;
-        } else {
-          if (ticket.stars && ticket.stars[index] && ticket.stars[index].length > 0) {
-            comboHTML += `<span style="margin: 0 4px; color: #9ca3af; font-weight: bold;">+</span>`;
-            comboHTML += ticket.stars[index].map(n => `<div class="saved-combination-number ${winningStarsSet.has(n) ? 'selected' : ''}" style="background: ${winningStarsSet.has(n) ? SHARED_BALL_COLORS.starWinningGradient : SHARED_BALL_COLORS.starDefaultBg}; color: ${SHARED_BALL_COLORS.starDefaultText};">${n}</div>`).join('');
-          }
-          const starHitsText = starHits > 0 ? ` + ${starHits}â­` : '';
-          const hitClass = hits >= 3 ? 'high-hits' : hits > 0 ? 'low-hits' : 'no-hits';
-
-          return `
-            <div class="saved-combination" style="margin-bottom: 8px;">
-              <div class="saved-combination-content">${comboHTML}</div>
-              <div class="hit-count ${hitClass}">${hits}${starHitsText} ${t('tickets.aciertos')}</div>
-            </div>
-          `;
-        }
-      }).join('');
-
-      let showBreakdownBadge = false;
-
-      if (hasSecondaryMatrix) {
-        const cascade = this.getCascadeForGame(gameId, ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-
-        if (cascade) {
-          showBreakdownBadge = true;
-          summaryTableHTML = this.renderCascadeSummaryTable(cascade, colors);
-        }
-      } else {
-        const winningTiers = getTicketWinningTiers(ticket);
-        if (winningTiers.length > 0) {
-          showBreakdownBadge = true;
-          const totalWinningBets = winningTiers.reduce((acc, tRow) => acc + tRow.count, 0);
-          const tierRows = winningTiers.map(tRow => `
-            <tr style="background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};">
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; font-weight: 600;">${tRow.label}</td>
-              <td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; font-size: 0.9rem; color: ${colors.accentText};">${tRow.count}</td>
-            </tr>
-          `).join('');
-
-          summaryTableHTML = `
-            <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 10px; margin-bottom: 8px;">
-              <thead>
-                <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.categoria')}</th>
-                  <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.apuestasGanadoras')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tierRows}
-              </tbody>
-            </table>
-            <div style="padding: 10px 12px; background: ${colors.totalBannerBg}; color: ${colors.totalBannerText}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.9rem;">
-              <span>${t('tickets.totalApuestasPremiadas')}</span>
-              <span style="font-size: 1.1rem; color: ${colors.totalBannerValue};">${totalWinningBets} ${t('tickets.apuestaSufijo')}</span>
-            </div>
-          `;
-        }
-      }
-
-      return `
-        <div style="background: ${colors.cardBg}; border: 1.5px solid ${colors.cardBorderThick}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-          <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-            ${showBreakdownBadge ? `<span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>` : ''}
-          </div>
-          ${combinationsListHTML}
-          ${summaryTableHTML}
-        </div>
-      `;
-
-    } else {
-      // Non-validated state
-      combinationsListHTML = ticket.combinations.map((combo, index) => {
-        let comboHTML = '';
-        if (gameId === 'nacional') {
-          const digits = [0, 0, 0, 0, 0];
-          combo.forEach(n => {
-            const col = Math.floor(n / 10) - 1;
-            if (col >= 0 && col < 5) digits[col] = n % 10;
-          });
-          comboHTML = digits.map(digit => `<div class="saved-combination-number" style="border-radius: 4px; font-weight: bold; background: ${SHARED_BALL_COLORS.defaultBg}; border: 1px solid #cbd5e1; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; color: #1f2937;">${digit}</div>`).join('');
-        } else {
-          comboHTML = combo.map(n => `<div class="saved-combination-number">${n}</div>`).join('');
-        }
-
-        if (hasSecondaryMatrix) {
-          const behavior = SECONDARY_MATRIX_BEHAVIOR[gameId];
-          const fallbackStars = behavior ? behavior.defaultSecondary : [1];
-          const currentStars = (ticket.stars && ticket.stars[index]) ? ticket.stars[index] : (ticket.stars && ticket.stars[0] ? ticket.stars[0] : fallbackStars);
-          const starBalls = currentStars.map(r => `<div class="saved-combination-number" style="background: ${gameId === 'powerball' ? colors.ballWinningBg : colors.secondaryWinningBg}; color: ${colors.secondaryWinningText}; font-weight: bold;">${r}</div>`).join('');
-
-          const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
-          const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
-
-          return `
-            <div class="saved-combination" style="margin-bottom: 6px;">
-              <div class="saved-combination-content" style="flex-wrap: wrap; gap: 4px;">
-                ${comboHTML}
-                <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
-                ${starBalls}
-              </div>
-            </div>
-          `;
-        } else {
-          if (ticket.stars && ticket.stars[index] && ticket.stars[index].length > 0) {
-            comboHTML += `<span style="margin: 0 4px; color: #9ca3af; font-weight: bold;">+</span>`;
-            comboHTML += ticket.stars[index].map(n => `<div class="saved-combination-number" style="background: ${SHARED_BALL_COLORS.starDefaultBg}; color: ${SHARED_BALL_COLORS.starDefaultText};">${n}</div>`).join('');
-          }
-          return `<div class="saved-combination" style="margin-bottom: 6px;"><div class="saved-combination-content">${comboHTML}</div></div>`;
-        }
-      }).join('');
-
-      return `
-        <div style="background: ${colors.cardBg}; border: 1px solid ${colors.cardBorderThin}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-          <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-          </div>
-          ${combinationsListHTML}
-        </div>
-      `;
-    }
-  }
-
-  renderMultipleTicketCard(ticket: Ticket): string {
-    const gameId = ticket.gameId || 'bonoloto';
-    const colors = GAME_COLORS[gameId] || GAME_COLORS['bonoloto'];
-    const hasSecondaryMatrix = (GAMES[gameId]?.maxStars || 0) > 0;
-    const superset = ticket.combinations[0] || [];
-
-    if (hasSecondaryMatrix) {
-      const costData = this.calculateTicketCost(ticket);
-      const defaultSecondary = SECONDARY_MATRIX_BEHAVIOR[gameId]?.defaultSecondary || [1];
-      const secondarySuperset = ticket.stars && ticket.stars[0] ? ticket.stars[0] : defaultSecondary;
-
-      const secondaryLabelKey = SECONDARY_LABEL_KEY_BY_GAME[gameId];
-      const secondaryLabel = secondaryLabelKey ? t(secondaryLabelKey) : '';
-
-      if (ticket.validation) {
-        const winningWhiteSet = new Set(ticket.validation.winningNumbers);
-        const winningStarsSet = new Set(ticket.validation.stars || []);
-
-        const cascade = this.getCascadeForGame(gameId, ticket, ticket.validation.winningNumbers, ticket.validation.stars || []);
-
-        let summaryTableHTML = '';
-        if (cascade) {
-          summaryTableHTML = this.renderCascadeSummaryTable(cascade, colors);
-        }
-
-        const combinationsListHTML = `
-          <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
-            <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
-              ${superset.map(n => `<div class="saved-combination-number ${winningWhiteSet.has(n) ? 'selected' : ''}" style="background: ${winningWhiteSet.has(n) ? colors.ballWinningBg : SHARED_BALL_COLORS.defaultBg}; color: ${winningWhiteSet.has(n) ? colors.ballWinningText : SHARED_BALL_COLORS.defaultText};">${n}</div>`).join('')}
-              <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
-              ${secondarySuperset.map(r => `<div class="saved-combination-number" style="background: ${winningStarsSet.has(r) ? colors.secondaryWinningBg : colors.secondaryDefaultBg}; color: ${winningStarsSet.has(r) ? colors.secondaryWinningText : colors.secondaryDefaultText}; font-weight: bold;">${r}</div>`).join('')}
-            </div>
-          </div>
-        `;
-
-        return `
-          <div style="background: ${colors.cardBg}; border: 1.5px solid ${colors.cardBorderThick}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-              <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.desgloseCategorias')}</span>
-            </div>
-            ${combinationsListHTML}
-            ${summaryTableHTML}
-          </div>
-        `;
-
-      } else {
-        const combinationsListHTML = `
-          <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
-            <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
-              ${superset.map(n => `<div class="saved-combination-number" style="background: ${SHARED_BALL_COLORS.defaultBg}; color: ${SHARED_BALL_COLORS.defaultText};">${n}</div>`).join('')}
-              <span style="margin: 0 4px; color: ${colors.secondaryLabelColor}; font-weight: bold; align-self: center;">${secondaryLabel}</span>
-              ${secondarySuperset.map(r => `<div class="saved-combination-number" style="background: ${gameId === 'powerball' ? colors.ballWinningBg : colors.secondaryWinningBg}; color: ${colors.secondaryWinningText}; font-weight: bold;">${r}</div>`).join('')}
-            </div>
-          </div>
-        `;
-
-        return `
-          <div style="background: ${colors.cardBg}; border: 1px solid ${colors.cardBorderThin}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-              <span>${t(`tickets.${gameId}.nombre`)} (${costData.totalBets} ${t('tickets.apuestasParentesis')})</span>
-            </div>
-            ${combinationsListHTML}
-          </div>
-        `;
-      }
-
-    } else {
-      const explodedCombos = this.getCombinations(superset, 6);
-
-      if (ticket.validation) {
-        const winningNumbersSet = new Set(ticket.validation.winningNumbers);
-        const breakdown = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-        explodedCombos.forEach(c => {
-          const hits = c.filter(n => winningNumbersSet.has(n)).length;
-          (breakdown as any)[hits]++;
-        });
-
-        const totalMatchesInSuperset = superset.filter(n => winningNumbersSet.has(n)).length;
-
-        const summaryTableHTML = `
-          <div style="margin-top: 10px; margin-bottom: 8px; font-weight: bold; color: ${colors.accentText};">
-            ğŸ¯ ${totalMatchesInSuperset} aciertos sobre los ${superset.length} nÃºmeros seleccionados.
-          </div>
-          <table class="validation-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 8px;">
-            <thead>
-              <tr style="background: ${colors.tableHeaderBg}; color: ${colors.tableHeaderColor}; font-size: 0.8rem;">
-                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: left;">${t('tickets.aciertosColumna')}</th>
-                <th style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center;">${t('tickets.cantidadColumna')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="${breakdown[6] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">6 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[6] > 0 ? colors.accentText : colors.neutralText};">${breakdown[6]}</td></tr>
-              <tr style="${breakdown[5] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">5 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[5] > 0 ? colors.accentText : colors.neutralText};">${breakdown[5]}</td></tr>
-              <tr style="${breakdown[4] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">4 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[4] > 0 ? colors.accentText : colors.neutralText};">${breakdown[4]}</td></tr>
-              <tr style="${breakdown[3] > 0 ? `background: ${colors.rowHighlightBg}; font-weight: bold; color: ${colors.headerText};` : `color: ${colors.neutralText};`}"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">3 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800; color: ${breakdown[3] > 0 ? colors.accentText : colors.neutralText};">${breakdown[3]}</td></tr>
-              <tr style="color: ${colors.neutralText};"><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder};">0-2 Aciertos</td><td style="padding: 6px 10px; border: 1px solid ${colors.tableBorder}; text-align: center; font-weight: 800;">${breakdown[0] + breakdown[1] + breakdown[2]}</td></tr>
-            </tbody>
-          </table>
-        `;
-
-        return `
-          <div style="background: ${colors.cardBg}; border: 1.5px solid ${colors.cardBorderThick}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-              <span>${t(`tickets.${gameId}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
-              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
-            </div>
-            <div class="saved-combination" style="flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
-              <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
-                ${superset.map(n => `<div class="saved-combination-number ${winningNumbersSet.has(n) ? 'selected' : ''}">${n}</div>`).join('')}
-              </div>
-            </div>
-            ${summaryTableHTML}
-          </div>
-        `;
-
-      } else {
-        return `
-          <div style="background: ${colors.cardBg}; border: 1px solid ${colors.cardBorderThin}; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
-            <div style="font-weight: 700; color: ${colors.headerText}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-              <span>${t(`tickets.${gameId}.nombre`)} (${explodedCombos.length} ${t('tickets.apuestasParentesis')})</span>
-              <span style="background: ${colors.badgeBg}; color: ${colors.badgeText}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${t('tickets.multipleDe')} ${superset.length}</span>
-            </div>
-            <div class="saved-combination" style="flex-wrap: wrap; justify-content: center;">
-              <div class="saved-combination-content" style="flex-wrap: wrap; justify-content: center; gap: 6px;">
-                ${superset.map(n => `<div class="saved-combination-number">${n}</div>`).join('')}
-              </div>
-            </div>
-          </div>
-        `;
-      }
-    }
-  }
-
   updateSavedTickets() {
     this.updateSavedTicketsStats();
     this.updateHistoryDashboard();
@@ -8653,8 +8312,8 @@ class DataLotto49Advanced {
         ));
 
       combosHTML = isMultipleTicket
-        ? this.renderMultipleTicketCard(ticket)
-        : this.renderStandardTicketCard(ticket);
+        ? renderMultipleTicketCard(ticket, this.currentGame?.id, SECONDARY_MATRIX_BEHAVIOR, SECONDARY_LABEL_KEY_BY_GAME)
+        : renderStandardTicketCard(ticket, this.currentGame?.id, SECONDARY_MATRIX_BEHAVIOR, SECONDARY_LABEL_KEY_BY_GAME);
 
       actionsHTML = ticket.validation
         ? ((ticket.gameId !== 'nacional' && ticket.filtersSnapshot && ticket.validation?.winningNumbers)
@@ -11490,53 +11149,535 @@ class DataLotto49Advanced {
     if (noDataEl) noDataEl.style.display = 'none';
 
     const totalPages = Math.ceil(totalItems / this.officialDrawsPageSize) || 1;
-    if (this.offxœì}Ár¹’à½¿İî~$Û"EÊ¢lK–’l¿V¬ívXêöÆ:Ï ¤ª»XÅWU”¬vë¾1‡™˜½ìe'ö¸‡>½=½ËFŒÿä}Á|Âf&€* …*’’zf"võ^´¥ªD"‘Hd&‰¬pòèiÊ/²×|*Øc–'9ğ÷¬Ã>}ÁÔO~f½d2	mğ}|€¯è¿á„µkš<bƒ•4>úgœÄYÎ²œ§ùqˆ P×A;ø¶ñIø‹Ø30Š8Ğø^òü¬7ã¶ÑËİ4rìÇ¹˜eç è) Í’4µëeQ8ö¢whNí77Ùó€çq„1ÏÃ$fa<Iìøç³PÉx1qŞ›ŠüY$ğ×ÃËã İr©Uˆ¡aKŠó#™s!Ÿôrñ1?Jââ—Æ,Éò”ÇAò†ÇÓ¤µÁ>ÉyÙeã4¼İbŒŠ]»×ØUÇš’{kŒïh‘¦ğ'ÅœÄbN>Y68É÷§‚†…Mvk$À- c8z6_§â|ótÉy“	,ÊEf óxõù”ğ­ãûîôå‰X50Å0†n×ÁüJÂ7b&ÖJ
-,ŞÊG½ Ìø(r¶f]ï+Ûl˜å—‘è%s>óË%­ÙÖê÷†-¶ËZƒV®yÂ$§ÏÎölŒqBÉyÒru™â¥9fõhÅ1»jÒÄ°Æàa«á‚t.Ø¨ıìĞb}¸£€¥É…”äBáõ&IúŒÏÚ¸˜Øşcƒ]R&¡‰)ãTÀrPÖnå©^Âø°j£$Dz˜€8Î yk0ÿŠ5
-vg2˜'ñ¿ ™ƒ;Aı›°;yp4˜„ °æ'‚0[@Å`8ÿØòBN@Ç¼áôÕLk”DnœDIŠ w¶ï‡;]([_}¸óõ'äm/®>Ø¬âó9¨Ú£3˜™6¶Ô6Eñb«Ç‹ñ¯0â)š›ÕYà«1CÍ8¿À&'9’HGûÖË“É˜GB½4mPNòY»CÙqEQÄİNHEÖ}vBšùBˆŸ~	Ï²3˜axv)x
-Æ0ˆ4Ãƒ0íÌ àú}¡«KJÇ|Â Ë®yRÒŞÎ¥y»ßÊ N§G<CBïš@ÒÀªü²'Ñé¨iñ½3‘÷zì(™ÀJÃÏ‰ÙyÌƒ$­Nì!¢l™%øÕ¦Öék„-q|<ŒEÚĞe›}ÚízãˆgÙ+>CÖ·À»Ğ¦ÉbîëÄ	ft$ÒRõÄ¶Ş±©|¯N&ÕĞÖ²¯÷,É_)²ÎxÖ;¢»€‰¤ƒDD™(1zVD5¶uŒÅ©’`®æ¿ü‘GÚŒ¥õG@jE.=®$æ.@àè7lĞïÀ
-ŒıÌ±Å[-ç²#KY7^!4˜Ë´"«nÓk§iQQcgUm÷ØAÊA³Mö·ßş¡²}·wõDğÍëÉéC`‹k¬#»İÒuTúû eíZ‹4™…Q@Öb¿şZ/- …³%pS°ãI3È<¹)-­ûÃä
-ÇmEfÿÕ‹D<ÍÏ`»Úï8‹İ Ò*!«ª„’éº¶ZÀÕ°†İôÚ§$Ì¦Ş…“yúrfØ”g…Ëid®›+W§xø>JbpDòe³“†³0ÏyËå:"'Î“Ù\2§aÂ¾„fØşM€îÀmTN¶ºÖ$¨†u“`SS7Iæ‘»Bx„3š&?íHùi6Óg[ajnwjıŒOºú°ÆWåy*®ÅqjVÇï‚ˆ:VËÖUFë»t8üFq¸h¹&s	i-kWY3…‘¬]ÿNnaNäLT9æà	cø/†-pô²9Ç`ØŞı¯h‹µ{çá6¿7z°ÇpgÖÍÀûŞí÷¤b¶÷Õãî£Mlğ¸µDl"~_®J;­}	“Uvçş56ı‡Ipi3?¹Ğñ+ú—€İÓÅwa–'éå÷“7"[DyÖÖò+WF”dâ$Äˆ§m…@Ç	N8Ng‚MQ('a”ƒW“‰HŒ)°™'lÆóñ¨&AaGK…CgÔB±5[g).Ãç]CtË„+£Z'Ô%ªe›ëÓ|Ş;çÑBøıf+DBïÉUÌ{Ê³³QÂÓ@³ˆ@òd:ÄË$àë°™ÃÆ5O¢œ:¬Šäß‰CU´rauôÄÇ¬]9}e€[çáøg‘›‘P)"8•oìÔjİBtH\ÌøyÑJ½Ù­¾éIüíA``>–ŠÜéÆÆñh¼ˆ0@Ñ14ö#MÏØTÀÂƒwAG(êtdÂì³¾d 3¸Â5•l°ıS2:ô¼‡‘vP¤—rè3‹Ü‰:Ã
-Â$é]ÿ}éïT¬Œ
-£ü6µu46“ŒY¡[úa´ Üïï±ğÑüçîİ†ÿv6İ°³Ùï\ReÖ]uÛ”˜œÀQuc?­€Æ3¾Êà®
-UgÈ ˆNi¢×Ì©Û¥yğ 0t4*Ë,(¿B³Wä`ı„¸ÖKìb€rÅTÄÌ’yÕ Ğ(‚qê
-,~Áu;i”\?®rBJ¾ì…¹=)•©ø±`@ãtüèëÔ’¤c¢õMwŞé	¹oÑP¬=ãÃÙbÆpd‚¿ğô»0/Z>;¡}­õâŒgôô8>Dô0¡dş3QÇpİ¦m°0øØ©—eŠ:&|ôãAAÃÛw€ı=hâ~5Hƒ†Rœ'=@§z“İ?6YÕñùÍ{EÕ×´M8«@†¾õÃ×+şTæ
-u»½]3\ÊNØ+l†|Ú²/;5ñ¯KOğeû,Á¡ÿú“äàûú†¸”äÁÆG¤y«ÌuğivmÆÀdšÓàéŠ^A[|`w™î™]a@ÎéÉæ«·µ¢5Æ%ÄÓ²ÕmUìD©`S{ùVü)úÑicçºyK4§ºG‰ç‚§1h¤æ£ğ³ôUòc!³oe“–é…“pë¬Ä‹b`İg¯!\³•éDğ‚úN9Ua:‹’ñÏ­%´:::´4ö9ÅŒ-`cÁÇù,;jA¶“oAŞ8ÛeŸØ»„“Ğ0¼ßeò hÜ‡—­h¶Öª·Õ¿÷Ô¿ö·ğ7vµçéÍ`&övx‰(õ)İÒš^¯œ±­el
-´û«¸útq
-ô»Èƒ\Ì´C¸Ša÷’l\ú=&õ4 }}<t+Hp8‚?ËLß™šd?{´ÄP÷=®´ñãHÎ;Œ÷wïVG?FT©¤–Ğp­†ëw°½VÛëwpo­î-í`d¸ÒêÑUí±'RîjŒƒà§ªrP ÆHğôT>ô[Šı” §ÔvŸ¡<š A
-Bi‡÷Ëélx¿ÔŞ†ÈùO•À.`Ë£$„S'z‡aK°ÍğOL­:dlGwhËGUƒ«/<
-è?=I*`ñòèušŒ(ÁÏPÀBz—íÚÜ»)ñÈ]¤13™Ûƒà£0
-aè)·›Ş“­Ñê­â2W™ˆ?• ¸2ãvLü\¤˜ÙJÏ
-™”?(ªÙb¦[ 9ÆfÄ…¤-k‘Ïâú~ô“ç=ğLR_wÊí‡Òè0ğş½g²|’$Šš¹!	—
-¬°œe³Ô¤Ãt¶IæŠSé§*Œ¯WRû-õQßÒœİèºªOóÉÄIî¹ì
-•›f÷¾3jfÏRéOtÖç™ëñ( _ğ
-ò™~—†Ã$‘S…BrÛò"ÖÚCL½Vg£
-9ô@½ÛÈm/ä=ä=/¤t]Xpü“l«Õiä‘¡¤‡°NqêóW2äãÚ$Ë¦ãü<^ˆxŒn¸Zv›şh¦fúµè	1qVíÉ5İøƒÚj.ÒÉ!(¼åñcKå@
-§z;ömoôÙÉë¼gÄÇ?O)Š¹ËîLîM¶';{L±;Û£ápçŞS)!»l{ş‘=˜Üc2Í±›ò \€dïà³ò¬ˆ©Ã"ùè‚–à.+¿zL›s-)Y?års®N•<‡p†çÎàc//šmhÎDv(ryŞàå%ªá'ÕŞ6ı½õòäyøQíÚÃÖ«ÍÏ4–ıÃ\ŒqS¼
-í
-İš×Ğ&%¸$‘Lv«_CàŠbŒ'cq¿“ÁğAÿ^p[b²b¢S¿vYGa,º“H@SX¤Ó¸búî.C&ŠtüÛ9õX‘­'LRJÂ4&}Ã™«kÊ%"¯!}ÿQ× È€2$«¬Á¥ëêm’f¢PÎ¶<×i.%ëŞw›.&wµıí¿ş›	óDˆ-±Uò{ôp0Œÿó¿şó?ıûú““OLkÆGÎå$\!¸±H“ƒ2Ú0×8…' ‡ÁO/ãåiÁiÉ²¥Ãï23^‰ùYŞÿn9#]=ÿ>Ôº—ò@÷SLe,>(fÆûR]¶îËePxg¥û€¿ wòàº=c¢I—f·˜Wì‹Œøm#öH›æ9OÛİ.fÁñô²C8¢T¬¤íÎÕ7·M—£¾ˆÙş»Ğ’Ë]: ïğ&­¾q#øæá®e?ÑßOCtèGtè¸>7Âµö6à“¾Ÿ%£¥7Z>’'™dÕaÖjG/Q‰4n6Xb®é}P¢[÷ä;põÙ¬vâ³e.$\Èu6?Bêã~?Æ" Sì ÖI20FW†q‹tŒ+’Ë9Bƒı¥Íøwôç{×<{ˆGjRúÖ|ô©°"æå¶ø¥LGPÁGskòÿFæ„=üõS&ìö«åJ¿z§¶'Óc(QàöN‹‘‚°ŠÌô
-)ñfÔŸ5h÷	¼äåõ^ş±İëõüˆ>—T#‚Ç5*Áõ9¨
-ÎòºƒÍš­Q56šZ‰Ú§Å&„9Šâ»ïòYäì¢PŸ=L3ÆGoş“¸ÄËW9÷ùÔÂ’9«†ª-š’÷ ÿØ«
-‘çõšá¹ß9}NĞH»^ÊñJÉZöÑğ?¥ã‰çáä<-J†Ë0çcÑ‰üBˆØï˜Ö¸aHxƒÅ6îZGåÎ½ûÛƒá€ì5rW{¦õhnyüovgtëAe·Ãç°`<û#eÄ<“n³Tõ8õR?X:Ÿ—«›6ŒµozeîóWn:b½U\¶ã›‰Ÿ’Tfnê}ßêóhÉ§˜Lv&ÃµÛ}>1p«fó´]İ<ı»'¤İ™ ¹ú +%Õöaïƒª1§uæÑóØpM7±tApá{MˆRXÌùuÄW1	ßÁş¯bıw¹æûXH1é”ó>ÆVµVÎEA¶Jú‚.ê|p„÷×ø‘-^œ~÷şs|tğ‚=?~qúìÍ	ûûşõéñËãÿÏ¿uÔ_èÔã£$MEDVód{"õ˜æF]Z´AÊ+m˜ë%3s)ÇXwQbÍ`¬B@€‘f\“¬é±Ãšß×&‘Èä‰†úg]|f‹¹¯P£ƒ4å—½IšÌ¼¼±²‚,¦4´•	seba†Tü¤/ğspéYÁƒópŒ _}eùæÙp5ñ½|»g·ÑúZœÈ<<½×ô€ˆÇĞûkncb”éğœJHÕCÓI­tÑï¦n)¹°AU,%<z¦8‰ğ¼Am²-Ó#’°€Ïh
-Rë}~+ÍHÎ‚2J4Ep“úã£L!íM;ìÑ¾İ¸o4–O»ò©æÒVÉ¥CşS²yåfY˜Y¼Æbö8+Ü—;]¬Ü"Œ‘KQrÑÀg X÷QËéÃ*Œ–i~RC`³çéªL¦¦İ²á5XLWëiaË«õ02LøÑd›ÏÓÏ¿%ÙæÁ"£¿‹‘Ñj¾Hx`^îR—&&ãçlÍ…qgW£é¢`92Ïq/¶X,ÀòD¿ô“‡JúË¥Y½ÁšŸŠÜÑ'‹é\G:_†n‹ôYC¿—üÃ³B‚ôx&Ö'Eë®Õ–Ê¾(†f—=ãÃ».ÛwíÖÎníY){VÏ½í(ÉÑÜ@°gàUˆ(â™ºPËêäÀ¶°*ş¡Ò°¥±¬Bñ+5‡Ìlùe#«¢-ÚkàÕàMˆ_e,ñ‘Òº“Ü¾‘‰Ü°V2^5ğI‹õVÅíŒÎF~dËTİ‰n÷ØÉbÆ™¼¢Ò~ÆŸÿç,'À«éç¿Æ ‚°Ó¤c¨eÚxA+s}§"XŒE»Í7Øˆöä”ìh,¨©Ğùùôµkt´C‚¥[[ ;UX¾e~G![Ì¤-Ú/}—-òRînvÙVÿ›Òu*’Uî1V4ê¨H7@L »%P]°zxäí ÜêĞ¡FA‰·‚ë–fXZša¯\ ¬…ŒÏaÂ;Å(o´TËÏßÉZMÍ”è%^znô,Êõ+l/lÿÂGË£}İ[ÅŠÈÂS®ŸXÑsûp`[¾uƒ;û?¼Ò×›ƒc&2)˜V{Ãƒ°µÁ•—ØÂ]»±/´kd›"õpspP%Õ=Ç“T!UBÊi²µ…œ¥e*ÃRØ¤VobbhWsDhdß²r×`ò¥°µšî®…\ÀAEM3¬jŞRã¾JÒj$P¿;è÷é­ŞPaåşFYA€6$DÇ¸;&Ãc)Uü”k]¢uö ß)·ay»õçt_öÄÇ1Ì8:v[¨ª¢éNMÓÑBÄ¼¾ÙvM3>s:Ÿ¶šú çÉ8‘¹|Xö€ÎE‰u?Û¾²»yş/
-×lÔé[fàëO4€«o>ì5c>äÆ]î:µe¿T©Uì-­ŠgİÉ"ŠÖÆÌBëbõ…`‘R›î°ßgâlÁò(¤¹œ’ûC,z6švÅ¤%
-°!V?+ †}ÆA8Mô{|ÂÑÀÒ«°¦?4—U®ËçÇåÄï}aİA?äãŸa”ÿpÜv÷<O»úØŸ"½”WËÁ|´z#Õ<Œ§]_ŞA·nŸ¹†êrêJXø¤©¼mßt¢‘ª‹ùË¨ŒDš¿JÂp¤ò yŞû—ÎF³¨Ô#’˜€˜LçÀÉ]”»ÉêN1IKB`º¡âfGÏÂŠÍ{;šÏ«öV2±crtÙ2Ï‰çª£¦apQ»wØÖ¥ßş•^bc}Ï‹t¾NÃ_Ş·ÉÊÜ};µ|‚•WvÂoÈcXıêİûòò„dŒ¾¸àï¤D.‘*tSúKá`ª@K½Cá<½œù°,ZÁ³ËxÌÒE¬u†¡1Ô•J4!`eCvl	ğ,ÈK§<H²[]2Jz–\œ&èÀÓü¥P'ÅIÆk‰4MR»ú6>£â‡¼5r‚…~Ÿ§ÉÕ£
-¡Ê@VĞh/U¯	º¦<GG–Ù°5Ğ,	ÄªØ_ì2Ü
-9F‰©Jòir*ï(¿Ã³ô*û‹;@T.¸,fb$‹<íO RuÙf0Ş¿CGuc¼q›ã/Uˆ³ğÈ¤wf(ùèV»étUb¡æN‘
- bu4 ö%™8ó²]gº»„§S‘1cGO¥{Æöæ­ØÈ*Ğk­Y=wİµ Êm6—6”¶%ÔÁ†¿¨híBqÕa=äkáğ:LêüÊ¨ŞÅ¥£Søk©bù#¬MÿõÖîîXEª*²œ·ÃµN•ûË¬aè±€—1¤e—´AûÃˆ@±\ª¤dØ1¨¦
-oqŒfŠ<O/‡Á©XWÄQËÑéu`q3Éº+Å
-©c¨èÎ	¾¤Co°Šc±M	éÃCQ¢¹t¤—RC€uXŞ&KÊ ó`ĞÑˆf
-ÊÓşÍ÷ÇKÚ„Ûn”¦‚ÿz5>Uõåê%ÜuD¼0j¨eÔ(kUı[kZ;¶8T‹ÿëUÕ¸^&µİwÊ–%™­í4ör¶;œ,Á?•¹";°ŠfP×A![~VEÿìã8Z4£‹ùwÆKPÃÂã‡¦ph•àtQ[‚”bJˆï‡8<‡ÉL¼xA¨:Jü–àXÕ^Äã£–ú†ïŠX§" Kib*]RÈHËun_OÂ8éµÓymqœ§¸ s·nUç¨ÿ	orÃÔ¢¬ßš,òY˜doÄx!ïØøù²¾<$Ô+‘ßTÓ$üd/Ùk-–÷Mj<¯õ26ÖËÙ0[ğsFèV¨\TFÍ~à¾k·äÔµ«s?Ü–V|‡n·ËŞğgƒ]v şBfaÆ*À,<Oè Ô¨-r#”bÀfëYºTÊ³L}ÊÇ“z^ÔWÇï€§ÊËÉå¦|O!Øe£$‰ÙÕ;Ì‰÷ŞºÄJIÆ"•²óÄ/H¹ÒàYñHd”™° /(œŠG‰¾ì:8zM|f³„‡ÙÂ:·ÀR 2å\}ğÏé×GÆ¦B=Ã\t7£¹ ½óxG-ŞWîâ*Wyìä¤´Û¡úDP¿w¯£ï”+ı(¯Vî9˜L?•bºÆÕğ-ö¸É¶0€+Ùb$•Íåò|ÇO/&T;A?½cyùÕ´1$Õc‡bÆ´rÀß°ÁVÓ•b~ÁCÌÊ¸@	€IèS'Ñ¹Àğ‘Oa°}ÖOñô¥Â©Ê=3`€,•âù°#¦\’&6Áe.g \è
-	®ºDÿ
-rµ8fmZT—öÈˆX3aàó_Ğ&v¼r Ò&É9Á¤ÊMôr·Ãº®§ÓQ'…rC±£â…¼w•¢#ê4){MKNwfÄ
-ã:zÛü„Ä†Ynş×_í†—j¯xê¾üSëêj¹·Zƒ¡GzóEvÖş¤bqZ‹ƒ³«:\9Êäåçÿ•#3ö…—ñ4J¤®À0ùä&<\o¤O¦rH´cæ(ÂŒãÅ ­C;*SªÊ‚sÕd©†”
-õc`T÷`\&‹aİë÷›–P¡rŠ¾‡}P4¦ö	a¥ı¡ÊV5îs-­#;5ê°­¢^–á»mácE{KK,«Ü¾Á/¾ÍÌ¥S1ÿ†çQéÊ.*i¥7<Y¹'j³aä<øÖ~qÚåYî*Õ–“d–ì6/Sk©)ÉƒÆoäÇƒÚÖ"¨ÈœËÔ¡ X~H¨Â@¬[ uı„ç½(<Rl}ğ/Ôç¼Sµ¨UÚ¾VÖX‹­.¾Ô	OpT´Iu8ºc
-h:®i´«Ã˜ÿiS4«¿š¼ØÀ‹Ub¢F„!#IÅ¦BërÂ¨0JØÌ¹í²ù?"Ra(°tÒĞƒ„t4¸ä$ìÏøO?ÿÆÑ¨ñ_xj#W~–´Š‹)¡yú	}
-h´PJR™Jt¾8™Ç$%ZT÷²ÊV«ƒvzEÑ¤òüF¹‰%|¡D¡‰T£øË#ö’~ñ)P,ñf±R‡Å§-çĞ‡Štú4ä¬İ†rÂ:n¿ËŸÃi ,Õ«oŒboe®tá7_âËWDÉÅ÷é3ÌnÀ$•rAÆˆgŒÉ%îÂ¨ÏoTõ1Â¨H‘w6ÛÕ~Áh—°-oÀÿ)eUÌ
-Ã.>ô7á¿4¤¬RSTo:*íª›ZnÏÆÁU	»‡,şƒ¢':ôŒ•“cF+†ƒG¹/láY- ˆ|ñ`ÓÒh°"Æ	›(–„‚‚·n°N7_!<Ê+±`Ã’pğ(·¢ÁfËgç?6—Xå CÙg”şÓ„æ@§$­ŠL6ğ£Ä#ï"$ÓŒÓµœœ"¬ğŸ¨ş™µá%´»Ø„ì+ÆúÔ–N‡IOÑMÒ<»Uã~åéYEÅÒøß²ŞŒ3Éî²®kİ«·²†BéeÕ¸&GK‡bÂmDÇÛîÄ¨sÅlW¼‚¶:ºPÔÄ ¡;Ëç+:Ûªtf£±?jû÷ÙCÊ“åJ2ØÑÁ.£ƒ*³¸C€w‚‡÷ï÷wH©ÊF&H¦zí*L1Ñê`«!RhéÓ™£üè$6·høƒ@ô ·5ôÏ†ë÷ÜhtRÅø})ôú"OÔe@Ü`Gòú©Jåhç '¯¦şªÑeÍ¢#ˆŞlq‰ÙÆòÖ%f_õGfˆ‡³G+~š•a|ÿ†$ókÒ«§vEBÙÖé,êz]›·Ó”_Ö2ö&¤øOÉkMÑõéó-¢°²JåêXÁÌğYål©ÿ]k„UB‹lPÒ¾Ò"Öé®U]e¾_a02Ö‡‡³¥2u’¡÷ª%?™1_¾·/½MT0Ğµ‚>Xó{õéÎp}QrÒòy|¬´ j?+ èKVA}xD9çŒÒª÷¿*Ë³€FšaÉ­.½÷uxä+8¥_É›û•Éa¢bÓÕ}€º£ÀMĞ<ËŠº~TR«z¼€!Ş+¤24AüÏòp¿ûÅÁE|gE[¤ìó_æÁ(H¢¶”Œã?ışeí¹˜¯ì499Kô	P«Äµa¿ÓK…<­«,dAY&Ælc‰½šZĞcıõ0×_€ş)	ã6Ö!÷*;YÑ†>K2I¼"‰?Å§×ûè¬K$Âi¶Â§nÑIù×şoÿ=”æïñê¯ìRƒ¿ÿïÍÔçv%ò$÷ço¿ıC«Ö?&{>°_ëk”¤Óooƒ‡ƒ{;ıŞ`Ø)+–H£ìT,Ù¹vÅ’QT|CsË’Ó"ç½ÛXÑ[±ÈRÂjvJ))¬áĞ“†ª—Ä”ÁÎÆàÁpc°õĞaŠíY9¥0eI¡ZæXŒpøµEür«aRŒD,©¨Kkkp¬f¼»ËÆ»uïáÆÎü?×­ò%ş«²¡,ñğ×6Fµ…8-|<~„9Bñô±SÌ
-ÇÎåÃæŠŒÁ×ŸJ5w%Ÿæ’R—ºq!ĞğÚ¢ØO«X•3Ğ±‡“ZjÃP¨ÌaÎô ¯©èäTÁ4Üéú’±Nğ!¦aÜÍ“yQÒ§†7~YŠÁwúAÚÖaÊk¦@Š«k8KK}²5Ò~É•í¯—ûÛtÏgiú¯N6š/KDWY;Ï>†˜™ö]iÑ•’ÑÍ$¡­]&“éŠn•ı†ÅIğÀQj©/Ñê›XM¿c¤•ˆAÈE:ç/e2™Q›3ÏÑ™§³'Õ†¾¤a…‘½":Õø­i4ş³0Šd¡);ßB¸ÕWùˆµáUÜ&ÚÒ¹iÆÚ_«ôhš0Ö¤³æŞ6Ò{U2İ4Oûú¡.¿{QQ|6ú¾AsM¾ÚqÍ+à[åÉJŠÎ²:©Ìâ*OóÆÂq®…3ØÊ¥S÷di›ó!£Ø¾t³’8Ç>­Ö,u®A±¿±‘æãa~Adm¡2#ËrIÅ25Ïß-«Vœe:ûywÔ©$?ØÃ®E(éiFW'†Ë®a(rÇ±ÜÀS¨§äV™¾®(óßÙ¢–“›8ã–ŒşØ6†˜äYvoĞ¤ UcØhã¯Áçß²œNj' ­1fc…Šo+é3ÁşûFõÏÕ–¥<{*
-`GXt}é§±0ÅbQDfXC>a 0€¼Q¾è:¹¢KóDË³D×ÎÕr²ª®‘å&{’B•*æÈ¾~ëIà0€i-ÔkUM¥Y§…gâ±.fÆéğß<áG6Ábİšô¥˜Àtö’K~Ç¼´ı¿Enšä§Á†˜¡´P3og´N°GØk¡õÜù¿f,Hûøƒ,ÍÓnê¡f¢İhª½Ct™q›³]éĞÊô›SgÄ¦GPI¡´I7Lı’P-¯Á¬a#³;O®’aŠ`+^´ûÖt>-ÍT,æùq lıö¨h,Ôß'Ğ«Ú¤ì6©IêÖËÔä†„×Îœ·Ù™¬¹N½YE§¬rc·ğÕL¬R¡Ê¸;”U
-ÖÕÆ“‹ŞÊúuòãŞ.ç)9”Ê—]«tCEëÌ2á­ôIŠçô!iòÎšBû\/“5Mš‰VetV—0°Y÷b_*t=«¹ïlŠÏÄ”ã~š
-Ä4!´ ›qÚúZŒÖ{¥ø}-*½Şm A]F;şÀ¿1ÉfÈKÀÌ$X]°§Àÿ)Ê†‘Oï
-œÅ6)'WT­ÌèàIDFÇ-O”±âHH—e¬mZÂ÷ÙVYFºmX4OwÿØªmş8~ô;=XúuıKıj÷«N~¸32ÌÙK"«b•ŠÊ}AÂ.Ùyá=×u³n¶º¥ĞB|·‘‡y;9˜7Ì¿¼AîåÍò.¯—syù–·œkù{äYŞRåò+KMyÎ£$}	ËôN(s„¨‚Î®é>I †\3Ër¥>ëÚõ]ÖfB^«;Bcwf‡-
-ù/<®A¨Mš7›².“r]r?à)™$3Ñ6İ•¶éªxcæ)~pLV]*¦‹´š£X“hå\âN“PsIª+ıEGÍ·Mã¥Šˆ˜_¯ÉÏ¬ÉÍ„ŞÌ<W;6âKÈDòËJşDSù~kÅôRgğB«,ÍMß}£úÍrÓy¤²Ö‘#"Šª„ÕA“€xóÖŒë‹Ç²¬¶ò[ª8‘è¢¤‹v¶¸?D Ó5°,êv¥Æµ&Ün[õª¬¾ı,— êSwÄq‰|—UØº¡ºƒ®víıJXåßi¯LÖë}#ò$BWém¨—‰]ÕL_C*İêitjï„r˜æÔù>—ãÅº·³İûQõ»4ô¿˜QŞŒ¿ë¿ïÔ~é¾lth656R•	e«®ìÒ—¡à§Ã„†úËXìûn'ÕàšßòÈ\ÆÖd+é5âüïš@iì“è?k”¤áúi”š¢ØÜMÈRÄ!Õ[!™Ò~ê¥9BU~ØNZ6ä•ßgíäÛ$#ÜLªÎû2UV¿Âì»pzarÅ±Ê'À/q=TÊ³·a~ÖnõY«SójPÿj‹ÅÿòW,ÌáO¡\'EJËà×ŸLÂÁâ¥ÉE÷L?Pö´á3mnB½n2Uå`tJòCt«àÄymş¼î­äWÙ ×LÒÿª_–á>Ó,ªI¹Dğ¬hÁj‹XòInZ2Á¯‘3>ŸA‰`z_”—TU%$x÷;-´µPt£•
-‘èS.<ªzJÅ_ó<Ù~¶»0×ØĞ’BĞÀXâ?f”öÜn=ış¥²Ò²~,L|ÛX¿øåÄÉa??şÏ»ì ™˜ÍóKô[@YÀÒf9Œ"'ã­qÑ*U¸ ğöéjïÿ  ÿÿ QG
+    if (this.officialDrawsPage > totalPages) {
+        this.officialDrawsPage = totalPages;
+    }
+    if (this.officialDrawsPage < 1) {
+        this.officialDrawsPage = 1;
+    }
+
+    const startIndex = (this.officialDrawsPage - 1) * this.officialDrawsPageSize;
+    const endIndex = Math.min(startIndex + this.officialDrawsPageSize, totalItems);
+    const pageItems = sortedDraws.slice(startIndex, endIndex);
+
+    // Update pagination info
+    const infoEl = document.getElementById('officialDrawsPaginationInfo');
+    if (infoEl) {
+        infoEl.textContent = t('officialdraws.mostrandoRango', { start: startIndex + 1, end: endIndex, total: totalItems });
+    }
+    const pageEl = document.getElementById('officialDrawsCurrentPage');
+    if (pageEl) {
+        pageEl.textContent = t('officialdraws.paginaDe', { page: this.officialDrawsPage, total: totalPages });
+    }
+
+    // Prev/Next Button states
+    const prevBtn = document.getElementById('officialDrawsPrevBtn') as HTMLButtonElement;
+    const nextBtn = document.getElementById('officialDrawsNextBtn') as HTMLButtonElement;
+    if (prevBtn) {
+        prevBtn.disabled = this.officialDrawsPage === 1;
+        prevBtn.style.opacity = this.officialDrawsPage === 1 ? '0.5' : '1';
+        prevBtn.style.pointerEvents = this.officialDrawsPage === 1 ? 'none' : 'auto';
+    }
+    if (nextBtn) {
+        nextBtn.disabled = this.officialDrawsPage === totalPages;
+        nextBtn.style.opacity = this.officialDrawsPage === totalPages ? '0.5' : '1';
+        nextBtn.style.pointerEvents = this.officialDrawsPage === totalPages ? 'none' : 'auto';
+    }
+
+    // Build rows
+    pageItems.forEach(draw => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #f1f5f9';
+        
+        // 1. Sorteo #
+        const tdId = document.createElement('td');
+        tdId.style.padding = '12px 15px';
+        tdId.style.fontWeight = 'bold';
+        tdId.style.color = '#475569';
+        tdId.textContent = `#${draw.id}`;
+        row.appendChild(tdId);
+
+        // 2. Fecha
+        const tdDate = document.createElement('td');
+        tdDate.style.padding = '12px 15px';
+        const rawDateStr = draw.date.toLocaleDateString(getLocale() === 'en' ? 'en-US' : 'es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        const capitalizedDate = rawDateStr.charAt(0).toUpperCase() + rawDateStr.slice(1);
+        tdDate.textContent = capitalizedDate;
+        row.appendChild(tdDate);
+
+        // 3. CombinaciÃ³n Ganadora
+        const tdBalls = document.createElement('td');
+        tdBalls.style.padding = '12px 15px';
+        
+        const ballsContainer = document.createElement('div');
+        ballsContainer.className = 'mini-balls-group';
+        
+        draw.numbers.forEach(n => {
+            const ballDiv = document.createElement('div');
+            ballDiv.className = 'mini-ball';
+            if (this.hotNumbers.has(n)) ballDiv.className += ' hot';
+            else if (this.coldNumbers.has(n)) ballDiv.className += ' cold';
+            
+            const displayVal = this.currentGame.id === 'nacional' ? (n % 10) : n;
+            ballDiv.textContent = String(displayVal);
+            ballsContainer.appendChild(ballDiv);
+        });
+        
+        tdBalls.appendChild(ballsContainer);
+        row.appendChild(tdBalls);
+
+        // 4. Adicional / â­
+        const tdExtra = document.createElement('td');
+        tdExtra.style.padding = '12px 15px';
+
+        const extraContainer = document.createElement('div');
+        extraContainer.className = 'mini-balls-group';
+
+        if ((this.currentGame.id === 'euromillones' || this.currentGame.id === 'eurodreams' || this.currentGame.id === 'gordo' || this.currentGame.id === 'powerball') && draw.stars && draw.stars.length > 0) {
+            draw.stars.forEach(s => {
+                const starDiv = document.createElement('div');
+                starDiv.className = 'mini-ball star-ball';
+                starDiv.textContent = String(s);
+                extraContainer.appendChild(starDiv);
+            });
+        } else if (this.currentGame.id === 'bonoloto' || this.currentGame.id === 'primitiva') {
+            if (draw.complementario !== undefined) {
+                const compDiv = document.createElement('div');
+                compDiv.className = 'mini-ball complementario-ball';
+                compDiv.title = t('common.complementario');
+                compDiv.textContent = `C${draw.complementario}`;
+                extraContainer.appendChild(compDiv);
+            }
+            if (draw.reintegro !== undefined) {
+                const reDiv = document.createElement('div');
+                reDiv.className = 'mini-ball reintegro-ball';
+                reDiv.title = t('common.reintegro');
+                reDiv.textContent = `R${draw.reintegro}`;
+                extraContainer.appendChild(reDiv);
+            }
+        } else if (this.currentGame.id === 'nacional') {
+            if (draw.reintegro !== undefined) {
+                const reDiv = document.createElement('div');
+                reDiv.className = 'mini-ball reintegro-ball';
+                reDiv.title = t('common.reintegro');
+                reDiv.textContent = `R${draw.reintegro}`;
+                extraContainer.appendChild(reDiv);
+            } else {
+                extraContainer.innerHTML = '<span style="color:#94a3b8; font-size:0.8rem;">-</span>';
+            }
+        } else {
+            extraContainer.innerHTML = '<span style="color:#94a3b8; font-size:0.8rem;">-</span>';
+        }
+
+        tdExtra.appendChild(extraContainer);
+        row.appendChild(tdExtra);
+
+        tableBody.appendChild(row);
+    });
+  }
+
+  showHistoryOfResults() {
+    this.closeSidebar();
+    
+    // Set the game filter selection to match the current game or default to 'all'
+    const hrGameFilter = document.getElementById('hrGameFilter') as HTMLSelectElement;
+    if (hrGameFilter) {
+        hrGameFilter.value = this.currentGame.id;
+    }
+
+    this.updateHistoryDashboard();
+    this.toggleModal('historyOfResultsModal', true);
+  }
+
+  updateHistoryDashboard() {
+    const hrGameFilter = document.getElementById('hrGameFilter') as HTMLSelectElement;
+    const hrGameFilterVal = hrGameFilter ? hrGameFilter.value : 'all';
+
+    // Filter tickets
+    const filteredTickets = hrGameFilterVal === 'all'
+      ? this.savedTickets
+      : this.savedTickets.filter(t => t.gameId === hrGameFilterVal);
+
+    // Calculate total combinations generated
+    let totalCombinations = 0;
+    filteredTickets.forEach(ticket => {
+        if (ticket.strategy === 'multiple' && ticket.combinations[0].length > 6) {
+             const n = ticket.combinations[0].length;
+             let combos = 1;
+             for(let i=0; i<6; i++) combos *= (n-i)/(i+1);
+             totalCombinations += Math.round(combos);
+        } else {
+             totalCombinations += ticket.combinations.length;
+        }
+    });
+
+    const elTotal = document.getElementById('hrTotalCombinations');
+    if (elTotal) elTotal.innerHTML = String(totalCombinations);
+
+    // Calculate validated combinations
+    const validatedTickets = filteredTickets.filter(t => t.validation);
+    let validatedCombinations = 0;
+    validatedTickets.forEach(ticket => {
+        validatedCombinations += ticket.validation!.hits.length;
+    });
+
+    const elValidated = document.getElementById('hrValidatedCombinations');
+    if (elValidated) elValidated.innerHTML = String(validatedCombinations);
+
+    // Calculate best combination (maximum hits)
+    let maxHit = 0;
+    let maxHitStars = 0;
+    let hasStarsInBest = false;
+    validatedTickets.forEach(ticket => {
+        ticket.validation!.hits.forEach((hit, idx) => {
+            const stars = ticket.validation!.starHits ? ticket.validation!.starHits[idx] : 0;
+            if (hit > maxHit || (hit === maxHit && stars > maxHitStars)) {
+                maxHit = hit;
+                maxHitStars = stars;
+                if (ticket.validation!.starHits) {
+                    hasStarsInBest = true;
+                }
+            }
+        });
+    });
+
+    const elBest = document.getElementById('hrBestCombination');
+    if (elBest) {
+        if (validatedCombinations > 0) {
+            let bestText = `${maxHit} ${t('tickets.aciertos')}`;
+            if (hasStarsInBest && maxHitStars > 0) {
+                bestText += ` + ${maxHitStars} â­`;
+            }
+            elBest.innerHTML = bestText;
+        } else {
+            elBest.innerHTML = '-';
+        }
+    }
+
+    // Comparison Table Body
+    const tableBody = document.getElementById('hrComparisonTableBody');
+    const warningEl = document.getElementById('hrNoValidationWarning');
+    
+    if (tableBody) {
+        tableBody.innerHTML = '';
+        
+        if (validatedCombinations === 0) {
+            if (warningEl) warningEl.style.display = 'block';
+        } else {
+            if (warningEl) warningEl.style.display = 'none';
+
+            // Count actual hits
+            const actualHitCounts: { [tier: string]: number } = { '6': 0, '5': 0, '4': 0, '3': 0, '<=2': 0 };
+            const validatedCountsByGame: { [gameId: string]: number } = {};
+
+            validatedTickets.forEach(ticket => {
+                const gameId = ticket.gameId || 'bonoloto';
+                const numCombos = ticket.validation!.hits.length;
+                validatedCountsByGame[gameId] = (validatedCountsByGame[gameId] || 0) + numCombos;
+
+                ticket.validation!.hits.forEach(hitCount => {
+                    if (hitCount >= 6) {
+                        actualHitCounts['6']++;
+                    } else if (hitCount === 5) {
+                        actualHitCounts['5']++;
+                    } else if (hitCount === 4) {
+                        actualHitCounts['4']++;
+                    } else if (hitCount === 3) {
+                        actualHitCounts['3']++;
+                    } else {
+                        actualHitCounts['<=2']++;
+                    }
+                });
+            });
+
+            // Adjust tiers depending on active game filter
+            let activeTiers = ['6', '5', '4', '3', '<=2'];
+            if (hrGameFilterVal !== 'all') {
+                const cfg = getGameConfig(hrGameFilterVal);
+                if (cfg && cfg.maxNumbers === 5) {
+                    activeTiers = ['5', '4', '3', '<=2'];
+                }
+            }
+
+            const getTheoreticalProb = (tier: string): number => {
+                if (hrGameFilterVal !== 'all') {
+                    const cfg = getGameConfig(hrGameFilterVal);
+                    return cfg && cfg.theoreticalProbabilities ? (cfg.theoreticalProbabilities[tier] || 0) : 0;
+                }
+                
+                // Weighted average for 'all'
+                let sumWeightedProbs = 0;
+                let totalWeight = 0;
+                Object.entries(validatedCountsByGame).forEach(([gameId, count]) => {
+                    const cfg = getGameConfig(gameId);
+                    if (count > 0 && cfg && cfg.theoreticalProbabilities) {
+                        const prob = cfg.theoreticalProbabilities[tier] || 0;
+                        sumWeightedProbs += count * prob;
+                        totalWeight += count;
+                    }
+                });
+                if (totalWeight > 0) return sumWeightedProbs / totalWeight;
+                return getGameConfig('bonoloto').theoreticalProbabilities[tier] || 0;
+            };
+
+            const tierLabels: { [key: string]: string } = {
+                '6': t('history.tier.6'),
+                '5': t('history.tier.5'),
+                '4': t('history.tier.4'),
+                '3': t('history.tier.3'),
+                '<=2': t('history.tier.menos2')
+            };
+
+            activeTiers.forEach(tier => {
+                const count = actualHitCounts[tier] || 0;
+                const actualFrequency = (count / validatedCombinations) * 100;
+                const theoreticalFrequency = getTheoreticalProb(tier);
+
+                let perfBadge = '';
+                if (count === 0 && theoreticalFrequency === 0) {
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.sinDatos')}</span>`;
+                } else if (actualFrequency > theoreticalFrequency) {
+                    const timesBetter = theoreticalFrequency > 0 ? (actualFrequency / theoreticalFrequency).toFixed(1) : 'N/A';
+                    const percentBetter = theoreticalFrequency > 0 ? (((actualFrequency - theoreticalFrequency) / theoreticalFrequency) * 100).toFixed(0) : '0';
+                    perfBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">${t('history.superior', { timesBetter, percentBetter })}</span>`;
+                } else if (actualFrequency === theoreticalFrequency) {
+                    perfBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.esperado')}</span>`;
+                } else {
+                    const timesWorse = actualFrequency > 0 && theoreticalFrequency > 0 ? (theoreticalFrequency / actualFrequency).toFixed(1) : 'âˆ';
+                    perfBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">ğŸ“‰ ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
+                }
+
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f3f4f6; hover:background-color: #fafafa;">
+                        <td style="padding: 12px 8px; font-weight: 500; color: #111827;">${tierLabels[tier] || tier}</td>
+                        <td style="padding: 12px 8px; text-align: center;">${count}</td>
+                        <td style="padding: 12px 8px; text-align: center; font-weight: 600; color: var(--primary);">${actualFrequency.toFixed(4)}%</td>
+                        <td style="padding: 12px 8px; text-align: center; color: #4b5563;">${theoreticalFrequency.toFixed(4)}%</td>
+                        <td style="padding: 12px 8px; text-align: right;">${perfBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+    }
+
+    // Strategy Distribution
+    const strategyCounts: { [key: string]: { total: number, validated: number, maxHits: number } } = {};
+    const strategyMap: { [key: string]: string } = { simple: t('tickets.strategy.simple'), winning: t('history.estrategiaGanadora'), multiple: t('tickets.strategy.multiple') };
+
+    filteredTickets.forEach(ticket => {
+        const strat = ticket.strategy || 'simple';
+        if (!strategyCounts[strat]) {
+            strategyCounts[strat] = { total: 0, validated: 0, maxHits: 0 };
+        }
+        
+        let combosCount = 0;
+        if (ticket.strategy === 'multiple' && ticket.combinations[0].length > 6) {
+             const n = ticket.combinations[0].length;
+             let combos = 1;
+             for(let i=0; i<6; i++) combos *= (n-i)/(i+1);
+             combosCount = Math.round(combos);
+        } else {
+             combosCount = ticket.combinations.length;
+        }
+
+        strategyCounts[strat].total += combosCount;
+        if (ticket.validation) {
+            strategyCounts[strat].validated += ticket.validation.hits.length;
+            const ticketMax = Math.max(...ticket.validation.hits);
+            if (ticketMax > strategyCounts[strat].maxHits) {
+                strategyCounts[strat].maxHits = ticketMax;
+            }
+        }
+    });
+
+    const elStrategyDist = document.getElementById('hrStrategyDistribution');
+    if (elStrategyDist) {
+        let stratHtml = '';
+        Object.entries(strategyCounts).forEach(([stratKey, data]) => {
+            const name = strategyMap[stratKey] || stratKey;
+            stratHtml += `
+                <div style="background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-weight: 600; color: #374151;">${name}</span>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${t('history.apuestasGeneradas', { total: data.total, validated: data.validated })}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; color: #4b5563; font-weight: 500;">${t('history.mejorResultado')}</div>
+                        <span style="background: #eff6ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">${data.validated > 0 ? `${data.maxHits} ${t('tickets.aciertos')}` : t('history.sinDatos')}</span>
+                    </div>
+                </div>
+            `;
+        });
+        if (!stratHtml) {
+            stratHtml = `<div style="color: #6b7280; font-style: italic; text-align: center; padding: 10px;">${t('history.sinCombinaciones')}</div>`;
+        }
+        elStrategyDist.innerHTML = stratHtml;
+    }
+  }
+
+
+
+  // ============================================
+  // MATHEMATICAL FILTERS & OPTIMIZATION
+  // ============================================
+
+  updateCorrelationScore() {
+    if (!this.correlationScoreContainer || (this.selectedNumbers.size === 0 && this.selectedStars.size === 0)) {
+      if (this.correlationScoreContainer) this.correlationScoreContainer.style.display = 'none';
+      return;
+    }
+
+    this.correlationScoreContainer.style.display = 'block';
+    
+    const selected = Array.from(this.selectedNumbers);
+    const selectedStars = Array.from(this.selectedStars);
+    let score = 50; // Base score
+    let advice = "";
+
+    const maxNumbers = this.currentGame.maxNumbers;
+    const maxStars = this.currentGame.maxStars;
+
+    // 1. Balance Par/Impar
+    const evens = selected.filter(n => n % 2 === 0).length;
+    const idealEvens = Math.floor(maxNumbers / 2);
+    if (evens === idealEvens || evens === idealEvens + 1) score += 15;
+    else if (Math.abs(evens - idealEvens) <= 1) score += 10;
+    else score -= 10;
+
+    // 2. Balance Bajo/Alto
+    const midPoint = Math.floor(this.currentGame.numberRange / 2);
+    const lows = selected.filter(n => n <= midPoint).length;
+    const idealLows = Math.floor(maxNumbers / 2);
+    if (lows === idealLows || lows === idealLows + 1) score += 15;
+    else if (Math.abs(lows - idealLows) <= 1) score += 10;
+    else score -= 10;
+
+    // 3. CorrelaciÃ³n con Calientes/FrÃ­os/Ausentes
+    if (this.dataLoaded) {
+      const hotCount = selected.filter(n => this.hotNumbers.has(n)).length;
+      const coldCount = selected.filter(n => this.coldNumbers.has(n)).length;
+      const neutralCount = selected.filter(n => !this.hotNumbers.has(n) && !this.coldNumbers.has(n)).length;
+
+      const target = this.currentSuggestedProfile;
+      
+      if (hotCount === target.hot) score += 10;
+      else if (Math.abs(hotCount - target.hot) === 1) score += 5;
+      
+      if (coldCount === target.cold) score += 10;
+      else if (Math.abs(coldCount - target.cold) === 1) score += 5;
+
+      if (neutralCount === target.neutral) score += 5;
+
+      // CorrelaciÃ³n de Estrellas
+      if (maxStars > 0 && selectedStars.length === maxStars) {
+          const hotStarCount = selectedStars.filter(s => this.hotStars.has(s)).length;
+          const coldStarCount = selectedStars.filter(s => this.coldStars.has(s)).length;
+          
+          if (target.starHot !== undefined && hotStarCount === target.starHot) score += 5;
+          if (target.starCold !== undefined && coldStarCount === target.starCold) score += 5;
+      }
+    }
+
+    // 4. Suma Total (DinÃ¡mico segÃºn el juego)
+    const totalSum = selected.reduce((a, b) => a + b, 0);
+    const avgNum = (1 + this.currentGame.numberRange) / 2;
+    const idealSum = avgNum * maxNumbers;
+    const sumRange = idealSum * 0.2; // +/- 20%
+    
+    if (totalSum >= (idealSum - sumRange) && totalSum <= (idealSum + sumRange)) score += 10;
+    else if (totalSum < (idealSum - sumRange * 2) || totalSum > (idealSum + sumRange * 2)) score -= 15;
+
+    // 5. Estrellas (si aplica)
+    if (maxStars > 0 && selectedStars.length === maxStars) {
+        const starEvens = selectedStars.filter(n => n % 2 === 0).length;
+        const starMid = Math.floor(this.currentGame.starRange / 2);
+        const starLows = selectedStars.filter(n => n <= starMid).length;
+
+        // Balance Par/Impar Estrellas
+        if (maxStars === 2) {
+            if (starEvens === 1) score += 10; // 1P/1I es ideal
+            else score += 5;
+        }
+
+        // Balance Bajo/Alto Estrellas
+        if (maxStars === 2) {
+            if (starLows === 1) score += 5; // 1B/1A es ideal
+        }
+        
+        // Suma Estrellas
+        const starSum = selectedStars.reduce((a, b) => a + b, 0);
+        const avgStar = (1 + this.currentGame.starRange) / 2;
+        const idealStarSum = avgStar * maxStars;
+        if (Math.abs(starSum - idealStarSum) <= this.currentGame.starRange * 0.5) score += 5;
+    }
+
+    // Normalizar score 0-100
+    score = Math.max(0, Math.min(100, score));
+
+    // Generar consejo
+    if (score >= 80) advice = t('quality.excelente');
+    else if (score >= 60) advice = t('quality.buena');
+    else if (score >= 40) advice = t('quality.aceptable');
+    else advice = t('quality.pocoProbable');
+
+    // Actualizar UI
+    if (this.correlationScoreValue) this.correlationScoreValue.textContent = `${score}%`;
+    if (this.correlationScoreBar) {
+      this.correlationScoreBar.style.width = `${score}%`;
+      this.correlationScoreBar.className = 'h-full transition-all duration-500 rounded-full ' + 
+        (score >= 75 ? 'bg-emerald-500' : score >= 50 ? 'bg-indigo-500' : 'bg-amber-500');
+    }
+    if (this.correlationAdvice) this.correlationAdvice.textContent = advice;
+  }
+
+  updateBacktestUI() {
+      const controls = document.querySelector('.backtesting-controls') as HTMLElement;
+      const actions = document.querySelector('.backtesting-actions') as HTMLElement;
+      const results = document.getElementById('backtestResults') as HTMLElement;
+      const alertNoData = document.getElementById('backtestNoDataAlert') as HTMLElement;
+
+      if (!this.dataLoaded || this.historicalData.length === 0) {
+          if (controls) controls.style.display = 'none';
+          if (actions) actions.style.display = 'none';
+          if (results) results.style.display = 'none';
+          if (alertNoData) alertNoData.style.display = 'block';
+      } else {
+          if (controls) controls.style.display = 'grid';
+          if (actions) actions.style.display = 'block';
+          if (alertNoData) alertNoData.style.display = 'none';
+      }
+  }
+
+  calculateDrawPrize(hits: number, starHits: number, draw: Draw, combo: number[]): number {
+    return calculateDrawPrize(hits, starHits, draw, combo, this.currentGame?.id || '', this.dataType || '');
+  }
+
+  async runBacktest() {
+      // Comprobar si hay datos cargados
+      if (!this.dataLoaded || this.historicalData.length === 0) {
+          this.showToast(t('toast.backtestSinDatos'), 'error');
+          return;
+      }
+
+      this.updateFilterStateFromUI();
+
+      const periodVal = (document.getElementById('backtestPerixœÄ<ÛrÛF–ïùŠNÆ1	‘räÄ”¥”dË±ª¬Ø%)ñV©\qhQp@4€ºXáÌÃnÕ¾ìÓÖ>ÎC2Oy™ªÑŸìì'ì9İ »ÑàERfX¹Pd÷¹õ¹÷yØòÍÈËãƒWG,fA¾³1KrÏ?§ñ”m~BÄ+àI–“1Ù4&[¤ò`Šëü+¶ì^í‡íÖ?å,Ë`í"Ø
+xÌr¦ô";æÇ°ÀŸø¾ŸŸE™ÿæ<?§9}W’ö„¥9[[¤Å§y…ìGXSšG<ô×jCÅƒöıÛ(	ù ë÷z›ÚB“í/?‹£€µ{r@ó3L/ñ½¾ fÉ(?#İ:Ï+PÌ‹3fñğ)ò@ãØIs#$eBÓŒí'yµÏ[…î®€SÑñ‰q¸9ÏAÊ¸ÉÚ,yÒE¯/º{&Íâà²3~qÌi–·óv+Ç7~¡GQrÄÓœñ¬åuH‹¥)O[#)Ë§iÒ@ç0OÀ&ıK§É®B´›'\¹y’òQÊ²ìOr%,ª ø½©	ê.]	,o‚tÌ.óU@áz|>óìyt¾¤C¹h'ÂöÄCŞæ9OJC£Œc†<­Ü…Ğm[j^]ú~–_Å¡Lbz@ZÃ˜?µt8ÆR}gÂÖ*‰_[#À8–+Bƒ|
+Öø‘ÑÍo		£äæÆàRHÈË£Ÿ§,æ26ºù=!1E/ËCÒŒ‡ñ±a!M5Úg‚_FÁO,r˜j¥"9šÀ†e¨› ¼åsMJ[æ€°Kcš,äE­rì?|½¿`/¬°÷óİ”ÑŸÀ¯&ÇQÏÅn¯µT¼jèO£8gifya\f«gªƒŸƒù¡RËÃÈ+«òaŸIo÷RÅ2™Ş®€^¶géÉø#šĞƒmì„àß£°	A©©?Ë‚ß»âé|ğ "®V@ƒáÑ€Mr°M]¹4°Jq<MÕ MY8Ş÷It‡ÉpA©<¥~à±Ó(ˆXDôhGêbßV1¯¦ iv¤¼Ô‘–.Ü¿>EãiLóÖê8IHg2…è½jâı¿€Ë÷8ZÔõ{ÓE >xvÈ‚)¤WrY]‡rÕw,¿«&¦<út/dÙ(æÛ-Osm+ó‚|÷»éx&…P0Ë¦i
+@¿¥cæWßnÚ»rÚ¸G|gî ç4Š1­PÌŠ­àÙwìïÚ­D`µ#D	Ä@î† zšjQr‡n·Ké˜’ş€ì@¾GY”†0‹Î9¦{àÀm‰4B9Ü¶ZdÁÒgB³Œ…ÂpŸñ©8"£‘ü`Fş2•(ÎäZü9 ¸iS!ç1£	™¼Ãê]Éb
+’Å€e£c~Ã>"åÊ@fEc–!.2…,(±¹ÄÜ
+ªŠYGÙ˜“ó(ƒtJƒ|ÊSĞc`êv)¨WoŸjE…úìáCS &ƒfåq"v˜lTë'JJb§1çi»İ–X’ÿÈ#kr|Ea;Å)iÉ»§gò*Ã¼ˆB(è¶Èû×ˆq¬Ï>¿)ÅÁQˆ¹4DYBî8¤iJç Á<İ3²|Ë8Æ’Âè!J[
+V2ü9é¯»
+±âE/(”	»@€Cd˜SóøìjòŞüø€ò¹ø´pj’šÙèA ?ˆ49…ø¤Ôˆ¨TAh9E3g„p.äTY$ã`?`J"Õş~Ÿ´…Q]1¨‘ˆfñ( ÁÀÍo=§ÈÁ•HN@KGG,>-Ìİlo\ŸúÒ2Û!J#…8ê GÂ„\(£ì0¹M”	Q<ãã!˜	ÖümáKÏ”ÉŸ	GôË/ ¶ã¤Ú©.÷ÑÚ¾ãáÃúÁ™k~ÄŸL³³¶ô%Ò‹”ÌÍzf–39¸ùk2ÌÈ*/yFÓ˜K_¦A/à€1ÁCÓ8”9™¨¿)3Ëft<‰YáûfW¦r•Gbí&+7¤\¸"|àò=BÄ`Az½y&Tºœ÷Fî}"°TºœºÇ)p®äu$RáæC[Æ½,‚w?ŞÂ%¾ ìƒW‘êš³C
+–?ÖM§ş;ZæQC%Ag*È—ÉÆ6éæ¾&±§SîvÛ¾è|5˜»`­#Éğæ™ªı|35LMil>°õjAMç¬^fÑ
+óCBXDº%P;OxNŒ	Û#eéƒ¡?§}+£¦2a,œuÌáıš4y Í	d-¯³óãE”ˆ†¦•úèA»ÎÆäÇi"ºYeûU—E‡ô=SuìTq„-#IÅškKA´QK(ÆÓ\6ä‡$ÛPéd ƒ5w^|ÊDÀÉÏø¦7¿Rjô#MMà*Ï’QQ¬cââœ>`N›¦ÊIªP‰Éá‘§‚–ojÌÔ[ÙÊ:D¥—³PHNP¦2M¬Ö—N¶H7Šo’ñÆå@Õb	¿‹=[¿]ŞÙH]°ñ…V';æÛö`£<0ÏÆ»8øY‚Ğ‚bE½æÍ¨öí6í¡‡®‘‚E½ºğ\½Ëb~ñ:İûy*®OlP*	N@ÖÃ³ºğxPÏ ì2AI
+
+6„ív/í*6õñò/–F §d\v©xÄô”~œ{“BÓÔ/^¦Óü¬¶¯^Ôº`;
+ÇªZcØ¾dq_}S´Áõ­d]êdÉvğ0wuƒ8Ë5„«¬CZØVÄXÍ`Ä‚V°ğÖnÖÛ—hóZ/X‡° <Ìn°¾sïr"/'çl†5, »û/ çÙ	Ï‡Lnpƒ|åYÙ’™ÓXj\8YÂŒökîş5'#íÎ®flÌlö±%{}ª¤+Ú‰ÂOµ:äZz¼A=¸Ï˜U-ìÿ-Â¦İIv¡nL¯ŞF	z‘*ËjHM‰–dGô™£Ûˆ‰·‰ÄÏù‹è’…í¾7#f*^[6mÈz€ÎÈùJdë5d&é=HFğ*ÓÌ··ÈÌª[ç4mw»TtPexè2k‹…
+Ÿ|õUï±pªrSH“K½fï*=Ñ:³õ)0Zåt:——&q»É –Ñ}}ÃÍŸ¹®ç}'î¤‹qçR˜õÅ²Ÿ8€zm×f¤\ö¹hZ¥æŠä oÃbi(ŒN¬ğÇÓ«8çÂê4È3g‘[ˆ—³–Dkyš1¡‘üÕI¦·¤·8Ú%	%ëw¤“eòÎáö²¥ôªQ°w!mH?ğ7E·§Ïe‚Âš•JëX"L8ä¬’“@`pX'´Ddz„Šö¥ŒX†}—¯Ò¿_‚*|8$[ù!İ'i~¯ãê<”çåúöÀ¹E5í(èZ+Â¢€ínî#JI9K”ÆÂ'Kq•«¦Oè‡ÅZµêıÓ»<$ˆ­ÏÄõ‡HüÁ#Ç4½êŠï?Ûvp÷4O]Ë¯Î¶\»”éÎhË›=]ƒU· ÚKòbüö`ö2lTÌ Ÿ§Ûõëlñrˆ,PŠÖ6ño~óho6zåÅ‘èø)ª6KÉÍo\AD“D•”¡ìã?}Ğxïá+;æGg¼¸*:Ôjpm£çù)“·u5C6ø§<İ£ÁYÛjlƒbuİÜÜUÍzH—EûŞÿÀ£¤Ùr:;Ñ Á¾ß~rÊ*‰/ÔtíàÏÖîŠ©Áí¦îsE$®ßDV»LByÓ8á,â,!&)ÿ÷ßÿù7ÌPÚëÙ4å!XÌ8Sşò_ó7Œx
+¥€ÿ‡Hş÷×oÕÛÀÅKÏ{òyšMhB„ßİú•v$zF†´½¾ÑïôŸô;wz~ÃÛ$ÌsTPÆÏïLd}rIO.7ÉHbiBh4ÍäKüìüm7‹>²&l)«Ï.X4:Ëñ¾47?Ó)¤:#®µc‘çŞ¶ƒo;ûåµ›±ê´†41åƒ”6HèğQs…ÒÜé½Ñé¯?±„bfVšl@¤¿>W8† ,y­y©6Ê€DI…hWôH„Ì\î†%2Újkàw°ˆßõGO:¿Æ€]›[•Kü‹™UÓP†z8Ø5ƒÑC°€F7Şiä×áöSœJFÛJM!ˆ1D.?G.ğàºrs3©øÂ0gËm.zîú"¢˜ŸÖ3°ºd`'b‡$ÿY†Òen4øLğ0:/ôó±.¤£d@07b©¥b"¶Õ¤r!(
+¤<Q°	ñ/EI7ç“é÷@åœ©¾Üº”@îô½Œ­=P(g˜òR]!Y2D27'[aì÷”Ba7Bn7û[k»®2ş[kÛ¢«©½Ë'³ ¾+/ºÔ0º>$´> r˜®¼áVÓoY#»2H”ÚÏd(…¾•7’PixÚÈP”œ¥cHşR"‡éäPÀ!cHæ)&óâîIíÁ$7ÚÈ}¿ìN•÷–MÁÅ1ˆŞM2®û%D­
+^&«¸O°Ur3jo%¨2£™±¿"2q§óÉ|T'ÓóÀÏÓã«	“ ‡<áx×Úª;>|O£¹…‹Q³¯9s(¾Vš°Œˆ[ÉayÃ‰º(®ÃÕWuÛhİ7–‰sã:MY:%pÇ”¶~²‹í7«ˆ³òh¹Åª›ıÌv¸ÅîÍÚ˜Cø%‘™x"Š…j®ÁÇ #¸Ó¦,¡J0ÖŠác¥WXÀâÉN
+áÌ?Sw"÷Ê»Ì¡·µM»C¯6ü`²İPÒ3\“.zlQ Êí'²€­JZÕø¤àÌ/\w‹…Ü%À0î)ÈáËŒ1BH³;ÄTPhãÛğæ×,7µ§ ­	NcĞL3®\B¤·i#¯úÊÏUÉRİ=ÉQkrÓ!¶Ód›ù]a§p[äz¦OÍîNƒXL@dZ4¤cPÑPï4/ºÊ¬èÂ9Ñşâ)Ñ•gµ¬©ª[LgÙÃÂ¡Jƒ—7:Tk±°…f¯ZPgxÖQ™™8¢‹>qºñO8EÎN±Bl²I×ˆ	goÎpÉ8—VÿgÌ¦Çs‡ù4A°¦f¨-b›™¶º°?ĞWg§?'h¿„÷q7Yæÿ¼*04´ÅØÚÉ¢-Œû<íBcZĞN-õŒ 6Bi’®…ú30àZŞ@XÃM::Ç¬’Š /÷}¡'Ÿ†g*y²ª!Ş=-7ËšŸ'(¬Z§ì·4ufªKC®/’9ç¶3(·ùs\‰%×[ÈQ‚sŞ,k'k”Ë¤â¥iiìI*Y‰ÁÕO.±e%6Ğ£^Óƒ©H(U.Kã@Œ¦aD|ƒß´‘ÃNIXGuÕÃ5¯W&pÊn§P4…9…y&#R2Ÿ–"Íj³4ÑÌóìHôwP–-İ.€±1OüøKÙ$=,©¯×ózãc6¢XOcé0 ±p>L³AßÑ¨¸—êß7‚*êáÁœ%èËÄƒŠ»ñ¯²Şòbp2Ü/@şS@ÍDNo+\qŠ2‰§)©¨²œèëãMD&®!Z.c-‘)ê<Ø¶0áí-²,˜Z‰ÕoAûQæÑ'³˜„µ›¿@¡!3ëñµÁˆ$±˜ß,$sLe]ÀÉ9çq ßãS7Za}ÛJè* ;´øîcó~f0ï8y‡ÙË»Í]Şnæòæ-ïyÖò˜³¼§Ë;ÌWVòœÆ<= ³¿É!ñ:=}Ò†@4/¸â”åR8µÇµ›Q6NBŞ
+ c"3Û¥ş—HW#Ô$Í9MÙ4I¹*¹ïñ–Lƒ“‚›ÊØ4+¿Ñçß[!«iÓZŸQl´²âNyTHIº+™]¶K¹­i_ªˆLuÖæ3f3›>çjöF\™HŞ¶|@É=h*¿__r¼Ôb.«¦ëy£æÍ%fÓ,yÃSù[G–Š(BêÂ‚y
+âœ[³ ®®‹¦Ú0q—CjêÇ‰ÌA¥]¢²Åú Áš®~¹ğéù_nØİ±‚pso=«2p»E.—|+B—À¤&ÖB¨&f·S¢rWÚK¶K?ğC–ó4±~bæ8^çà`…ªáøæŒÒ-?F§j'ÔÛP§¯‡ û@JAqie±öÓÙöóQÍUæß;Dûy3zÒ{ç‰\¸¹«†›võMÃ¹›d‡]íêJ”®	K9-!ÅtCïsˆñƒæQs®À5¦PÎ¼¨As¢ Ò¹,Jª_ô˜9ÆÔù_:@©U‡<~FsEW´ú¥¦ü±¹» yƒWœÃHü.ØÃ”æ§ö]š¥TåÄ¢¼iéÈGZŞ-°¼tÅbR>èç¼ÈĞ\Y³!EÙËhtãp”ècMUN uî§‚ÑTÊ³·Q~ÖnõHËkøªßüÕ:Işñ;ş0‡{„r•©B\ë„CÄKùE÷¬ø@ÅÓÆ1	L¨D¯:LÕù]ë%p.KÎXá¹Î>ÿÃç«Ì¥·*ş¯Ş,ºÂİ+DÔ0r€àŸµ5òmÖ“ôS¤iü`3B'“OÄ XQ×eáÕQ.jƒŸıÎYã@ã*ñD«ø!’â–¯ªğ·@^ñ<ç_>Ø‹hCœ5Ö¼d	<ğŞ9¼yebì¹İzşú@EéWœ†,„ƒokö;¾<8Éö‹ı0$4!l<É¯0og¦Mrà"Æ§ÆvkÄON!üD-»mş?   ÿÿ Ç®€
