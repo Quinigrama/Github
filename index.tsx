@@ -5848,7 +5848,12 @@ class DataLotto49Advanced {
     });
 
     document.getElementById('hrGameFilter')?.addEventListener('change', () => {
-        updateHistoryDashboard(this.savedTickets);
+        updateHistoryDashboard(this.savedTickets, this.controlGroupStats);
+    });
+
+    document.getElementById('controlGroupInfoBtn')?.addEventListener('click', () => {
+        const box = document.getElementById('controlGroupInfoBox');
+        if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
     });
 
     document.getElementById('runBacktestBtn')?.addEventListener('click', () => {
@@ -7798,7 +7803,7 @@ class DataLotto49Advanced {
 
   updateSavedTickets() {
     this.updateSavedTicketsStats();
-    updateHistoryDashboard(this.savedTickets);
+    updateHistoryDashboard(this.savedTickets, this.controlGroupStats);
     const container = document.getElementById('savedTickets');
     if (!container) return;
     container.innerHTML = '';
@@ -10841,7 +10846,7 @@ class DataLotto49Advanced {
         hrGameFilter.value = this.currentGame.id;
     }
 
-    updateHistoryDashboard(this.savedTickets);
+    updateHistoryDashboard(this.savedTickets, this.controlGroupStats);
     this.toggleModal('historyOfResultsModal', true);
   }
 

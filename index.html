@@ -1521,10 +1521,19 @@
           <div class="dashboard-panel" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
               <div style="border-bottom: 1px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 1.2rem;">⚖️</span>
-                  <div style="text-align: left;">
-                      <h3 style="margin: 0; font-size: 1rem; color: #111827; font-weight: 600;" data-i18n="history.rendimientoTitulo">Rendimiento del Filtrado vs Azar Matemático</h3>
+                  <div style="text-align: left; flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                          <h3 style="margin: 0; font-size: 1rem; color: #111827; font-weight: 600;" data-i18n="history.rendimientoTitulo">Rendimiento del Filtrado vs Azar Matemático</h3>
+                          <button id="controlGroupInfoBtn" type="button" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; font-weight: 700; line-height: 1; flex-shrink: 0;" title="¿Qué es el Grupo de Control?" data-i18n-title="history.grupoControlInfoTitle">ℹ️</button>
+                      </div>
                       <p style="margin: 0; font-size: 0.75rem; color: #6b7280;" data-i18n="history.rendimientoSubtitulo">Demostración de efectividad vs probabilidades teóricas del azar</p>
                   </div>
+              </div>
+
+              <div id="controlGroupInfoBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 15px; font-size: 0.82rem; color: #1e3a5f; line-height: 1.5;">
+                  <p style="margin: 0 0 8px 0;" data-i18n="history.grupoControlExplicacion1">🧪 El <strong>Grupo de Control</strong> funciona como en un estudio médico: por cada boleto que generas con filtros, guardamos también —de forma oculta, nunca visible— el mismo número de combinaciones totalmente al azar, sin ningún filtro. Cuando se valida el sorteo real, comparamos ambos resultados.</p>
+                  <p style="margin: 0 0 8px 0;" data-i18n="history.grupoControlExplicacion2">Por ejemplo: si tus combinaciones filtradas acertaron un 2,1% de las veces en la categoría "3 aciertos", y el grupo de control (puro azar) acertó un 1,8% en esa misma categoría, tus filtros muestran una ligera ventaja en esa categoría concreta — la celda con el porcentaje más alto se resalta en verde.</p>
+                  <p style="margin: 0; font-style: italic; color: #475569;" data-i18n="history.grupoControlAviso">⚠️ Con pocas validaciones, la diferencia entre ambos no es estadísticamente significativa — es ruido normal del azar. Cuantas más apuestas valides con el tiempo, más fiable será esta comparación.</p>
               </div>
 
               <div style="overflow-x: auto;">
@@ -1535,6 +1544,7 @@
                               <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colApuestas">Nº de Apuestas</th>
                               <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colTuFrecuencia">Tu Frecuencia (%)</th>
                               <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colFrecuenciaAzar">Frecuencia Azar (%)</th>
+                              <th style="padding: 10px 6px; text-align: center;" data-i18n="history.colGrupoControl">Grupo de Control (%)</th>
                               <th style="padding: 10px 6px; text-align: right;" data-i18n="history.colRendimiento">Rendimiento vs Azar</th>
                           </tr>
                       </thead>

@@ -2,7 +2,10 @@ import { Ticket } from "../types";
 import { getGameConfig } from "../../game-configs";
 import { t } from "./i18n";
 
-export function updateHistoryDashboard(savedTickets: Ticket[]) {
+export function updateHistoryDashboard(
+  savedTickets: Ticket[],
+  controlGroupStats: { [gameId: string]: { '6': number, '5': number, '4': number, '3': number, '<=2': number, totalValidated: number } } = {}
+) {
   const hrGameFilter = document.getElementById('hrGameFilter') as HTMLSelectElement;
   const hrGameFilterVal = hrGameFilter ? hrGameFilter.value : 'all';
 
@@ -141,10 +144,27 @@ export function updateHistoryDashboard(savedTickets: Ticket[]) {
               '<=2': t('history.tier.menos2')
           };
 
+          // Aggregate control group counts across the currently relevant game(s)
+          const relevantGameIds = hrGameFilterVal !== 'all' ? [hrGameFilterVal] : Object.keys(validatedCountsByGame);
+          const controlTotals = { '6': 0, '5': 0, '4': 0, '3': 0, '<=2': 0, totalValidated: 0 };
+          relevantGameIds.forEach(gid => {
+              const gStats = controlGroupStats[gid];
+              if (gStats) {
+                  controlTotals['6'] += gStats['6'];
+                  controlTotals['5'] += gStats['5'];
+                  controlTotals['4'] += gStats['4'];
+                  controlTotals['3'] += gStats['3'];
+                  controlTotals['<=2'] += gStats['<=2'];
+                  controlTotals.totalValidated += gStats.totalValidated;
+              }
+          });
+
           activeTiers.forEach(tier => {
               const count = actualHitCounts[tier] || 0;
               const actualFrequency = (count / validatedCombinations) * 100;
               const theoreticalFrequency = getTheoreticalProb(tier);
+              const controlCount = controlTotals[tier as '6' | '5' | '4' | '3' | '<=2'] || 0;
+              const controlFrequency = controlTotals.totalValidated > 0 ? (controlCount / controlTotals.totalValidated) * 100 : 0;
 
               let perfBadge = '';
               if (count === 0 && theoreticalFrequency === 0) {
@@ -160,12 +180,29 @@ export function updateHistoryDashboard(savedTickets: Ticket[]) {
                   perfBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📉 ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
               }
 
+              const hasControlData = controlTotals.totalValidated > 0;
+              let realCellStyle = "padding: 12px 8px; text-align: center; font-weight: 600; color: var(--primary);";
+              let controlCellHtml = `<td style="padding: 12px 8px; text-align: center; color: #9ca3af;">${t('history.sinDatos')}</td>`;
+
+              if (hasControlData) {
+                  const realWins = actualFrequency > controlFrequency;
+                  const controlWins = controlFrequency > actualFrequency;
+                  if (realWins) {
+                      realCellStyle = "padding: 12px 8px; text-align: center; font-weight: 700; color: #15803d; background: #dcfce7; border-radius: 6px;";
+                  }
+                  const controlCellStyle = controlWins
+                      ? "padding: 12px 8px; text-align: center; font-weight: 700; color: #15803d; background: #dcfce7; border-radius: 6px;"
+                      : "padding: 12px 8px; text-align: center; color: #4b5563;";
+                  controlCellHtml = `<td style="${controlCellStyle}">${controlFrequency.toFixed(4)}%</td>`;
+              }
+
               tableBody.innerHTML += `
                   <tr style="border-bottom: 1px solid #f3f4f6; hover:background-color: #fafafa;">
                       <td style="padding: 12px 8px; font-weight: 500; color: #111827;">${tierLabels[tier] || tier}</td>
                       <td style="padding: 12px 8px; text-align: center;">${count}</td>
-                      <td style="padding: 12px 8px; text-align: center; font-weight: 600; color: var(--primary);">${actualFrequency.toFixed(4)}%</td>
+                      <td style="${realCellStyle}">${actualFrequency.toFixed(4)}%</td>
                       <td style="padding: 12px 8px; text-align: center; color: #4b5563;">${theoreticalFrequency.toFixed(4)}%</td>
+                      ${controlCellHtml}
                       <td style="padding: 12px 8px; text-align: right;">${perfBadge}</td>
                   </tr>
               `;
