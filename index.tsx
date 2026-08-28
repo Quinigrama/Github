@@ -3988,6 +3988,7 @@ class DataLotto49Advanced {
       dayCell.style.alignItems = 'center';
       dayCell.style.justifyContent = 'center';
       dayCell.style.minHeight = '52px';
+      dayCell.style.minWidth = '0';
       dayCell.style.position = 'relative';
       dayCell.style.transition = 'all 0.18s ease';
       dayCell.style.userSelect = 'none';
