@@ -7930,6 +7930,12 @@ class DataLotto49Advanced {
         historicalDrawsByDate[drawDateStr] = { numbers: draw.numbers, stars: draw.stars };
     });
 
+    // Tickets validated manually whose telemetry is still pending confirmation against a real draw.
+    // Processed separately below, after the main loop, with zero visual side effects.
+    const pendingManualTelemetry: Ticket[] = this.savedTickets.filter(
+        t => t.validation && t.validatedManually && !t.telemetrySent
+    );
+
     this.savedTickets.forEach(ticket => {
         if (ticket.validation) return; 
 
@@ -8009,6 +8015,7 @@ class DataLotto49Advanced {
                 }
             });
 
+            ticket.telemetrySent = true;
             this.sendTelemetry('validate_ticket', {
                 gameId: valData.gameId,
                 allHits: valData.allHits,
@@ -8026,6 +8033,69 @@ class DataLotto49Advanced {
             this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, ticket.drawDate || 'Auto-validado');
         }
     });
+
+    // Silently confirm telemetry for tickets that were validated manually earlier, now that a real
+    // draw has loaded. No re-render, no toast, no badge change — the user already saw this ticket
+    // validated and must not notice anything happening now.
+    let pendingTelemetryConfirmed = false;
+    pendingManualTelemetry.forEach(ticket => {
+        if (ticket.gameId && ticket.gameId !== this.currentGame.id) return;
+        if (!ticket.validation) return;
+
+        const drawDateKey = ticket.drawDate && historicalDrawsByDate[ticket.drawDate] ? ticket.drawDate : null;
+        if (!drawDateKey) return; // The real draw for this ticket hasn't loaded yet; try again next time.
+
+        const winningData = historicalDrawsByDate[drawDateKey];
+        const valData = this.getTicketValidationData(ticket, winningData.numbers, winningData.stars || []);
+
+        let prizeNotice = `${valData.maxHits} aciertos`;
+        if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
+        const favNums = ticket.favoriteNumbers || Array.from(this.favoriteNumbers || []);
+        const favSecs = ticket.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
+        const favCounts: { [num: number]: number } = {};
+        const favSecCounts: { [num: number]: number } = {};
+
+        favNums.forEach((num: number) => {
+            let cnt = 0;
+            if (ticket.strategy === 'multiple' && ticket.combinations.length === 1) {
+                if (ticket.combinations[0].includes(num)) cnt = valData.allHits.length;
+            } else {
+                ticket.combinations.forEach((c: number[]) => { if (c.includes(num)) cnt++; });
+            }
+            if (cnt > 0) favCounts[num] = cnt;
+        });
+
+        favSecs.forEach((star: number) => {
+            let cnt = 0;
+            if (ticket.strategy === 'multiple' && ticket.stars && ticket.stars.length === 1) {
+                if (ticket.stars[0].includes(star)) cnt = valData.allHits.length;
+            } else if (ticket.stars) {
+                ticket.stars.forEach((s: number[]) => { if (s.includes(star)) cnt++; });
+            }
+            if (cnt > 0) favSecCounts[star] = cnt;
+        });
+
+        ticket.telemetrySent = true;
+        pendingTelemetryConfirmed = true;
+        this.sendTelemetry('validate_ticket', {
+            gameId: valData.gameId,
+            allHits: valData.allHits,
+            maxHits: valData.maxHits,
+            maxStars: valData.maxStars,
+            stars: valData.starHits,
+            favoriteNumbers: favNums.length > 0 ? favNums : undefined,
+            favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
+            favoriteCounts: Object.keys(favCounts).length > 0 ? favCounts : undefined,
+            favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
+            prizeNotice: prizeNotice,
+            drawDate: drawDateKey,
+            combinationsCount: valData.allHits.length
+        });
+        this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, drawDateKey);
+    });
+    if (pendingTelemetryConfirmed) {
+        this.saveState();
+    }
 
     if (validatedCount > 0) {
         this.saveState();
@@ -8151,57 +8221,17 @@ class DataLotto49Advanced {
         if (prizeSummary.hasPrize) {
             ticketToUpdate.seenWinning = true;
         }
+
+        // Integrity flags: this validation came from user-entered numbers, not from a real loaded draw.
+        // Telemetry (Sheets) and the Telegram prize alert are intentionally NOT sent here — they will be
+        // sent later, silently, by autoValidateSavedTickets() only if/when this ticket's real draw loads
+        // and confirms the same result. This keeps statistics free of manual test validations.
+        ticketToUpdate.validatedManually = true;
+        ticketToUpdate.telemetrySent = false;
+
         this.saveState();
         this.updateSavedTickets();
         this.updateSavedTicketsBadge();
-
-        // Telemetry
-        let prizeNotice = `${valData.maxHits} aciertos`;
-        if (valData.maxStars > 0) prizeNotice += ` + ${valData.maxStars} ⭐`;
-        const favNums = ticketToUpdate.favoriteNumbers || Array.from(this.favoriteNumbers || []);
-        const favSecs = ticketToUpdate.favoriteSecondaryNumbers || Array.from(this.favoriteStars || []);
-        const favCounts: { [num: number]: number } = {};
-        const favSecCounts: { [num: number]: number } = {};
-
-        favNums.forEach((num: number) => {
-            let cnt = 0;
-            if (ticketToUpdate.strategy === 'multiple' && ticketToUpdate.combinations.length === 1) {
-                if (ticketToUpdate.combinations[0].includes(num)) cnt = valData.allHits.length;
-            } else {
-                ticketToUpdate.combinations.forEach((c: number[]) => { if (c.includes(num)) cnt++; });
-            }
-            if (cnt > 0) {
-                favCounts[num] = cnt;
-            }
-        });
-
-        favSecs.forEach((star: number) => {
-            let cnt = 0;
-            if (ticketToUpdate.strategy === 'multiple' && ticketToUpdate.stars && ticketToUpdate.stars.length === 1) {
-                if (ticketToUpdate.stars[0].includes(star)) cnt = valData.allHits.length;
-            } else if (ticketToUpdate.stars) {
-                ticketToUpdate.stars.forEach((s: number[]) => { if (s.includes(star)) cnt++; });
-            }
-            if (cnt > 0) {
-                favSecCounts[star] = cnt;
-            }
-        });
-
-        this.sendTelemetry('validate_ticket', {
-            gameId: valData.gameId,
-            allHits: valData.allHits,
-            maxHits: valData.maxHits,
-            maxStars: valData.maxStars,
-            stars: valData.starHits,
-            favoriteNumbers: favNums.length > 0 ? favNums : undefined,
-            favoriteSecondaryNumbers: favSecs.length > 0 ? favSecs : undefined,
-            favoriteCounts: Object.keys(favCounts).length > 0 ? favCounts : undefined,
-            favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
-            prizeNotice: prizeNotice,
-            drawDate: ticketToUpdate.drawDate || 'Desconocida',
-            combinationsCount: valData.allHits.length
-        });
-        this.sendTelegramPrizeAlert(ticketToUpdate, valData, prizeNotice, ticketToUpdate.drawDate || 'Desconocida');
 
         this.toggleModal('validationModal', false);
         this.showToast(t('toast.boletoValidadoManualmente'), 'success');
