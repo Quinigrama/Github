@@ -1302,3 +1302,44 @@ export function classifyNumbers(
   };
 }
 
+/**
+ * Generates `count` purely random combinations (no filters applied) for the Control Group feature.
+ * Each combination independently draws `maxNumbers` distinct numbers from [numbersStartAt, numbersStartAt + numberRange - 1],
+ * and, if `maxStars > 0`, an accompanying independent draw of `maxStars` distinct stars from
+ * [starsStartAt, starsStartAt + starRange - 1].
+ */
+export function generateRandomControlCombinations(
+  count: number,
+  maxNumbers: number,
+  numberRange: number,
+  numbersStartAt: number = 1,
+  maxStars: number = 0,
+  starRange: number = 0,
+  starsStartAt: number = 1
+): { combinations: number[][]; stars?: number[][] } {
+  const drawRandomSubset = (size: number, rangeSize: number, startAt: number): number[] => {
+    const universe: number[] = [];
+    for (let i = 0; i < rangeSize; i++) universe.push(startAt + i);
+    // Fisher-Yates partial shuffle
+    for (let i = universe.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [universe[i], universe[j]] = [universe[j], universe[i]];
+    }
+    return universe.slice(0, size).sort((a, b) => a - b);
+  };
+
+  const combinations: number[][] = [];
+  const starsCombinations: number[][] = [];
+
+  for (let i = 0; i < count; i++) {
+    combinations.push(drawRandomSubset(maxNumbers, numberRange, numbersStartAt));
+    if (maxStars > 0 && starRange > 0) {
+      starsCombinations.push(drawRandomSubset(maxStars, starRange, starsStartAt));
+    }
+  }
+
+  return maxStars > 0 && starRange > 0
+    ? { combinations, stars: starsCombinations }
+    : { combinations };
+}
+

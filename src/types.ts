@@ -35,6 +35,13 @@ export interface Ticket {
   // Internal telemetry-integrity flags (NOT shown in any UI):
   validatedManually?: boolean; // true if this ticket's validation came from confirmValidation() (user-entered numbers), not from a real loaded draw
   telemetrySent?: boolean; // true once sendTelemetry('validate_ticket', ...) has actually been sent for this ticket's validation
+  // Control Group (Grupo de Control): purely random combinations generated at ticket creation time,
+  // same count as the real ticket, NEVER shown to the user in any screen. Consumed and deleted once
+  // automatically validated against a real draw (see autoValidateSavedTickets in a later prompt).
+  controlGroup?: {
+    combinations: number[][];
+    stars?: number[][];
+  };
 }
 
 export interface PositionRangeConfig {

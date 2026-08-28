@@ -41,7 +41,8 @@ import {
   getWinningTicketInfo as getWinningTicketInfoUtil,
   getTicketWinningTiers,
   getTicketPrizeSummary as getTicketPrizeSummaryUtil,
-  classifyNumbers as classifyNumbersUtil
+  classifyNumbers as classifyNumbersUtil,
+  generateRandomControlCombinations
 } from './src/utils/combinatorial';
 import {
   GridLayout,
@@ -7471,13 +7472,32 @@ class DataLotto49Advanced {
 
     this.currentTicket.filtersSnapshot = JSON.parse(JSON.stringify(this.filters));
 
+    const metrics = this.calculateTicketMetrics(this.currentTicket);
+
+    // Control Group generation: same combination count as the real ticket, purely random, hidden.
+    // Not generated for Lotería Nacional (different 5-digit structure).
+    if (this.currentGame.id !== 'nacional' && metrics.combinationsCount > 0) {
+      try {
+        this.currentTicket.controlGroup = generateRandomControlCombinations(
+          metrics.combinationsCount,
+          this.currentGame.maxNumbers,
+          this.currentGame.numberRange,
+          this.currentGame.numbersStartAt || 1,
+          this.currentGame.maxStars || 0,
+          this.currentGame.starRange || 0,
+          this.currentGame.secondaryStartAt || 1
+        );
+      } catch (err) {
+        console.warn('No se pudo generar el Grupo de Control para este boleto:', err);
+      }
+    }
+
     const savedTicketCopy = { ...this.currentTicket };
     this.savedTickets.unshift(this.currentTicket);
     this.saveState();
     this.updateSavedTickets();
 
     // Telemetry
-    const metrics = this.calculateTicketMetrics(savedTicketCopy);
     this.sendTelemetry('save_ticket', {
         gameId: metrics.gameId,
         combinationsCount: metrics.combinationsCount,
