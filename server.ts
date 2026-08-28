@@ -204,6 +204,9 @@ async function startServer() {
           if (payload.favoriteSecondaryCounts) {
             sheetsBody.favoriteSecondaryCounts = payload.favoriteSecondaryCounts;
           }
+          if (payload.controlHitsByCategory && Array.isArray(payload.controlHitsByCategory) && payload.controlHitsByCategory.length > 0) {
+            sheetsBody.controlHitsByCategory = payload.controlHitsByCategory;
+          }
         } else {
           sheetsBody = {
             event,

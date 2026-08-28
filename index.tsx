@@ -318,6 +318,11 @@ class DataLotto49Advanced {
     lastMultipleStats: { validCount: number, totalCount: number } | null;
     lastDebugInfo: string;
     savedTickets: Ticket[];
+    // Persistent aggregate of Control Group results, survives ticket deletion (the raw control
+    // combinations are deleted from each ticket right after being validated — see
+    // computeAndConsumeControlGroup()). Never shown per-ticket, only used for the aggregated
+    // "Grupo de Control" comparison in the Historial dashboard (see a later prompt).
+    controlGroupStats: { [gameId: string]: { '6': number, '5': number, '4': number, '3': number, '<=2': number, totalValidated: number } };
     currentTicket: Ticket | null;
     currentValidatingTicket: Ticket | null;
     historicalData: Draw[];
@@ -429,6 +434,7 @@ class DataLotto49Advanced {
     this.lastDebugInfo = '';
     this.lastMultipleStats = null;
     this.savedTickets = [];
+    this.controlGroupStats = {};
     this.currentTicket = null;
     this.currentValidatingTicket = null;
     this.historicalData = [];
@@ -1660,6 +1666,7 @@ class DataLotto49Advanced {
           const state = {
               currentGameId: this.currentGame.id,
               savedTickets: this.savedTickets,
+              controlGroupStats: this.controlGroupStats,
               gameFilters: this.gameFilters, // Save all game filters
               gameDataTypes: this.gameDataTypes,
               gameHistoricalData: Object.keys(this.gameHistoricalData).reduce((acc: any, gid: string) => {
@@ -1777,6 +1784,7 @@ class DataLotto49Advanced {
                   this.currentGame = GAMES[savedState.currentGameId];
               }
               this.savedTickets = savedState.savedTickets || [];
+              this.controlGroupStats = savedState.controlGroupStats || {};
               // Migrate any old saved tickets gameId from 'lotto649' or missing to 'bonoloto'
               this.savedTickets.forEach((t: any) => {
                   if (!t.gameId || t.gameId === 'lotto649') {
@@ -7940,6 +7948,56 @@ class DataLotto49Advanced {
     this.updateSavedTicketsBadge();
   }
 
+  /**
+   * Validates a ticket's hidden Control Group combinations against the same real winning numbers
+   * used to validate the ticket itself, updates the persistent aggregate `controlGroupStats`
+   * (coarse 6/5/4/3/<=2 buckets, ignoring stars — same scheme already used by the Historial
+   * dashboard for the real ticket's own hit counts), and returns the detailed per-category
+   * breakdown (e.g. "5+2", "3+0"...) for telemetry. Deletes `ticket.controlGroup` afterwards —
+   * the random numbers themselves are never persisted once validated.
+   */
+  computeAndConsumeControlGroup(ticket: Ticket, winningNumbers: number[], winningStars: number[]): { label: string; count: number }[] {
+    if (!ticket.controlGroup || !ticket.controlGroup.combinations || ticket.controlGroup.combinations.length === 0) {
+        return [];
+    }
+
+    const gameId = ticket.gameId || 'bonoloto';
+    const controlTicket: Ticket = {
+        ...ticket,
+        strategy: 'simple', // Control combinations are always final, independent bets — never a superset.
+        combinations: ticket.controlGroup.combinations,
+        stars: ticket.controlGroup.stars,
+    };
+
+    const cgValData = this.getTicketValidationData(controlTicket, winningNumbers, winningStars);
+    controlTicket.validation = {
+        winningNumbers,
+        stars: winningStars.length > 0 ? winningStars : undefined,
+        hits: cgValData.allHits,
+        starHits: cgValData.starHits
+    };
+
+    const detailedCategories = getTicketWinningTiers(controlTicket);
+
+    // Coarse bucket aggregation (matches the scheme already used in updateHistoryDashboard for real tickets)
+    if (!this.controlGroupStats[gameId]) {
+        this.controlGroupStats[gameId] = { '6': 0, '5': 0, '4': 0, '3': 0, '<=2': 0, totalValidated: 0 };
+    }
+    const bucket = this.controlGroupStats[gameId];
+    cgValData.allHits.forEach((hitCount: number) => {
+        bucket.totalValidated++;
+        if (hitCount >= 6) bucket['6']++;
+        else if (hitCount === 5) bucket['5']++;
+        else if (hitCount === 4) bucket['4']++;
+        else if (hitCount === 3) bucket['3']++;
+        else bucket['<=2']++;
+    });
+
+    delete ticket.controlGroup;
+
+    return detailedCategories;
+  }
+
   autoValidateSavedTickets() {
     if (!this.historicalData || this.historicalData.length === 0) return;
 
@@ -8036,6 +8094,8 @@ class DataLotto49Advanced {
                 }
             });
 
+            const controlHitsByCategory = this.computeAndConsumeControlGroup(ticket, winningNumbers, winningStars);
+
             ticket.telemetrySent = true;
             this.sendTelemetry('validate_ticket', {
                 gameId: valData.gameId,
@@ -8049,7 +8109,8 @@ class DataLotto49Advanced {
                 favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
                 prizeNotice: prizeNotice,
                 drawDate: ticket.drawDate || 'Auto-validado',
-                combinationsCount: valData.allHits.length
+                combinationsCount: valData.allHits.length,
+                controlHitsByCategory: controlHitsByCategory.length > 0 ? controlHitsByCategory : undefined
             });
             this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, ticket.drawDate || 'Auto-validado');
         }
@@ -8096,6 +8157,8 @@ class DataLotto49Advanced {
             if (cnt > 0) favSecCounts[star] = cnt;
         });
 
+        const controlHitsByCategory = this.computeAndConsumeControlGroup(ticket, winningData.numbers, winningData.stars || []);
+
         ticket.telemetrySent = true;
         pendingTelemetryConfirmed = true;
         this.sendTelemetry('validate_ticket', {
@@ -8110,7 +8173,8 @@ class DataLotto49Advanced {
             favoriteSecondaryCounts: Object.keys(favSecCounts).length > 0 ? favSecCounts : undefined,
             prizeNotice: prizeNotice,
             drawDate: drawDateKey,
-            combinationsCount: valData.allHits.length
+            combinationsCount: valData.allHits.length,
+            controlHitsByCategory: controlHitsByCategory.length > 0 ? controlHitsByCategory : undefined
         });
         this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, drawDateKey);
     });
