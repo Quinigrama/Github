@@ -184,6 +184,17 @@ export function updateHistoryDashboard(
               let realCellStyle = "padding: 12px 8px; text-align: center; font-weight: 600; color: var(--primary);";
               let controlCellHtml = `<td style="padding: 12px 8px; text-align: center; color: #9ca3af;">${t('history.sinDatos')}</td>`;
 
+              // Provisional badge (vs theoretical probability) — used only while no control data exists yet.
+              const provisionalBadge = perfBadge.replace(
+                  /background: (#dcfce7|#fee2e2|#f3f4f6); color: (#15803d|#b91c1c|#4b5563);/,
+                  'background: #fef3c7; color: #92400e;'
+              ).replace('display: inline-flex;', 'display: inline-flex;').replace(
+                  />/,
+                  `>⏳ `
+              );
+
+              let finalBadge = provisionalBadge;
+
               if (hasControlData) {
                   const realWins = actualFrequency > controlFrequency;
                   const controlWins = controlFrequency > actualFrequency;
@@ -194,6 +205,20 @@ export function updateHistoryDashboard(
                       ? "padding: 12px 8px; text-align: center; font-weight: 700; color: #15803d; background: #dcfce7; border-radius: 6px;"
                       : "padding: 12px 8px; text-align: center; color: #4b5563;";
                   controlCellHtml = `<td style="${controlCellStyle}">${controlFrequency.toFixed(4)}%</td>`;
+
+                  // Rendimiento vs Control: compares actualFrequency against controlFrequency (not theoretical).
+                  if (actualFrequency === 0 && controlFrequency === 0) {
+                      finalBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.sinDatos')}</span>`;
+                  } else if (actualFrequency > controlFrequency) {
+                      const timesBetter = controlFrequency > 0 ? (actualFrequency / controlFrequency).toFixed(1) : 'N/A';
+                      const percentBetter = controlFrequency > 0 ? (((actualFrequency - controlFrequency) / controlFrequency) * 100).toFixed(0) : '0';
+                      finalBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">${t('history.superior', { timesBetter, percentBetter })}</span>`;
+                  } else if (actualFrequency === controlFrequency) {
+                      finalBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.esperado')}</span>`;
+                  } else {
+                      const timesWorse = actualFrequency > 0 && controlFrequency > 0 ? (controlFrequency / actualFrequency).toFixed(1) : '∞';
+                      finalBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📉 ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
+                  }
               }
 
               tableBody.innerHTML += `
@@ -201,9 +226,9 @@ export function updateHistoryDashboard(
                       <td style="padding: 12px 8px; font-weight: 500; color: #111827;">${tierLabels[tier] || tier}</td>
                       <td style="padding: 12px 8px; text-align: center;">${count}</td>
                       <td style="${realCellStyle}">${actualFrequency.toFixed(4)}%</td>
-                      <td style="padding: 12px 8px; text-align: center; color: #4b5563;">${theoreticalFrequency.toFixed(4)}%</td>
                       ${controlCellHtml}
-                      <td style="padding: 12px 8px; text-align: right;">${perfBadge}</td>
+                      <td style="padding: 12px 8px; text-align: center; color: #4b5563;">${theoreticalFrequency.toFixed(4)}%</td>
+                      <td style="padding: 12px 8px; text-align: right;">${finalBadge}</td>
                   </tr>
               `;
           });
