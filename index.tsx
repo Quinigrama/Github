@@ -494,7 +494,14 @@ class DataLotto49Advanced {
     this.anonymousUserId = anonId;
 
     this.loadState();
-    this.createNumbersGrid();
+    // Defer the first grid render to after the browser's initial layout pass — measuring
+    // container width too early (right at boot) can yield a smaller-than-final value, making
+    // the number grid render undersized only on this very first paint.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.createNumbersGrid();
+      });
+    });
 
     // Ensure sidebar has the correct active game class from the loaded game
     document.querySelectorAll('.sidebar-links li').forEach(li => {
@@ -7961,9 +7968,9 @@ class DataLotto49Advanced {
    * breakdown (e.g. "5+2", "3+0"...) for telemetry. Deletes `ticket.controlGroup` afterwards —
    * the random numbers themselves are never persisted once validated.
    */
-  computeAndConsumeControlGroup(ticket: Ticket, winningNumbers: number[], winningStars: number[]): { hits: number[]; starHits: number[] } {
+  computeAndConsumeControlGroup(ticket: Ticket, winningNumbers: number[], winningStars: number[]): { hits: number[]; starHits?: number[] } {
     if (!ticket.controlGroup || !ticket.controlGroup.combinations || ticket.controlGroup.combinations.length === 0) {
-        return { hits: [], starHits: [] };
+        return { hits: [], starHits: undefined };
     }
 
     const gameId = ticket.gameId || 'bonoloto';
@@ -7992,7 +7999,7 @@ class DataLotto49Advanced {
 
     delete ticket.controlGroup;
 
-    return { hits: cgValData.allHits, starHits: cgValData.starHits };
+    return { hits: cgValData.allHits || [], starHits: cgValData.starHits };
   }
 
   autoValidateSavedTickets() {
@@ -8107,8 +8114,8 @@ class DataLotto49Advanced {
                 prizeNotice: prizeNotice,
                 drawDate: ticket.drawDate || 'Auto-validado',
                 combinationsCount: valData.allHits.length,
-                controlHits: controlResult.hits.length > 0 ? controlResult.hits : undefined,
-                controlStarHits: controlResult.starHits.length > 0 ? controlResult.starHits : undefined
+                controlHits: (controlResult && controlResult.hits && controlResult.hits.length > 0) ? controlResult.hits : undefined,
+                controlStarHits: (controlResult && controlResult.starHits && controlResult.starHits.length > 0) ? controlResult.starHits : undefined
             });
             this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, ticket.drawDate || 'Auto-validado');
         }
@@ -8172,8 +8179,8 @@ class DataLotto49Advanced {
             prizeNotice: prizeNotice,
             drawDate: drawDateKey,
             combinationsCount: valData.allHits.length,
-            controlHits: controlResult.hits.length > 0 ? controlResult.hits : undefined,
-            controlStarHits: controlResult.starHits.length > 0 ? controlResult.starHits : undefined
+            controlHits: (controlResult && controlResult.hits && controlResult.hits.length > 0) ? controlResult.hits : undefined,
+            controlStarHits: (controlResult && controlResult.starHits && controlResult.starHits.length > 0) ? controlResult.starHits : undefined
         });
         this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, drawDateKey);
     });
@@ -8837,13 +8844,18 @@ class DataLotto49Advanced {
     const highJk = jackpots.find((j: any) => j.bote >= 100000000 || j.rating === t('jackpots.ratingExcelente') || j.rating === '🌟 Excelente') || jackpots[0];
 
     if (highJk && (highJk.bote >= 50000000 || highJk.rating === t('jackpots.ratingExcelente') || highJk.rating === '🌟 Excelente')) {
+      const config = this.getNotificationSettings();
+      const todayStr = new Date().toISOString().split('T')[0];
+
       const banner = document.getElementById('highJackpotBannerContainer');
       const titleEl = document.getElementById('highJackpotTitle');
       const descEl = document.getElementById('highJackpotDesc');
       const playBtn = document.getElementById('highJackpotPlayBtn');
       const closeBtn = document.getElementById('highJackpotCloseBtn');
 
-      if (banner && titleEl && descEl && playBtn) {
+      // Show the in-app banner at most once per day — same "candado" pattern used for the
+      // daily draws notice (config.lastNotifiedDate).
+      if (banner && titleEl && descEl && playBtn && config.lastJackpotBannerDate !== todayStr) {
         const formattedBote = (highJk.bote / 1000000).toFixed(0) + 'M€';
         titleEl.textContent = t('jackpots.bannerTituloDinamico', { game: highJk.juego.toUpperCase(), bote: formattedBote });
         descEl.textContent = t('jackpots.bannerDescDinamico', { bote: highJk.bote.toLocaleString('es-ES'), rating: highJk.rating, score: highJk.score });
@@ -8884,10 +8896,11 @@ class DataLotto49Advanced {
             closeBanner();
           };
         }
+
+        config.lastJackpotBannerDate = todayStr;
+        this.saveNotificationSettings(config);
       }
 
-      const config = this.getNotificationSettings();
-      const todayStr = new Date().toISOString().split('T')[0];
       if (config.enabled && config.lastJackpotAlertDate !== todayStr && highJk.bote >= 100000000) {
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification(t('jackpots.notifTitulo', { game: highJk.juego, amount: (highJk.bote/1e6).toFixed(0) }), {

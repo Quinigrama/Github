@@ -31,10 +31,10 @@ export function updateHistoryDashboard(
   if (elTotal) elTotal.innerHTML = String(totalCombinations);
 
   // Calculate validated combinations
-  const validatedTickets = filteredTickets.filter(t => t.validation);
+  const validatedTickets = filteredTickets.filter(t => t.validation && Array.isArray(t.validation.hits));
   let validatedCombinations = 0;
   validatedTickets.forEach(ticket => {
-      validatedCombinations += ticket.validation!.hits.length;
+      validatedCombinations += (ticket.validation?.hits?.length || 0);
   });
 
   const elValidated = document.getElementById('hrValidatedCombinations');
@@ -256,7 +256,7 @@ export function updateHistoryDashboard(
       }
 
       strategyCounts[strat].total += combosCount;
-      if (ticket.validation) {
+      if (ticket.validation && Array.isArray(ticket.validation.hits) && ticket.validation.hits.length > 0) {
           strategyCounts[strat].validated += ticket.validation.hits.length;
           const ticketMax = Math.max(...ticket.validation.hits);
           if (ticketMax > strategyCounts[strat].maxHits) {
