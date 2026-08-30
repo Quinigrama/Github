@@ -7961,9 +7961,9 @@ class DataLotto49Advanced {
    * breakdown (e.g. "5+2", "3+0"...) for telemetry. Deletes `ticket.controlGroup` afterwards —
    * the random numbers themselves are never persisted once validated.
    */
-  computeAndConsumeControlGroup(ticket: Ticket, winningNumbers: number[], winningStars: number[]): { label: string; count: number }[] {
+  computeAndConsumeControlGroup(ticket: Ticket, winningNumbers: number[], winningStars: number[]): { hits: number[]; starHits: number[] } {
     if (!ticket.controlGroup || !ticket.controlGroup.combinations || ticket.controlGroup.combinations.length === 0) {
-        return [];
+        return { hits: [], starHits: [] };
     }
 
     const gameId = ticket.gameId || 'bonoloto';
@@ -7975,14 +7975,6 @@ class DataLotto49Advanced {
     };
 
     const cgValData = this.getTicketValidationData(controlTicket, winningNumbers, winningStars);
-    controlTicket.validation = {
-        winningNumbers,
-        stars: winningStars.length > 0 ? winningStars : undefined,
-        hits: cgValData.allHits,
-        starHits: cgValData.starHits
-    };
-
-    const detailedCategories = getTicketWinningTiers(controlTicket);
 
     // Coarse bucket aggregation (matches the scheme already used in updateHistoryDashboard for real tickets)
     if (!this.controlGroupStats[gameId]) {
@@ -8000,7 +7992,7 @@ class DataLotto49Advanced {
 
     delete ticket.controlGroup;
 
-    return detailedCategories;
+    return { hits: cgValData.allHits, starHits: cgValData.starHits };
   }
 
   autoValidateSavedTickets() {
@@ -8099,7 +8091,7 @@ class DataLotto49Advanced {
                 }
             });
 
-            const controlHitsByCategory = this.computeAndConsumeControlGroup(ticket, winningNumbers, winningStars);
+            const controlResult = this.computeAndConsumeControlGroup(ticket, winningNumbers, winningStars);
 
             ticket.telemetrySent = true;
             this.sendTelemetry('validate_ticket', {
@@ -8115,7 +8107,8 @@ class DataLotto49Advanced {
                 prizeNotice: prizeNotice,
                 drawDate: ticket.drawDate || 'Auto-validado',
                 combinationsCount: valData.allHits.length,
-                controlHitsByCategory: controlHitsByCategory.length > 0 ? controlHitsByCategory : undefined
+                controlHits: controlResult.hits.length > 0 ? controlResult.hits : undefined,
+                controlStarHits: controlResult.starHits.length > 0 ? controlResult.starHits : undefined
             });
             this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, ticket.drawDate || 'Auto-validado');
         }
@@ -8162,7 +8155,7 @@ class DataLotto49Advanced {
             if (cnt > 0) favSecCounts[star] = cnt;
         });
 
-        const controlHitsByCategory = this.computeAndConsumeControlGroup(ticket, winningData.numbers, winningData.stars || []);
+        const controlResult = this.computeAndConsumeControlGroup(ticket, winningData.numbers, winningData.stars || []);
 
         ticket.telemetrySent = true;
         pendingTelemetryConfirmed = true;
@@ -8179,7 +8172,8 @@ class DataLotto49Advanced {
             prizeNotice: prizeNotice,
             drawDate: drawDateKey,
             combinationsCount: valData.allHits.length,
-            controlHitsByCategory: controlHitsByCategory.length > 0 ? controlHitsByCategory : undefined
+            controlHits: controlResult.hits.length > 0 ? controlResult.hits : undefined,
+            controlStarHits: controlResult.starHits.length > 0 ? controlResult.starHits : undefined
         });
         this.sendTelegramPrizeAlert(ticket, valData, prizeNotice, drawDateKey);
     });

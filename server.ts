@@ -204,8 +204,11 @@ async function startServer() {
           if (payload.favoriteSecondaryCounts) {
             sheetsBody.favoriteSecondaryCounts = payload.favoriteSecondaryCounts;
           }
-          if (payload.controlHitsByCategory && Array.isArray(payload.controlHitsByCategory) && payload.controlHitsByCategory.length > 0) {
-            sheetsBody.controlHitsByCategory = payload.controlHitsByCategory;
+          if (payload.controlHits && Array.isArray(payload.controlHits) && payload.controlHits.length > 0) {
+            sheetsBody.controlHits = payload.controlHits;
+          }
+          if (payload.controlStarHits && Array.isArray(payload.controlStarHits) && payload.controlStarHits.length > 0) {
+            sheetsBody.controlStarHits = payload.controlStarHits;
           }
         } else {
           sheetsBody = {
