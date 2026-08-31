@@ -525,6 +525,10 @@ class DataLotto49Advanced {
     this.updateUIFromFilterState();
     this.updateGameSpecificUI();
     await this.initializeHistoricalData();
+    // Re-render the filter panel now that historical data is confirmed loaded, so filters whose
+    // display depends on it (e.g. "Rango Óptimo por Posición") self-correct automatically instead
+    // of staying stuck on their pre-data-load provisional state.
+    this.renderFilterOptions();
     this.analyzeNumbers();
     this.updateGridNumberStates();
     this.bindEvents();
@@ -3738,6 +3742,9 @@ class DataLotto49Advanced {
     // Re-create grid and reset stats for the new game
     this.createNumbersGrid();
     await this.initializeHistoricalData(); // Auto-loads real data or restores simulated data
+    // Re-render the filter panel now that historical data for this game is confirmed loaded (same
+    // reasoning as in init()).
+    this.renderFilterOptions();
     this.analyzeNumbers();
     this.updateGridNumberStates();
     this.updateDataAnalysis();
