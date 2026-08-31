@@ -4573,7 +4573,11 @@ class DataLotto49Advanced {
         .filter(n => n && n.length >= this.currentGame.maxNumbers);
 
       let ranges = this.filters.positionRange?.ranges;
-      if (!ranges || ranges.length !== this.currentGame.maxNumbers) {
+      // Recalculate if missing, wrong length, OR if it was cached as theoretical-only
+      // (usedHistorical: false) back when historicalData wasn't loaded yet, and now there IS
+      // enough history available (matches the 10-draw minimum used in orderStatistics.ts).
+      const rangesAreStaleTheoretical = ranges && ranges.some(r => !r.usedHistorical) && mainHistorical.length >= 10;
+      if (!ranges || ranges.length !== this.currentGame.maxNumbers || rangesAreStaleTheoretical) {
         ranges = calculateAllPositionRanges(
           this.currentGame.numberRange,
           this.currentGame.maxNumbers,
@@ -4687,7 +4691,8 @@ class DataLotto49Advanced {
           .filter(s => s && s.length >= this.currentGame.maxStars);
 
         let starRanges = this.filters.starPositionRange?.ranges;
-        if (!starRanges || starRanges.length !== this.currentGame.maxStars) {
+        const starRangesAreStaleTheoretical = starRanges && starRanges.some(r => !r.usedHistorical) && starHistorical.length >= 10;
+        if (!starRanges || starRanges.length !== this.currentGame.maxStars || starRangesAreStaleTheoretical) {
           starRanges = calculateAllPositionRanges(
             this.currentGame.starRange,
             this.currentGame.maxStars,
