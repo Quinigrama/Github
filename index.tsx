@@ -365,6 +365,7 @@ class DataLotto49Advanced {
     filterPanelMode: 'simple' | 'expert' = 'simple';
     gameDataTypes: { [key: string]: string } = {};
     gameHistoricalData: { [key: string]: any[] } = {};
+    gameLastAccessed: { [key: string]: number } = {};
     drawCalYear: number = new Date().getFullYear();
     drawCalMonth: number = new Date().getMonth();
     powerPlayActive: boolean = false;
@@ -526,6 +527,7 @@ class DataLotto49Advanced {
     this.updateUIFromFilterState();
     this.updateGameSpecificUI();
     await this.initializeHistoricalData();
+    this.cleanupStaleGameData();
     // Re-render the filter panel now that historical data is confirmed loaded, so filters whose
     // display depends on it (e.g. "Rango Óptimo por Posición") self-correct automatically instead
     // of staying stuck on their pre-data-load provisional state.
@@ -1681,6 +1683,7 @@ class DataLotto49Advanced {
               controlGroupStats: this.controlGroupStats,
               gameFilters: this.gameFilters, // Save all game filters
               gameDataTypes: this.gameDataTypes,
+              gameLastAccessed: this.gameLastAccessed,
               gameHistoricalData: Object.keys(this.gameHistoricalData).reduce((acc: any, gid: string) => {
                   acc[gid] = this.gameHistoricalData[gid];
                   return acc;
@@ -1848,6 +1851,9 @@ class DataLotto49Advanced {
               this.excludedStarDecadesSnapshot = new Map(savedState.excludedStarDecadesSnapshot || []);
               if (savedState.gameDataTypes) {
                   this.gameDataTypes = savedState.gameDataTypes;
+              }
+              if (savedState.gameLastAccessed) {
+                  this.gameLastAccessed = savedState.gameLastAccessed;
               }
               if (savedState.gameHistoricalData) {
                   this.gameHistoricalData = {};
@@ -2291,9 +2297,36 @@ class DataLotto49Advanced {
   }
 
   // ===== DATOS HISTÓRICOS (Sin cambios) =====
+  cleanupStaleGameData() {
+    try {
+      const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      let changed = false;
+
+      Object.keys(this.gameLastAccessed).forEach(gameId => {
+        if (gameId === this.currentGame.id) return; // nunca purgar el juego activo
+
+        const lastAccessed = this.gameLastAccessed[gameId];
+        if (typeof lastAccessed === 'number' && (now - lastAccessed) > FIFTEEN_DAYS_MS) {
+          delete this.gameHistoricalData[gameId];
+          delete this.gameLastAccessed[gameId];
+          localStorage.removeItem(`datalotto_csv_cache_${gameId}`);
+          localStorage.removeItem(`datalotto_csv_url_${gameId}`);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        this.saveState();
+      }
+    } catch (error) {
+      console.error('Error en cleanupStaleGameData:', error);
+    }
+  }
   async initializeHistoricalData() {
     const gameId = this.currentGame.id;
     if (this.gameDataTypes[gameId] === 'simulated' && this.gameHistoricalData[gameId] && this.gameHistoricalData[gameId].length > 0) {
+      this.gameLastAccessed[gameId] = Date.now();
       this.historicalData = [...this.gameHistoricalData[gameId]];
       this.allHistoricalData = [...this.historicalData];
       this.dataType = 'simulated';
@@ -2572,6 +2605,7 @@ class DataLotto49Advanced {
   }
 
   async loadSpecificGame(gameKey: string, isAutoLoad = false) {
+    this.gameLastAccessed[gameKey] = Date.now();
     const gameConfig = getGameConfig(gameKey);
     const rawUrl = gameConfig.csvUrl || '';
     const url = this.convertGoogleSheetsUrlToCsv(rawUrl);
