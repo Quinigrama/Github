@@ -603,7 +603,7 @@
   "history.totalApuestas": "Total Apuestas",
   "history.apuestasValidadas": "Apuestas Validadas",
   "history.mejorAcierto": "Mejor Acierto",
-  "history.boletosConAcierto": "Apuestas con Algún Acierto",
+  "history.boletosConAcierto": "Apuestas Premiadas",
   "history.veredicto": "Tu filtrado superó al azar puro en {superior} de {total} categorías con datos suficientes.",
   "history.rendimientoTitulo": "Rendimiento del Filtrado vs Azar Matemático",
   "history.rendimientoSubtitulo": "Demostración de efectividad vs probabilidades teóricas del azar",

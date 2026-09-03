@@ -1,5 +1,6 @@
 import { Ticket } from "../types";
 import { getGameConfig } from "../../game-configs";
+import { getTicketWinningTiers } from "./combinatorial";
 import { t } from "./i18n";
 
 export function updateHistoryDashboard(
@@ -44,13 +45,10 @@ export function updateHistoryDashboard(
   let maxHit = 0;
   let maxHitStars = 0;
   let hasStarsInBest = false;
-  let anyHitCount = 0;
+  let prizedHitCount = 0;
   validatedTickets.forEach(ticket => {
       ticket.validation!.hits.forEach((hit, idx) => {
           const stars = ticket.validation!.starHits ? ticket.validation!.starHits[idx] : 0;
-          if (hit > 0) {
-              anyHitCount++;
-          }
           if (hit > maxHit || (hit === maxHit && stars > maxHitStars)) {
               maxHit = hit;
               maxHitStars = stars;
@@ -58,6 +56,10 @@ export function updateHistoryDashboard(
                   hasStarsInBest = true;
               }
           }
+      });
+      const winningTiers = getTicketWinningTiers(ticket);
+      winningTiers.forEach(tier => {
+          prizedHitCount += tier.count;
       });
   });
 
@@ -77,8 +79,8 @@ export function updateHistoryDashboard(
   const elAnyHit = document.getElementById('hrAnyHitCombination');
   if (elAnyHit) {
       if (validatedCombinations > 0) {
-          const anyHitPct = ((anyHitCount / validatedCombinations) * 100).toFixed(1);
-          elAnyHit.innerHTML = `${anyHitCount} / ${validatedCombinations} (${anyHitPct}%)`;
+          const prizedPct = ((prizedHitCount / validatedCombinations) * 100).toFixed(1);
+          elAnyHit.innerHTML = `${prizedHitCount} / ${validatedCombinations} (${prizedPct}%)`;
       } else {
           elAnyHit.innerHTML = '-';
       }

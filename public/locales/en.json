@@ -603,7 +603,7 @@
   "history.totalApuestas": "Total Bets",
   "history.apuestasValidadas": "Validated Bets",
   "history.mejorAcierto": "Best Hit",
-  "history.boletosConAcierto": "Bets With Any Hit",
+  "history.boletosConAcierto": "Prize-Winning Bets",
   "history.veredicto": "Your filtering beat pure chance in {superior} of {total} categories with sufficient data.",
   "history.rendimientoTitulo": "Filtering Performance vs Mathematical Chance",
   "history.rendimientoSubtitulo": "Demonstration of effectiveness vs theoretical chance probabilities",
