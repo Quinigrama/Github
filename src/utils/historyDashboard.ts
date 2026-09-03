@@ -44,9 +44,13 @@ export function updateHistoryDashboard(
   let maxHit = 0;
   let maxHitStars = 0;
   let hasStarsInBest = false;
+  let anyHitCount = 0;
   validatedTickets.forEach(ticket => {
       ticket.validation!.hits.forEach((hit, idx) => {
           const stars = ticket.validation!.starHits ? ticket.validation!.starHits[idx] : 0;
+          if (hit > 0) {
+              anyHitCount++;
+          }
           if (hit > maxHit || (hit === maxHit && stars > maxHitStars)) {
               maxHit = hit;
               maxHitStars = stars;
@@ -70,15 +74,27 @@ export function updateHistoryDashboard(
       }
   }
 
+  const elAnyHit = document.getElementById('hrAnyHitCombination');
+  if (elAnyHit) {
+      if (validatedCombinations > 0) {
+          const anyHitPct = ((anyHitCount / validatedCombinations) * 100).toFixed(1);
+          elAnyHit.innerHTML = `${anyHitCount} / ${validatedCombinations} (${anyHitPct}%)`;
+      } else {
+          elAnyHit.innerHTML = '-';
+      }
+  }
+
   // Comparison Table Body
   const tableBody = document.getElementById('hrComparisonTableBody');
   const warningEl = document.getElementById('hrNoValidationWarning');
+  const elVerdict = document.getElementById('hrVerdictLine');
   
   if (tableBody) {
       tableBody.innerHTML = '';
       
       if (validatedCombinations === 0) {
           if (warningEl) warningEl.style.display = 'block';
+          if (elVerdict) elVerdict.style.display = 'none';
       } else {
           if (warningEl) warningEl.style.display = 'none';
 
@@ -143,6 +159,10 @@ export function updateHistoryDashboard(
               '3': t('history.tier.3'),
               '<=2': t('history.tier.menos2')
           };
+
+          let tiersSuperior = 0;
+          let tiersEsperado = 0;
+          let tiersInferior = 0;
 
           // Aggregate control group counts across the currently relevant game(s)
           const relevantGameIds = hrGameFilterVal !== 'all' ? [hrGameFilterVal] : Object.keys(validatedCountsByGame);
@@ -213,11 +233,14 @@ export function updateHistoryDashboard(
                       const timesBetter = controlFrequency > 0 ? (actualFrequency / controlFrequency).toFixed(1) : 'N/A';
                       const percentBetter = controlFrequency > 0 ? (((actualFrequency - controlFrequency) / controlFrequency) * 100).toFixed(0) : '0';
                       finalBadge = `<span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">${t('history.superior', { timesBetter, percentBetter })}</span>`;
+                      tiersSuperior++;
                   } else if (actualFrequency === controlFrequency) {
                       finalBadge = `<span style="background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">${t('history.esperado')}</span>`;
+                      tiersEsperado++;
                   } else {
                       const timesWorse = actualFrequency > 0 && controlFrequency > 0 ? (controlFrequency / actualFrequency).toFixed(1) : '∞';
                       finalBadge = `<span style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">📉 ${actualFrequency > 0 ? t('history.inferior', { timesWorse }) : t('history.ceroAciertos')}</span>`;
+                      tiersInferior++;
                   }
               }
 
@@ -232,6 +255,16 @@ export function updateHistoryDashboard(
                   </tr>
               `;
           });
+
+          if (elVerdict) {
+              const tiersWithControlData = tiersSuperior + tiersEsperado + tiersInferior;
+              if (tiersWithControlData === 0) {
+                  elVerdict.style.display = 'none';
+              } else {
+                  elVerdict.style.display = 'block';
+                  elVerdict.innerHTML = t('history.veredicto', { superior: String(tiersSuperior), total: String(tiersWithControlData) });
+              }
+          }
       }
   }
 

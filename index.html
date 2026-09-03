@@ -1515,6 +1515,10 @@
                   <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;" data-i18n="history.mejorAcierto">Mejor Acierto</div>
                   <div class="stat-value" id="hrBestCombination" style="font-size: 1.6rem; font-weight: 700; color: #16a34a;">-</div>
               </div>
+              <div class="stat-item" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                  <div class="stat-label" style="font-size: 0.8rem; color: #4b5563; font-weight: 500; margin-bottom: 4px;" data-i18n="history.boletosConAcierto">Apuestas con Algún Acierto</div>
+                  <div class="stat-value" id="hrAnyHitCombination" style="font-size: 1.6rem; font-weight: 700; color: #7c3aed;">-</div>
+              </div>
           </div>
 
           <!-- Comparativa Científica vs Azar Puro -->
@@ -1529,6 +1533,8 @@
                       <p style="margin: 0; font-size: 0.75rem; color: #6b7280;" data-i18n="history.rendimientoSubtitulo">Demostración de efectividad vs probabilidades teóricas del azar</p>
                   </div>
               </div>
+
+              <div id="hrVerdictLine" style="display: none; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 10px 14px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600; color: #5b21b6; text-align: center;"></div>
 
               <div id="controlGroupInfoBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 15px; font-size: 0.82rem; color: #1e3a5f; line-height: 1.5;">
                   <p style="margin: 0 0 8px 0;" data-i18n="history.grupoControlExplicacion1">🧪 El <strong>Grupo de Control</strong> funciona como en un estudio médico: por cada boleto que generas con filtros, guardamos también —de forma oculta, nunca visible— el mismo número de combinaciones totalmente al azar, sin ningún filtro. Cuando se valida el sorteo real, comparamos ambos resultados.</p>
