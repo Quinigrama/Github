@@ -1154,7 +1154,8 @@ export function getTicketWinningTiers(ticket: Ticket): { label: string; count: n
           label = `${hits}+${starHits}⭐`;
         }
       } else {
-        if (hits >= 3) {
+        const minPrizeHits = getGameConfig(gameId)?.minPrizeHits ?? 3;
+        if (hits >= minPrizeHits) {
           isComboWinning = true;
           label = `${hits} aciertos`;
         }

@@ -55,6 +55,7 @@ export interface GameConfig {
   allowedDays: number[]; // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
   drawDays: number[];
   theoreticalProbabilities: { [tier: string]: number };
+  minPrizeHits?: number;
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   restaurarFiltrosLevel?: { pLow: number; pHigh: number };
@@ -159,6 +160,7 @@ export class BaseGameConfig implements GameConfig {
   gridCols: number;
   allowedDays: number[];
   theoreticalProbabilities: { [tier: string]: number };
+  minPrizeHits?: number;
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   restaurarFiltrosLevel?: { pLow: number; pHigh: number };
@@ -185,6 +187,7 @@ export class BaseGameConfig implements GameConfig {
     gridCols: number;
     allowedDays: number[];
     theoreticalProbabilities: { [tier: string]: number };
+    minPrizeHits?: number;
     jackpotThresholds?: { excellent: number; good: number };
     customFilterLimits?: Partial<GameFilterLimits>;
     restaurarFiltrosLevel?: { pLow: number; pHigh: number };
@@ -210,6 +213,7 @@ export class BaseGameConfig implements GameConfig {
     this.gridCols = opts.gridCols;
     this.allowedDays = opts.allowedDays;
     this.theoreticalProbabilities = opts.theoreticalProbabilities;
+    this.minPrizeHits = opts.minPrizeHits ?? 3;
     this.jackpotThresholds = opts.jackpotThresholds || { excellent: 5000000, good: 2000000 };
     this.customFilterLimits = opts.customFilterLimits;
     this.restaurarFiltrosLevel = opts.restaurarFiltrosLevel;
@@ -1015,6 +1019,7 @@ export const GAMES: { [key: string]: GameConfig } = {
     secondaryStartAt: 0,
     allowedDays: [0, 1, 2, 3, 4, 5, 6],
     theoreticalProbabilities: { '6': 0.00000715, '5': 0.00184, '4': 0.0969, '3': 1.765, '<=2': 98.136 },
+    minPrizeHits: 3,
     jackpotThresholds: { excellent: 2000000, good: 1000000 },
     restaurarFiltrosLevel: { pLow: 0.10, pHigh: 0.90 },
     customFilterLimits: {
@@ -1050,6 +1055,7 @@ export const GAMES: { [key: string]: GameConfig } = {
     secondaryStartAt: 0,
     allowedDays: [1, 4, 6],
     theoreticalProbabilities: { '6': 0.00000715, '5': 0.00184, '4': 0.0969, '3': 1.765, '<=2': 98.136 },
+    minPrizeHits: 3,
     jackpotThresholds: { excellent: 10000000, good: 5000000 },
     customFilterLimits: {
       sum: { min: 121, max: 190 },
