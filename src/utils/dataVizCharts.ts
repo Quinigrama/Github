@@ -27,7 +27,10 @@ export function renderGapHistogramChart(ctx: DataVizChartContext) {
     if (summary) {
       summary.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
-          <div style="font-weight: 700; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-weight: 700; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+            <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="gaps" title="${t('datavizHelp.gaps.modalTitle')}" aria-label="Información">ℹ️</button>
+          </div>
           <div style="font-size: 0.85rem; color: #64748b;">${t('dataviz.gaps.subtitulo')}</div>
         </div>
       `;
@@ -60,7 +63,10 @@ export function renderGapHistogramChart(ctx: DataVizChartContext) {
       <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
           <div>
-            <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">📐 ${t('dataviz.gaps.titulo')}</div>
+              <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="gaps" title="${t('datavizHelp.gaps.modalTitle')}" aria-label="Información">ℹ️</button>
+            </div>
             <div style="font-size: 0.82rem; color: #64748b;">${t('dataviz.gaps.subtitulo')}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -212,7 +218,10 @@ export function renderRachasOverviewChart(ctx: DataVizChartContext) {
     if (summary) {
       summary.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
-          <div style="font-weight: 700; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-weight: 700; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+            <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="rachas" title="${t('datavizHelp.rachas.modalTitle')}" aria-label="Información">ℹ️</button>
+          </div>
           <div style="font-size: 0.85rem; color: #64748b;">${t('dataviz.rachas.subtitulo')}</div>
         </div>
       `;
@@ -228,7 +237,10 @@ export function renderRachasOverviewChart(ctx: DataVizChartContext) {
   if (summary) {
     summary.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
-        <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔥 ${t('dataviz.rachas.titulo')}</div>
+          <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="rachas" title="${t('datavizHelp.rachas.modalTitle')}" aria-label="Información">ℹ️</button>
+        </div>
         <div style="font-size: 0.82rem; color: #64748b;">${t('dataviz.rachas.subtitulo')}</div>
       </div>
     `;
@@ -301,7 +313,10 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
     if (summary) {
       summary.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
-          <div style="font-weight: 700; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-weight: 700; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+            <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="coocurrencia" title="${t('datavizHelp.coocurrencia.modalTitle')}" aria-label="Información">ℹ️</button>
+          </div>
           <div style="font-size: 0.85rem; color: #64748b;">${t('coocurrencia.subtitulo')}</div>
         </div>
       `;
@@ -322,7 +337,10 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
       <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
           <div>
-            <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">🔢 ${t('coocurrencia.titulo')}</div>
+              <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="coocurrencia" title="${t('datavizHelp.coocurrencia.modalTitle')}" aria-label="Información">ℹ️</button>
+            </div>
             <div style="font-size: 0.82rem; color: #64748b;">${t('coocurrencia.subtitulo')}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px; border-radius: 8px;">
@@ -600,17 +618,30 @@ export function renderFrequencyChart(ctx: DataVizChartContext) {
   const minFreqStr = minFreqNum.map(formatKey).join(', ');
 
   if (summary) {
+      const modeKey = ctx.vizMode === 'heatmap' ? 'heatmap' : 'ranking';
+      const modeTitle = ctx.vizMode === 'heatmap' ? '🗺️ ' + t('dataviz.modoMapaCalor') : '📊 ' + t('dataviz.modoRanking');
       summary.innerHTML = `
-          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; width: 100%;">
-              <div style="flex: 1; min-width: 220px;">
-                  🔥 <strong>${t('dataviz.masFrecuente')}</strong> <span style="color: #ef4444; font-weight: bold;">${maxFreqStr}</span> (${t('backtest.economico.vecesCount', { count: maxActualFreq })})
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-weight: 700; font-size: 1.05rem; color: #1e293b;">${modeTitle}</span>
+                      <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="${modeKey}" title="${t('datavizHelp.' + modeKey + '.modalTitle')}" aria-label="Información">ℹ️</button>
+                  </div>
+                  <div style="font-size: 0.85rem; color: #64748b;">
+                      ${t('dataviz.analizar')}: <strong>${ctx.vizTarget === 'star' ? t('dataviz.estrellasGenerico') : t('dataviz.numerosPrincipales')}</strong> | ${t('dataviz.nSorteos', { n: N })}
+                  </div>
               </div>
-              <div style="flex: 1; min-width: 220px;">
-                  ❄️ <strong>${t('dataviz.menosFrecuente')}</strong> <span style="color: #3b82f6; font-weight: bold;">${minFreqStr}</span> (${t('backtest.economico.vecesCount', { count: minActualFreq })})
-              </div>
-              <div style="flex: 1; min-width: 250px; text-align: right;" class="mean-indicator">
-                  📈 <strong>${t('dataviz.mediaEsperada')}</strong> <span style="color: #10b981; font-weight: bold;">${mean.toFixed(2)}</span>
-                  <span style="color: #64748b; font-size: 0.85rem; margin-left: 5px;">${t('dataviz.desviacionEst', { sd: sd.toFixed(2) })}</span>
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; width: 100%;">
+                  <div style="flex: 1; min-width: 220px;">
+                      🔥 <strong>${t('dataviz.masFrecuente')}</strong> <span style="color: #ef4444; font-weight: bold;">${maxFreqStr}</span> (${t('backtest.economico.vecesCount', { count: maxActualFreq })})
+                  </div>
+                  <div style="flex: 1; min-width: 220px;">
+                      ❄️ <strong>${t('dataviz.menosFrecuente')}</strong> <span style="color: #3b82f6; font-weight: bold;">${minFreqStr}</span> (${t('backtest.economico.vecesCount', { count: minActualFreq })})
+                  </div>
+                  <div style="flex: 1; min-width: 250px; text-align: right;" class="mean-indicator">
+                      📈 <strong>${t('dataviz.mediaEsperada')}</strong> <span style="color: #10b981; font-weight: bold;">${mean.toFixed(2)}</span>
+                      <span style="color: #64748b; font-size: 0.85rem; margin-left: 5px;">${t('dataviz.desviacionEst', { sd: sd.toFixed(2) })}</span>
+                  </div>
               </div>
           </div>
       `;

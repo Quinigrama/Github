@@ -379,7 +379,10 @@
 
     <div class="number-selection-section">
       <div class="number-selection-header">
-        <h3 id="selectionTitle">Selección de números</h3>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3 id="selectionTitle" style="margin: 0;">Selección de números</h3>
+          <button type="button" class="position-range-info-btn" id="selectionGridInfoBtn" title="Información sobre la selección y el mapa de calor táctico" aria-label="Información de selección de números">ℹ️</button>
+        </div>
         <div class="selection-mode-controls">
           <div class="selection-mode-item">
             <button class="selection-mode-btn" data-mode="cold" title="Activar modo para marcar/desmarcar números fríos">

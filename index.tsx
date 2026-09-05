@@ -333,6 +333,7 @@ class DataLotto49Advanced {
     starStats: { [key: number]: { frequency: number; score: number; lastSeen: number; } }; // New for Euromillones
     analysisPeriod: number;
     dataLoaded: boolean;
+    filterSaveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
     dataType: string;
     filters: Filters;
     primes: Set<number>;
@@ -765,6 +766,43 @@ class DataLotto49Advanced {
       </div>
       ${hasMathNote ? `
         <div style="font-size: 0.85rem; color: #475569; font-style: italic;">
+          📊 ${mathNote}
+        </div>
+      ` : ''}
+    `;
+
+    this.toggleModal('filterInfoExpandedModal', true);
+  }
+
+  showDataVizHelpModal(topicKey: string) {
+    const titleEl = document.getElementById('filterInfoExpandedModalTitle');
+    const bodyEl = document.getElementById('filterInfoExpandedModalBody');
+    if (!titleEl || !bodyEl) return;
+
+    const title = t(`datavizHelp.${topicKey}.modalTitle`);
+    const theory = t(`datavizHelp.${topicKey}.modalTheory`);
+    const formula = t(`datavizHelp.${topicKey}.modalFormula`);
+    const example = t(`datavizHelp.${topicKey}.modalExample`);
+    const mathNote = t(`datavizHelp.${topicKey}.modalMathNote`);
+
+    titleEl.textContent = title.startsWith('[') ? 'ℹ️ Información' : title;
+
+    const hasFormula = !!formula && !formula.startsWith('[datavizHelp.');
+    const hasMathNote = !!mathNote && !mathNote.startsWith('[datavizHelp.');
+
+    bodyEl.innerHTML = `
+      <p style="margin-bottom: 14px; font-size: 0.95rem; color: #1e293b; line-height: 1.6;">${theory}</p>
+      ${hasFormula ? `
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 6px; font-size: 0.88rem; margin-bottom: 14px; color: #0f172a; line-height: 1.5;">
+          <strong>📐 ${t('filterInfo.shared.formulaLabel')}:</strong> ${formula}
+        </div>
+      ` : ''}
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 14px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 14px; color: #1e3a8a; line-height: 1.5;">
+        💡 <strong>${t('filterInfo.shared.exampleLabel')}:</strong>
+        <div style="margin-top: 6px;">${example}</div>
+      </div>
+      ${hasMathNote ? `
+        <div style="font-size: 0.85rem; color: #475569; font-style: italic; line-height: 1.4; padding-top: 4px;">
           📊 ${mathNote}
         </div>
       ` : ''}
@@ -1672,6 +1710,14 @@ class DataLotto49Advanced {
   }
 
   // ===== PERSISTENCIA DE DATOS =====
+  debouncedSaveState() {
+      if (this.filterSaveDebounceTimer) clearTimeout(this.filterSaveDebounceTimer);
+      this.filterSaveDebounceTimer = setTimeout(() => {
+          this.saveState();
+          this.filterSaveDebounceTimer = null;
+      }, 400);
+  }
+
   saveState() {
       try {
           // Update current game filters in the map before saving
@@ -5256,6 +5302,27 @@ class DataLotto49Advanced {
       }
     });
 
+    // Listener para el botón ℹ️ de Selección de Números y mapa de calor táctico
+    document.getElementById('selectionGridInfoBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.showDataVizHelpModal('selectionGrid');
+    });
+
+    // Listener delegado para los botones ℹ️ de las tarjetas de Visualización de Datos
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const datavizBtn = target.closest<HTMLElement>('.dataviz-info-btn');
+      if (datavizBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const infoKey = datavizBtn.dataset.infoKey;
+        if (infoKey) {
+          this.showDataVizHelpModal(infoKey);
+        }
+      }
+    });
+
     document.getElementById('savedTicketsGameFilter')?.addEventListener('change', () => {
         this.updateSavedTickets();
     });
@@ -5498,6 +5565,7 @@ class DataLotto49Advanced {
             this.updateGridNumberStates();
         }
         this.updateFilterBadgesFromAudit();
+        this.debouncedSaveState();
     });
     document.querySelector('.filters-panel')?.addEventListener('change', (e) => {
         const target = e.target as HTMLInputElement;
@@ -5509,6 +5577,7 @@ class DataLotto49Advanced {
         }
         if (target.type === 'range') return; // already handled by input event
         this.updateFilterBadgesFromAudit();
+        this.debouncedSaveState();
     });
     document.querySelector('.filters-panel')?.addEventListener('click', e => {
        const chip = (e.target as HTMLElement).closest<HTMLElement>('.filter-chip');
@@ -5516,6 +5585,7 @@ class DataLotto49Advanced {
            if (chip.closest('#excluirDecenasOptions, #excluirDecenasEstrellasOptions, #terminacionesOptions')) return;
            chip.classList.toggle('active');
            this.updateFilterBadgesFromAudit();
+           this.saveState();
        }
     });
     document.getElementById('filterModeSimpleBtn')?.addEventListener('click', () => {
@@ -9509,7 +9579,10 @@ class DataLotto49Advanced {
       summary.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
           <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
-            <span>📈 ${t('dataviz.tendenciaResumen', { slope: formattedSlope })}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>📈 ${t('dataviz.tendenciaResumen', { slope: formattedSlope })}</span>
+              <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="trend" title="${t('datavizHelp.trend.modalTitle')}" aria-label="Información">ℹ️</button>
+            </div>
             <span style="font-size: 0.85rem; padding: 2px 8px; border-radius: 6px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">${t('dataviz.pendienteLabel', { slope: formattedSlope })}</span>
           </div>
           <div style="font-size: 0.82rem; color: #64748b; font-style: italic; line-height: 1.4;">
@@ -9544,8 +9617,11 @@ class DataLotto49Advanced {
     if (summary) {
       summary.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 8px;">
-          <div>
-            🔬 <strong>${t('dataviz.chiTitulo')}</strong>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div>
+              🔬 <strong>${t('dataviz.chiTitulo')}</strong>
+            </div>
+            <button type="button" class="position-range-info-btn dataviz-info-btn" data-info-key="chi" title="${t('datavizHelp.chi.modalTitle')}" aria-label="Información">ℹ️</button>
           </div>
           <div style="font-size: 0.85rem; color: #475569;">
             ${t('dataviz.analizar')}: <strong>${this.vizTarget === 'star' ? t('dataviz.estrellasGenerico') : t('dataviz.numerosPrincipales')}</strong> | ${t('dataviz.nSorteos', { n: N })}
