@@ -5795,6 +5795,9 @@ class DataLotto49Advanced {
     document.getElementById('loadFiltersBtn')?.addEventListener('click', () => this.openLoadFilterModal());
     document.getElementById('saveFiltersBtn')?.addEventListener('click', () => this.openSaveFilterModal());
     document.getElementById('restaurarFiltrosBtn')?.addEventListener('click', () => this.restaurarFiltros());
+    // TODO: temporalmente enlazado a la misma lógica que "Restaurar Filtros". Pendiente 
+    // implementar el optimizador ampliado (Nash/Popularidad + vista previa) en un prompt separado.
+    document.getElementById('optimizarFiltrosBtn')?.addEventListener('click', () => this.restaurarFiltros());
     document.getElementById('closeSaveFilterBtn')?.addEventListener('click', () => this.toggleModal('saveFilterModal', false));
     document.getElementById('confirmSaveFilterBtn')?.addEventListener('click', () => this.confirmSaveFilter());
     document.getElementById('closeLoadFilterBtn')?.addEventListener('click', () => this.toggleModal('loadFilterModal', false));
