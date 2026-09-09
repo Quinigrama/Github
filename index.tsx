@@ -158,6 +158,7 @@ interface Filters {
   useMarkov: boolean;
   useNash: boolean;
   useRegression: boolean;
+  diversifyPortfolio: boolean;
   gapPercentilEnabled?: boolean;
   gapPercentilUmbral?: number;
   nashStrictMode?: boolean;
@@ -2256,6 +2257,7 @@ class DataLotto49Advanced {
     setChecked('excludeHistoricalMatchFull', !!this.filters.excludeHistoricalMatchFull);
     setChecked('excludeHistoricalMatchNearFull', !!this.filters.excludeHistoricalMatchNearFull);
     setChecked('useRegressionSwitch', this.filters.useRegression);
+    setChecked('diversifyPortfolioSwitch', this.filters.diversifyPortfolio);
     setChecked('useGapPercentilSwitch', !!this.filters.gapPercentilEnabled);
     setRangeVal('gapPercentilUmbral', this.filters.gapPercentilUmbral ?? 90);
     setChecked('nashStrictModeSwitch', !!this.filters.nashStrictMode);
@@ -6257,6 +6259,7 @@ class DataLotto49Advanced {
       this.filters.useMarkov = getChecked('useMarkovSwitch');
       this.filters.useNash = getChecked('useNashSwitch');
       this.filters.useRegression = getChecked('useRegressionSwitch');
+      this.filters.diversifyPortfolio = getChecked('diversifyPortfolioSwitch');
       this.filters.gapPercentilEnabled = getChecked('useGapPercentilSwitch');
       this.filters.gapPercentilUmbral = getVal('gapPercentilUmbral');
       this.filters.nashStrictMode = getChecked('nashStrictModeSwitch');

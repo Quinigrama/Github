@@ -107,7 +107,8 @@ export function calculateOptimizationScore(
       combination,
       context.historicalData,
       context.filters?.ai?.regressionWindow || 20,
-      context.filters?.ai?.regressionBonus || 0
+      context.filters?.ai?.regressionBonus || 0,
+      context.currentGame?.numberRange || 49
     );
   }
   return score;

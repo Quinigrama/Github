@@ -561,6 +561,16 @@
           <input type="number" id="playCount" value="10" min="1" max="100">
           <span data-i18n="strategy.mejores">mejores</span>
         </div>
+        <div class="switch-control">
+          <label class="switch">
+            <input type="checkbox" id="diversifyPortfolioSwitch">
+            <span class="slider"></span>
+          </label>
+          <span data-i18n="strategy.diversificarCartera">Diversificar Cartera</span>
+        </div>
+        <div class="filter-info-text" data-i18n="strategy.diversificarCarteraInfo">
+          Reparte el riesgo: prioriza que tus boletos compartan pocos números entre sí, en vez de elegir solo los de mayor puntuación individual.
+        </div>
       </div>
       
       <div class="multiple-numbers-options" id="multipleNumbersOptions" style="display: none;">
@@ -937,6 +947,7 @@
 
                         <div class="filter-info-text">
                             <b data-i18n="filters.predictivos.infoMarkovLabel">Markov:</b> <span data-i18n="filters.predictivos.infoMarkovTexto">Analiza secuencias.</span> <b data-i18n="filters.predictivos.infoRegresionLabel">Regresión:</b> <span data-i18n="filters.predictivos.infoRegresionTexto">Ajusta por tendencia.</span>
+                            <div style="margin-top: 4px;" data-i18n="filters.regresion.candadoTexto">El bonus solo se aplica cuando la desviación reciente frente al histórico es estadísticamente significativa (test de homogeneidad chi-cuadrado); si no lo es, el bonus es cero aunque haya una tendencia aparente.</div>
                         </div>
                     </div>
 

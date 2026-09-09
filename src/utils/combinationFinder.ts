@@ -107,6 +107,49 @@ export async function findValidSuperset(
   return null;
 }
 
+// Selección greedy: en cada paso, elige la combinación candidata que maximiza
+// (score - penalización por solapamiento con las ya elegidas). No es una
+// optimización exacta de cartera, pero evita boletos casi idénticos.
+function seleccionarCarteraDiversificada(
+  scoredPairs: { pair: { combo: number[]; stars: number[] }; score: number }[],
+  playCount: number
+): { combo: number[]; stars: number[] }[] {
+  if (scoredPairs.length === 0) return [];
+
+  const seleccionadas: { pair: { combo: number[]; stars: number[] }; score: number }[] = [];
+  const restantes = [...scoredPairs];
+
+  // La primera combinación es siempre la de mejor score puro.
+  restantes.sort((a, b) => b.score - a.score);
+  seleccionadas.push(restantes.shift()!);
+
+  const solapamiento = (a: number[], b: number[]): number =>
+    a.filter(n => b.includes(n)).length;
+
+  while (seleccionadas.length < playCount && restantes.length > 0) {
+    let mejorIdx = 0;
+    let mejorScoreAjustado = -Infinity;
+
+    restantes.forEach((candidata, idx) => {
+      const maxSolapamiento = Math.max(
+        ...seleccionadas.map(s => solapamiento(candidata.pair.combo, s.pair.combo))
+      );
+      // Penalización: cada número compartido con la combinación más parecida
+      // ya elegida resta valor proporcional al score máximo del pool.
+      const penalizacion = maxSolapamiento * (scoredPairs[0].score * 0.1);
+      const scoreAjustado = candidata.score - penalizacion;
+      if (scoreAjustado > mejorScoreAjustado) {
+        mejorScoreAjustado = scoreAjustado;
+        mejorIdx = idx;
+      }
+    });
+
+    seleccionadas.push(restantes.splice(mejorIdx, 1)[0]);
+  }
+
+  return seleccionadas.map(item => item.pair);
+}
+
 export async function findAndRankWinningCombinations(
   universe: number[],
   generateCount: number,
@@ -152,5 +195,10 @@ export async function findAndRankWinningCombinations(
   }));
 
   scoredPairs.sort((a, b) => b.score - a.score);
+
+  if (filters?.diversifyPortfolio && playCount > 1) {
+    return seleccionarCarteraDiversificada(scoredPairs, playCount);
+  }
+
   return scoredPairs.slice(0, playCount).map(item => item.pair);
 }
