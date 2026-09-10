@@ -335,6 +335,7 @@ class DataLotto49Advanced {
     analysisPeriod: number;
     dataLoaded: boolean;
     filterSaveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+    private restaurarFiltrosBlockTimeout: ReturnType<typeof setTimeout> | null = null;
     dataType: string;
     filters: Filters;
     primes: Set<number>;
@@ -1479,9 +1480,8 @@ class DataLotto49Advanced {
     const numUniv = this.getAvailableUniverse('number');
     const starUniv = this.currentGame.maxStars > 0 ? this.getAvailableUniverse('star') : [];
 
-    const nivelJuego = this.currentGame.restaurarFiltrosLevel || { pLow: 0.05, pHigh: 0.95 };
     const levels = [
-      { ...nivelJuego, levelNum: 0 },
+      { pLow: 0.10, pHigh: 0.90, z: 1.282, levelNum: 0 },
       { pLow: 0.05, pHigh: 0.95, z: 1.645, levelNum: 1 },
       { pLow: 0.025, pHigh: 0.975, z: 1.960, levelNum: 2 },
       { pLow: 0, pHigh: 1, z: 2.576, levelNum: 3 }
@@ -1506,6 +1506,7 @@ class DataLotto49Advanced {
   renderRestaurarFiltrosBlock(resumen: ReturnType<typeof this.applyPercentileFilterLevel>) {
     const container = document.getElementById('restaurarFiltrosBlock');
     const textEl = document.getElementById('restaurarFiltrosText');
+    const closeBtn = document.getElementById('restaurarFiltrosCloseBtn');
     if (!container || !textEl) return;
     const pct = Math.round((resumen.pHigh - resumen.pLow) * 100);
     textEl.innerHTML = t('restaurarFiltros.resumenTexto', {
@@ -1517,6 +1518,24 @@ class DataLotto49Advanced {
       consecCount: String(resumen.consecutivosCount)
     });
     container.style.display = 'block';
+
+    if (this.restaurarFiltrosBlockTimeout) {
+      clearTimeout(this.restaurarFiltrosBlockTimeout);
+    }
+    const hideBlock = () => {
+      container.style.display = 'none';
+      this.restaurarFiltrosBlockTimeout = null;
+    };
+    this.restaurarFiltrosBlockTimeout = setTimeout(hideBlock, 15000);
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        if (this.restaurarFiltrosBlockTimeout) {
+          clearTimeout(this.restaurarFiltrosBlockTimeout);
+        }
+        hideBlock();
+      };
+    }
   }
 
   showFilterStatsModal(filterKey: string) {
