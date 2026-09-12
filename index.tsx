@@ -57,7 +57,7 @@ import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight, getNashScoreAverage } from './src/utils/popularity';
-import { getSumSeriesWithRegression } from './src/utils/regression';
+import { getSumSeriesWithRegression, filtrarPorEraVigente } from './src/utils/regression';
 import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
 import { construirMatrizPares, rankingPares, rankingTrios } from './src/utils/coocurrencia';
 import {
@@ -3173,25 +3173,33 @@ class DataLotto49Advanced {
       if (biasDetectedLabelEl) biasDetectedLabelEl.textContent = t('analyzer.sesgoDetectado');
     }
 
-    if (this.historicalData.length >= 50 && chiSquareEl && biasEl) {
-        // 1. Chi-Square for Numbers
+    const datosVigentesChi = filtrarPorEraVigente(this.historicalData, this.currentGame.currentEraStartDate);
+
+    if (datosVigentesChi.length >= 50 && chiSquareEl && biasEl) {
+        // 1. Chi-Square for Numbers (solo sorteos de la era de formato vigente)
         let expectedFrequency = 0;
         let dfNumbers = 0;
 
         if (isNacional) {
             // Lotería Nacional: 5 posiciones independientes con dígitos 0-9 (prob=0.1 por posición)
-            expectedFrequency = this.historicalData.length * 0.1;
+            expectedFrequency = datosVigentesChi.length * 0.1;
             // 5 pruebas de uniformidad independientes (cada una con 10 dígitos -> df=9), df total = 5 * 9 = 45
             const df = 45; // df = 45 para Nacional (5 posiciones x 9 grados de libertad)
             dfNumbers = df;
         } else {
-            expectedFrequency = (this.historicalData.length * this.currentGame.maxNumbers) / this.currentGame.numberRange;
+            expectedFrequency = (datosVigentesChi.length * this.currentGame.maxNumbers) / this.currentGame.numberRange;
             dfNumbers = this.currentGame.numberRange - 1;
         }
 
+        const frequenciesVigentes: { [key: number]: number } = {};
+        for (let i = startNum; i <= this.currentGame.numberRange; i++) frequenciesVigentes[i] = 0;
+        datosVigentesChi.forEach(draw => (draw.numbers || []).forEach(num => {
+            if (frequenciesVigentes[num] !== undefined) frequenciesVigentes[num]++;
+        }));
+
         let chiSquareNumStat = 0;
         for (let i = startNum; i <= this.currentGame.numberRange; i++) {
-            chiSquareNumStat += Math.pow((frequencies[i] || 0) - expectedFrequency, 2) / expectedFrequency;
+            chiSquareNumStat += Math.pow((frequenciesVigentes[i] || 0) - expectedFrequency, 2) / expectedFrequency;
         }
 
         const criticalValueNumbers = this.chiSquareCriticalValue(dfNumbers, 1.645);
@@ -3202,17 +3210,27 @@ class DataLotto49Advanced {
         biasEl.classList.toggle('invalid', biasDetectedNumbers);
         biasEl.classList.toggle('valid', !biasDetectedNumbers);
 
-        // 2. Chi-Square for Stars (if applicable)
+        // 2. Chi-Square for Stars (if applicable) — solo sorteos de la era de formato vigente
         if (hasStars) {
             const isGordo = this.currentGame.id === 'gordo';
             const minStar = isGordo ? 0 : 1;
             const maxStar = isGordo ? 9 : this.currentGame.starRange;
             const starCategoriesCount = isGordo ? 10 : this.currentGame.starRange;
-            const expectedStarFreq = (this.historicalData.length * this.currentGame.maxStars) / starCategoriesCount;
-            
+            const expectedStarFreq = (datosVigentesChi.length * this.currentGame.maxStars) / starCategoriesCount;
+
+            const starFrequenciesVigentes: { [key: number]: number } = {};
+            for (let i = minStar; i <= maxStar; i++) starFrequenciesVigentes[i] = 0;
+            datosVigentesChi.forEach(draw => {
+                if (draw.stars) {
+                    draw.stars.forEach(star => {
+                        if (starFrequenciesVigentes[star] !== undefined) starFrequenciesVigentes[star]++;
+                    });
+                }
+            });
+
             let chiSquareStarStat = 0;
             for (let i = minStar; i <= maxStar; i++) {
-                chiSquareStarStat += Math.pow((starFrequencies[i] || 0) - expectedStarFreq, 2) / expectedStarFreq;
+                chiSquareStarStat += Math.pow((starFrequenciesVigentes[i] || 0) - expectedStarFreq, 2) / expectedStarFreq;
             }
 
             const dfStars = starCategoriesCount - 1;
