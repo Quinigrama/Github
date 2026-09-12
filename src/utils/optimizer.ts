@@ -12,7 +12,7 @@ export interface OptimizationContext {
   favoriteStars: Set<number>;
   filters: any;
   historicalData: any[];
-  currentGame: { maxNumbers: number; numberRange: number; starRange: number; gridCols?: number; numbersLayout?: any; startAt?: number };
+  currentGame: { maxNumbers: number; numberRange: number; starRange: number; gridCols?: number; numbersLayout?: any; startAt?: number; currentEraStartDate?: string };
   primes: Set<number>;
 }
 
@@ -108,7 +108,8 @@ export function calculateOptimizationScore(
       context.historicalData,
       context.filters?.ai?.regressionWindow || 20,
       context.filters?.ai?.regressionBonus || 0,
-      context.currentGame?.numberRange || 49
+      context.currentGame?.numberRange || 49,
+      context.currentGame?.currentEraStartDate
     );
   }
   return score;

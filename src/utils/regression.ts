@@ -83,18 +83,31 @@ export function chiSquareCriticalValue(df: number, zAlpha: number = 1.645): numb
   return df * Math.pow(term, 3);
 }
 
+// Descarta sorteos anteriores al cambio de formato vigente, para no mezclar
+// épocas con rangos de números incompatibles en cálculos que asumen homogeneidad.
+export function filtrarPorEraVigente(historicalData: any[], eraStartDate?: string): any[] {
+  if (!eraStartDate || !historicalData) return historicalData;
+  const cutoff = new Date(eraStartDate);
+  return historicalData.filter(d => {
+    const fecha = d.date instanceof Date ? d.date : new Date(d.date || d.fecha);
+    return fecha >= cutoff;
+  });
+}
+
 // Test de homogeneidad: compara la frecuencia de cada número en el ciclo corto
 // (últimos `shortCycleSize` sorteos) frente al ciclo largo (el resto del histórico).
 // Devuelve true solo si la diferencia es estadísticamente significativa (no ruido).
 export function esTendenciaSignificativa(
   historicalData: any[],
   numberRange: number,
-  shortCycleSize: number = 100
+  shortCycleSize: number = 100,
+  eraStartDate?: string
 ): boolean {
-  if (!historicalData || historicalData.length < shortCycleSize * 2) return false;
+  const datosVigentes = filtrarPorEraVigente(historicalData, eraStartDate);
+  if (!datosVigentes || datosVigentes.length < shortCycleSize * 2) return false;
 
-  const shortCycle = historicalData.slice(-shortCycleSize);
-  const longCycle = historicalData.slice(0, -shortCycleSize);
+  const shortCycle = datosVigentes.slice(-shortCycleSize);
+  const longCycle = datosVigentes.slice(0, -shortCycleSize);
 
   const countFrequencies = (draws: any[]): number[] => {
     const freq: Record<number, number> = {};
@@ -129,17 +142,19 @@ export function getNumberTrendScore(
   historicalData: any[],
   windowSize: number,
   bonusWeight: number,
-  numberRange: number = 49
+  numberRange: number = 49,
+  eraStartDate?: string
 ): number {
-  if (!historicalData || historicalData.length < windowSize * 3) return 0;
+  const datosVigentes = filtrarPorEraVigente(historicalData, eraStartDate);
+  if (!datosVigentes || datosVigentes.length < windowSize * 3) return 0;
 
   // Candado estadístico: si el ciclo corto no difiere del largo de forma
   // significativa (chi-cuadrado), no hay señal real — el bonus se anula.
-  if (!esTendenciaSignificativa(historicalData, numberRange)) return 0;
+  if (!esTendenciaSignificativa(datosVigentes, numberRange, 100)) return 0;
 
   const blocks: number[][] = [];
-  for (let i = 0; i < historicalData.length; i += windowSize) {
-    blocks.push(historicalData.slice(i, i + windowSize).flatMap(d => d.numbers || []));
+  for (let i = 0; i < datosVigentes.length; i += windowSize) {
+    blocks.push(datosVigentes.slice(i, i + windowSize).flatMap(d => d.numbers || []));
   }
   const xs = blocks.map((_, i) => i);
   let score = 0;

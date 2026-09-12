@@ -56,6 +56,11 @@ export interface GameConfig {
   drawDays: number[];
   theoreticalProbabilities: { [tier: string]: number };
   minPrizeHits?: number;
+  // Fecha (ISO, 'YYYY-MM-DD') desde la que rige el formato ACTUAL del juego.
+  // Si el juego cambió de matriz de números alguna vez, los cálculos estadísticos
+  // que asumen homogeneidad (chi-cuadrado, tendencias) deben ignorar sorteos anteriores.
+  // Opcional: si no se define, no se aplica ningún filtro (comportamiento actual).
+  currentEraStartDate?: string;
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   numbersLayout?: GridLayout;
@@ -160,6 +165,7 @@ export class BaseGameConfig implements GameConfig {
   allowedDays: number[];
   theoreticalProbabilities: { [tier: string]: number };
   minPrizeHits?: number;
+  currentEraStartDate?: string;
   jackpotThresholds: { excellent: number; good: number };
   customFilterLimits?: Partial<GameFilterLimits>;
   numbersLayout?: GridLayout;
@@ -186,6 +192,7 @@ export class BaseGameConfig implements GameConfig {
     allowedDays: number[];
     theoreticalProbabilities: { [tier: string]: number };
     minPrizeHits?: number;
+    currentEraStartDate?: string;
     jackpotThresholds?: { excellent: number; good: number };
     customFilterLimits?: Partial<GameFilterLimits>;
     numbersLayout?: GridLayout;
@@ -211,6 +218,7 @@ export class BaseGameConfig implements GameConfig {
     this.allowedDays = opts.allowedDays;
     this.theoreticalProbabilities = opts.theoreticalProbabilities;
     this.minPrizeHits = opts.minPrizeHits ?? 3;
+    this.currentEraStartDate = opts.currentEraStartDate;
     this.jackpotThresholds = opts.jackpotThresholds || { excellent: 5000000, good: 2000000 };
     this.customFilterLimits = opts.customFilterLimits;
     this.numbersLayout = opts.numbersLayout;
@@ -915,6 +923,7 @@ export const GAMES: { [key: string]: GameConfig } = {
     secondaryLayout: { type: 'column-chunk', chunkSize: 5 },
     allowedDays: [2, 5],
     theoreticalProbabilities: { '5': 0.0000033, '4': 0.0011, '3': 0.068, '<=2': 99.93 },
+    currentEraStartDate: '2017-10-31',
     jackpotThresholds: { excellent: 200000000, good: 100000000 },
     customFilterLimits: {
       sum: { min: 140, max: 215 },
