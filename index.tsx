@@ -51,7 +51,6 @@ import {
   generateRandomCombination
 } from './src/utils/geometry';
 import { runFilterAudit, compareFiltersAgainstCombination, FilterComparisonItem, aggregateFilterStats, FilterAggregateStat } from './src/utils/filterAudit';
-import { syncNativeNotifications } from './src/services/notificationScheduler';
 import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './src/config/telegramConfig';
 import { t, initI18n, setLocale, getLocale } from './src/utils/i18n';
 import { getCombinationStats, calculateTicketMetrics } from './src/utils/combinatorial';
@@ -8854,13 +8853,11 @@ class DataLotto49Advanced {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (!parsed.hour) parsed.hour = '09:00';
         return parsed;
       } catch (e) {}
     }
     return {
       enabled: true,
-      hour: '09:00',
       games: {
         powerball: true,
         megamillions: true,
@@ -8885,9 +8882,6 @@ class DataLotto49Advanced {
     
     const masterSwitch = document.getElementById('notifMasterSwitch') as HTMLInputElement;
     if (masterSwitch) masterSwitch.checked = config.enabled;
-
-    const hourInput = document.getElementById('notifHourInput') as HTMLInputElement;
-    if (hourInput) hourInput.value = config.hour || '09:00';
     
     const gameKeys: ('powerball'|'megamillions'|'bonoloto'|'primitiva'|'euromillones'|'eurodreams'|'gordo'|'nacional')[] = ['powerball', 'megamillions', 'bonoloto', 'primitiva', 'euromillones', 'eurodreams', 'gordo', 'nacional'];
     gameKeys.forEach(gk => {
@@ -8897,7 +8891,6 @@ class DataLotto49Advanced {
 
     const updateNotifUIState = () => {
       const isEnabled = masterSwitch ? masterSwitch.checked : true;
-      if (hourInput) hourInput.disabled = !isEnabled;
       gameKeys.forEach(gk => {
         const chk = document.getElementById(`notifGame_${gk}`) as HTMLInputElement;
         if (chk) chk.disabled = !isEnabled;
@@ -8917,9 +8910,6 @@ class DataLotto49Advanced {
     
     const masterSwitch = document.getElementById('notifMasterSwitch') as HTMLInputElement;
     if (masterSwitch) config.enabled = masterSwitch.checked;
-
-    const hourInput = document.getElementById('notifHourInput') as HTMLInputElement;
-    if (hourInput) config.hour = hourInput.value || '09:00';
     
     const gameKeys: ('powerball'|'megamillions'|'bonoloto'|'primitiva'|'euromillones'|'eurodreams'|'gordo'|'nacional')[] = ['powerball', 'megamillions', 'bonoloto', 'primitiva', 'euromillones', 'eurodreams', 'gordo', 'nacional'];
     gameKeys.forEach(gk => {
@@ -8931,19 +8921,13 @@ class DataLotto49Advanced {
     this.toggleModal('notificationsModal', false);
     this.showToast(t('toast.recordatoriosGuardados'), 'success');
 
-    // Sincronizar notificaciones nativas en segundo plano si la app corre en Capacitor/APK
-    syncNativeNotifications(config, GAMES);
-
     if (config.enabled && 'Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }
 
   initNotificationScheduler() {
-    // Sincroniza las notificaciones nativas al iniciar la app
-    syncNativeNotifications(this.getNotificationSettings(), GAMES);
-
-    // Triggers daily draw notification check when the user opens the app
+    // Muestra el aviso de sorteos del día al abrir la app (best-effort, en la propia UI)
     setTimeout(() => {
       this.checkAndTriggerDrawNotifications();
     }, 1500);
