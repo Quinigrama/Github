@@ -536,7 +536,7 @@
   "dataviz.rachas.colHuecoActual": "Current gap",
   "dataviz.rachas.colPercentil": "Percentile",
   "dataviz.rachas.colHuecos": "Historical gaps",
-  "dataviz.rachas.colRunsTest": "Runs Test (p-val)",
+  "dataviz.rachas.colRunsTest": "Runs test (p-value)",
   "dataviz.rachas.insuficiente": "Insufficient data",
   "dataviz.rachas.aviso": "The percentile shows where the current streak falls within that number's own history — it does not predict whether it is 'due': each draw is independent and its probability does not depend on how long it has been absent. Numbers with fewer than 8 historical gaps are marked 'Insufficient data' because their percentile is not representative.",
   "dataviz.gaps.titulo": "Gap Histogram Between Appearances",

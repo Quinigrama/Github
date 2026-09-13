@@ -536,7 +536,7 @@
   "dataviz.rachas.colHuecoActual": "Hueco actual",
   "dataviz.rachas.colPercentil": "Percentil",
   "dataviz.rachas.colHuecos": "Huecos históricos",
-  "dataviz.rachas.colRunsTest": "Runs Test (p-val)",
+  "dataviz.rachas.colRunsTest": "Test de rachas (p-valor)",
   "dataviz.rachas.insuficiente": "Datos insuficientes",
   "dataviz.rachas.aviso": "El percentil indica dónde cae la racha actual de cada número dentro de su propia historia — no predice si 'toca' salir: cada sorteo es independiente y su probabilidad no depende de cuánto tiempo lleve sin aparecer. Los números con menos de 8 huecos históricos se marcan como 'Datos insuficientes' porque su percentil no es representativo.",
   "dataviz.gaps.titulo": "Histograma de Huecos entre Apariciones",
