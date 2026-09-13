@@ -1,4 +1,5 @@
 import { getGameConfig } from "../../game-configs";
+import { secureRandom } from './secureRandom';
 
 export function getGreedyCovering(N: number, K: number, T: number, C: number): number[][] {
   const targets: number[][] = [];
@@ -118,13 +119,13 @@ export function generateSyntheticCSV(gameKey: string): string {
     const nums: number[] = [];
     if (gameKey === 'nacional') {
       for (let col = 0; col < 5; col++) {
-        const val = Math.floor(Math.random() * 10);
+        const val = Math.floor(secureRandom() * 10);
         nums.push((col + 1) * 10 + val);
       }
     } else {
       const numPool = Array.from({ length: numberRange }, (_, idx) => idx + 1);
       for (let n = 0; n < maxNumbers; n++) {
-        const idx = Math.floor(Math.random() * numPool.length);
+        const idx = Math.floor(secureRandom() * numPool.length);
         nums.push(numPool.splice(idx, 1)[0]);
       }
       nums.sort((a, b) => a - b);
@@ -136,7 +137,7 @@ export function generateSyntheticCSV(gameKey: string): string {
       const minStar = gameKey === 'gordo' ? 0 : 1;
       const starPool = Array.from({ length: starRange }, (_, idx) => minStar + idx);
       for (let s = 0; s < maxStars; s++) {
-        const idx = Math.floor(Math.random() * starPool.length);
+        const idx = Math.floor(secureRandom() * starPool.length);
         stars.push(starPool.splice(idx, 1)[0]);
       }
       stars.sort((a, b) => a - b);

@@ -57,6 +57,7 @@ import { getCombinationStats, calculateTicketMetrics } from './src/utils/combina
 import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight, getNashScoreAverage } from './src/utils/popularity';
 import { getSumSeriesWithRegression, filtrarPorEraVigente } from './src/utils/regression';
+import { secureRandom } from './src/utils/secureRandom';
 import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
 import { construirMatrizPares, rankingPares, rankingTrios } from './src/utils/coocurrencia';
 import {
@@ -2468,7 +2469,7 @@ class DataLotto49Advanced {
     if (this.currentGame.id === 'nacional') {
       const numbers: number[] = [];
       for (let col = 0; col < 5; col++) {
-        const val = Math.floor(Math.random() * 10);
+        const val = Math.floor(secureRandom() * 10);
         numbers.push((col + 1) * 10 + val);
       }
       return { numbers };
@@ -2476,7 +2477,7 @@ class DataLotto49Advanced {
 
     const numbers = new Set<number>();
     while(numbers.size < this.currentGame.maxNumbers) {
-        const num = Math.floor(Math.random() * this.currentGame.numberRange) + 1;
+        const num = Math.floor(secureRandom() * this.currentGame.numberRange) + 1;
         if(!numbers.has(num)) {
             numbers.add(num);
         }
@@ -2488,7 +2489,7 @@ class DataLotto49Advanced {
         const isGordo = this.currentGame.id === 'gordo';
         while(starSet.size < this.currentGame.maxStars) {
             const range = this.currentGame.starRange;
-            const star = isGordo ? Math.floor(Math.random() * range) : Math.floor(Math.random() * range) + 1;
+            const star = isGordo ? Math.floor(secureRandom() * range) : Math.floor(secureRandom() * range) + 1;
             if(!starSet.has(star)) {
                 starSet.add(star);
             }
@@ -2502,11 +2503,11 @@ class DataLotto49Advanced {
         // Complementario: un número del 1 al 49 que no esté en los principales
         let comp;
         do {
-            comp = Math.floor(Math.random() * 49) + 1;
+            comp = Math.floor(secureRandom() * 49) + 1;
         } while (numbers.has(comp));
         complementario = comp;
         // Reintegro: un número del 0 al 9
-        reintegro = Math.floor(Math.random() * 10);
+        reintegro = Math.floor(secureRandom() * 10);
     }
 
     return { numbers: Array.from(numbers), stars, complementario, reintegro };
@@ -3774,7 +3775,7 @@ class DataLotto49Advanced {
 
       const shuffled = [...universe];
       for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(secureRandom() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       const candidatePool = shuffled.slice(0, countNeeded).sort((a, b) => a - b);
@@ -3783,7 +3784,7 @@ class DataLotto49Advanced {
       if (subCombinations.length > 50000) {
         const sample: number[][] = [];
         for (let i = 0; i < 5000; i++) {
-          sample.push(subCombinations[Math.floor(Math.random() * subCombinations.length)]);
+          sample.push(subCombinations[Math.floor(secureRandom() * subCombinations.length)]);
         }
         subCombinations = sample;
       }
@@ -6134,7 +6135,7 @@ class DataLotto49Advanced {
       const pool = Array.from({ length: N }, (_, idx) => idx + 1);
       const combo: number[] = [];
       for (let j = 0; j < k; j++) {
-        const idx = Math.floor(Math.random() * pool.length);
+        const idx = Math.floor(secureRandom() * pool.length);
         combo.push(pool[idx]);
         pool.splice(idx, 1);
       }
@@ -6875,7 +6876,7 @@ class DataLotto49Advanced {
     
     const randomNumbers: number[] = [];
     while (randomNumbers.length < this.currentGame.maxNumbers) {
-      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const randomIndex = Math.floor(secureRandom() * availableNumbers.length);
       const number = availableNumbers.splice(randomIndex, 1)[0];
       randomNumbers.push(number);
       const ball = document.querySelector(`.number-ball[data-number="${number}"][data-type="number"]`);
@@ -6889,7 +6890,7 @@ class DataLotto49Advanced {
     const randomStars: number[] = [];
     if (this.currentGame.maxStars > 0) {
         while (randomStars.length < this.currentGame.maxStars) {
-            const randomIndex = Math.floor(Math.random() * availableStars.length);
+            const randomIndex = Math.floor(secureRandom() * availableStars.length);
             const number = availableStars.splice(randomIndex, 1)[0];
             randomStars.push(number);
             const ball = document.querySelector(`.number-ball[data-number="${number}"][data-type="star"]`);
@@ -7215,7 +7216,7 @@ class DataLotto49Advanced {
               baseStars = selectedStarsArr.slice(0, this.currentGame.maxStars);
           } else {
               const availableStars = this.getAvailableUniverse('star');
-              const shuffledStars = [...availableStars].sort(() => Math.random() - 0.5);
+              const shuffledStars = [...availableStars].sort(() => secureRandom() - 0.5);
               baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
           }
           
@@ -10529,7 +10530,7 @@ class DataLotto49Advanced {
           for (let sim = 0; sim < M; sim++) {
               let simulatedPassed = 0;
               for (let i = 0; i < totalDraws; i++) {
-                  if (Math.random() < p_univ) simulatedPassed++;
+                  if (secureRandom() < p_univ) simulatedPassed++;
               }
               simulatedCounts.push(simulatedPassed);
           }

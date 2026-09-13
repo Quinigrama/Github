@@ -1,3 +1,5 @@
+import { secureRandom } from './secureRandom';
+
 export type GridLayout =
   | { type: 'decade-column' }
   | { type: 'column-chunk'; chunkSize: number }
@@ -233,16 +235,16 @@ export function generateRandomCombination(universe: number[], count: number, gam
 
     let colsToUse = [0, 1, 2, 3, 4];
     if (count < 5) {
-      colsToUse = colsToUse.sort(() => Math.random() - 0.5).slice(0, count);
+      colsToUse = colsToUse.sort(() => secureRandom() - 0.5).slice(0, count);
     }
 
     colsToUse.forEach(colIdx => {
       const pool = cols[colIdx];
       if (pool && pool.length > 0) {
-        const randomIndex = Math.floor(Math.random() * pool.length);
+        const randomIndex = Math.floor(secureRandom() * pool.length);
         combination.push(pool[randomIndex]);
       } else {
-        const randVal = Math.floor(Math.random() * 10);
+        const randVal = Math.floor(secureRandom() * 10);
         combination.push((colIdx + 1) * 10 + randVal);
       }
     });
@@ -253,7 +255,7 @@ export function generateRandomCombination(universe: number[], count: number, gam
   let tempUniverse = [...universe];
   let combination: number[] = [];
   while (combination.length < count && tempUniverse.length > 0) {
-    const randomIndex = Math.floor(Math.random() * tempUniverse.length);
+    const randomIndex = Math.floor(secureRandom() * tempUniverse.length);
     combination.push(tempUniverse.splice(randomIndex, 1)[0]);
   }
   return combination.sort((a, b) => a - b);

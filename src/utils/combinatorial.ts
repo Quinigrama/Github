@@ -1,5 +1,6 @@
 import { Ticket, Draw } from '../types';
 import { GAMES, getGameConfig } from '../../game-configs';
+import { secureRandom } from './secureRandom';
 
 /**
  * Calculates combinations n choose r (nCr)
@@ -817,7 +818,7 @@ export function calculateDrawPrize(
 
   // Simular reintegro con un 10% de probabilidad asignada
   if (draw.reintegro !== undefined) {
-    if (Math.random() < 0.10) {
+    if (secureRandom() < 0.10) {
       return rVal;
     }
   }
@@ -1323,7 +1324,7 @@ export function generateRandomControlCombinations(
     for (let i = 0; i < rangeSize; i++) universe.push(startAt + i);
     // Fisher-Yates partial shuffle
     for (let i = universe.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(secureRandom() * (i + 1));
       [universe[i], universe[j]] = [universe[j], universe[i]];
     }
     return universe.slice(0, size).sort((a, b) => a - b);
