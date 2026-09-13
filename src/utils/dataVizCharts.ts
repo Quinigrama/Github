@@ -1,7 +1,7 @@
 import { Draw } from '../types';
 import { GameConfig } from '../../game-configs';
 import { t } from './i18n';
-import { analizarTodosLosNumeros, calcularGaps, percentilHueco, construirHistogramaGaps } from './gapFilter';
+import { analizarTodosLosNumeros, calcularGaps, percentilHueco, construirHistogramaGaps, testRachasWaldWolfowitz } from './gapFilter';
 import { construirMatrizPares, rankingPares, rankingTrios } from './coocurrencia';
 
 export interface DataVizChartContext {
@@ -274,6 +274,18 @@ export function renderRachasOverviewChart(ctx: DataVizChartContext) {
           }
         </td>
         <td style="padding: 8px 14px; text-align: center; color: #64748b;">${item.nGaps}</td>
+        <td style="padding: 8px 14px; text-align: center;">
+          ${(() => {
+            const runsResult = testRachasWaldWolfowitz(ctx.historicalData, item.numero);
+            if (!runsResult) {
+              return `<span style="background: #f1f5f9; color: #94a3b8; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; font-style: italic;">${t('dataviz.rachas.insuficiente')}</span>`;
+            }
+            const sig = runsResult.pValue < 0.05;
+            const bg = sig ? '#fef9c3' : '#f1f5f9';
+            const color = sig ? '#a16207' : '#334155';
+            return `<span style="background: ${bg}; color: ${color}; padding: 3px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;" title="z=${runsResult.z}">p=${runsResult.pValue}</span>`;
+          })()}
+        </td>
       </tr>
     `;
   });
@@ -288,6 +300,7 @@ export function renderRachasOverviewChart(ctx: DataVizChartContext) {
               <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colHuecoActual')}</th>
               <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colPercentil')}</th>
               <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colHuecos')}</th>
+              <th style="padding: 8px 14px; text-align: center;">${t('dataviz.rachas.colRunsTest')}</th>
             </tr>
           </thead>
           <tbody>
@@ -403,6 +416,12 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
               ${p.ratio.toFixed(2)}x
             </span>
           </td>
+          <td style="padding: 10px 14px; text-align: center;">
+            ${p.significativo
+              ? `<span style="background: #fef9c3; color: #a16207; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;" title="p=${p.pValue}">★</span>`
+              : `<span style="color: #cbd5e1; font-size: 0.8rem;" title="p=${p.pValue}">—</span>`
+            }
+          </td>
         </tr>
       `;
     });
@@ -442,6 +461,12 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
               ${tItem.ratio.toFixed(2)}x
             </span>
           </td>
+          <td style="padding: 10px 14px; text-align: center;">
+            ${tItem.significativo
+              ? `<span style="background: #fef9c3; color: #a16207; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;" title="p=${tItem.pValue}">★</span>`
+              : `<span style="color: #cbd5e1; font-size: 0.8rem;" title="p=${tItem.pValue}">—</span>`
+            }
+          </td>
         </tr>
       `;
     });
@@ -464,6 +489,7 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
               <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colPct')}</th>
               <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colEsperado')}</th>
               <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colRatio')}</th>
+              <th style="padding: 12px 14px; text-align: center;">${t('coocurrencia.colSignificativo')}</th>
             </tr>
           </thead>
           <tbody>
@@ -474,6 +500,10 @@ export function renderCoocurrenciaChart(ctx: DataVizChartContext) {
 
       <div style="font-size: 0.82rem; color: #64748b; font-style: italic; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.4;">
         ${t('coocurrencia.aviso')}
+      </div>
+
+      <div style="font-size: 0.82rem; color: #475569; font-weight: 600; background: #fefce8; border: 1px solid #fde68a; padding: 10px 14px; border-radius: 8px;">
+        ${t('coocurrencia.significativoResumen', { n: (ctx.coocurrenciaModo === 'pares' ? construirMatrizPares(ctx.historicalData, numberRange) && rankingPares(construirMatrizPares(ctx.historicalData, numberRange), ctx.historicalData.length, maxNumbers, numberRange, 20).filter(x => x.significativo).length : rankingTrios(ctx.historicalData, maxNumbers, numberRange, 20).filter(x => x.significativo).length) })}
       </div>
     </div>
   `;

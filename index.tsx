@@ -58,6 +58,7 @@ import { calculateOptimizationScore } from './src/utils/optimizer';
 import { getPopularityWeight, getNashScoreAverage } from './src/utils/popularity';
 import { getSumSeriesWithRegression, filtrarPorEraVigente } from './src/utils/regression';
 import { secureRandom } from './src/utils/secureRandom';
+import { chiSquarePValue } from './src/utils/statHelpers';
 import { analizarTodosLosNumeros, aplicarFiltroGap, calcularGaps, percentilHueco, construirHistogramaGaps } from './src/utils/gapFilter';
 import { construirMatrizPares, rankingPares, rankingTrios } from './src/utils/coocurrencia';
 import {
@@ -3206,7 +3207,8 @@ class DataLotto49Advanced {
         const biasDetectedNumbers = chiSquareNumStat > criticalValueNumbers;
 
         chiSquareEl.textContent = chiSquareNumStat.toFixed(2);
-        biasEl.textContent = biasDetectedNumbers ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
+        const pValorNumeros = chiSquarePValue(chiSquareNumStat, dfNumbers);
+        biasEl.textContent = (biasDetectedNumbers ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo')) + t('analyzer.pValorSufijo', { valor: pValorNumeros.toFixed(4) });
         biasEl.classList.toggle('invalid', biasDetectedNumbers);
         biasEl.classList.toggle('valid', !biasDetectedNumbers);
 
@@ -3238,8 +3240,9 @@ class DataLotto49Advanced {
             const biasDetectedStars = chiSquareStarStat > criticalValueStars;
 
             if (chiSquareStarsEl) chiSquareStarsEl.textContent = chiSquareStarStat.toFixed(2);
+            const pValorEstrellas = chiSquarePValue(chiSquareStarStat, dfStars);
             if (biasDetectedStarsEl) {
-                biasDetectedStarsEl.textContent = biasDetectedStars ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo');
+                biasDetectedStarsEl.textContent = (biasDetectedStars ? t('analyzer.sesgoSi') : t('analyzer.sesgoNo')) + t('analyzer.pValorSufijo', { valor: pValorEstrellas.toFixed(4) });
                 biasDetectedStarsEl.classList.toggle('invalid', biasDetectedStars);
                 biasDetectedStarsEl.classList.toggle('valid', !biasDetectedStars);
             }
@@ -9636,6 +9639,7 @@ class DataLotto49Advanced {
     const { chiSquare, degreesOfFreedom } = this.computeChiSquare(activeFreqs, mean);
     const criticalVal = this.chiSquareCriticalValue(degreesOfFreedom, 1.645);
     const isSignificant = chiSquare > criticalVal;
+    const pValueChi = chiSquarePValue(chiSquare, degreesOfFreedom);
 
     const statusBg = isSignificant ? '#fef2f2' : '#f0fdf4';
     const statusBorder = isSignificant ? '#fca5a5' : '#86efac';
@@ -9672,6 +9676,10 @@ class DataLotto49Advanced {
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
             <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.chiCritico')}</div>
             <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${criticalVal.toFixed(2)}</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase;">${t('dataviz.chiPvalor')}</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${pValueChi.toFixed(4)}</div>
           </div>
         </div>
 

@@ -1,3 +1,5 @@
+import { poissonUpperTailPValue, passesBenjaminiHochberg } from './statHelpers';
+
 export interface ParFrecuencia {
   a: number;
   b: number;
@@ -5,6 +7,8 @@ export interface ParFrecuencia {
   pctSobreSorteos: number;
   esperado: number;
   ratio: number;
+  pValue: number;
+  significativo: boolean;
 }
 
 export interface TrioFrecuencia {
@@ -15,6 +19,8 @@ export interface TrioFrecuencia {
   pctSobreSorteos: number;
   esperado: number;
   ratio: number;
+  pValue: number;
+  significativo: boolean;
 }
 
 const combinaciones = (n: number, k: number): number => {
@@ -54,7 +60,7 @@ export function rankingPares(
     : 0;
   const esperado = totalSorteos * probParJunto;
 
-  const pares: ParFrecuencia[] = [];
+  const pares: Array<Omit<ParFrecuencia, 'pValue' | 'significativo'>> = [];
   for (let a = 1; a <= numberRange; a++) {
     for (let b = a + 1; b <= numberRange; b++) {
       const count = matriz[a][b];
@@ -68,7 +74,16 @@ export function rankingPares(
       }
     }
   }
-  return pares.sort((x, y) => y.count - x.count).slice(0, topN);
+  const topPares = pares.sort((x, y) => y.count - x.count).slice(0, topN);
+  const totalTestsPares = combinaciones(numberRange, 2);
+  return topPares.map((p, idx): ParFrecuencia => {
+    const pValue = poissonUpperTailPValue(p.count, esperado);
+    return {
+      ...p,
+      pValue: Number(pValue.toFixed(4)),
+      significativo: passesBenjaminiHochberg(pValue, idx + 1, totalTestsPares),
+    };
+  });
 }
 
 export function rankingTrios(
@@ -99,7 +114,7 @@ export function rankingTrios(
     : 0;
   const esperado = dataset.length * probTrioJunto;
 
-  const trios: TrioFrecuencia[] = [];
+  const trios: Array<Omit<TrioFrecuencia, 'pValue' | 'significativo'>> = [];
   counts.forEach((count, key) => {
     const [a, b, c] = key.split('-').map(Number);
     trios.push({
@@ -109,5 +124,14 @@ export function rankingTrios(
       ratio: esperado > 0 ? Number((count / esperado).toFixed(2)) : 0,
     });
   });
-  return trios.sort((x, y) => y.count - x.count).slice(0, topN);
+  const topTrios = trios.sort((x, y) => y.count - x.count).slice(0, topN);
+  const totalTestsTrios = combinaciones(numberRange, 3);
+  return topTrios.map((tItem, idx): TrioFrecuencia => {
+    const pValue = poissonUpperTailPValue(tItem.count, esperado);
+    return {
+      ...tItem,
+      pValue: Number(pValue.toFixed(4)),
+      significativo: passesBenjaminiHochberg(pValue, idx + 1, totalTestsTrios),
+    };
+  });
 }

@@ -1,3 +1,5 @@
+import { normalCdf } from './statHelpers';
+
 export interface GapAnalysis {
   numero: number;
   huecoActual: number;
@@ -119,5 +121,47 @@ export function construirHistogramaGaps(
       teorico: Number((probTeorica * gaps.length).toFixed(2)),
     };
   });
+}
+
+export interface RunsTestResult {
+  z: number;
+  pValue: number;
+  nApariciones: number;
+  nAusencias: number;
+}
+
+/**
+ * Runs test de Wald-Wolfowitz: convierte la aparición/no-aparición de un
+ * número en cada sorteo en una secuencia binaria y comprueba si el número
+ * de "rachas" (bloques consecutivos del mismo valor) es compatible con una
+ * secuencia aleatoria, o si está anormalmente agrupado/alternado.
+ * Devuelve null si la muestra es demasiado pequeña para la aproximación
+ * normal del test (menos de 5 apariciones o menos de 5 ausencias).
+ */
+export function testRachasWaldWolfowitz(historicalData: any[], numero: number): RunsTestResult | null {
+  const secuencia: boolean[] = historicalData.map(sorteo => (sorteo.numbers || []).includes(numero));
+  const n1 = secuencia.filter(Boolean).length;
+  const n2 = secuencia.length - n1;
+  if (n1 < 5 || n2 < 5) return null;
+
+  let runs = 1;
+  for (let i = 1; i < secuencia.length; i++) {
+    if (secuencia[i] !== secuencia[i - 1]) runs++;
+  }
+
+  const n = n1 + n2;
+  const meanRuns = (2 * n1 * n2) / n + 1;
+  const varRuns = (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n * n * (n - 1));
+  if (varRuns <= 0) return null;
+
+  const z = (runs - meanRuns) / Math.sqrt(varRuns);
+  const pValue = 2 * (1 - normalCdf(Math.abs(z)));
+
+  return {
+    z: Number(z.toFixed(2)),
+    pValue: Number(pValue.toFixed(4)),
+    nApariciones: n1,
+    nAusencias: n2,
+  };
 }
 
