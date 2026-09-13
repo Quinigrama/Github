@@ -323,6 +323,7 @@
       <li><a href="#" id="sidebarNotificationsBtn" data-i18n="config.recordatorios">🗓️ Recordatorios de Sorteos</a></li>
       <li><a href="#" id="darkModeToggleBtn"><span data-i18n="config.modoOscuro">🌙 Modo Oscuro</span> <span id="darkModeBadge" style="float: right; font-size: 0.75rem; background: rgba(99,102,241,0.15); color: var(--primary); padding: 2px 8px; border-radius: 10px; font-weight: bold;">OFF</span></a></li>
       <li id="serverConfigMenuItem" style="display: none;"><a href="#" id="serverConfigBtn" data-i18n="config.servidor">🖥️ Servidor Backend</a></li>
+      <li><a href="#" id="sidebarHowItWorksBtn" data-i18n="nav.comoFunciona">📖 Cómo funciona</a></li>
       <li><a href="#" id="contactBtn" data-i18n="config.contacto">✉️ Contacto</a></li>
       <li><a href="#" id="sidebarLanguageBtn" data-i18n="nav.idioma">🌐 Idioma (ES)</a></li>
     </ul>
@@ -1868,7 +1869,64 @@
       </div>
     </div>
   </div>
-  
+
+  <div class="modal modal-fullscreen-mobile" id="howItWorksModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px; width: 95%; max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 data-i18n="comoFunciona.titulo">📖 Cómo funciona DataLotto</h3>
+      </div>
+      <div class="modal-body" style="line-height: 1.6; color: var(--dark); overflow-y: auto;">
+        <p data-i18n="comoFunciona.intro">DataLotto no predice números ganadores — nadie puede hacerlo, cada sorteo es
+        independiente del anterior. Lo que hacemos es analizar el historial con métodos estadísticos reales, de
+        forma transparente, para ayudarte a explorar patrones y diversificar tus combinaciones. Aquí explicamos,
+        sin tecnicismos, qué hace cada herramienta y qué limitaciones tiene.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionAleatoriedad.titulo">🎲 Generación de combinaciones</h4>
+        <p data-i18n="comoFunciona.seccionAleatoriedad.texto">Cuando generamos números al azar, usamos el mismo tipo de generador
+        criptográficamente seguro que usan los sistemas informáticos para proteger contraseñas — no un generador
+        aleatorio básico. Esto no mejora tus probabilidades de ganar, pero garantiza que no hay ningún sesgo oculto
+        en cómo se eligen los números.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionGap.titulo">⏳ Hueco actual y percentil</h4>
+        <p data-i18n="comoFunciona.seccionGap.texto">Mostramos cuántos sorteos lleva un número sin salir, comparado con su propio
+        historial de rachas. Esto es solo descriptivo: <strong>no significa que a un número "le toque" salir</strong>.
+        La probabilidad de cada número es la misma en cada sorteo, sin importar cuánto tiempo lleve ausente.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionRachas.titulo">📈 Test de rachas</h4>
+        <p data-i18n="comoFunciona.seccionRachas.texto">Comprobamos si el patrón de apariciones de un número a lo largo del
+        historial es distinto de lo que produciría el azar puro. No es una señal para apostar — es una comprobación
+        de transparencia, para poder decirte honestamente si algo en el historial se aleja de lo esperado por
+        casualidad, o si (como ocurre casi siempre) no hay nada fuera de lo normal.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionChi.titulo">🔬 Test de homogeneidad</h4>
+        <p data-i18n="comoFunciona.seccionChi.texto">Comprobamos si, en conjunto, todos los números del juego han salido con
+        una frecuencia parecida a la esperada. Mostramos también el grado de confianza real de esa comprobación
+        (no solo un "sí" o un "no"), para que quede claro cuánta certeza hay detrás de cada resultado.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionCoocurrencia.titulo">🔢 Pares y tríos más frecuentes</h4>
+        <p data-i18n="comoFunciona.seccionCoocurrencia.texto">Mostramos qué combinaciones de números han coincidido más veces
+        en el historial. Pero con cientos o miles de combinaciones posibles, es matemáticamente inevitable que
+        algunas parezcan "calientes" por pura casualidad. Por eso aplicamos una corrección estadística exigente
+        antes de marcar algo como realmente destacable — y lo habitual, incluso con la combinación más repetida
+        del historial, es que <strong>no</strong> sobreviva esa corrección. Si la tabla no marca ninguna como
+        significativa, esa es la conclusión honesta, no un fallo.</p>
+
+        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionHistorico.titulo">📊 Profundidad del historial</h4>
+        <p data-i18n="comoFunciona.seccionHistorico.texto">Cuantos más sorteos tengamos guardados de un juego, más fiables son
+        estas comprobaciones. Juegos con historiales muy largos (Lotería Nacional, Bonoloto) permiten conclusiones
+        más sólidas que juegos recientes con pocos sorteos disponibles todavía, donde cualquier resultado debe
+        tomarse con más cautela.</p>
+
+        <p style="margin-top: 15px; padding: 10px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 4px;" data-i18n="comoFunciona.avisoFinal">
+        En resumen: todo lo anterior son herramientas de diversificación y transparencia sobre el propio historial —
+        ninguna predice el próximo sorteo, y ninguna estrategia a largo plazo vence al azar.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn confirm" id="howItWorksCloseBtn" data-i18n="history.entendido">Entendido</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="validationModal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">

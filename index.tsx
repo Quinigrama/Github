@@ -5641,6 +5641,11 @@ class DataLotto49Advanced {
 
     document.getElementById('disclaimerBtn')?.addEventListener('click', () => this.toggleModal('disclaimerModal', true));
     document.getElementById('disclaimerCloseBtn')?.addEventListener('click', () => this.toggleModal('disclaimerModal', false));
+    document.getElementById('sidebarHowItWorksBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.toggleModal('howItWorksModal', true);
+    });
+    document.getElementById('howItWorksCloseBtn')?.addEventListener('click', () => this.toggleModal('howItWorksModal', false));
     
     // Sidebar & Menu Events
     document.getElementById('menuBtn')?.addEventListener('click', () => this.toggleSidebar());
