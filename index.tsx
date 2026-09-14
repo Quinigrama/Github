@@ -7709,6 +7709,11 @@ class DataLotto49Advanced {
     this.saveState();
     this.updateSavedTickets();
 
+    // Si el modal de Bankroll está abierto, refresca sus datos sin toasts ni animaciones.
+    if (document.getElementById('bankrollModal')?.style.display === 'flex') {
+      this.renderBankrollModal();
+    }
+
     // Telemetry
     this.sendTelemetry('save_ticket', {
         gameId: metrics.gameId,
@@ -7901,6 +7906,30 @@ class DataLotto49Advanced {
     const alerts = getBankrollAlerts(stats, negativeWeeks);
     const currency = this.bankrollConfig.currency;
 
+    const semaforoSection = document.getElementById('bankrollSemaforoSection') as HTMLElement;
+    const alertsContainer = document.getElementById('bankrollAlerts') as HTMLElement;
+    const statsGrid = document.getElementById('bankrollStatsGrid') as HTMLElement;
+    const chartSection = document.getElementById('bankrollChartSection') as HTMLElement;
+    const exportBtn = document.getElementById('bankrollExportBtn') as HTMLElement;
+    const monthEmptyState = document.getElementById('bankrollMonthEmptyState') as HTMLElement;
+
+    // Mes sin gasto: mostramos un mensaje contextual en vez del dashboard a cero.
+    if (stats.totalSpent === 0) {
+      if (semaforoSection) semaforoSection.style.display = 'none';
+      if (alertsContainer) alertsContainer.style.display = 'none';
+      if (statsGrid) statsGrid.style.display = 'none';
+      if (chartSection) chartSection.style.display = 'none';
+      if (exportBtn) exportBtn.style.display = 'none';
+      if (monthEmptyState) monthEmptyState.style.display = 'block';
+      return;
+    }
+    if (semaforoSection) semaforoSection.style.display = 'block';
+    if (alertsContainer) alertsContainer.style.display = 'block';
+    if (statsGrid) statsGrid.style.display = 'grid';
+    if (chartSection) chartSection.style.display = 'block';
+    if (exportBtn) exportBtn.style.display = 'block';
+    if (monthEmptyState) monthEmptyState.style.display = 'none';
+
     const semaforoIcon = document.getElementById('bankrollSemaforoIcon');
     const semaforoText = document.getElementById('bankrollSemaforoText');
     const semaforoBox = document.getElementById('bankrollSemaforo') as HTMLElement;
@@ -7914,7 +7943,19 @@ class DataLotto49Advanced {
     if (semaforoIcon) semaforoIcon.textContent = c.icon;
     if (semaforoText) semaforoText.textContent = `${c.text} — ${stats.pctUsed.toFixed(0)}%`;
 
-    const alertsContainer = document.getElementById('bankrollAlerts');
+    // Subindicadores: gasto y rentabilidad, cada uno con su propio color.
+    const subGasto = document.getElementById('bankrollSubGasto');
+    const subRoi = document.getElementById('bankrollSubRoi');
+    const subColors: { [k: string]: string } = { green: '#16a34a', yellow: '#ca8a04', red: '#dc2626' };
+    if (subGasto) {
+      subGasto.textContent = `${t('bankroll.subGasto')}: ${stats.pctUsed.toFixed(0)}%`;
+      subGasto.style.color = subColors[stats.budgetSemaforo];
+    }
+    if (subRoi) {
+      subRoi.textContent = `${t('bankroll.subRentabilidad')}: ${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(0)}%`;
+      subRoi.style.color = subColors[stats.roiSemaforo];
+    }
+
     if (alertsContainer) {
       alertsContainer.innerHTML = alerts.map(a => `
         <div style="background:${a.level === 'danger' ? '#fee2e2' : '#fef3c7'}; color:${a.level === 'danger' ? '#991b1b' : '#92400e'}; border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:0.85rem;">
@@ -7935,7 +7976,7 @@ class DataLotto49Advanced {
       elBalance.textContent = `${stats.balance >= 0 ? '+' : ''}${stats.balance.toFixed(2)}${currency}`;
       elBalance.style.color = stats.balance >= 0 ? 'var(--success)' : 'var(--danger)';
     }
-    if (elRoi) elRoi.textContent = `${stats.roi.toFixed(1)}%`;
+    if (elRoi) elRoi.textContent = `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%`;
 
     const chartContainer = document.getElementById('bankrollWeeklyChart') as HTMLElement;
     if (chartContainer) renderBankrollWeeklyChart(chartContainer, weeklyEntries, currency);

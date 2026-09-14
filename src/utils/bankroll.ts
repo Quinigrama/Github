@@ -8,10 +8,12 @@ export interface BankrollStats {
   totalSpent: number;
   totalWon: number;
   balance: number;
-  roi: number; // porcentaje
+  roi: number; // rentabilidad neta en %: (ganado - gastado) / gastado * 100. 0 = empate, negativo = pérdida.
   weeklyBudget: number;
   pctUsed: number; // 0-100+
-  semaforo: Semaforo;
+  semaforo: Semaforo;       // el peor de los dos siguientes
+  budgetSemaforo: Semaforo; // según pctUsed (presupuesto usado)
+  roiSemaforo: Semaforo;    // según roi (rentabilidad)
 }
 
 export interface WeeklyBankrollEntry {
@@ -86,14 +88,25 @@ export function calculateBankrollStats(tickets: Ticket[], config: BankrollConfig
     if (ticket.validation?.totalPayout) totalWon += ticket.validation.totalPayout;
   });
   const balance = totalWon - totalSpent;
-  const roi = totalSpent > 0 ? (totalWon / totalSpent) * 100 : 0;
+  // Rentabilidad neta: 0% = empate, negativo = pérdida (antes era ganado/gastado*100, que nunca bajaba de 0
+  // y confundía "empate" con "100%"). Con esta definición el signo tiene sentido intuitivo.
+  const roi = totalSpent > 0 ? ((totalWon - totalSpent) / totalSpent) * 100 : 0;
   const weeksInMonth = getWeeksInMonth(monthDate.getFullYear(), monthDate.getMonth());
   const weeklyBudget = weeksInMonth > 0 ? config.monthlyBudget / weeksInMonth : config.monthlyBudget;
   const pctUsed = config.monthlyBudget > 0 ? (totalSpent / config.monthlyBudget) * 100 : 0;
-  let semaforo: Semaforo = 'green';
-  if (pctUsed >= 100) semaforo = 'red';
-  else if (pctUsed >= 60) semaforo = 'yellow';
-  return { totalSpent, totalWon, balance, roi, weeklyBudget, pctUsed, semaforo };
+
+  let budgetSemaforo: Semaforo = 'green';
+  if (pctUsed >= 100) budgetSemaforo = 'red';
+  else if (pctUsed >= 60) budgetSemaforo = 'yellow';
+
+  let roiSemaforo: Semaforo = 'green';
+  if (roi <= -85) roiSemaforo = 'red';
+  else if (roi <= -60) roiSemaforo = 'yellow';
+
+  const semaforoRank: { [k in Semaforo]: number } = { green: 0, yellow: 1, red: 2 };
+  const semaforo: Semaforo = semaforoRank[roiSemaforo] > semaforoRank[budgetSemaforo] ? roiSemaforo : budgetSemaforo;
+
+  return { totalSpent, totalWon, balance, roi, weeklyBudget, pctUsed, semaforo, budgetSemaforo, roiSemaforo };
 }
 
 /** Agrupa los boletos del mes por semana ISO, para el histórico/gráfico. */

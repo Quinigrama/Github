@@ -316,7 +316,7 @@
       <li><a href="#" id="sidebarOfficialDrawsBtn" data-i18n="tools.sorteosOficiales">📅 Sorteos Oficiales</a></li>
       <li><a href="#" id="historyOfResultsBtn" data-i18n="tools.rendimiento">📈 Rendimiento de Boletos</a></li>
       <li><a href="#" id="sidebarJackpotsBtn" data-i18n="tools.alertaBotes">🔔 Alerta de Botes</a></li>
-      <li><a href="#" id="sidebarBankrollBtn" data-i18n="tools.gestorBankroll">💰 Gestor de Bankroll</a></li>
+      <li><a href="#" id="sidebarBankrollBtn" data-i18n="tools.gestorBankroll">💰 Control de Presupuesto</a></li>
       
       <li class="divider"></li>
       
@@ -2326,8 +2326,8 @@
     <div class="modal-content" style="max-width: 700px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
         <div>
-          <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" data-i18n="bankroll.titulo">💰 Gestor de Bankroll</h3>
-          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="bankroll.subtitulo">Controla tu presupuesto mensual de juego de forma responsable</p>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" data-i18n="bankroll.titulo">💰 Control de Presupuesto</h3>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="bankroll.subtitulo">Registro y control de tu gasto mensual en loterías</p>
         </div>
         <button class="close-btn" id="bankrollCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
@@ -2348,7 +2348,7 @@
                 <option value="$">$</option>
               </select>
             </div>
-            <button id="bankrollSaveConfigBtn" class="tickets-toolbar-btn" style="padding:8px 16px; white-space:nowrap;" data-i18n="bankroll.guardarBtn">Guardar</button>
+            <button id="bankrollSaveConfigBtn" class="modal-btn confirm" style="white-space:nowrap;" data-i18n="bankroll.guardarBtn">Guardar</button>
           </div>
           <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: #94a3b8; font-style: italic;" data-i18n="bankroll.monedaNota">Solo se contabilizan los boletos de juegos en esta moneda.</p>
         </div>
@@ -2360,14 +2360,25 @@
 
         <div id="bankrollDashboard" style="display:none;">
 
-          <div id="bankrollSemaforo" style="border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display:flex; align-items:center; gap:10px; font-weight:600; font-size:0.9rem;">
-            <span id="bankrollSemaforoIcon" style="font-size:1.3rem;">🟢</span>
-            <span id="bankrollSemaforoText"></span>
+          <div id="bankrollMonthEmptyState" style="display:none; text-align:center; padding: 30px 10px; color:#6b7280;">
+            <div style="font-size:2rem; margin-bottom:8px;">🗓️</div>
+            <p data-i18n="bankroll.mesVacio">Aún no has guardado boletos este mes. Cuando guardes alguno, aparecerán aquí sus estadísticas.</p>
+          </div>
+
+          <div id="bankrollSemaforoSection">
+            <div id="bankrollSemaforo" style="border-radius: 10px; padding: 12px 15px; margin-bottom: 8px; display:flex; align-items:center; gap:10px; font-weight:600; font-size:0.9rem;">
+              <span id="bankrollSemaforoIcon" style="font-size:1.3rem;">🟢</span>
+              <span id="bankrollSemaforoText"></span>
+            </div>
+            <div style="display:flex; gap:15px; margin-bottom: 15px; font-size:0.75rem; font-weight:600;">
+              <span id="bankrollSubGasto"></span>
+              <span id="bankrollSubRoi"></span>
+            </div>
           </div>
 
           <div id="bankrollAlerts" style="margin-bottom: 15px;"></div>
 
-          <div class="stats-grid" style="margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); display: grid; gap: 12px;">
+          <div id="bankrollStatsGrid" class="stats-grid" style="margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); display: grid; gap: 12px;">
             <div class="stat-item">
               <div class="stat-label" data-i18n="bankroll.presupuestoSemanal">Presupuesto semanal</div>
               <div class="stat-value" id="bkWeeklyBudget">-</div>
@@ -2390,13 +2401,15 @@
             </div>
           </div>
 
-          <div style="margin-bottom: 15px;">
+          <div id="bankrollChartSection" style="margin-bottom: 15px;">
             <div style="font-weight:600; font-size:0.85rem; color:#334155; margin-bottom:8px;" data-i18n="bankroll.historicoTitulo">📊 Gasto vs. ganado por semana</div>
             <div id="bankrollWeeklyChart"></div>
           </div>
 
-          <button id="bankrollExportBtn" class="tickets-toolbar-btn" style="width:100%;" data-i18n="bankroll.exportarBtn">⬇️ Exportar informe del mes (CSV)</button>
+          <button id="bankrollExportBtn" class="modal-btn" style="width:100%;" data-i18n="bankroll.exportarBtn">⬇️ Exportar informe del mes (CSV)</button>
         </div>
+
+        <p style="margin: 15px 0 0 0; font-size: 0.7rem; color: #9ca3af; text-align: center;" data-i18n="bankroll.disclaimerJuego">Juega con responsabilidad. Prohibido para menores de 18 años. Si crees que tienes un problema con el juego, visita <a href="https://www.jugarbien.es" target="_blank" rel="noopener noreferrer" style="color:#9ca3af; text-decoration:underline;">jugarbien.es</a>.</p>
 
       </div>
     </div>
