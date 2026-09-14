@@ -24,7 +24,7 @@ import {
   buildSumaDigitosStatsHtml,
   buildDesviacionStatsHtml
 } from './src/utils/filterStatsTemplates';
-import { Draw, Ticket, PositionRangeFilter, PositionRangeConfig } from './src/types';
+import { Draw, Ticket, PositionRangeFilter, PositionRangeConfig, BankrollConfig } from './src/types';
 import {
   nCr,
   getCombinations,
@@ -80,6 +80,7 @@ import {
   FILTER_PRESET_KEY
 } from './src/utils/storage';
 import { renderGapHistogramChart, renderRachasOverviewChart, renderCoocurrenciaChart, renderFrequencyChart, DataVizChartContext } from './src/utils/dataVizCharts';
+import { calculateBankrollStats, groupTicketsByWeek, countConsecutiveNegativeWeeks, getBankrollAlerts, buildBankrollReportCsv, renderBankrollWeeklyChart } from './src/utils/bankroll';
 
 export type { Draw, Ticket };
 
@@ -321,6 +322,7 @@ class DataLotto49Advanced {
     lastMultipleStats: { validCount: number, totalCount: number } | null;
     lastDebugInfo: string;
     savedTickets: Ticket[];
+    bankrollConfig: BankrollConfig | null;
     // Persistent aggregate of Control Group results, survives ticket deletion (the raw control
     // combinations are deleted from each ticket right after being validated — see
     // computeAndConsumeControlGroup()). Never shown per-ticket, only used for the aggregated
@@ -440,6 +442,7 @@ class DataLotto49Advanced {
     this.lastDebugInfo = '';
     this.lastMultipleStats = null;
     this.savedTickets = [];
+    this.bankrollConfig = null;
     this.controlGroupStats = {};
     this.currentTicket = null;
     this.currentValidatingTicket = null;
@@ -1747,6 +1750,7 @@ class DataLotto49Advanced {
           const state = {
               currentGameId: this.currentGame.id,
               savedTickets: this.savedTickets,
+              bankrollConfig: this.bankrollConfig,
               controlGroupStats: this.controlGroupStats,
               gameFilters: this.gameFilters, // Save all game filters
               gameDataTypes: this.gameDataTypes,
@@ -1866,6 +1870,7 @@ class DataLotto49Advanced {
                   this.currentGame = GAMES[savedState.currentGameId];
               }
               this.savedTickets = savedState.savedTickets || [];
+              this.bankrollConfig = savedState.bankrollConfig || null;
               this.controlGroupStats = savedState.controlGroupStats || {};
               // Migrate any old saved tickets gameId from 'lotto649' or missing to 'bonoloto'
               this.savedTickets.forEach((t: any) => {
@@ -5945,6 +5950,25 @@ class DataLotto49Advanced {
         this.toggleModal('jackpotsModal', false);
     });
 
+    document.getElementById('sidebarBankrollBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeSidebar();
+        this.toggleModal('bankrollModal', true);
+        this.renderBankrollModal();
+    });
+
+    document.getElementById('bankrollCloseBtn')?.addEventListener('click', () => {
+        this.toggleModal('bankrollModal', false);
+    });
+
+    document.getElementById('bankrollSaveConfigBtn')?.addEventListener('click', () => {
+        this.saveBankrollConfig();
+    });
+
+    document.getElementById('bankrollExportBtn')?.addEventListener('click', () => {
+        this.exportBankrollReport();
+    });
+
     document.getElementById('sidebarCalculatorBtn')?.addEventListener('click', (e) => {
         e.preventDefault();
         this.closeSidebar();
@@ -7831,6 +7855,112 @@ class DataLotto49Advanced {
     } catch (error) {
       this.showToast(t('toast.errorExportarHistorial'), 'error');
       console.error('Export CSV error:', error);
+    }
+  }
+
+  saveBankrollConfig() {
+    const budgetInput = document.getElementById('bankrollBudgetInput') as HTMLInputElement;
+    const currencySelect = document.getElementById('bankrollCurrencySelect') as HTMLSelectElement;
+    const budget = parseFloat(budgetInput?.value || '0');
+    if (!budget || budget <= 0) {
+      this.showToast(t('toast.bankrollPresupuestoInvalido'), 'warning');
+      return;
+    }
+    this.bankrollConfig = {
+      monthlyBudget: budget,
+      currency: (currencySelect?.value === '$' ? '$' : '€'),
+      createdAt: this.bankrollConfig?.createdAt || new Date().toISOString(),
+    };
+    this.saveState();
+    this.renderBankrollModal();
+    this.showToast(t('toast.bankrollGuardado'), 'success');
+  }
+
+  renderBankrollModal() {
+    const emptyState = document.getElementById('bankrollEmptyState');
+    const dashboard = document.getElementById('bankrollDashboard');
+    const budgetInput = document.getElementById('bankrollBudgetInput') as HTMLInputElement;
+    const currencySelect = document.getElementById('bankrollCurrencySelect') as HTMLSelectElement;
+
+    if (this.bankrollConfig) {
+      if (budgetInput) budgetInput.value = String(this.bankrollConfig.monthlyBudget);
+      if (currencySelect) currencySelect.value = this.bankrollConfig.currency;
+    }
+
+    if (!this.bankrollConfig) {
+      if (emptyState) emptyState.style.display = 'block';
+      if (dashboard) dashboard.style.display = 'none';
+      return;
+    }
+    if (emptyState) emptyState.style.display = 'none';
+    if (dashboard) dashboard.style.display = 'block';
+
+    const stats = calculateBankrollStats(this.savedTickets, this.bankrollConfig);
+    const weeklyEntries = groupTicketsByWeek(this.savedTickets, this.bankrollConfig);
+    const negativeWeeks = countConsecutiveNegativeWeeks(weeklyEntries);
+    const alerts = getBankrollAlerts(stats, negativeWeeks);
+    const currency = this.bankrollConfig.currency;
+
+    const semaforoIcon = document.getElementById('bankrollSemaforoIcon');
+    const semaforoText = document.getElementById('bankrollSemaforoText');
+    const semaforoBox = document.getElementById('bankrollSemaforo') as HTMLElement;
+    const colors: { [k: string]: { bg: string; icon: string; text: string } } = {
+      green: { bg: '#dcfce7', icon: '🟢', text: t('bankroll.semaforo.verde') },
+      yellow: { bg: '#fef9c3', icon: '🟡', text: t('bankroll.semaforo.amarillo') },
+      red: { bg: '#fee2e2', icon: '🔴', text: t('bankroll.semaforo.rojo') },
+    };
+    const c = colors[stats.semaforo];
+    if (semaforoBox) semaforoBox.style.background = c.bg;
+    if (semaforoIcon) semaforoIcon.textContent = c.icon;
+    if (semaforoText) semaforoText.textContent = `${c.text} — ${stats.pctUsed.toFixed(0)}%`;
+
+    const alertsContainer = document.getElementById('bankrollAlerts');
+    if (alertsContainer) {
+      alertsContainer.innerHTML = alerts.map(a => `
+        <div style="background:${a.level === 'danger' ? '#fee2e2' : '#fef3c7'}; color:${a.level === 'danger' ? '#991b1b' : '#92400e'}; border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:0.85rem;">
+          ⚠️ ${t(a.messageKey, a.params)}
+        </div>
+      `).join('');
+    }
+
+    const elWeeklyBudget = document.getElementById('bkWeeklyBudget');
+    const elSpent = document.getElementById('bkSpent');
+    const elWon = document.getElementById('bkWon');
+    const elBalance = document.getElementById('bkBalance') as HTMLElement;
+    const elRoi = document.getElementById('bkRoi');
+    if (elWeeklyBudget) elWeeklyBudget.textContent = `${stats.weeklyBudget.toFixed(2)}${currency}`;
+    if (elSpent) elSpent.textContent = `${stats.totalSpent.toFixed(2)}${currency}`;
+    if (elWon) elWon.textContent = `${stats.totalWon.toFixed(2)}${currency}`;
+    if (elBalance) {
+      elBalance.textContent = `${stats.balance >= 0 ? '+' : ''}${stats.balance.toFixed(2)}${currency}`;
+      elBalance.style.color = stats.balance >= 0 ? 'var(--success)' : 'var(--danger)';
+    }
+    if (elRoi) elRoi.textContent = `${stats.roi.toFixed(1)}%`;
+
+    const chartContainer = document.getElementById('bankrollWeeklyChart') as HTMLElement;
+    if (chartContainer) renderBankrollWeeklyChart(chartContainer, weeklyEntries, currency);
+  }
+
+  exportBankrollReport() {
+    if (!this.bankrollConfig) return;
+    const stats = calculateBankrollStats(this.savedTickets, this.bankrollConfig);
+    const weeklyEntries = groupTicketsByWeek(this.savedTickets, this.bankrollConfig);
+    const csvContent = buildBankrollReportCsv(this.bankrollConfig, stats, weeklyEntries);
+    try {
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const monthStr = new Date().toISOString().slice(0, 7);
+      a.download = `datalotto_bankroll_${monthStr}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.showToast(t('toast.bankrollExportado'), 'success');
+    } catch (error) {
+      this.showToast(t('toast.errorExportarHistorial'), 'error');
+      console.error('Export bankroll CSV error:', error);
     }
   }
 

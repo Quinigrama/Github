@@ -44,6 +44,12 @@ export interface Ticket {
   };
 }
 
+export interface BankrollConfig {
+  monthlyBudget: number;
+  currency: '€' | '$';
+  createdAt: string; // ISO date de cuándo se configuró por primera vez
+}
+
 export interface PositionRangeConfig {
   position: number;
   min: number;

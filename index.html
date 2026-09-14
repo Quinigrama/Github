@@ -316,6 +316,7 @@
       <li><a href="#" id="sidebarOfficialDrawsBtn" data-i18n="tools.sorteosOficiales">📅 Sorteos Oficiales</a></li>
       <li><a href="#" id="historyOfResultsBtn" data-i18n="tools.rendimiento">📈 Rendimiento de Boletos</a></li>
       <li><a href="#" id="sidebarJackpotsBtn" data-i18n="tools.alertaBotes">🔔 Alerta de Botes</a></li>
+      <li><a href="#" id="sidebarBankrollBtn" data-i18n="tools.gestorBankroll">💰 Gestor de Bankroll</a></li>
       
       <li class="divider"></li>
       
@@ -1876,50 +1877,90 @@
         <h3 data-i18n="comoFunciona.titulo">📖 Cómo funciona DataLotto</h3>
       </div>
       <div class="modal-body" style="line-height: 1.6; color: var(--dark); overflow-y: auto;">
-        <p data-i18n="comoFunciona.intro">DataLotto no predice números ganadores — nadie puede hacerlo, cada sorteo es
-        independiente del anterior. Lo que hacemos es analizar el historial con métodos estadísticos reales, de
-        forma transparente, para ayudarte a explorar patrones y diversificar tus combinaciones. Aquí explicamos,
-        sin tecnicismos, qué hace cada herramienta y qué limitaciones tiene.</p>
+        <p data-i18n="comoFunciona.intro">DataLotto analiza el historial de cada juego con métodos estadísticos reales,
+        de forma transparente. Aquí tienes, sin tecnicismos, qué hace cada herramienta y qué significan los números
+        que ves en pantalla. Para el aviso legal completo, consulta el Disclaimer Ético (⚠️).</p>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionAleatoriedad.titulo">🎲 Generación de combinaciones</h4>
-        <p data-i18n="comoFunciona.seccionAleatoriedad.texto">Cuando generamos números al azar, usamos el mismo tipo de generador
-        criptográficamente seguro que usan los sistemas informáticos para proteger contraseñas — no un generador
-        aleatorio básico. Esto no mejora tus probabilidades de ganar, pero garantiza que no hay ningún sesgo oculto
-        en cómo se eligen los números.</p>
+        <h3 style="margin-top: 22px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;" data-i18n="comoFunciona.bloqueGeneracion">🎲 Generación de combinaciones</h3>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionGap.titulo">⏳ Hueco actual y percentil</h4>
-        <p data-i18n="comoFunciona.seccionGap.texto">Mostramos cuántos sorteos lleva un número sin salir, comparado con su propio
-        historial de rachas. Esto es solo descriptivo: <strong>no significa que a un número "le toque" salir</strong>.
-        La probabilidad de cada número es la misma en cada sorteo, sin importar cuánto tiempo lleve ausente.</p>
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionAleatoriedad.titulo">🎲 Aleatoriedad</h4>
+        <p data-i18n="comoFunciona.seccionAleatoriedad.texto">Usamos el mismo tipo de generador criptográficamente seguro que
+        protege contraseñas en cualquier sistema informático — más robusto que un generador aleatorio básico, sin
+        ningún sesgo oculto en cómo se eligen los números.</p>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionRachas.titulo">📈 Test de rachas</h4>
-        <p data-i18n="comoFunciona.seccionRachas.texto">Comprobamos si el patrón de apariciones de un número a lo largo del
-        historial es distinto de lo que produciría el azar puro. No es una señal para apostar — es una comprobación
-        de transparencia, para poder decirte honestamente si algo en el historial se aleja de lo esperado por
-        casualidad, o si (como ocurre casi siempre) no hay nada fuera de lo normal.</p>
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionGeometria.titulo">🔷 Exclusión de patrones geométricos</h4>
+        <p data-i18n="comoFunciona.seccionGeometria.texto">Puedes descartar combinaciones cuyos números formen un patrón
+        visual reconocible en la rejilla del boleto (línea recta, diagonal, triángulo, cruz o círculo). Es un filtro
+        estético: el patrón no cambia la probabilidad real, solo evita boletos que "se ven" marcados.</p>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionChi.titulo">🔬 Test de homogeneidad</h4>
-        <p data-i18n="comoFunciona.seccionChi.texto">Comprobamos si, en conjunto, todos los números del juego han salido con
-        una frecuencia parecida a la esperada. Mostramos también el grado de confianza real de esa comprobación
-        (no solo un "sí" o un "no"), para que quede claro cuánta certeza hay detrás de cada resultado.</p>
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionControl.titulo">🧪 Grupo de Control</h4>
+        <p data-i18n="comoFunciona.seccionControl.texto">Cada vez que guardas un boleto, generamos en paralelo una
+        combinación totalmente aleatoria, sin ningún filtro, y la comprobamos contra los sorteos reales igual que la
+        tuya. Los aciertos de ambas se acumulan por separado y los ves lado a lado en el Historial — es la forma más
+        directa de comprobar si tus filtros marcan alguna diferencia real frente al azar puro, con tus propios datos.</p>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionCoocurrencia.titulo">🔢 Pares y tríos más frecuentes</h4>
-        <p data-i18n="comoFunciona.seccionCoocurrencia.texto">Mostramos qué combinaciones de números han coincidido más veces
-        en el historial. Pero con cientos o miles de combinaciones posibles, es matemáticamente inevitable que
-        algunas parezcan "calientes" por pura casualidad. Por eso aplicamos una corrección estadística exigente
-        antes de marcar algo como realmente destacable — y lo habitual, incluso con la combinación más repetida
-        del historial, es que <strong>no</strong> sobreviva esa corrección. Si la tabla no marca ninguna como
-        significativa, esa es la conclusión honesta, no un fallo.</p>
+        <h3 style="margin-top: 22px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;" data-i18n="comoFunciona.bloqueFiltros">📏 Filtros de tu combinación</h3>
 
-        <h4 style="margin-top: 18px; color: var(--primary);" data-i18n="comoFunciona.seccionHistorico.titulo">📊 Profundidad del historial</h4>
-        <p data-i18n="comoFunciona.seccionHistorico.texto">Cuantos más sorteos tengamos guardados de un juego, más fiables son
-        estas comprobaciones. Juegos con historiales muy largos (Lotería Nacional, Bonoloto) permiten conclusiones
-        más sólidas que juegos recientes con pocos sorteos disponibles todavía, donde cualquier resultado debe
-        tomarse con más cautela.</p>
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionFiltros.titulo">📏 Filtros descriptivos</h4>
+        <p data-i18n="comoFunciona.seccionFiltros.texto">Puedes acotar tu combinación por suma total, suma de dígitos,
+        desviación estándar, balance par/impar, balance bajos/altos, cantidad de números primos, bloques de números
+        consecutivos, distancia entre números, agrupación por decenas y variedad de terminaciones. Cada uno tiene su
+        propio botón ℹ️ en el panel de filtros con fórmula y ejemplos.</p>
 
-        <p style="margin-top: 15px; padding: 10px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 4px;" data-i18n="comoFunciona.avisoFinal">
-        En resumen: todo lo anterior son herramientas de diversificación y transparencia sobre el propio historial —
-        ninguna predice el próximo sorteo, y ninguna estrategia a largo plazo vence al azar.</p>
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionEntropia.titulo">🌀 Entropía de terminaciones e intervalos</h4>
+        <p data-i18n="comoFunciona.seccionEntropia.texto">La entropía mide cuán repartida está una distribución: si todos
+        los valores aparecen por igual, es máxima (mucha variedad); si uno domina, es mínima (poca variedad).
+        La aplicamos a los últimos dígitos de tus números (terminaciones) y a las distancias entre ellos (intervalos).
+        Ejemplo: en [7, 17, 23, 34, 45, 49] las terminaciones son 7, 7, 3, 4, 5, 9 — el 7 se repite, así que la
+        entropía (≈2,25) es alta pero no la máxima posible (2,58 si las 6 fueran distintas).</p>
+
+        <h3 style="margin-top: 22px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;" data-i18n="comoFunciona.bloqueHistorial">📊 Análisis del histórico</h3>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionGap.titulo">⏳ Hueco actual y percentil</h4>
+        <p data-i18n="comoFunciona.seccionGap.texto">Mostramos cuántos sorteos lleva un número sin salir, comparado con
+        su propio historial de rachas — un dato descriptivo sobre el pasado del número, no una proyección.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionRachas.titulo">📈 Test de rachas</h4>
+        <p data-i18n="comoFunciona.seccionRachas.texto">Con un test estadístico real (runs test), comprobamos si el
+        patrón de apariciones de un número a lo largo del historial es distinto de lo que produciría el azar puro.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionChi.titulo">🔬 Test de homogeneidad</h4>
+        <p data-i18n="comoFunciona.seccionChi.texto">Comprobamos si, en conjunto, todos los números del juego han salido
+        con una frecuencia parecida a la esperada, mostrando también el grado de confianza real (p-valor) de esa
+        comprobación — no solo un "sí" o un "no".</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionCoocurrencia.titulo">🔢 Pares y tríos más frecuentes</h4>
+        <p data-i18n="comoFunciona.seccionCoocurrencia.texto">Mostramos qué combinaciones de números han coincidido más
+        veces en el historial. Con cientos o miles de combinaciones posibles, algunas parecerán "calientes" por pura
+        casualidad, así que aplicamos una corrección estadística exigente (FDR) antes de marcar algo como realmente
+        destacable. Lo habitual, incluso con la combinación más repetida del historial, es que ninguna la supere —
+        y así lo indicamos, sin maquillarlo.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionTendencia.titulo">📉 Tendencia</h4>
+        <p data-i18n="comoFunciona.seccionTendencia.texto">Analizamos si la suma de los sorteos, o la frecuencia de un
+        número concreto, muestra una tendencia ascendente o descendente en el histórico cargado. Es descriptivo:
+        alimenta un gráfico, no es por sí solo una prueba de que esa tendencia vaya a continuar.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionRangoPosicion.titulo">🎯 Rango óptimo por posición</h4>
+        <p data-i18n="comoFunciona.seccionRangoPosicion.texto">Para cada posición de tu combinación ordenada (el número
+        más bajo, el segundo más bajo, etc.), calculamos un rango típico combinando la teoría matemática del juego
+        con los percentiles reales del histórico — la única herramienta de la app que mezcla ambas cosas.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionNash.titulo">⚖️ Puntuación de popularidad (Nash)</h4>
+        <p data-i18n="comoFunciona.seccionNash.texto">Puntúa cuánto se parece tu combinación a las que la gente elige por
+        sesgo de calendario (días 1-31, meses 1-12, múltiplos de 7). No cambia tu probabilidad de acertar — todas las
+        combinaciones la tienen igual — pero si algún día aciertas, una combinación menos "popular" entre el resto de
+        jugadores significa compartir el premio con menos gente.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionMarkov.titulo">🔁 Puntuación de recencia</h4>
+        <p data-i18n="comoFunciona.seccionMarkov.texto">Puntúa cuántas veces ha aparecido cada número de tu combinación
+        en los últimos sorteos que elijas analizar. Es una heurística de "calor reciente", no un modelo predictivo:
+        no cambia la probabilidad real del próximo sorteo.</p>
+
+        <h4 style="margin-top: 14px; color: var(--primary);" data-i18n="comoFunciona.seccionHistorico.titulo">📊 Profundidad del historial</h4>
+        <p data-i18n="comoFunciona.seccionHistorico.texto">Cuantos más sorteos tengamos guardados de un juego, más
+        fiables son estas comprobaciones. Juegos con historiales muy largos (Lotería Nacional, Bonoloto) permiten
+        conclusiones más sólidas que juegos recientes con menos sorteos disponibles todavía.</p>
       </div>
       <div class="modal-actions">
         <button class="modal-btn confirm" id="howItWorksCloseBtn" data-i18n="history.entendido">Entendido</button>
@@ -2278,6 +2319,86 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <div class="modal modal-fullscreen-mobile" id="bankrollModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" data-i18n="bankroll.titulo">💰 Gestor de Bankroll</h3>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="bankroll.subtitulo">Controla tu presupuesto mensual de juego de forma responsable</p>
+        </div>
+        <button class="close-btn" id="bankrollCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 15px; overflow-y: auto; flex: 1; text-align: left;">
+
+        <div id="bankrollConfigSection" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+          <div style="font-weight: 600; font-size: 0.9rem; color: #334155; margin-bottom: 10px;" data-i18n="bankroll.configTitulo">⚙️ Tu presupuesto mensual</div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 120px;">
+              <label style="display:block; font-size:0.75rem; color:#64748b; margin-bottom:4px;" data-i18n="bankroll.presupuestoLabel">Presupuesto mensual</label>
+              <input type="number" id="bankrollBudgetInput" min="0" step="1" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;" placeholder="40">
+            </div>
+            <div style="min-width: 90px;">
+              <label style="display:block; font-size:0.75rem; color:#64748b; margin-bottom:4px;" data-i18n="bankroll.monedaLabel">Moneda</label>
+              <select id="bankrollCurrencySelect" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
+                <option value="€">€</option>
+                <option value="$">$</option>
+              </select>
+            </div>
+            <button id="bankrollSaveConfigBtn" class="tickets-toolbar-btn" style="padding:8px 16px; white-space:nowrap;" data-i18n="bankroll.guardarBtn">Guardar</button>
+          </div>
+          <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: #94a3b8; font-style: italic;" data-i18n="bankroll.monedaNota">Solo se contabilizan los boletos de juegos en esta moneda.</p>
+        </div>
+
+        <div id="bankrollEmptyState" style="display:none; text-align:center; padding: 30px 10px; color:#6b7280;">
+          <div style="font-size:2rem; margin-bottom:8px;">💰</div>
+          <p data-i18n="bankroll.sinConfigurar">Define tu presupuesto mensual para empezar a ver tu dashboard.</p>
+        </div>
+
+        <div id="bankrollDashboard" style="display:none;">
+
+          <div id="bankrollSemaforo" style="border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display:flex; align-items:center; gap:10px; font-weight:600; font-size:0.9rem;">
+            <span id="bankrollSemaforoIcon" style="font-size:1.3rem;">🟢</span>
+            <span id="bankrollSemaforoText"></span>
+          </div>
+
+          <div id="bankrollAlerts" style="margin-bottom: 15px;"></div>
+
+          <div class="stats-grid" style="margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); display: grid; gap: 12px;">
+            <div class="stat-item">
+              <div class="stat-label" data-i18n="bankroll.presupuestoSemanal">Presupuesto semanal</div>
+              <div class="stat-value" id="bkWeeklyBudget">-</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label" data-i18n="bankroll.gastado">Gastado este mes</div>
+              <div class="stat-value" id="bkSpent">-</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label" data-i18n="bankroll.ganado">Ganado este mes</div>
+              <div class="stat-value" style="color: var(--success);" id="bkWon">-</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label" data-i18n="bankroll.balance">Balance neto</div>
+              <div class="stat-value" id="bkBalance">-</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label" data-i18n="bankroll.roi">ROI</div>
+              <div class="stat-value" id="bkRoi">-</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <div style="font-weight:600; font-size:0.85rem; color:#334155; margin-bottom:8px;" data-i18n="bankroll.historicoTitulo">📊 Gasto vs. ganado por semana</div>
+            <div id="bankrollWeeklyChart"></div>
+          </div>
+
+          <button id="bankrollExportBtn" class="tickets-toolbar-btn" style="width:100%;" data-i18n="bankroll.exportarBtn">⬇️ Exportar informe del mes (CSV)</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
