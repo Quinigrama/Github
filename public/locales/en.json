@@ -1249,5 +1249,17 @@
   "comoFunciona.seccionMarkov.titulo": "🔁 Recency score",
   "comoFunciona.seccionMarkov.texto": "Scores how often each number has appeared in the most recent draws you select. It is a recency heuristic, not a predictive model: every draw remains an independent event.",
   "comoFunciona.seccionHistorico.titulo": "📊 History depth",
-  "comoFunciona.seccionHistorico.texto": "The more historical draws recorded for a game, the more reliable these tests are. Games with decades of history (Lotería Nacional, Bonoloto) provide much greater statistical power than newer games with limited draws."
+  "comoFunciona.seccionHistorico.texto": "The more historical draws recorded for a game, the more reliable these tests are. Games with decades of history (Lotería Nacional, Bonoloto) provide much greater statistical power than newer games with limited draws.",
+  "comoFunciona.bloqueAxiomas": "📐 Mathematical foundations",
+  "comoFunciona.seccionAxioma1.titulo": "1. Independence",
+  "comoFunciona.seccionAxioma1.texto": "Every draw of an audited lottery is independent of the ones before it. The drum has no memory: what's already come out doesn't change the odds of what comes next.",
+  "comoFunciona.seccionAxioma2.titulo": "2. Equiprobability",
+  "comoFunciona.seccionAxioma2.texto": "Every possible combination has exactly the same chance of coming out. No combination is \"more likely\" than another, however rare or common it looks.",
+  "comoFunciona.seccionAxioma3.titulo": "3. Negative expected value",
+  "comoFunciona.seccionAxioma3.texto": "The expected value of any bet is negative: the share of the pool paid out in prizes is always less than 100% of what's collected. Playing more doesn't change this in the long run.",
+  "comoFunciona.seccionAxioma4.titulo": "4. History doesn't predict the future",
+  "comoFunciona.seccionAxioma4.texto": "No strategy based only on past results can change the odds of the next draw. This app's filters and analyses don't predict — they select combinations within a space where every one is still equally likely.",
+  "comoFunciona.seccionAxioma5.titulo": "5. The only real edge",
+  "comoFunciona.seccionAxioma5.texto": "The mathematical edge available isn't hitting more often — it's collecting more when you do: picking less popular combinations means fewer people to split the prize with.",
+  "comoFunciona.axiomasCierre": "Everything else you see in this app — filters, entropy, streaks, popularity — is built on top of these five points, never against them."
 }

@@ -1249,5 +1249,17 @@
   "comoFunciona.seccionMarkov.titulo": "🔁 Puntuación de recencia",
   "comoFunciona.seccionMarkov.texto": "Puntúa cuántas veces ha aparecido cada número de tu combinación en los últimos sorteos que elijas analizar. Es una heurística de \"calor reciente\", no un modelo predictivo: no cambia la probabilidad real del próximo sorteo.",
   "comoFunciona.seccionHistorico.titulo": "📊 Profundidad del historial",
-  "comoFunciona.seccionHistorico.texto": "Cuantos más sorteos tengamos guardados de un juego, más fiables son estas comprobaciones. Juegos con historiales muy largos (Lotería Nacional, Bonoloto) permiten conclusiones más sólidas que juegos recientes con menos sorteos disponibles todavía."
+  "comoFunciona.seccionHistorico.texto": "Cuantos más sorteos tengamos guardados de un juego, más fiables son estas comprobaciones. Juegos con historiales muy largos (Lotería Nacional, Bonoloto) permiten conclusiones más sólidas que juegos recientes con menos sorteos disponibles todavía.",
+  "comoFunciona.bloqueAxiomas": "📐 Fundamentos matemáticos",
+  "comoFunciona.seccionAxioma1.titulo": "1. Independencia",
+  "comoFunciona.seccionAxioma1.texto": "Cada sorteo de una lotería auditada es independiente de los anteriores. El bombo no tiene memoria: lo que ha salido no cambia la probabilidad de lo que va a salir.",
+  "comoFunciona.seccionAxioma2.titulo": "2. Equiprobabilidad",
+  "comoFunciona.seccionAxioma2.texto": "Todas las combinaciones posibles tienen exactamente la misma probabilidad de salir. Ninguna combinación es \"más probable\" que otra, por muy rara o muy común que parezca.",
+  "comoFunciona.seccionAxioma3.titulo": "3. Valor esperado negativo",
+  "comoFunciona.seccionAxioma3.texto": "El valor esperado de cualquier apuesta es negativo: el porcentaje del bote destinado a premios es siempre menor que el 100% de lo recaudado. Jugar más no cambia este hecho a largo plazo.",
+  "comoFunciona.seccionAxioma4.titulo": "4. El histórico no predice el futuro",
+  "comoFunciona.seccionAxioma4.texto": "Ninguna estrategia basada solo en el historial puede cambiar la probabilidad del siguiente sorteo. Los filtros y análisis de esta app no predicen: seleccionan combinaciones dentro de un espacio donde todas siguen siendo igual de probables.",
+  "comoFunciona.seccionAxioma5.titulo": "5. La única ventaja real",
+  "comoFunciona.seccionAxioma5.texto": "La ventaja matemática disponible no está en acertar más, sino en cobrar más si aciertas: elegir combinaciones menos populares reduce cuántas personas comparten el premio contigo.",
+  "comoFunciona.axiomasCierre": "Todo lo demás que ves en esta app —filtros, entropía, rachas, popularidad— se construye sobre estos cinco puntos, nunca en contra de ellos."
 }
