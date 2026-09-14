@@ -1147,7 +1147,7 @@
   "bankroll.ganado": "Ganado este mes",
   "bankroll.balance": "Balance neto",
   "bankroll.roi": "ROI",
-  "bankroll.historicoTitulo": "📊 Gasto vs. ganado por semana",
+  "bankroll.historicoTitulo": "📊 Últimas 8 semanas",
   "bankroll.exportarBtn": "⬇️ Exportar informe del mes (CSV)",
   "bankroll.subGasto": "Gasto",
   "bankroll.subRentabilidad": "Rentabilidad",

@@ -1147,7 +1147,7 @@
   "bankroll.ganado": "Won this month",
   "bankroll.balance": "Net balance",
   "bankroll.roi": "ROI",
-  "bankroll.historicoTitulo": "📊 Spent vs. won per week",
+  "bankroll.historicoTitulo": "📊 Last 8 weeks",
   "bankroll.exportarBtn": "⬇️ Export monthly report (CSV)",
   "bankroll.subGasto": "Spent",
   "bankroll.subRentabilidad": "Return",

@@ -80,7 +80,7 @@ import {
   FILTER_PRESET_KEY
 } from './src/utils/storage';
 import { renderGapHistogramChart, renderRachasOverviewChart, renderCoocurrenciaChart, renderFrequencyChart, DataVizChartContext } from './src/utils/dataVizCharts';
-import { calculateBankrollStats, groupTicketsByWeek, countConsecutiveNegativeWeeks, getBankrollAlerts, buildBankrollReportCsv, renderBankrollWeeklyChart } from './src/utils/bankroll';
+import { calculateBankrollStats, groupTicketsByWeek, getLast8WeeksEntries, countConsecutiveNegativeWeeks, getBankrollAlerts, buildBankrollReportCsv, renderBankrollWeeklyChart } from './src/utils/bankroll';
 
 export type { Draw, Ticket };
 
@@ -7904,6 +7904,7 @@ class DataLotto49Advanced {
     const weeklyEntries = groupTicketsByWeek(this.savedTickets, this.bankrollConfig);
     const negativeWeeks = countConsecutiveNegativeWeeks(weeklyEntries);
     const alerts = getBankrollAlerts(stats, negativeWeeks);
+    const last8WeeksEntries = getLast8WeeksEntries(this.savedTickets, this.bankrollConfig);
     const currency = this.bankrollConfig.currency;
 
     const semaforoSection = document.getElementById('bankrollSemaforoSection') as HTMLElement;
@@ -7979,14 +7980,14 @@ class DataLotto49Advanced {
     if (elRoi) elRoi.textContent = `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%`;
 
     const chartContainer = document.getElementById('bankrollWeeklyChart') as HTMLElement;
-    if (chartContainer) renderBankrollWeeklyChart(chartContainer, weeklyEntries, currency);
+    if (chartContainer) renderBankrollWeeklyChart(chartContainer, last8WeeksEntries, currency);
   }
 
   exportBankrollReport() {
     if (!this.bankrollConfig) return;
     const stats = calculateBankrollStats(this.savedTickets, this.bankrollConfig);
-    const weeklyEntries = groupTicketsByWeek(this.savedTickets, this.bankrollConfig);
-    const csvContent = buildBankrollReportCsv(this.bankrollConfig, stats, weeklyEntries);
+    const last8WeeksEntries = getLast8WeeksEntries(this.savedTickets, this.bankrollConfig);
+    const csvContent = buildBankrollReportCsv(this.bankrollConfig, stats, last8WeeksEntries);
     try {
       const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);

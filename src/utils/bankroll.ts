@@ -127,6 +127,35 @@ export function groupTicketsByWeek(tickets: Ticket[], config: BankrollConfig, mo
   return Array.from(map.values()).sort((a, b) => a.weekKey.localeCompare(b.weekKey));
 }
 
+/**
+ * Últimas 8 semanas ISO completas (lunes a domingo), terminando en la semana que contiene
+ * referenceDate — independiente del mes natural. A diferencia de groupTicketsByWeek(), aquí
+ * se generan siempre los 8 slots aunque alguna semana no tenga boletos (quedan a 0).
+ */
+export function getLast8WeeksEntries(tickets: Ticket[], config: BankrollConfig, referenceDate: Date = new Date()): WeeklyBankrollEntry[] {
+  const slots: WeeklyBankrollEntry[] = [];
+  const cursor = new Date(referenceDate);
+  cursor.setDate(cursor.getDate() - 7 * 7);
+  for (let i = 0; i < 8; i++) {
+    slots.push({ weekKey: getIsoWeekKey(cursor), weekLabel: getIsoWeekLabel(cursor), spent: 0, won: 0, balance: 0 });
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  const slotMap = new Map(slots.map(s => [s.weekKey, s]));
+
+  tickets.forEach(ticket => {
+    const game = GAMES[ticket.gameId];
+    if (!game || game.currency !== config.currency) return;
+    const d = getTicketRelevantDate(ticket);
+    const slot = slotMap.get(getIsoWeekKey(d));
+    if (!slot) return; // fuera de las últimas 8 semanas
+    slot.spent += calculateTicketCost(ticket, ticket.gameId).totalCost;
+    if (ticket.validation?.totalPayout) slot.won += ticket.validation.totalPayout;
+    slot.balance = slot.won - slot.spent;
+  });
+
+  return slots;
+}
+
 /** Cuenta la racha de semanas consecutivas en negativo, desde la más reciente hacia atrás. */
 export function countConsecutiveNegativeWeeks(weeklyEntries: WeeklyBankrollEntry[]): number {
   let count = 0;
@@ -151,36 +180,52 @@ export function getBankrollAlerts(stats: BankrollStats, consecutiveNegativeWeeks
   return alerts;
 }
 
-/** CSV del informe mensual como texto puro; el Blob/descarga lo hace index.tsx (igual que exportTicketsHistoryToCsv). */
-export function buildBankrollReportCsv(config: BankrollConfig, stats: BankrollStats, weeklyEntries: WeeklyBankrollEntry[]): string {
-  const headers = ['Semana', 'Gastado', 'Ganado', 'Balance'];
-  const rows = weeklyEntries.map(w => [w.weekLabel, w.spent.toFixed(2), w.won.toFixed(2), w.balance.toFixed(2)]);
-  const summaryRows: string[][] = [
-    [],
+/** CSV del informe con dos secciones: resumen del mes natural, y detalle de las últimas 8 semanas ISO. */
+export function buildBankrollReportCsv(config: BankrollConfig, stats: BankrollStats, last8WeeksEntries: WeeklyBankrollEntry[]): string {
+  const sectionA: string[][] = [
+    ['Resumen del mes natural'],
     ['Presupuesto mensual', config.monthlyBudget.toFixed(2)],
+    ['Presupuesto semanal', stats.weeklyBudget.toFixed(2)],
     ['Gastado total', stats.totalSpent.toFixed(2)],
     ['Ganado total', stats.totalWon.toFixed(2)],
     ['Balance neto', stats.balance.toFixed(2)],
     ['ROI (%)', stats.roi.toFixed(1)],
+    ['% presupuesto usado', stats.pctUsed.toFixed(0)],
   ];
-  const lines = [headers, ...rows, ...summaryRows].map(row =>
+  const sectionB: string[][] = [
+    [],
+    ['Últimas 8 semanas ISO'],
+    ['Semana', 'Gastado', 'Ganado', 'Balance'],
+    ...last8WeeksEntries.map(w => [w.weekLabel, w.spent.toFixed(2), w.won.toFixed(2), w.balance.toFixed(2)]),
+  ];
+  const lines = [...sectionA, ...sectionB].map(row =>
     row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   );
   return lines.join('\n');
 }
 
-/** Barras semanales gasto/ganado como divs — sin librería externa, mismo espíritu visual que el resto de la app. */
+/** Barras semanales gasto/ganado como divs, con etiqueta de balance por semana y línea de referencia en cero. */
 export function renderBankrollWeeklyChart(container: HTMLElement, weeklyEntries: WeeklyBankrollEntry[], currency: string) {
   container.innerHTML = '';
   if (weeklyEntries.length === 0) {
-    container.innerHTML = `<div style="color:#666; text-align:center; padding: 20px; font-size: 0.85rem;">Sin datos este mes todavía.</div>`;
+    container.innerHTML = `<div style="color:#666; text-align:center; padding: 20px; font-size: 0.85rem;">Sin datos todavía.</div>`;
     return;
   }
   const maxVal = Math.max(1, ...weeklyEntries.flatMap(w => [w.spent, w.won]));
-  container.style.cssText = 'display:flex; align-items:flex-end; gap:12px; height:160px; padding: 10px 5px; overflow-x:auto;';
+  container.style.cssText = 'position:relative; display:flex; align-items:flex-end; gap:12px; height:190px; padding: 26px 5px 10px 5px; overflow-x:auto;';
+
+  const zeroLine = document.createElement('div');
+  zeroLine.style.cssText = 'position:absolute; left:0; right:0; bottom:30px; height:1px; background:#e2e8f0;';
+  container.appendChild(zeroLine);
+
   weeklyEntries.forEach(w => {
     const col = document.createElement('div');
-    col.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; min-width:56px;';
+    col.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; min-width:56px; position:relative;';
+
+    const balanceLabel = document.createElement('div');
+    balanceLabel.style.cssText = `font-size:0.7rem; font-weight:700; color:${w.balance >= 0 ? '#16a34a' : '#dc2626'}; white-space:nowrap;`;
+    balanceLabel.textContent = `${w.balance >= 0 ? '+' : ''}${w.balance.toFixed(2)}${currency}`;
+
     const bars = document.createElement('div');
     bars.style.cssText = 'display:flex; align-items:flex-end; gap:3px; height:110px;';
     const spentBar = document.createElement('div');
@@ -191,9 +236,12 @@ export function renderBankrollWeeklyChart(container: HTMLElement, weeklyEntries:
     wonBar.title = `Ganado: ${w.won.toFixed(2)}${currency}`;
     bars.appendChild(spentBar);
     bars.appendChild(wonBar);
+
     const label = document.createElement('div');
     label.style.cssText = 'font-size:0.7rem; color:#64748b; text-align:center;';
     label.textContent = w.weekLabel;
+
+    col.appendChild(balanceLabel);
     col.appendChild(bars);
     col.appendChild(label);
     container.appendChild(col);
