@@ -14,6 +14,7 @@
   "tools.rendimiento": "📈 Ticket Performance",
   "tools.alertaBotes": "🔔 Jackpot Alert",
   "tools.gestorBankroll": "💰 Budget Control",
+  "tools.martingalas": "📉 Betting Systems",
   "tools.calculadora": "🧮 Calculator",
   "config.recordatorios": "🗓️ Draw Reminders",
   "config.modoOscuro": "🌙 Dark Mode",
@@ -1261,5 +1262,18 @@
   "comoFunciona.seccionAxioma4.texto": "No strategy based only on past results can change the odds of the next draw. This app's filters and analyses don't predict — they select combinations within a space where every one is still equally likely.",
   "comoFunciona.seccionAxioma5.titulo": "5. The only real edge",
   "comoFunciona.seccionAxioma5.texto": "The mathematical edge available isn't hitting more often — it's collecting more when you do: picking less popular combinations means fewer people to split the prize with.",
-  "comoFunciona.axiomasCierre": "Everything else you see in this app — filters, entropy, streaks, popularity — is built on top of these five points, never against them."
+  "comoFunciona.axiomasCierre": "Everything else you see in this app — filters, entropy, streaks, popularity — is built on top of these five points, never against them.",
+  "martingalas.titulo": "📉 Betting Systems & Martingale Fallacy",
+  "martingalas.subtitulo": "Rigorous mathematical simulation: proof that no staking system overcomes negative expected value",
+  "martingalas.graficoEncabezado": "Expected capital progression (average of 2,000 simulations, 40 rounds)",
+  "martingalas.recalcularBtn": "🔄 Resimulate",
+  "martingalas.estrategia.martingala": "Martingale (double on loss)",
+  "martingalas.estrategia.fibonacci": "Fibonacci (sequence progression)",
+  "martingalas.estrategia.dalembert": "D'Alembert (+1/-1)",
+  "martingalas.estrategia.fraccionFija": "Fixed fraction (1% of capital)",
+  "martingalas.resumenTitulo": "No staking system beats the house edge",
+  "martingalas.resumenTexto": "All 4 strategies (Martingale, Fibonacci, D'Alembert, and Fixed Fraction) adjust bet sizing based on prior outcomes, but none alter the underlying event probability. When each trial carries negative expected value, mean expected capital inevitably decays over time: this is a fundamental theorem of martingale theory (Doob), not a limitation of this simulation.",
+  "martingalas.notaAxiomaTitulo": "Axiomatic link",
+  "martingalas.notaAxiomaTexto": "There is no staking algorithm capable of transforming a negative expected unit value (E < 0) into a positive one. In lotteries or casinos, increasing sample size or altering stakes merely modulates variance, but long-run ruin remains mathematically certain.",
+  "martingalas.disclaimer": "Educational simulation using an even-money European roulette bet (48.6% probability at 1:1 payout). In a real lottery draw (with multi-million odds and a 50-55% prize payout), the curve would decline even more drastically."
 }

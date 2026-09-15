@@ -14,6 +14,7 @@
   "tools.rendimiento": "📈 Rendimiento de Boletos",
   "tools.alertaBotes": "🔔 Alerta de Botes",
   "tools.gestorBankroll": "💰 Control de Presupuesto",
+  "tools.martingalas": "📉 Sistemas de Apuestas",
   "tools.calculadora": "🧮 Calculadora",
   "config.recordatorios": "🗓️ Recordatorios de Sorteos",
   "config.modoOscuro": "🌙 Modo Oscuro",
@@ -1261,5 +1262,18 @@
   "comoFunciona.seccionAxioma4.texto": "Ninguna estrategia basada solo en el historial puede cambiar la probabilidad del siguiente sorteo. Los filtros y análisis de esta app no predicen: seleccionan combinaciones dentro de un espacio donde todas siguen siendo igual de probables.",
   "comoFunciona.seccionAxioma5.titulo": "5. La única ventaja real",
   "comoFunciona.seccionAxioma5.texto": "La ventaja matemática disponible no está en acertar más, sino en cobrar más si aciertas: elegir combinaciones menos populares reduce cuántas personas comparten el premio contigo.",
-  "comoFunciona.axiomasCierre": "Todo lo demás que ves en esta app —filtros, entropía, rachas, popularidad— se construye sobre estos cinco puntos, nunca en contra de ellos."
+  "comoFunciona.axiomasCierre": "Todo lo demás que ves en esta app —filtros, entropía, rachas, popularidad— se construye sobre estos cinco puntos, nunca en contra de ellos.",
+  "martingalas.titulo": "📉 Sistemas de Apuestas y Falacia de Martingala",
+  "martingalas.subtitulo": "Simulación matemática rigurosa: demostración de que ningún sistema vence el valor esperado negativo",
+  "martingalas.graficoEncabezado": "Evolución del capital esperado (promedio 2.000 simulaciones, 40 rondas)",
+  "martingalas.recalcularBtn": "🔄 Volver a simular",
+  "martingalas.estrategia.martingala": "Martingala (doblar al perder)",
+  "martingalas.estrategia.fibonacci": "Fibonacci (secuencia progresiva)",
+  "martingalas.estrategia.dalembert": "D'Alembert (+1/-1)",
+  "martingalas.estrategia.fraccionFija": "Fracción fija (1% del capital)",
+  "martingalas.resumenTitulo": "Ningún sistema de apuestas vence la ventaja de la casa",
+  "martingalas.resumenTexto": "Las 4 estrategias (Martingala, Fibonacci, D'Alembert y Fracción fija) varían el tamaño de cada apuesta según el resultado previo, pero ninguna de ellas modifica la probabilidad intrínseca del evento. Con esperanza matemática negativa en cada tirada, el capital medio esperado siempre decrece con el tiempo: es un teorema de la teoría de martingalas (Doob), no un defecto de esta simulación.",
+  "martingalas.notaAxiomaTitulo": "Conexión axiomática",
+  "martingalas.notaAxiomaTexto": "No existe ningún algoritmo de gestión de apuestas que transforme un valor esperado unitario negativo (E < 0) en uno positivo. En loterías o casinos, jugar más tiradas o cambiar el importe solo acelera o modula la varianza, pero la ruina a largo plazo es matemáticamente inevitable.",
+  "martingalas.disclaimer": "Simulación pedagógica con una apuesta equiprobable estilo ruleta europea (48,6% de probabilidad de acierto a cuota 1:1). En un sorteo de lotería real (donde las probabilidades son de 1 entre millones y el retorno es del 50-55%), la curva descendería de forma aún más drástica."
 }

@@ -81,6 +81,7 @@ import {
 } from './src/utils/storage';
 import { renderGapHistogramChart, renderRachasOverviewChart, renderCoocurrenciaChart, renderFrequencyChart, DataVizChartContext } from './src/utils/dataVizCharts';
 import { calculateBankrollStats, groupTicketsByWeek, getLast8WeeksEntries, countConsecutiveNegativeWeeks, getBankrollAlerts, buildBankrollReportCsv, renderBankrollWeeklyChart } from './src/utils/bankroll';
+import { renderMartingalasPanel } from './src/utils/martingalas';
 
 export type { Draw, Ticket };
 
@@ -5967,6 +5968,21 @@ class DataLotto49Advanced {
 
     document.getElementById('bankrollExportBtn')?.addEventListener('click', () => {
         this.exportBankrollReport();
+    });
+
+    document.getElementById('sidebarMartingalasBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeSidebar();
+        this.toggleModal('martingalasModal', true);
+        renderMartingalasPanel();
+    });
+
+    document.getElementById('martingalasCloseBtn')?.addEventListener('click', () => {
+        this.toggleModal('martingalasModal', false);
+    });
+
+    document.getElementById('martingalasRecalculateBtn')?.addEventListener('click', () => {
+        renderMartingalasPanel(true);
     });
 
     document.getElementById('sidebarCalculatorBtn')?.addEventListener('click', (e) => {

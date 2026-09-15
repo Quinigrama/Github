@@ -317,6 +317,7 @@
       <li><a href="#" id="historyOfResultsBtn" data-i18n="tools.rendimiento">📈 Rendimiento de Boletos</a></li>
       <li><a href="#" id="sidebarJackpotsBtn" data-i18n="tools.alertaBotes">🔔 Alerta de Botes</a></li>
       <li><a href="#" id="sidebarBankrollBtn" data-i18n="tools.gestorBankroll">💰 Control de Presupuesto</a></li>
+      <li><a href="#" id="sidebarMartingalasBtn" data-i18n="tools.martingalas">📉 Sistemas de Apuestas</a></li>
       
       <li class="divider"></li>
       
@@ -2429,6 +2430,34 @@
         </div>
 
         <p style="margin: 15px 0 0 0; font-size: 0.7rem; color: #9ca3af; text-align: center;" data-i18n="bankroll.disclaimerJuego">Juega con responsabilidad. Prohibido para menores de 18 años. Si crees que tienes un problema con el juego, visita <a href="https://www.jugarbien.es" target="_blank" rel="noopener noreferrer" style="color:#9ca3af; text-decoration:underline;">jugarbien.es</a>.</p>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sistemas de Apuestas y Martingalas -->
+  <div class="modal modal-fullscreen-mobile" id="martingalasModal" style="display: none;">
+    <div class="modal-content" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; flex-shrink: 0;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 8px;" data-i18n="martingalas.titulo">📉 Sistemas de Apuestas y Falacia de Martingala</h3>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #6b7280;" data-i18n="martingalas.subtitulo">Simulación matemática rigurosa: demostración de que ningún sistema vence el valor esperado negativo</p>
+        </div>
+        <button class="close-btn" id="martingalasCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 16px; overflow-y: auto; flex: 1; text-align: left;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 0.85rem; color: #475569; font-weight: 600;" data-i18n="martingalas.graficoEncabezado">Evolución del capital esperado (promedio 2.000 simulaciones, 40 rondas)</span>
+          <button id="martingalasRecalculateBtn" class="modal-btn" style="padding: 6px 12px; font-size: 0.8rem;" data-i18n="martingalas.recalcularBtn">🔄 Volver a simular</button>
+        </div>
+
+        <div id="martingalasChartContainer" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
+          <div style="color: #94a3b8; font-size: 0.9rem;">Cargando simulación...</div>
+        </div>
+
+        <div id="martingalasSummary" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;">
+        </div>
 
       </div>
     </div>
