@@ -3855,6 +3855,61 @@ body.dark-mode .filter-mode-btn.active {
   color: white;
 }
 
+/* ===== Cuadrícula homogénea para Modos Visuales en DataViz ===== */
+.modal-toggle-group.dataviz-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 6px;
+  width: 100%;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.modal-toggle-btn.dataviz-mode-btn {
+  border: 1px solid #e2e8f0;
+  padding: 8px 6px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #ffffff;
+  color: #475569;
+  white-space: normal;
+  text-align: center;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.25;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+.modal-toggle-btn.dataviz-mode-btn:hover:not(.active) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.modal-toggle-btn.dataviz-mode-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 640px) {
+  .modal-toggle-group.dataviz-modes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  /* En cuadrícula de 2 columnas con 7 elementos, el 7º abarca las 2 columnas para una simetría perfecta */
+  .modal-toggle-btn.dataviz-mode-btn:nth-child(7) {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 480px) {
   .modal-control-row {
     flex-direction: column;
@@ -3869,19 +3924,6 @@ body.dark-mode .filter-mode-btn.active {
   .modal-filter-select {
     width: 100%;
     box-sizing: border-box;
-  }
-
-  .modal-toggle-group {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .modal-toggle-btn {
-    white-space: normal;
-    text-align: center;
-    padding: 8px 6px;
-    font-size: 0.78rem;
   }
 }
 
