@@ -4,15 +4,15 @@ export type EstrategiaApuesta = 'martingala' | 'fibonacci' | 'dalembert' | 'frac
 
 const FIBONACCI_SEQ = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
 
-const ESTRATEGIAS_INFO: { id: EstrategiaApuesta; labelKey: string; color: string }[] = [
-  { id: 'martingala', labelKey: 'martingalas.estrategia.martingala', color: '#ef4444' },
-  { id: 'fibonacci', labelKey: 'martingalas.estrategia.fibonacci', color: '#f59e0b' },
-  { id: 'dalembert', labelKey: 'martingalas.estrategia.dalembert', color: '#8b5cf6' },
-  { id: 'fraccionFija', labelKey: 'martingalas.estrategia.fraccionFija', color: '#0ea5e9' },
+const ESTRATEGIAS_INFO: { id: EstrategiaApuesta; labelKey: string; blurbKey: string; color: string }[] = [
+  { id: 'martingala', labelKey: 'martingalas.estrategia.martingala', blurbKey: 'martingalas.estrategia.martingala.resumenCorto', color: '#ef4444' },
+  { id: 'fibonacci', labelKey: 'martingalas.estrategia.fibonacci', blurbKey: 'martingalas.estrategia.fibonacci.resumenCorto', color: '#f59e0b' },
+  { id: 'dalembert', labelKey: 'martingalas.estrategia.dalembert', blurbKey: 'martingalas.estrategia.dalembert.resumenCorto', color: '#8b5cf6' },
+  { id: 'fraccionFija', labelKey: 'martingalas.estrategia.fraccionFija', blurbKey: 'martingalas.estrategia.fraccionFija.resumenCorto', color: '#0ea5e9' },
 ];
 
 // Cache memoizado para evitar recalcular 320.000 iteraciones cada vez que se abre el modal
-let cachedSeriesList: { id: EstrategiaApuesta; labelKey: string; color: string; data: number[] }[] | null = null;
+let cachedSeriesList: { id: EstrategiaApuesta; labelKey: string; blurbKey: string; color: string; data: number[] }[] | null = null;
 
 function simularUnTrial(estrategia: EstrategiaApuesta, rounds: number, capitalInicial: number, pGanar: number, baseBet: number): number[] {
   const capital: number[] = [capitalInicial];
@@ -66,18 +66,18 @@ export function simularEstrategia(
   return acumulado.map(v => v / trials);
 }
 
-function renderMartingalasChart(container: HTMLElement, seriesList: { labelKey: string; color: string; data: number[] }[]) {
+function renderMartingalasChart(container: HTMLElement, seriesList: { labelKey: string; blurbKey: string; color: string; data: number[] }[]) {
   const rounds = seriesList[0]?.data.length ? seriesList[0].data.length - 1 : 0;
   const allValues = seriesList.flatMap(s => s.data);
   const minY = Math.min(0, ...allValues);
   const maxY = Math.max(...allValues, 100);
 
   const svgWidth = 800;
-  const svgHeight = 360;
+  const svgHeight = 420;
   const marginTop = 20;
   const marginBottom = 30;
   const marginLeft = 55;
-  const marginRight = 20;
+  const marginRight = 130;
   const chartW = svgWidth - marginLeft - marginRight;
   const chartH = svgHeight - marginTop - marginBottom;
 
@@ -96,13 +96,26 @@ function renderMartingalasChart(container: HTMLElement, seriesList: { labelKey: 
   const initialCapY = scaleY(100);
   const initialLineHTML = `
     <line x1="${marginLeft}" y1="${initialCapY.toFixed(1)}" x2="${svgWidth - marginRight}" y2="${initialCapY.toFixed(1)}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="${(svgWidth - marginRight - 5).toFixed(1)}" y="${(initialCapY - 5).toFixed(1)}" font-size="10" fill="#94a3b8" text-anchor="end">Capital inicial (100€)</text>
+    <text x="${(marginLeft + 4).toFixed(1)}" y="${(initialCapY - 6).toFixed(1)}" font-size="10" fill="#94a3b8" text-anchor="start">Capital inicial (100€)</text>
   `;
 
   const linesHTML = seriesList.map(s => {
     const pts = s.data.map((v, i) => `${scaleX(i).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
-    return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+    return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />`;
   }).join('');
+
+  // Etiqueta al final de cada línea (nombre + capital final), con separación mínima para que no se solapen
+  const minGap = 15;
+  const endPoints = seriesList.map(s => {
+    const finalValue = s.data[s.data.length - 1];
+    return { label: t(s.labelKey), color: s.color, y: scaleY(finalValue), value: finalValue };
+  }).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < endPoints.length; i++) {
+    if (endPoints[i].y - endPoints[i - 1].y < minGap) {
+      endPoints[i].y = endPoints[i - 1].y + minGap;
+    }
+  }
+  const endLabelsHTML = endPoints.map(p => `<text x="${(svgWidth - marginRight + 8).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11.5" font-weight="700" fill="${p.color}">${p.label}: ${p.value.toFixed(0)}€</text>`).join('');
 
   const axesHTML = `
     <line x1="${marginLeft}" y1="${marginTop}" x2="${marginLeft}" y2="${marginTop + chartH}" stroke="#cbd5e1" stroke-width="1.5" />
@@ -110,21 +123,25 @@ function renderMartingalasChart(container: HTMLElement, seriesList: { labelKey: 
   `;
 
   const legendHTML = seriesList.map(s => `
-    <div style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:#334155;">
-      <span style="width:14px; height:3px; background:${s.color}; display:inline-block; border-radius:2px;"></span>
-      <span>${t(s.labelKey)}</span>
+    <div style="display:flex; flex-direction:column; gap:2px; min-width: 150px;">
+      <div style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:#334155; font-weight:600;">
+        <span style="width:14px; height:3px; background:${s.color}; display:inline-block; border-radius:2px;"></span>
+        <span>${t(s.labelKey)}</span>
+      </div>
+      <div style="font-size: 0.72rem; color: #94a3b8; margin-left: 20px;">${t(s.blurbKey)}</div>
     </div>
   `).join('');
 
   container.innerHTML = `
     <div style="width: 100%; overflow-x: auto;">
-      <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 380px; display: block; background: #ffffff; font-family: system-ui, sans-serif; border-radius: 8px;">
+      <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: auto; max-height: 440px; display: block; background: #ffffff; font-family: system-ui, sans-serif; border-radius: 8px;">
         ${yTicksHTML}
         ${initialLineHTML}
         ${axesHTML}
         ${linesHTML}
+        ${endLabelsHTML}
       </svg>
-      <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:12px; padding: 4px 8px;">
+      <div style="display:flex; gap:18px; flex-wrap:wrap; justify-content:center; margin-top:14px; padding: 6px 8px;">
         ${legendHTML}
       </div>
     </div>
@@ -150,6 +167,7 @@ export function renderMartingalasPanel(forceRecalculate: boolean = false) {
     cachedSeriesList = ESTRATEGIAS_INFO.map(info => ({
       id: info.id,
       labelKey: info.labelKey,
+      blurbKey: info.blurbKey,
       color: info.color,
       data: simularEstrategia(info.id, rounds, trials, capitalInicial, pGanar, 1),
     }));

@@ -2446,18 +2446,52 @@
         <button class="close-btn" id="martingalasCloseBtn" style="background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
       </div>
       <div class="modal-body" style="padding: 18px 16px; overflow-y: auto; flex: 1; text-align: left;">
-        
+
+        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.8rem; color: #92400e;" data-i18n="martingalas.avisoSimulacion">⚠️ Esto es una simulación matemática de apuestas de dinero (estilo casino/ruleta) — no está conectado a tus boletos de lotería ni a ningún juego real de esta app.</div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
           <span style="font-size: 0.85rem; color: #475569; font-weight: 600;" data-i18n="martingalas.graficoEncabezado">Evolución del capital esperado (promedio 2.000 simulaciones, 40 rondas)</span>
-          <button id="martingalasRecalculateBtn" class="modal-btn" style="padding: 6px 12px; font-size: 0.8rem;" data-i18n="martingalas.recalcularBtn">🔄 Volver a simular</button>
+          <button id="martingalasRecalculateBtn" class="tickets-toolbar-btn audit-agg-btn" style="padding: 6px 12px; font-size: 0.8rem;" data-i18n="martingalas.recalcularBtn">🔄 Volver a simular</button>
         </div>
 
-        <div id="martingalasChartContainer" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
+        <div id="martingalasChartContainer" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px; min-height: 340px; display: flex; align-items: center; justify-content: center;">
           <div style="color: #94a3b8; font-size: 0.9rem;">Cargando simulación...</div>
         </div>
 
         <div id="martingalasSummary" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;">
         </div>
+
+        <h4 style="margin-top: 20px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;" data-i18n="martingalas.explicacionesTitulo">📖 ¿Qué hace cada estrategia?</h4>
+
+        <div style="border-left: 4px solid #ef4444; background:#fef2f2; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-top: 12px;">
+          <div style="font-weight:700; color:#1e293b; margin-bottom:6px; font-size: 0.9rem;" data-i18n="martingalas.estrategia.martingala.titulo">🔴 Martingala — doblar tras perder</div>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.mecanicaLabel">Mecánica:</strong> <span data-i18n="martingalas.estrategia.martingala.mecanica">Pierdes → doblas la próxima apuesta. Ganas → vuelves a la apuesta mínima.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.ejemploLabel">Ejemplo:</strong> <span data-i18n="martingalas.estrategia.martingala.ejemplo">Apuestas 1€ y pierdes → 2€ y pierdes → 4€ y pierdes → 8€ y pierdes → 16€ y ganas: recuperas lo perdido más 1€. El problema aparece si la racha es más larga: a la 7ª pérdida seguida ya apuestas 64€ para ganar solo 1€ neto.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.porQueFallaLabel">Por qué falla:</strong> <span data-i18n="martingalas.estrategia.martingala.porQueFalla">Cuanto más larga la racha perdedora —y las rachas largas pasan más de lo que la intuición dice—, más rápido crece la apuesta, de forma exponencial. Antes o después topas con tu presupuesto o con el límite del juego, justo en el peor momento.</span></p>
+        </div>
+
+        <div style="border-left: 4px solid #f59e0b; background:#fffbeb; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-top: 10px;">
+          <div style="font-weight:700; color:#1e293b; margin-bottom:6px; font-size: 0.9rem;" data-i18n="martingalas.estrategia.fibonacci.titulo">🟠 Fibonacci — un escalón más, un escalón menos</div>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.mecanicaLabel">Mecánica:</strong> <span data-i18n="martingalas.estrategia.fibonacci.mecanica">Sigues la secuencia 1, 1, 2, 3, 5, 8, 13, 21... Pierdes → subes un escalón. Ganas → bajas dos escalones, no vuelves directo al mínimo.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.ejemploLabel">Ejemplo:</strong> <span data-i18n="martingalas.estrategia.fibonacci.ejemplo">1€ pierdes → 1€ pierdes → 2€ pierdes → 3€ pierdes → 5€ ganas: bajas dos escalones y vuelves a apostar 1€. Tras una racha larga, hacen falta varias victorias seguidas para recuperarte del todo, no solo una.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.porQueFallaLabel">Por qué falla:</strong> <span data-i18n="martingalas.estrategia.fibonacci.porQueFalla">Crece más despacio que Martingala, así que duele menos a corto plazo. Pero el problema de fondo es el mismo: sigue sin cambiar la probabilidad de ganar cada apuesta, solo reparte el dolor en el tiempo de otra forma.</span></p>
+        </div>
+
+        <div style="border-left: 4px solid #8b5cf6; background:#f5f3ff; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-top: 10px;">
+          <div style="font-weight:700; color:#1e293b; margin-bottom:6px; font-size: 0.9rem;" data-i18n="martingalas.estrategia.dalembert.titulo">🟣 D'Alembert — de uno en uno</div>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.mecanicaLabel">Mecánica:</strong> <span data-i18n="martingalas.estrategia.dalembert.mecanica">Pierdes → sube la apuesta 1 unidad. Ganas → baja la apuesta 1 unidad, sin bajar del mínimo.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.ejemploLabel">Ejemplo:</strong> <span data-i18n="martingalas.estrategia.dalembert.ejemplo">5€ pierdes → 6€ pierdes → 7€ ganas → 6€ ganas → 5€. Mucho más suave: nunca "explota" como Martingala.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.porQueFallaLabel">Por qué falla:</strong> <span data-i18n="martingalas.estrategia.dalembert.porQueFalla">Es la más conservadora de las 4, y precisamente por eso la más fácil de aguantar mucho tiempo sin notar que, apuesta a apuesta, sigues perdiendo en promedio. Pierdes más lento, no menos.</span></p>
+        </div>
+
+        <div style="border-left: 4px solid #0ea5e9; background:#f0f9ff; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-top: 10px;">
+          <div style="font-weight:700; color:#1e293b; margin-bottom:6px; font-size: 0.9rem;" data-i18n="martingalas.estrategia.fraccionFija.titulo">🔵 Fracción fija — un % de lo que te queda</div>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.mecanicaLabel">Mecánica:</strong> <span data-i18n="martingalas.estrategia.fraccionFija.mecanica">Cada apuesta es un porcentaje fijo de tu capital actual (aquí, 1%), no una cantidad fija en euros.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.ejemploLabel">Ejemplo:</strong> <span data-i18n="martingalas.estrategia.fraccionFija.ejemplo">Con 100€ apuestas 1€. Si bajas a 80€, tu siguiente apuesta es 0,80€, no 1€. Nunca llegas a 0€ de golpe porque siempre apuestas una fracción de lo que queda.</span></p>
+          <p style="font-size:0.82rem; color:#475569; margin:4px 0;"><strong data-i18n="martingalas.porQueFallaLabel">Por qué falla:</strong> <span data-i18n="martingalas.estrategia.fraccionFija.porQueFalla">Es la más elegante matemáticamente —evita la ruina total—, pero por el mismo motivo tu capital tiende hacia 0 sin tocarlo nunca del todo. El resultado final es idéntico a las otras tres: solo cambia lo suave que es la curva.</span></p>
+        </div>
+
+        <p style="margin-top: 14px; font-style: italic; color: #64748b; font-size: 0.85rem; text-align: center;" data-i18n="martingalas.cierreComun">Las 4 responden a la misma pregunta —cuánto apuesto ahora según lo que pasó antes— pero ninguna responde a la que de verdad importa: la probabilidad de ganar la próxima apuesta no cambia nunca. Por eso las 4 líneas bajan.</p>
 
       </div>
     </div>
