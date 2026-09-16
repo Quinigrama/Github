@@ -1301,5 +1301,6 @@
   "martingalas.estrategia.fraccionFija.mecanica": "Cada apuesta es un porcentaje fijo de tu capital actual (aquí, 1%), no una cantidad fija en euros.",
   "martingalas.estrategia.fraccionFija.ejemplo": "Con 100€ apuestas 1€. Si bajas a 80€, tu siguiente apuesta es 0,80€, no 1€. Nunca llegas a 0€ de golpe porque siempre apuestas una fracción de lo que queda.",
   "martingalas.estrategia.fraccionFija.porQueFalla": "Es la más elegante matemáticamente —evita la ruina total—, pero por el mismo motivo tu capital tiende hacia 0 sin tocarlo nunca del todo. El resultado final es idéntico a las otras tres: solo cambia lo suave que es la curva.",
-  "martingalas.cierreComun": "Las 4 responden a la misma pregunta —cuánto apuesto ahora según lo que pasó antes— pero ninguna responde a la que de verdad importa: la probabilidad de ganar la próxima apuesta no cambia nunca. Por eso las 4 líneas bajan."
+  "martingalas.cierreComun": "Las 4 responden a la misma pregunta —cuánto apuesto ahora según lo que pasó antes— pero ninguna responde a la que de verdad importa: la probabilidad de ganar la próxima apuesta no cambia nunca. Por eso las 4 líneas bajan.",
+  "martingalas.avisoBadgeTitulo": "Simulación de apuestas de dinero"
 }

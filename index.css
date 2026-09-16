@@ -183,6 +183,22 @@ body {
 }
 
 
+.sidebar-warning-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15em;
+    height: 1.15em;
+    font-size: 0.95em;
+    line-height: 1;
+    background: var(--warning);
+    color: white;
+    border-radius: 50%;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: disclaimerPulse 2s infinite;
+}
+
 @keyframes disclaimerPulse {
   0%, 100% { 
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);

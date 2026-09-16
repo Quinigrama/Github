@@ -54,44 +54,44 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
   primitiva: [
     {
       id: 'reduced-8-5-5',
-      name: '8 Números; garantizados 5 aciertos si caen los 6 (12 apuestas - 12,00 €)',
+      name: '8 Números; garantizados 5 aciertos si caen los 6 (4 apuestas - 4,00 €)',
       baseNumbersCount: 8,
-      combinationsCount: 12,
+      combinationsCount: 4,
       description: 'Garantiza al menos un premio de 5 aciertos si entre tus 8 números elegidos están los 6 ganadores.'
     },
     {
       id: 'reduced-10-5-5',
-      name: '10 Números; garantizados 5 aciertos si caen los 6 (56 apuestas - 56,00 €)',
+      name: '10 Números; garantizados 5 aciertos si caen los 6 (17 apuestas - 17,00 €)',
       baseNumbersCount: 10,
-      combinationsCount: 56,
+      combinationsCount: 17,
       description: 'Garantiza al menos un premio de 5 aciertos si entre tus 10 números elegidos están los 6 ganadores.'
     },
     {
       id: 'reduced-12-5-5',
-      name: '12 Números; garantizados 5 aciertos si caen los 6 (172 apuestas - 172,00 €)',
+      name: '12 Números; garantizados 5 aciertos si caen los 6 (46 apuestas - 46,00 €)',
       baseNumbersCount: 12,
-      combinationsCount: 172,
+      combinationsCount: 46,
       description: 'Garantiza al menos un premio de 5 aciertos si entre tus 12 números elegidos están los 6 ganadores.'
     },
     {
       id: 'reduced-10-4-4',
-      name: '10 Números; garantizados 4 aciertos si caen los 6 (23 apuestas - 23,00 €)',
+      name: '10 Números; garantizados 4 aciertos si caen los 6 (3 apuestas - 3,00 €)',
       baseNumbersCount: 10,
-      combinationsCount: 23,
+      combinationsCount: 3,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 números elegidos están los 6 ganadores.'
     },
     {
       id: 'reduced-12-4-4',
-      name: '12 Números; garantizados 4 aciertos si caen los 6 (53 apuestas - 53,00 €)',
+      name: '12 Números; garantizados 4 aciertos si caen los 6 (6 apuestas - 6,00 €)',
       baseNumbersCount: 12,
-      combinationsCount: 53,
+      combinationsCount: 6,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 números elegidos están los 6 ganadores.'
     },
     {
       id: 'reduced-14-4-4',
-      name: '14 Números; garantizados 4 aciertos si caen los 6 (107 apuestas - 107,00 €)',
+      name: '14 Números; garantizados 4 aciertos si caen los 6 (18 apuestas - 18,00 €)',
       baseNumbersCount: 14,
-      combinationsCount: 107,
+      combinationsCount: 18,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 números elegidos están los 6 ganadores.'
     }
   ],

@@ -4,6 +4,7 @@
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
+import { PRIMITIVA_OPTIMIZED_PATTERNS } from "./src/data/reducedSystemPatterns";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
 import { parseCSVData, parseFlexibleDate } from "./src/utils/csvParser";
 import { parseJackpotsCsvDirectly } from "./src/services/jackpotsFetcher";
@@ -7268,12 +7269,17 @@ class DataLotto49Advanced {
               baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
           }
           
-          const matrix = getGreedyCovering(
-              system.baseNumbersCount,
-              this.currentGame.maxNumbers,
-              system.id.includes('-3-3') ? 3 : (system.id.includes('-4-4') ? 4 : 5),
-              system.combinationsCount
-          );
+          let matrix: number[][];
+          if (gameId === 'primitiva' && PRIMITIVA_OPTIMIZED_PATTERNS[system.id]) {
+              matrix = PRIMITIVA_OPTIMIZED_PATTERNS[system.id];
+          } else {
+              matrix = getGreedyCovering(
+                  system.baseNumbersCount,
+                  this.currentGame.maxNumbers,
+                  system.id.includes('-3-3') ? 3 : (system.id.includes('-4-4') ? 4 : 5),
+                  system.combinationsCount
+              );
+          }
           
           combinations = matrix.map(indices => {
               return indices.map(idx => baseNumbersSorted[idx]).sort((a, b) => a - b);
