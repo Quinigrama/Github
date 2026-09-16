@@ -45,9 +45,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-14-4-4',
-      name: '14 Números; garantizados 4 aciertos si caen los 6 (18 apuestas - 9,00 €)',
+      name: '14 Números; garantizados 4 aciertos si caen los 6 (17 apuestas - 8,50 €)',
       baseNumbersCount: 14,
-      combinationsCount: 18,
+      combinationsCount: 17,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 números elegidos están los 6 ganadores.'
     }
   ],
@@ -89,9 +89,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-14-4-4',
-      name: '14 Números; garantizados 4 aciertos si caen los 6 (18 apuestas - 18,00 €)',
+      name: '14 Números; garantizados 4 aciertos si caen los 6 (17 apuestas - 17,00 €)',
       baseNumbersCount: 14,
-      combinationsCount: 18,
+      combinationsCount: 17,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 números elegidos están los 6 ganadores.'
     }
   ],
@@ -133,9 +133,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-14-4-4',
-      name: '14 Números; garantizados 4 aciertos si caen los 6 (18 apuestas - 45,00 €)',
+      name: '14 Números; garantizados 4 aciertos si caen los 6 (17 apuestas - 42,50 €)',
       baseNumbersCount: 14,
-      combinationsCount: 18,
+      combinationsCount: 17,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 14 números elegidos están los 6 ganadores (1 Sueño fijo).'
     }
   ],
@@ -177,9 +177,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-15-3-3',
-      name: '15 Números; garantizados 3 aciertos si caen los 5 (16 apuestas - 24,00 €)',
+      name: '15 Números; garantizados 3 aciertos si caen los 5 (14 apuestas - 21,00 €)',
       baseNumbersCount: 15,
-      combinationsCount: 16,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 números elegidos están los 5 ganadores (1 Clave fija).'
     }
   ],
@@ -221,9 +221,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-15-3-3',
-      name: '15 Números; garantizados 3 aciertos si caen los 5 (16 apuestas - 40,00 €)',
+      name: '15 Números; garantizados 3 aciertos si caen los 5 (14 apuestas - 35,00 €)',
       baseNumbersCount: 15,
-      combinationsCount: 16,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 números elegidos están los 5 ganadores (2 estrellas fijas).'
     }
   ],
@@ -266,9 +266,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-15-3-3',
-      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (16 apuestas)',
+      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (14 apuestas)',
       baseNumbersCount: 15,
-      combinationsCount: 16,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 números elegidos caen los 5 ganadores.'
     }
   ],
@@ -310,9 +310,9 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-15-3-3',
-      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (16 apuestas - $32.00)',
+      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (14 apuestas - $28.00)',
       baseNumbersCount: 15,
-      combinationsCount: 16,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 números elegidos caen los 5 ganadores (1 Mega Ball fija).'
     }
   ]
