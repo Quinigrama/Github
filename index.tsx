@@ -5,6 +5,7 @@ import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
 import { PRIMITIVA_OPTIMIZED_PATTERNS } from "./src/data/reducedSystemPatterns";
+import { FIVE_NUMBER_OPTIMIZED_PATTERNS } from "./src/data/fiveNumberOptimizedPatterns";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
 import { parseCSVData, parseFlexibleDate } from "./src/utils/csvParser";
 import { parseJackpotsCsvDirectly } from "./src/services/jackpotsFetcher";
@@ -7269,9 +7270,13 @@ class DataLotto49Advanced {
               baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
           }
           
+          const SIX_NUMBER_OPTIMIZED_GAMES = ['primitiva', 'bonoloto', 'eurodreams'];
+          const FIVE_NUMBER_OPTIMIZED_GAMES = ['gordo', 'euromillones', 'powerball', 'megamillions'];
           let matrix: number[][];
-          if (gameId === 'primitiva' && PRIMITIVA_OPTIMIZED_PATTERNS[system.id]) {
+          if (SIX_NUMBER_OPTIMIZED_GAMES.includes(gameId) && PRIMITIVA_OPTIMIZED_PATTERNS[system.id]) {
               matrix = PRIMITIVA_OPTIMIZED_PATTERNS[system.id];
+          } else if (FIVE_NUMBER_OPTIMIZED_GAMES.includes(gameId) && FIVE_NUMBER_OPTIMIZED_PATTERNS[system.id]) {
+              matrix = FIVE_NUMBER_OPTIMIZED_PATTERNS[system.id];
           } else {
               matrix = getGreedyCovering(
                   system.baseNumbersCount,
