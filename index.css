@@ -3358,6 +3358,38 @@ textarea.modal-input {
     box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
 }
 
+.reduced-audit-btn {
+    flex: 1;
+    min-width: 140px;
+    font-size: 0.85rem;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #ffffff;
+    border: 1.5px solid #bae6fd;
+    color: #0284c7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: var(--transition);
+}
+
+.reduced-audit-btn:hover {
+    background: #f0f9ff;
+    border-color: #38bdf8;
+    color: #0369a1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+}
+
+.reduced-audit-btn:active {
+    transform: scale(0.97) !important;
+    box-shadow: 0 2px 5px rgba(2, 132, 199, 0.1);
+}
+
 .reduced-clear-btn {
     flex: 1;
     min-width: 120px;

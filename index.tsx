@@ -4,6 +4,7 @@
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
+import { getReducedSystemMatrix, optimizeReducedBasePool, auditReducedBaseCompliance } from "./src/utils/reducedSystemOptimizer";
 import { PRIMITIVA_OPTIMIZED_PATTERNS } from "./src/data/reducedSystemPatterns";
 import { FIVE_NUMBER_OPTIMIZED_PATTERNS } from "./src/data/fiveNumberOptimizedPatterns";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
@@ -327,6 +328,7 @@ class DataLotto49Advanced {
     currentSelectionMode: 'excluded' | 'hot' | 'cold' | 'figure' | 'absent' | 'favorites' | null;
     isGenerating: boolean;
     lastMultipleStats: { validCount: number, totalCount: number } | null;
+    lastReducedBaseStats: { validCount: number, totalBets: number, percentage: number, systemId: string } | null;
     lastDebugInfo: string;
     savedTickets: Ticket[];
     bankrollConfig: BankrollConfig | null;
@@ -448,6 +450,7 @@ class DataLotto49Advanced {
     this.isGenerating = false;
     this.lastDebugInfo = '';
     this.lastMultipleStats = null;
+    this.lastReducedBaseStats = null;
     this.savedTickets = [];
     this.bankrollConfig = null;
     this.controlGroupStats = {};
@@ -3746,11 +3749,15 @@ class DataLotto49Advanced {
     }
     
     infoTitle.textContent = `📋 Garantías: ${system.name}`;
+    const complianceLine = this.lastReducedBaseStats && this.lastReducedBaseStats.systemId === system.id
+      ? `<br/>• <strong>Cumplimiento de filtros de la base:</strong> <span style="color: ${this.lastReducedBaseStats.percentage >= 80 ? '#16a34a' : (this.lastReducedBaseStats.percentage >= 50 ? '#d97706' : '#dc2626')}; font-weight: bold;">${this.lastReducedBaseStats.validCount} de ${this.lastReducedBaseStats.totalBets} boletos (${this.lastReducedBaseStats.percentage}%)</span>`
+      : '';
+
     infoDesc.innerHTML = `
       <strong>${system.description}</strong><br/>
       • Números base requeridos: <span style="color: var(--primary); font-weight: bold;">${system.baseNumbersCount}</span><br/>
       • Apuestas simples generadas: <span style="color: #0284c7; font-weight: bold;">${system.combinationsCount}</span><br/>
-      • Ahorro vs Combinaciones Múltiples: <span style="color: #16a34a; font-weight: bold;">${Math.round((1 - (system.combinationsCount / this.getMultipleCombinationsCount(system.baseNumbersCount))) * 100)}%</span>
+      • Ahorro vs Combinaciones Múltiples: <span style="color: #16a34a; font-weight: bold;">${Math.round((1 - (system.combinationsCount / this.getMultipleCombinationsCount(system.baseNumbersCount))) * 100)}%</span>${complianceLine}
     `;
     this.updateSelectionTitle();
   }
@@ -3810,60 +3817,119 @@ class DataLotto49Advanced {
       return;
     }
 
-    const threshold = DEFAULT_TOLERANCE_LEVELS[countNeeded] || 0.5;
-    const maxAttempts = 2000;
+    const matrix = getReducedSystemMatrix(gameId, system, maxNumbers);
+    const totalBets = matrix.length;
 
-    let bestPool: number[] = [];
-    let bestPct = -1;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (attempt % 100 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-
-      const shuffled = [...universe];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(secureRandom() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      const candidatePool = shuffled.slice(0, countNeeded).sort((a, b) => a - b);
-
-      let subCombinations = getCombinations(candidatePool, maxNumbers);
-      if (subCombinations.length > 50000) {
-        const sample: number[][] = [];
-        for (let i = 0; i < 5000; i++) {
-          sample.push(subCombinations[Math.floor(secureRandom() * subCombinations.length)]);
-        }
-        subCombinations = sample;
-      }
-
-      let validCount = 0;
-      for (const combo of subCombinations) {
-        if (isValidCombination(combo, [], this.currentGame, this.filters, this.primes, true, this.historicalData)) {
-          validCount++;
-        }
-      }
-      const pct = validCount / subCombinations.length;
-
-      if (pct > bestPct) {
-        bestPct = pct;
-        bestPool = candidatePool;
-      }
-
-      if (pct >= threshold) {
-        break;
+    let baseStars: number[] = [];
+    if (this.currentGame.maxStars > 0) {
+      const selectedStarsArr = Array.from(this.selectedStars);
+      if (selectedStarsArr.length >= this.currentGame.maxStars) {
+        baseStars = selectedStarsArr.slice(0, this.currentGame.maxStars);
+      } else {
+        const availableStars = this.getAvailableUniverse('star');
+        const shuffledStars = [...availableStars].sort(() => secureRandom() - 0.5);
+        baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
       }
     }
 
-    bestPool.forEach(num => this.selectedNumbers.add(num));
+    const btn = document.getElementById('reducedAiBaseBtn') as HTMLButtonElement;
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `⏳ Optimizando (${totalBets} boletos)...`;
+    }
 
-    const pctDisplay = Math.round(bestPct * 100);
-    this.showToast(t('toast.numerosBasePorCobertura', { count: countNeeded, pct: pctDisplay }), 'success');
+    try {
+      const result = await optimizeReducedBasePool(
+        universe,
+        countNeeded,
+        matrix,
+        baseStars,
+        this.currentGame,
+        this.filters,
+        this.primes,
+        this.historicalData,
+        4000
+      );
 
-    this.updateGridNumberStates();
-    this.updateSelectedDisplay();
-    this.updateStats();
-    this.updateCorrelationScore();
+      result.bestPool.forEach(num => this.selectedNumbers.add(num));
+
+      this.lastReducedBaseStats = {
+        validCount: result.validCount,
+        totalBets: result.totalBets,
+        percentage: result.percentage,
+        systemId: system.id
+      };
+
+      if (result.validCount === totalBets) {
+        this.showToast(t('toast.basePerfectaEncontrada', { count: countNeeded, total: totalBets }), 'success');
+      } else {
+        this.showToast(t('toast.numerosBasePorCobertura', { count: countNeeded, valid: result.validCount, total: totalBets, pct: result.percentage }), 'success');
+      }
+
+      this.updateGridNumberStates();
+      this.updateSelectedDisplay();
+      this.updateStats();
+      this.updateCorrelationScore();
+      this.updateReducedSystemInfo();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+  }
+
+  auditCurrentBase() {
+    const select = document.getElementById('reducedSystemSelect') as HTMLSelectElement;
+    const gameId = this.currentGame.id;
+    const systems = REDUCED_SYSTEMS[gameId] || [];
+    const selectedId = select?.value;
+    const system = systems.find(s => s.id === selectedId);
+
+    if (!system) {
+      this.showToast(t('toast.seleccionaSistemaReducido'), 'warning');
+      return;
+    }
+
+    const countNeeded = system.baseNumbersCount;
+    const selectedArr = Array.from(this.selectedNumbers);
+
+    if (selectedArr.length < countNeeded) {
+      this.showToast(t('toast.baseIncompletaParaAuditar', { needed: countNeeded, selected: selectedArr.length }), 'warning');
+      return;
+    }
+
+    const matrix = getReducedSystemMatrix(gameId, system, this.currentGame.maxNumbers);
+    const baseStars = Array.from(this.selectedStars).slice(0, this.currentGame.maxStars || 0);
+
+    const audit = auditReducedBaseCompliance(
+      selectedArr.slice(0, countNeeded),
+      matrix,
+      baseStars,
+      this.currentGame,
+      this.filters,
+      this.primes,
+      this.historicalData
+    );
+
+    this.lastReducedBaseStats = {
+      validCount: audit.validCount,
+      totalBets: audit.totalBets,
+      percentage: audit.percentage,
+      systemId: system.id
+    };
+
+    this.showToast(
+      t('toast.comprobacionBaseReducida', {
+        valid: audit.validCount,
+        total: audit.totalBets,
+        pct: audit.percentage
+      }),
+      audit.percentage >= 80 ? 'success' : (audit.percentage >= 50 ? 'info' : 'warning')
+    );
+
+    this.updateReducedSystemInfo();
   }
 
   async switchGame(gameId: string) {
@@ -5650,6 +5716,9 @@ class DataLotto49Advanced {
     document.getElementById('reducedAiBaseBtn')?.addEventListener('click', () => {
         this.selectAiBase();
     });
+    document.getElementById('reducedAuditBaseBtn')?.addEventListener('click', () => {
+        this.auditCurrentBase();
+    });
     document.getElementById('reducedClearBaseBtn')?.addEventListener('click', () => {
         this.clearSelections(false);
         this.showToast(t('toast.seleccionesBaseBorradas'), 'info');
@@ -6964,9 +7033,11 @@ class DataLotto49Advanced {
     document.querySelectorAll('.number-ball.suggested').forEach(b => b.classList.remove('suggested'));
     document.querySelectorAll('.number-ball.base-reduced').forEach(b => b.classList.remove('base-reduced'));
     this.clearGridHighlights();
+    this.lastReducedBaseStats = null;
     this.updateSelectedDisplay();
     this.updateStats();
     this.updateCorrelationScore();
+    this.updateReducedSystemInfo();
   }
   randomSelect() {
     this.clearSelections(false);
@@ -7345,27 +7416,23 @@ class DataLotto49Advanced {
               baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
           }
           
-          const SIX_NUMBER_OPTIMIZED_GAMES = ['primitiva', 'bonoloto', 'eurodreams'];
-          const FIVE_NUMBER_OPTIMIZED_GAMES = ['gordo', 'euromillones', 'powerball', 'megamillions'];
-          let matrix: number[][];
-          if (SIX_NUMBER_OPTIMIZED_GAMES.includes(gameId) && PRIMITIVA_OPTIMIZED_PATTERNS[system.id]) {
-              matrix = PRIMITIVA_OPTIMIZED_PATTERNS[system.id];
-          } else if (FIVE_NUMBER_OPTIMIZED_GAMES.includes(gameId) && FIVE_NUMBER_OPTIMIZED_PATTERNS[system.id]) {
-              matrix = FIVE_NUMBER_OPTIMIZED_PATTERNS[system.id];
-          } else {
-              matrix = getGreedyCovering(
-                  system.baseNumbersCount,
-                  this.currentGame.maxNumbers,
-                  system.id.includes('-3-3') ? 3 : (system.id.includes('-4-4') ? 4 : 5),
-                  system.combinationsCount
-              );
-          }
+          const matrix = getReducedSystemMatrix(gameId, system, this.currentGame.maxNumbers);
           
           combinations = matrix.map(indices => {
               return indices.map(idx => baseNumbersSorted[idx]).sort((a, b) => a - b);
           });
           
           starsCombinations = combinations.map(() => [...baseStars].sort((a, b) => a - b));
+
+          const validCount = combinations.filter(combo => this.isValidCombination(combo, baseStars)).length;
+          const totalCount = combinations.length;
+          const pct = Math.round((validCount / totalCount) * 100);
+          this.lastReducedBaseStats = {
+              validCount,
+              totalBets: totalCount,
+              percentage: pct,
+              systemId: system.id
+          };
       }
 
       if (combinations.length > 0) {
@@ -7387,9 +7454,11 @@ class DataLotto49Advanced {
             const percentage = ((validCount / totalCount) * 100).toFixed(1);
             triggerMsg = t('generation.triggerMultiple', { valid: validCount, total: totalCount, pct: percentage });
             toastMsg = t('toast.multipleEncontrada', { valid: validCount, total: totalCount, pct: percentage });
-        } else if (strategy === 'reducida') {
-            triggerMsg = t('generation.triggerReducida', { count: combinations.length, system: selectedSystemName });
-            toastMsg = t('toast.reducidaGenerada');
+        } else if (strategy === 'reducida' && this.lastReducedBaseStats) {
+            const { validCount, totalBets, percentage } = this.lastReducedBaseStats;
+            this.updateReducedSystemInfo();
+            triggerMsg = t('generation.triggerReducida', { count: totalBets, system: selectedSystemName, valid: validCount, pct: percentage });
+            toastMsg = t('toast.reducidaGenerada', { count: totalBets, valid: validCount, pct: percentage });
         }
 
         if (triggerMsg) {
