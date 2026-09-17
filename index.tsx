@@ -74,6 +74,8 @@ import {
   findAndRankWinningCombinations as runFindAndRankWinningCombinations
 } from './src/utils/combinationFinder';
 import { calculateAllPositionRanges, percentile } from './src/utils/orderStatistics';
+import { getAllValidNacionalNumbers } from './src/utils/filterSelectivity';
+import { calculateNacionalHistoricalStats, renderNacionalStatsHtml } from './src/utils/nacionalStats';
 import {
   saveAppStateToStorage,
   loadAppStateFromStorage,
@@ -197,6 +199,8 @@ interface Filters {
   nacionalRangoInterno?: { min: number; max: number };
   nacionalDesviacion?: { min: number; max: number };
   nacionalEntropiaDigitos?: { min: number; max: number };
+  nacionalGarantiaReintegros?: boolean;
+  nacionalPortfolioMode?: 'complete_reintegros' | 'consecutive' | 'alternating_parity' | 'standard';
   aiReasoning?: string;
 }
 
@@ -2368,6 +2372,12 @@ class DataLotto49Advanced {
       
       setVal('nacionalEntropiaDigitosMin', this.filters.nacionalEntropiaDigitos?.min ?? 0.000);
       setVal('nacionalEntropiaDigitosMax', this.filters.nacionalEntropiaDigitos?.max ?? 2.322);
+
+      const garantiaEl = document.getElementById('nacionalGarantiaReintegros') as HTMLInputElement;
+      if (garantiaEl) garantiaEl.checked = this.filters.nacionalGarantiaReintegros ?? true;
+
+      const portfolioModeEl = document.getElementById('nacionalPortfolioMode') as HTMLSelectElement;
+      if (portfolioModeEl) portfolioModeEl.value = this.filters.nacionalPortfolioMode || 'complete_reintegros';
     }
 
   }
@@ -3075,6 +3085,11 @@ class DataLotto49Advanced {
       dataInfo.className = 'data-info';
       dataStatsGrid.style.display = 'none';
       this.renderFrequencyChart(); // Clear chart
+      const nacContainer = document.getElementById('nacionalHistoricalAnalysisContainer');
+      if (nacContainer) {
+        nacContainer.style.display = 'none';
+        nacContainer.innerHTML = '';
+      }
       const gapSwitch = document.getElementById('useGapPercentilSwitch') as HTMLInputElement;
       const gapUmbral = document.getElementById('gapPercentilUmbral') as HTMLInputElement;
       if (gapSwitch) {
@@ -3269,8 +3284,30 @@ class DataLotto49Advanced {
     
     dataStatsGrid.style.display = 'grid';
     this.renderFrequencyChart();
+    this.updateNacionalHistoricalStatsUI();
     this.updateBigDataPanel(); // Refresh panel on data load
     this.updateBacktestUI();
+  }
+
+  updateNacionalHistoricalStatsUI() {
+    const container = document.getElementById('nacionalHistoricalAnalysisContainer');
+    if (!container) return;
+
+    if (this.currentGame.id !== 'nacional' || !this.dataLoaded || this.historicalData.length === 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    const stats = calculateNacionalHistoricalStats(this.historicalData);
+    if (!stats) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = renderNacionalStatsHtml(stats);
+    container.style.display = 'block';
   }
 
   // ===== ANÁLISIS DE NÚMEROS (Actualizado) =====
@@ -3983,6 +4020,7 @@ class DataLotto49Advanced {
     this.updateCalculatorJackpotValue();
     this.updateCalculatorStarsWrapper();
     this.updateCalculatorResults();
+    this.updateNacionalHistoricalStatsUI();
   }
 
   getGameAllowedDaysText(): string {
@@ -5444,6 +5482,20 @@ class DataLotto49Advanced {
         });
     }
 
+    const portfolioModeSelect = document.getElementById('nacionalPortfolioMode') as HTMLSelectElement;
+    if (portfolioModeSelect) {
+        portfolioModeSelect.addEventListener('change', () => {
+            this.updateFilterStateFromUI();
+        });
+    }
+
+    const garantiaCheckbox = document.getElementById('nacionalGarantiaReintegros') as HTMLInputElement;
+    if (garantiaCheckbox) {
+        garantiaCheckbox.addEventListener('change', () => {
+            this.updateFilterStateFromUI();
+        });
+    }
+
     document.getElementById('numbersGrid')?.addEventListener('click', e => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('number-ball')) this.handleNumberClick(target);
@@ -6436,6 +6488,12 @@ class DataLotto49Advanced {
           this.filters.nacionalRangoInterno = { min: getVal('nacionalRangoInternoMin'), max: getVal('nacionalRangoInternoMax') };
           this.filters.nacionalDesviacion = { min: getVal('nacionalDesviacionMin', true), max: getVal('nacionalDesviacionMax', true) };
           this.filters.nacionalEntropiaDigitos = { min: getVal('nacionalEntropiaDigitosMin', true), max: getVal('nacionalEntropiaDigitosMax', true) };
+          const garantiaEl = document.getElementById('nacionalGarantiaReintegros') as HTMLInputElement;
+          this.filters.nacionalGarantiaReintegros = garantiaEl ? garantiaEl.checked : true;
+          const portfolioModeEl = document.getElementById('nacionalPortfolioMode') as HTMLSelectElement;
+          if (portfolioModeEl) {
+            this.filters.nacionalPortfolioMode = portfolioModeEl.value as any;
+          }
       }
 
       this.saveState();
@@ -7160,25 +7218,42 @@ class DataLotto49Advanced {
           this.showLoading(t('generacion.buscandoCombinacionSimple'));
           const loadingInfo = document.getElementById('loadingInfo');
           let found = false;
-          const maxSimpleAttempts = 50000;
-          const chunkSize = 1500;
-          
-          for (let i = 0; i < maxSimpleAttempts; i++) {
-              if (i > 0 && i % chunkSize === 0) {
-                  if (loadingInfo) {
-                      loadingInfo.textContent = t('generacion.intentosProbados', { attempts: i });
-                  }
-                  // Yield execution to the browser event loop to avoid locking the UI thread
-                  await new Promise(resolve => setTimeout(resolve, 1));
-              }
-              
-              const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
-              const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
-              if (this.isValidCombination(combo, stars)) {
-                  combinations = [combo];
-                  starsCombinations = [stars];
+
+          if (this.currentGame.id === 'nacional') {
+              const validNumbers = getAllValidNacionalNumbers(this.filters, availableUniverse);
+              if (validNumbers.length > 0) {
+                  const randomIndex = Math.floor(secureRandom() * validNumbers.length);
+                  const n = validNumbers[randomIndex];
+                  const d1 = Math.floor(n / 10000);
+                  const d2 = Math.floor((n % 10000) / 1000);
+                  const d3 = Math.floor((n % 1000) / 100);
+                  const d4 = Math.floor((n % 100) / 10);
+                  const d5 = n % 10;
+                  combinations = [[10 + d1, 20 + d2, 30 + d3, 40 + d4, 50 + d5]];
+                  starsCombinations = [[]];
                   found = true;
-                  break;
+              }
+          } else {
+              const maxSimpleAttempts = 50000;
+              const chunkSize = 1500;
+              
+              for (let i = 0; i < maxSimpleAttempts; i++) {
+                  if (i > 0 && i % chunkSize === 0) {
+                      if (loadingInfo) {
+                          loadingInfo.textContent = t('generacion.intentosProbados', { attempts: i });
+                      }
+                      // Yield execution to the browser event loop to avoid locking the UI thread
+                      await new Promise(resolve => setTimeout(resolve, 1));
+                  }
+                  
+                  const combo = this.generateRandomCombination(availableUniverse, maxNumbers);
+                  const stars = maxStars > 0 ? this.generateRandomCombination(availableStars, maxStars) : [];
+                  if (this.isValidCombination(combo, stars)) {
+                      combinations = [combo];
+                      starsCombinations = [stars];
+                      found = true;
+                      break;
+                  }
               }
           }
           if (!found) {

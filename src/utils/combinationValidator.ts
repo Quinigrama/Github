@@ -3,6 +3,211 @@ import { passesNashStrictFilter } from './optimizer';
 
 const DEFAULT_PRIMES = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]);
 
+export function isPrimeNumberNacional(n: number): boolean {
+  if (n < 2) return false;
+  if (n === 2 || n === 3) return true;
+  if (n % 2 === 0 || n % 3 === 0) return false;
+  const limit = Math.sqrt(n);
+  for (let i = 5; i <= limit; i += 6) {
+    if (n % i === 0 || n % (i + 2) === 0) return false;
+  }
+  return true;
+}
+
+export function isValidNacionalDigits(
+  d1: number,
+  d2: number,
+  d3: number,
+  d4: number,
+  d5: number,
+  numValue: number,
+  filters: any
+): boolean {
+  if (!filters) return true;
+
+  // 1. Suma de dígitos
+  const sumVal = d1 + d2 + d3 + d4 + d5;
+  if (filters.nacionalSumaDigitos) {
+    if (sumVal < filters.nacionalSumaDigitos.min || sumVal > filters.nacionalSumaDigitos.max) return false;
+  }
+
+  // 2. Capicúa
+  const isCapicua = d1 === d5 && d2 === d4;
+  if (filters.nacionalCapicua && filters.nacionalCapicua !== 'all') {
+    if (filters.nacionalCapicua === 'yes' && !isCapicua) return false;
+    if (filters.nacionalCapicua === 'no' && isCapicua) return false;
+  }
+
+  // 3. Primalidad
+  if (filters.nacionalPrimo && filters.nacionalPrimo !== 'all') {
+    const isPrime = isPrimeNumberNacional(numValue);
+    if (filters.nacionalPrimo === 'yes' && !isPrime) return false;
+    if (filters.nacionalPrimo === 'no' && isPrime) return false;
+  }
+
+  // 4. Cuadrado / Cubo perfecto
+  if (filters.nacionalCuadradoCubo && filters.nacionalCuadradoCubo !== 'all') {
+    const isSquare = Math.floor(Math.sqrt(numValue)) ** 2 === numValue;
+    const isCube = Math.floor(Math.cbrt(numValue)) ** 3 === numValue;
+    const isPerf = isSquare || isCube;
+    if (filters.nacionalCuadradoCubo === 'yes' && !isPerf) return false;
+    if (filters.nacionalCuadradoCubo === 'no' && isPerf) return false;
+  }
+
+  // 5. Repdigits
+  if (filters.nacionalRepdigits && filters.nacionalRepdigits !== 'all') {
+    const isRepdigit = d1 === d2 && d2 === d3 && d3 === d4 && d4 === d5;
+    if (filters.nacionalRepdigits === 'yes' && !isRepdigit) return false;
+    if (filters.nacionalRepdigits === 'no' && isRepdigit) return false;
+  }
+
+  // 6. Múltiplo de N
+  if (filters.nacionalMultiploDe && filters.nacionalMultiploDe > 1) {
+    if (numValue % filters.nacionalMultiploDe !== 0) return false;
+  }
+
+  // 7. Rango por franja
+  if (filters.nacionalFranja) {
+    if (numValue < filters.nacionalFranja.min || numValue > filters.nacionalFranja.max) return false;
+  }
+
+  // 8. Distancia a objetivo
+  if (filters.nacionalObjetivo && filters.nacionalDistanciaObjetivo) {
+    const targetVal = parseInt(filters.nacionalObjetivo, 10);
+    if (!isNaN(targetVal)) {
+      const diff = Math.abs(numValue - targetVal);
+      if (diff < filters.nacionalDistanciaObjetivo.min || diff > filters.nacionalDistanciaObjetivo.max) return false;
+    }
+  }
+
+  const digits = [d1, d2, d3, d4, d5];
+
+  // 9. Paridad por posición
+  if (filters.nacionalParidad) {
+    for (let i = 0; i < 5; i++) {
+      const rule = filters.nacionalParidad[i];
+      if (rule === 'par' && digits[i] % 2 !== 0) return false;
+      if (rule === 'imp' && digits[i] % 2 === 0) return false;
+    }
+  }
+
+  // 10. Alto/bajo por posición
+  if (filters.nacionalAltoBajo) {
+    for (let i = 0; i < 5; i++) {
+      const rule = filters.nacionalAltoBajo[i];
+      if (rule === 'bajo' && digits[i] > 4) return false;
+      if (rule === 'alto' && digits[i] < 5) return false;
+    }
+  }
+
+  // 11. Secuencias consecutivas
+  let isAsc = true;
+  let isDesc = true;
+  for (let i = 1; i < 5; i++) {
+    if (digits[i] !== digits[i - 1] + 1) isAsc = false;
+    if (digits[i] !== digits[i - 1] - 1) isDesc = false;
+  }
+  if (filters.nacionalConsecutivos && filters.nacionalConsecutivos !== 'all') {
+    if (filters.nacionalConsecutivos === 'yes_asc' && !isAsc) return false;
+    if (filters.nacionalConsecutivos === 'yes_desc' && !isDesc) return false;
+    if (filters.nacionalConsecutivos === 'any_consec' && !isAsc && !isDesc) return false;
+    if (filters.nacionalConsecutivos === 'no' && (isAsc || isDesc)) return false;
+  }
+
+  // 12. Suma de mitades
+  if (filters.nacionalSumaMitades && filters.nacionalSumaMitades !== 'all') {
+    const sum1 = d1 + d2;
+    const sum2 = d4 + d5;
+    if (filters.nacionalSumaMitades === 'equal' && sum1 !== sum2) return false;
+    if (filters.nacionalSumaMitades === 'greater' && sum1 <= sum2) return false;
+    if (filters.nacionalSumaMitades === 'less' && sum1 >= sum2) return false;
+  }
+
+  // 13. Pares/Impares por conteo
+  if (filters.nacionalParesConteo && filters.nacionalParesConteo.length > 0) {
+    const evensCount = (d1 % 2 === 0 ? 1 : 0) + (d2 % 2 === 0 ? 1 : 0) + (d3 % 2 === 0 ? 1 : 0) + (d4 % 2 === 0 ? 1 : 0) + (d5 % 2 === 0 ? 1 : 0);
+    const oddsCount = 5 - evensCount;
+    const category = `${evensCount}P/${oddsCount}I`;
+    if (!filters.nacionalParesConteo.includes(category)) return false;
+  }
+
+  // 14. Altos/Bajos por conteo
+  if (filters.nacionalAltosConteo && filters.nacionalAltosConteo.length > 0) {
+    const highsCount = (d1 >= 5 ? 1 : 0) + (d2 >= 5 ? 1 : 0) + (d3 >= 5 ? 1 : 0) + (d4 >= 5 ? 1 : 0) + (d5 >= 5 ? 1 : 0);
+    const lowsCount = 5 - highsCount;
+    const category = `${highsCount}A/${lowsCount}B`;
+    if (!filters.nacionalAltosConteo.includes(category)) return false;
+  }
+
+  // 15. Variedad de cifras (únicos)
+  if (filters.nacionalUnicos && filters.nacionalUnicos.length > 0) {
+    const uniqueCount = new Set(digits).size;
+    if (!filters.nacionalUnicos.includes(uniqueCount)) return false;
+  }
+
+  // 16. Moda (Repeticiones Máximas)
+  if (filters.nacionalModaRepeticiones) {
+    const counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    counts[d1]++; counts[d2]++; counts[d3]++; counts[d4]++; counts[d5]++;
+    const maxRep = Math.max(...counts);
+    if (maxRep < filters.nacionalModaRepeticiones.min || maxRep > filters.nacionalModaRepeticiones.max) return false;
+  }
+
+  // 17. Cantidad de ceros
+  if (filters.nacionalCeros && filters.nacionalCeros.length > 0) {
+    const zeroCount = (d1 === 0 ? 1 : 0) + (d2 === 0 ? 1 : 0) + (d3 === 0 ? 1 : 0) + (d4 === 0 ? 1 : 0) + (d5 === 0 ? 1 : 0);
+    let zeroKey = String(zeroCount);
+    if (zeroCount >= 3) zeroKey = '3+';
+    if (!filters.nacionalCeros.includes(zeroKey)) return false;
+  }
+
+  // 18. Primos entre dígitos
+  if (filters.nacionalPrimosDigitos) {
+    const primesCount = (d1 === 2 || d1 === 3 || d1 === 5 || d1 === 7 ? 1 : 0) +
+                        (d2 === 2 || d2 === 3 || d2 === 5 || d2 === 7 ? 1 : 0) +
+                        (d3 === 2 || d3 === 3 || d3 === 5 || d3 === 7 ? 1 : 0) +
+                        (d4 === 2 || d4 === 3 || d4 === 5 || d4 === 7 ? 1 : 0) +
+                        (d5 === 2 || d5 === 3 || d5 === 5 || d5 === 7 ? 1 : 0);
+    if (primesCount < filters.nacionalPrimosDigitos.min || primesCount > filters.nacionalPrimosDigitos.max) return false;
+  }
+
+  // 19. Rango interno
+  if (filters.nacionalRangoInterno) {
+    const maxVal = Math.max(d1, d2, d3, d4, d5);
+    const minVal = Math.min(d1, d2, d3, d4, d5);
+    const diff = maxVal - minVal;
+    if (diff < filters.nacionalRangoInterno.min || diff > filters.nacionalRangoInterno.max) return false;
+  }
+
+  // 20. Desviación típica
+  if (filters.nacionalDesviacion) {
+    const mean = sumVal / 5;
+    const variance = (
+      Math.pow(d1 - mean, 2) + Math.pow(d2 - mean, 2) + Math.pow(d3 - mean, 2) +
+      Math.pow(d4 - mean, 2) + Math.pow(d5 - mean, 2)
+    ) / 5;
+    const stdDev = Math.sqrt(variance);
+    if (stdDev < filters.nacionalDesviacion.min || stdDev > filters.nacionalDesviacion.max) return false;
+  }
+
+  // 21. Entropía de Shannon
+  if (filters.nacionalEntropiaDigitos) {
+    const counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    counts[d1]++; counts[d2]++; counts[d3]++; counts[d4]++; counts[d5]++;
+    let entropy = 0;
+    for (let i = 0; i < 10; i++) {
+      if (counts[i] > 0) {
+        const p = counts[i] / 5;
+        entropy -= p * Math.log2(p);
+      }
+    }
+    entropy = Number(entropy.toFixed(3));
+    if (entropy < filters.nacionalEntropiaDigitos.min || entropy > filters.nacionalEntropiaDigitos.max) return false;
+  }
+
+  return true;
+}
+
 export function isValidCombination(
   combination: number[],
   stars: number[] = [],
@@ -45,197 +250,14 @@ export function isValidCombination(
 
       // Extract ordered digits
       const sorted = [...combination].sort((a, b) => a - b);
-      const digits = sorted.map(num => num % 10);
-      const d1 = digits[0];
-      const d2 = digits[1];
-      const d3 = digits[2];
-      const d4 = digits[3];
-      const d5 = digits[4];
-      const numString = digits.join('');
-      const numValue = parseInt(numString, 10);
+      const d1 = sorted[0] % 10;
+      const d2 = sorted[1] % 10;
+      const d3 = sorted[2] % 10;
+      const d4 = sorted[3] % 10;
+      const d5 = sorted[4] % 10;
+      const numValue = d1 * 10000 + d2 * 1000 + d3 * 100 + d4 * 10 + d5;
 
-      const isPrimeNumber = (n: number): boolean => {
-          if (n < 2) return false;
-          if (n === 2 || n === 3) return true;
-          if (n % 2 === 0 || n % 3 === 0) return false;
-          const limit = Math.sqrt(n);
-          for (let i = 5; i <= limit; i += 6) {
-              if (n % i === 0 || n % (i + 2) === 0) return false;
-          }
-          return true;
-      };
-
-      // 1. Suma de dígitos
-      if (filters.nacionalSumaDigitos) {
-          const sumVal = d1 + d2 + d3 + d4 + d5;
-          if (sumVal < filters.nacionalSumaDigitos.min || sumVal > filters.nacionalSumaDigitos.max) return false;
-      }
-
-      // 2. Capicúa
-      if (filters.nacionalCapicua && filters.nacionalCapicua !== 'all') {
-          const isCapicua = d1 === d5 && d2 === d4;
-          if (filters.nacionalCapicua === 'yes' && !isCapicua) return false;
-          if (filters.nacionalCapicua === 'no' && isCapicua) return false;
-      }
-
-      // 3. Primalidad
-      if (filters.nacionalPrimo && filters.nacionalPrimo !== 'all') {
-          const isPrime = isPrimeNumber(numValue);
-          if (filters.nacionalPrimo === 'yes' && !isPrime) return false;
-          if (filters.nacionalPrimo === 'no' && isPrime) return false;
-      }
-
-      // 4. Cuadrado / Cubo perfecto
-      if (filters.nacionalCuadradoCubo && filters.nacionalCuadradoCubo !== 'all') {
-          const isSquare = Math.floor(Math.sqrt(numValue)) ** 2 === numValue;
-          const isCube = Math.floor(Math.cbrt(numValue)) ** 3 === numValue;
-          const isPerf = isSquare || isCube;
-          if (filters.nacionalCuadradoCubo === 'yes' && !isPerf) return false;
-          if (filters.nacionalCuadradoCubo === 'no' && isPerf) return false;
-      }
-
-      // 5. Repdigits
-      if (filters.nacionalRepdigits && filters.nacionalRepdigits !== 'all') {
-          const isRepdigit = d1 === d2 && d2 === d3 && d3 === d4 && d4 === d5;
-          if (filters.nacionalRepdigits === 'yes' && !isRepdigit) return false;
-          if (filters.nacionalRepdigits === 'no' && isRepdigit) return false;
-      }
-
-      // 6. Múltiplo de N
-      if (filters.nacionalMultiploDe && filters.nacionalMultiploDe > 1) {
-          if (numValue % filters.nacionalMultiploDe !== 0) return false;
-      }
-
-      // 7. Rango por franja
-      if (filters.nacionalFranja) {
-          if (numValue < filters.nacionalFranja.min || numValue > filters.nacionalFranja.max) return false;
-      }
-
-      // 8. Distancia a objetivo
-      if (filters.nacionalObjetivo && filters.nacionalDistanciaObjetivo) {
-          const targetVal = parseInt(filters.nacionalObjetivo, 10);
-          if (!isNaN(targetVal)) {
-              const diff = Math.abs(numValue - targetVal);
-              if (diff < filters.nacionalDistanciaObjetivo.min || diff > filters.nacionalDistanciaObjetivo.max) return false;
-          }
-      }
-
-      // 9. Paridad por posición
-      if (filters.nacionalParidad) {
-          for (let i = 0; i < 5; i++) {
-              const rule = filters.nacionalParidad[i];
-              if (rule === 'par' && digits[i] % 2 !== 0) return false;
-              if (rule === 'imp' && digits[i] % 2 === 0) return false;
-          }
-      }
-
-      // 10. Alto/bajo por posición
-      if (filters.nacionalAltoBajo) {
-          for (let i = 0; i < 5; i++) {
-              const rule = filters.nacionalAltoBajo[i];
-              if (rule === 'bajo' && digits[i] > 4) return false;
-              if (rule === 'alto' && digits[i] < 5) return false;
-          }
-      }
-
-      // 11. Secuencias consecutivas
-      let isAsc = true;
-      let isDesc = true;
-      for (let i = 1; i < 5; i++) {
-          if (digits[i] !== digits[i - 1] + 1) isAsc = false;
-          if (digits[i] !== digits[i - 1] - 1) isDesc = false;
-      }
-      if (filters.nacionalConsecutivos && filters.nacionalConsecutivos !== 'all') {
-          if (filters.nacionalConsecutivos === 'yes_asc' && !isAsc) return false;
-          if (filters.nacionalConsecutivos === 'yes_desc' && !isDesc) return false;
-          if (filters.nacionalConsecutivos === 'any_consec' && !isAsc && !isDesc) return false;
-          if (filters.nacionalConsecutivos === 'no' && (isAsc || isDesc)) return false;
-      }
-
-      // 12. Suma de mitades
-      if (filters.nacionalSumaMitades && filters.nacionalSumaMitades !== 'all') {
-          const sum1 = d1 + d2;
-          const sum2 = d4 + d5;
-          if (filters.nacionalSumaMitades === 'equal' && sum1 !== sum2) return false;
-          if (filters.nacionalSumaMitades === 'greater' && sum1 <= sum2) return false;
-          if (filters.nacionalSumaMitades === 'less' && sum1 >= sum2) return false;
-      }
-
-      // 13. Pares/Impares por conteo
-      if (filters.nacionalParesConteo && filters.nacionalParesConteo.length > 0) {
-          const evensCount = digits.filter(d => d % 2 === 0).length;
-          const oddsCount = 5 - evensCount;
-          const category = `${evensCount}P/${oddsCount}I`;
-          if (!filters.nacionalParesConteo.includes(category)) return false;
-      }
-
-      // 14. Altos/Bajos por conteo
-      if (filters.nacionalAltosConteo && filters.nacionalAltosConteo.length > 0) {
-          const highsCount = digits.filter(d => d >= 5).length;
-          const lowsCount = 5 - highsCount;
-          const category = `${highsCount}A/${lowsCount}B`;
-          if (!filters.nacionalAltosConteo.includes(category)) return false;
-      }
-
-      // 15. Variedad de cifras (únicos)
-      if (filters.nacionalUnicos && filters.nacionalUnicos.length > 0) {
-          const uniqueCount = new Set(digits).size;
-          if (!filters.nacionalUnicos.includes(uniqueCount)) return false;
-      }
-
-      // 16. Moda (Repeticiones Máximas)
-      if (filters.nacionalModaRepeticiones) {
-          const counts: { [key: number]: number } = {};
-          digits.forEach(d => counts[d] = (counts[d] || 0) + 1);
-          const maxRep = Math.max(...Object.values(counts));
-          if (maxRep < filters.nacionalModaRepeticiones.min || maxRep > filters.nacionalModaRepeticiones.max) return false;
-      }
-
-      // 17. Cantidad de ceros
-      if (filters.nacionalCeros && filters.nacionalCeros.length > 0) {
-          const zeroCount = digits.filter(d => d === 0).length;
-          let zeroKey = String(zeroCount);
-          if (zeroCount >= 3) zeroKey = '3+';
-          if (!filters.nacionalCeros.includes(zeroKey)) return false;
-      }
-
-      // 18. Primos entre dígitos
-      if (filters.nacionalPrimosDigitos) {
-          const primesSet = new Set([2, 3, 5, 7]);
-          const primesCount = digits.filter(d => primesSet.has(d)).length;
-          if (primesCount < filters.nacionalPrimosDigitos.min || primesCount > filters.nacionalPrimosDigitos.max) return false;
-      }
-
-      // 19. Rango interno
-      if (filters.nacionalRangoInterno) {
-          const maxVal = Math.max(...digits);
-          const minVal = Math.min(...digits);
-          const diff = maxVal - minVal;
-          if (diff < filters.nacionalRangoInterno.min || diff > filters.nacionalRangoInterno.max) return false;
-      }
-
-      // 20. Desviación típica
-      if (filters.nacionalDesviacion) {
-          const mean = digits.reduce((s, x) => s + x, 0) / 5;
-          const variance = digits.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / 5;
-          const stdDev = Math.sqrt(variance);
-          if (stdDev < filters.nacionalDesviacion.min || stdDev > filters.nacionalDesviacion.max) return false;
-      }
-
-      // 21. Entropía de Shannon
-      if (filters.nacionalEntropiaDigitos) {
-          const counts: { [key: number]: number } = {};
-          digits.forEach(d => counts[d] = (counts[d] || 0) + 1);
-          let entropy = 0;
-          Object.values(counts).forEach(count => {
-              const p = count / 5;
-              entropy -= p * Math.log2(p);
-          });
-          entropy = Number(entropy.toFixed(3));
-          if (entropy < filters.nacionalEntropiaDigitos.min || entropy > filters.nacionalEntropiaDigitos.max) return false;
-      }
-
-      return true; // Passed all Lotería Nacional checks!
+      return isValidNacionalDigits(d1, d2, d3, d4, d5, numValue, filters);
   }
 
   // 0a. EXCLUIR DECENAS Y TERMINACIONES

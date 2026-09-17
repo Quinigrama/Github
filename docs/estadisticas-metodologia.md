@@ -49,6 +49,95 @@ separado y se muestran lado a lado en el Historial ("Grupo de Control (%)")
 — es la comprobación más directa que tiene la app de si sus filtros
 aportan algo frente al azar puro, sorteo a sorteo, con datos reales de uso.
 
+### 1.4 Sistemas reducidos con garantía (diseño de cobertura combinatoria)
+
+`src/data/reducedSystemPatterns.ts`, `src/data/fiveNumberOptimizedPatterns.ts`.
+Para cada preset de "N números" con garantía de acierto (ej. "8 números →
+garantiza 5 aciertos si caen los 6"), la app juega un conjunto FIJO y
+precalculado de boletos en vez de generarlos en el momento. Es un problema
+de diseño combinatorio — la misma disciplina matemática que usa Iliya
+Bluskov en sus libros de "lottery wheels" y que sostienen las librerías de
+wheeling de referencia del sector.
+
+**La idea clave (reformulación por complementos):** en vez de razonar sobre
+qué números entran en cada boleto, se razona sobre cuáles se **excluyen**.
+La condición "el boleto T y el sorteo W comparten al menos `p` aciertos" es
+matemáticamente equivalente a "sus complementos comparten al menos
+`s = n - 2k + p` elementos" (`n` = números base elegidos, `k` = tamaño del
+boleto) — un problema de cobertura mucho más simple de resolver que buscar
+las combinaciones directamente.
+
+**Método de cálculo:** greedy aleatorizado (en cada paso elige el boleto
+candidato que cubre más casos aún sin cubrir; se repite el proceso cientos
+de veces con orden aleatorio distinto y se conserva el mejor resultado) +
+poda de redundancias (se comprueba si algún boleto ya elegido se puede
+quitar sin perder la garantía). Cada patrón final se verificó por fuerza
+bruta contra el 100% de los sorteos posibles antes de aplicarse — no es una
+estimación.
+
+**Ejemplo (Primitiva, 8 números → garantiza 5 aciertos si caen los 6):** el
+algoritmo original de la app usaba 12 boletos; el optimizado usa solo 4 —
+comprobado que ambos cumplen la misma garantía exacta contra los 28 sorteos
+posibles dentro de esos 8 números.
+
+**Resumen de la optimización (boletos, antes → después):**
+
+| Preset | Antes | Después |
+|---|---|---|
+| 8 números / 5 aciertos (juegos de 6 núm.) | 12 | 4 |
+| 10 números / 5 aciertos | 56 | 14 |
+| 12 números / 5 aciertos | 172 | 42 |
+| 10 números / 4 aciertos | 23 | 3 |
+| 12 números / 4 aciertos | 53 | 6 |
+| 14 números / 4 aciertos | 107 | 17 |
+| 8 números / 4 aciertos (juegos de 5 núm.) | 23 | 5 |
+| 10 números / 4 aciertos | 53 | 21 |
+| 12 números / 4 aciertos | 132 | 40 |
+| 10 números / 3 aciertos | 19 | 2 |
+| 12 números / 3 aciertos | 33 | 6 |
+| 15 números / 3 aciertos | 62 | 14 |
+
+**Por qué la Múltiple no admite esta optimización:** jugar TODAS las
+combinaciones de N números (la Múltiple) exige garantizar el acierto exacto
+del 6/6 — en la fórmula anterior eso equivale a `s = m` (el complemento
+completo), lo que obliga a jugar cada combinación de forma individual, sin
+atajo posible. La Reducida es, precisamente, la versión que acepta una
+garantía menor (p<k) a cambio de un coste mucho menor.
+
+### 1.5 Selectividad de filtros (cálculo exacto o estimado)
+
+`src/utils/filterSelectivity.ts`. Antes de generar combinaciones (Múltiple
+o el ranking de "N mejores"), calcula qué fracción de todas las
+combinaciones posibles del juego cumple los filtros activos — en vez de
+descubrirlo por fuerza bruta a base de intentos fallidos.
+
+Para 6 filtros "numéricos simples" (suma, suma de dígitos, huecos entre
+números, cantidad de primos, bajos/altos, pares/impares) el cálculo es
+**exacto** mediante programación dinámica — el mismo tipo de matemática
+combinatoria/hipergeométrica que usa Catalin Barboianu en sus libros de
+probabilidad de lotería. Validado contra fuerza bruta en universos pequeños
+antes de aplicarse a las 13.983.816 combinaciones reales de Primitiva. Si
+además hay activo algún filtro "estructural" (patrón geométrico, Nash,
+consecutivos, entropía, exclusión de decenas/terminaciones...) que no se
+presta a fórmula cerrada, se usa una muestra Monte Carlo de 25.000
+combinaciones evaluadas con la función real de validación, con margen de
+error estadístico reportado.
+
+**Ejemplo real (Primitiva):** filtro "entre 5 y 6 números primos" → exacto:
+107.107 de 13.983.816 combinaciones (0,77%). Combinando 4 filtros a la vez
+(suma de dígitos + huecos + primos + bajos/altos) → solo 1.163
+combinaciones (0,008%).
+
+**Uso:** si el cálculo detecta que los filtros son matemáticamente
+imposibles (o casi), la app avisa de inmediato en vez de agotar hasta
+50.000-500.000 intentos a ciegas buscando algo que no existe.
+
+**Limitación conocida:** no aplica a Lotería Nacional. Su estructura de 5
+columnas fijas (un número de cada columna) no es un "elige N de M" simple,
+así que se excluyó explícitamente (`estimateFilterSelectivity` devuelve
+`null` para ese juego) en vez de arriesgarse a mostrar un porcentaje
+incorrecto.
+
 ---
 
 <a name="bloque-2"></a>
@@ -195,6 +284,24 @@ nombre no tiene relación con el equilibrio de Nash de teoría de juegos.
 Ejemplo (Bonoloto): número 7 → peso ≈64; número 45 → peso ≈24; combinación
 `[7,45]` → score Nash = 4,4 (escala 0,0-10,0). No depende del histórico,
 solo del rango del juego.
+
+**Por qué importa (valor esperado, no probabilidad):** este filtro no
+cambia la probabilidad de acertar — en un sorteo justo, todas las
+combinaciones son igual de probables. Cambia la **recompensa esperada si
+aciertas**: cuanto más se parezca tu combinación a las que la gente elige a
+mano (fechas, el 7 de la suerte), más jugadores probablemente eligieron
+también esos números — y si sale premiada, el bote se reparte entre más
+personas. Es el mismo razonamiento de valor esperado que usa John Haigh en
+su análisis de estrategias de lotería (*Taking Chances*) — la única de las
+tres referencias de esta sesión (junto a Bluskov y Barboianu) que no trata
+de la probabilidad de ganar, sino de cuánto ganas si ganas. Ya estaba bien
+implementado en la app antes de esta sesión: el texto de ayuda del filtro
+(`filterInfo.nash.modalTheory`) ya distinguía correctamente ambos conceptos
+— esta entrada solo traslada esa misma explicación al glosario técnico.
+**Limitación honesta:** cuantificar esto en euros reales exigiría saber cómo
+elige números el público español (SELAE no publica ese dato), así que se
+queda en argumento cualitativo de teoría de juegos, no en una cifra
+verificada.
 
 ### 3.8 Score Markov (dependencia de sorteos recientes)
 

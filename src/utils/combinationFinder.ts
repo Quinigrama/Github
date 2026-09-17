@@ -3,7 +3,18 @@ import { getCombinations } from './combinatorial';
 import { isValidCombination } from './combinationValidator';
 import { calculateOptimizationScore, OptimizationContext } from './optimizer';
 import { t } from './i18n';
-import { estimateFilterSelectivity } from './filterSelectivity';
+import { estimateFilterSelectivity, getAllValidNacionalNumbers } from './filterSelectivity';
+import { secureRandom } from './secureRandom';
+import { selectNacionalPortfolioByMode } from './nacionalPortfolioStrategy';
+
+function convertNacionalNumberToCombo(n: number): number[] {
+  const d1 = Math.floor(n / 10000);
+  const d2 = Math.floor((n % 10000) / 1000);
+  const d3 = Math.floor((n % 1000) / 100);
+  const d4 = Math.floor((n % 100) / 10);
+  const d5 = n % 10;
+  return [10 + d1, 20 + d2, 30 + d3, 40 + d4, 50 + d5];
+}
 
 export const DEFAULT_TOLERANCE_LEVELS: { [key: number]: number } = {
   7: 0.70,
@@ -171,6 +182,63 @@ export async function findAndRankWinningCombinations(
   optimizationContext: OptimizationContext,
   onProgress?: (msg: string) => void
 ): Promise<{ combo: number[], stars: number[] }[]> {
+  // Manejador ultra-optimizado específico para Lotería Nacional (Cero Descartes)
+  if (currentGame?.id === 'nacional') {
+    onProgress?.(t('generacion.buscandoNValidas', { generateCount }));
+    const validNumbers = getAllValidNacionalNumbers(filters, universe);
+
+    if (validNumbers.length === 0) {
+      const detail = `Solo 0 de 100.000 combinaciones posibles (0,0000%) cumplen estos filtros. `;
+      const err = new Error(`No se encontraron combinaciones válidas. ${detail}Intenta flexibilizar los filtros.`);
+      (err as any).i18nKey = 'generacion.sinCombinacionesValidas';
+      (err as any).selectivity = { fraction: 0, count: 0, total: 100000, isExact: true };
+      throw err;
+    }
+
+    let sampleNumbers: number[] = [];
+    if (validNumbers.length <= generateCount) {
+      sampleNumbers = validNumbers;
+    } else {
+      const pool = [...validNumbers];
+      const countToSample = Math.min(generateCount, pool.length);
+      for (let i = 0; i < countToSample; i++) {
+        const j = i + Math.floor(secureRandom() * (pool.length - i));
+        const temp = pool[i];
+        pool[i] = pool[j];
+        pool[j] = temp;
+        sampleNumbers.push(pool[i]);
+      }
+    }
+
+    onProgress?.(t('generacion.puntuandoOrdenando'));
+    onProgress?.(t('generacion.puntuandoNCombinaciones', { count: sampleNumbers.length }));
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const scoredPairs = sampleNumbers.map(n => {
+      const combo = convertNacionalNumberToCombo(n);
+      return {
+        pair: { combo, stars: [] },
+        score: calculateOptimizationScore(combo, [], optimizationContext),
+        ending: n % 10
+      };
+    });
+
+    scoredPairs.sort((a, b) => b.score - a.score);
+
+    // Estrategias avanzadas de terminaciones y cobertura de reintegros para Lotería Nacional
+    const portfolioMode = filters?.nacionalPortfolioMode || (filters?.nacionalGarantiaReintegros !== false ? 'complete_reintegros' : 'standard');
+
+    if (portfolioMode !== 'standard') {
+      return selectNacionalPortfolioByMode(scoredPairs, playCount, portfolioMode);
+    }
+
+    if (filters?.diversifyPortfolio && playCount > 1) {
+      return seleccionarCarteraDiversificada(scoredPairs, playCount);
+    }
+
+    return scoredPairs.slice(0, playCount).map(item => item.pair);
+  }
+
   onProgress?.(t('generacion.buscandoNValidas', { generateCount }));
 
   const validPairs: { combo: number[], stars: number[] }[] = [];

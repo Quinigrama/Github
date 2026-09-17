@@ -522,6 +522,9 @@
           <div class="stat-value" id="lastUpdateDate" style="color: #0284c7; font-weight: 700;">-</div>
         </div>
       </div>
+
+      <!-- Contenedor específico de Estadísticas Históricas de Lotería Nacional (Reintegros y Terminaciones) -->
+      <div id="nacionalHistoricalAnalysisContainer" style="display: none;"></div>
     </div>
     
 
@@ -1296,6 +1299,34 @@
                             <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px; line-height: 1.35;">
                                 💡 <strong data-i18n="filters.nacEntropia.notaLabel">Nota:</strong> <span data-i18n="filters.nacEntropia.parte1">Mide la rareza estructural de las cifras. Los números con cifras idénticas (11111) tienen entropía</span> <strong>0.000</strong>. <span data-i18n="filters.nacEntropia.parte2">Números con 5 cifras distintas (13579) alcanzan el máximo de</span> <strong>2.322</strong>. 
                                 <span style="color: #475569; font-weight: 500;" data-i18n="filters.nacEntropia.parte3">Este es un filtro combinatorio estructural, no una garantía predictiva de acierto.</span>
+                            </div>
+                        </div>
+
+                        <!-- 22. Cobertura Garantizada de Reintegros y Estrategias de Terminaciones -->
+                        <div class="filter-group" style="grid-column: 1 / -1; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 14px 16px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px;">
+                                <div>
+                                    <div style="font-weight: 700; color: #166534; font-size: 0.95rem;">
+                                        🛡️ Cobertura Completa de Reintegros (0 al 9)
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #15803d; margin-top: 2px;">
+                                        Al generar una cartera de 10 décimos, asigna automáticamente las 10 terminaciones distintas (0 al 9) entre los décimos que cumplen tus filtros para asegurar matemáticamente al menos un reintegro.
+                                    </div>
+                                </div>
+                                <input type="checkbox" id="nacionalGarantiaReintegros" checked style="width: 20px; height: 20px; cursor: pointer; accent-color: #16a34a;">
+                            </div>
+
+                            <!-- Selector de Modo de Distribución de Terminaciones en Cartera -->
+                            <div style="border-top: 1px dashed #bbf7d0; padding-top: 10px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px;">
+                                <label style="font-size: 0.85rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
+                                    <span>🎯 Modo de Distribución de Terminaciones en Cartera:</span>
+                                </label>
+                                <select id="nacionalPortfolioMode" style="width: 100%; max-width: 420px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #86efac; background: #ffffff; color: #14532d; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                                    <option value="complete_reintegros">🛡️ Cobertura Completa (1 décimo por cada reintegro 0-9)</option>
+                                    <option value="consecutive">🪜 Escalera Consecutiva (Terminaciones consecutivas: 1, 2, 3...)</option>
+                                    <option value="alternating_parity">⚖️ Paridad Alterna (Terminaciones par, impar, par, impar...)</option>
+                                    <option value="standard">⭐ Estándar (Los décimos con mejor puntuación combinatoria)</option>
+                                </select>
                             </div>
                         </div>
                     </div> <!-- End of nacionalFiltersContainer -->

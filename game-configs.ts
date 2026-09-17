@@ -335,7 +335,9 @@ export class BaseGameConfig implements GameConfig {
         nacionalPrimosDigitos: { min: 0, max: 5 },
         nacionalRangoInterno: { min: 0, max: 9 },
         nacionalDesviacion: { min: 0.00, max: 4.50 },
-        nacionalEntropiaDigitos: { min: 0.000, max: 2.322 }
+        nacionalEntropiaDigitos: { min: 0.000, max: 2.322 },
+        nacionalGarantiaReintegros: true,
+        nacionalPortfolioMode: 'complete_reintegros'
       };
     }
 

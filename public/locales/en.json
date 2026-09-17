@@ -1303,5 +1303,7 @@
   "martingalas.estrategia.fraccionFija.ejemplo": "With €100 you bet €1. If you drop to €80, your next bet is €0.80, not €1. You never hit €0 outright because you're always betting a fraction of what's left.",
   "martingalas.estrategia.fraccionFija.porQueFalla": "It's the most mathematically elegant of the four — it avoids total ruin — but for the same reason your capital trends toward 0 without ever quite touching it. The end result is identical to the other three: only how smooth the curve is changes.",
   "martingalas.cierreComun": "All 4 answer the same question — how much to bet now based on what happened before — but none answers the one that actually matters: the probability of winning the next bet never changes. That's why all 4 lines go down.",
-  "martingalas.avisoBadgeTitulo": "Simulation of money bets"
+  "martingalas.avisoBadgeTitulo": "Simulation of money bets",
+  "stats.apariciones": "appearances",
+  "stats.sinSalir": "draws absent"
 }
