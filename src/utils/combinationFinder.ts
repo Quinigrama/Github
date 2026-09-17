@@ -61,7 +61,7 @@ export async function findValidSuperset(
   // imposibles de cumplir, lo detectamos ahora (cálculo exacto o estimado, milisegundos)
   // en vez de gastar hasta 50.000 intentos a ciegas.
   const selectivity = estimateFilterSelectivity(currentGame, filters, universe);
-  if (selectivity.count < 1) {
+  if (selectivity && selectivity.count < 1) {
     const pctStr = (selectivity.fraction * 100).toFixed(4);
     onProgress?.(t('generacion.filtrosImposibles', { pct: pctStr }));
     return null;
@@ -192,13 +192,16 @@ export async function findAndRankWinningCombinations(
   }
 
   if (validPairs.length === 0) {
-    const pctStr = (selectivity.fraction * 100).toFixed(4);
-    const detail = selectivity.isExact
-      ? `Solo ${selectivity.count.toLocaleString('es-ES')} de ${selectivity.total.toLocaleString('es-ES')} combinaciones posibles (${pctStr}%) cumplen estos filtros.`
-      : `Se estima que aproximadamente el ${pctStr}% de las combinaciones posibles cumplen estos filtros.`;
-    const err = new Error(`No se encontraron combinaciones válidas. ${detail} Intenta flexibilizar los filtros.`);
+    let detail = '';
+    if (selectivity) {
+      const pctStr = (selectivity.fraction * 100).toFixed(4);
+      detail = selectivity.isExact
+        ? `Solo ${selectivity.count.toLocaleString('es-ES')} de ${selectivity.total.toLocaleString('es-ES')} combinaciones posibles (${pctStr}%) cumplen estos filtros. `
+        : `Se estima que aproximadamente el ${pctStr}% de las combinaciones posibles cumplen estos filtros. `;
+    }
+    const err = new Error(`No se encontraron combinaciones válidas. ${detail}Intenta flexibilizar los filtros.`);
     (err as any).i18nKey = 'generacion.sinCombinacionesValidas';
-    (err as any).selectivity = selectivity;
+    if (selectivity) (err as any).selectivity = selectivity;
     throw err;
   }
 

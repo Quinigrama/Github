@@ -152,7 +152,15 @@ export function estimateFilterSelectivity(
   currentGame: any,
   filters: any,
   universe: number[]
-): SelectivityResult {
+): SelectivityResult | null {
+  // Lotería Nacional no es "elige N de M": cada billete toma un número de cada una de 5
+  // columnas fijas (estructura de producto). La fórmula C(numberRange, maxNumbers) no
+  // representa su espacio real de combinaciones, así que la excluimos explícitamente en
+  // vez de arriesgarnos a mostrar un porcentaje incorrecto.
+  if (currentGame?.id === 'nacional') {
+    return null;
+  }
+
   const N = currentGame.numberRange;
   const k = currentGame.maxNumbers;
   const total = nCrLocal(N, k);
