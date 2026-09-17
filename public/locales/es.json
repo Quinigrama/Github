@@ -1113,6 +1113,7 @@
   "generacion.buscandoNValidas": "Buscando {generateCount} válidas...",
   "generacion.progresoEncontradas": "{found} / {generateCount} encontradas... (Intento {attempt})",
   "generacion.sinCombinacionesValidas": "No se encontraron combinaciones válidas. Intenta flexibilizar los filtros.",
+  "generacion.filtrosImposibles": "Estos filtros son casi imposibles de cumplir (aprox. {pct}% de las combinaciones posibles). Prueba a flexibilizarlos.",
   "generacion.puntuandoOrdenando": "Puntuando y ordenando...",
   "generacion.puntuandoNCombinaciones": "Puntuando {count} combinaciones...",
   "generacion.buscandoCombinacionSimple": "Buscando combinación...",

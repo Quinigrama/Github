@@ -3,6 +3,7 @@ import { getCombinations } from './combinatorial';
 import { isValidCombination } from './combinationValidator';
 import { calculateOptimizationScore, OptimizationContext } from './optimizer';
 import { t } from './i18n';
+import { estimateFilterSelectivity } from './filterSelectivity';
 
 export const DEFAULT_TOLERANCE_LEVELS: { [key: number]: number } = {
   7: 0.70,
@@ -55,6 +56,16 @@ export async function findValidSuperset(
 
   const tolerance = toleranceLevels[numCount] || 0.5;
   const maxAttempts = 50000;
+
+  // Comprobación temprana: si los filtros activos son matemáticamente imposibles o casi
+  // imposibles de cumplir, lo detectamos ahora (cálculo exacto o estimado, milisegundos)
+  // en vez de gastar hasta 50.000 intentos a ciegas.
+  const selectivity = estimateFilterSelectivity(currentGame, filters, universe);
+  if (selectivity.count < 1) {
+    const pctStr = (selectivity.fraction * 100).toFixed(4);
+    onProgress?.(t('generacion.filtrosImposibles', { pct: pctStr }));
+    return null;
+  }
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (attempt % 100 === 0) {
@@ -166,6 +177,7 @@ export async function findAndRankWinningCombinations(
   const maxNumbers = currentGame.maxNumbers;
   const maxStars = currentGame.maxStars;
   const maxAttempts = Math.max(500000, generateCount * 100);
+  const selectivity = estimateFilterSelectivity(currentGame, filters, universe);
 
   for (let i = 0; i < maxAttempts && validPairs.length < generateCount; i++) {
     if (i % 500 === 0) {
@@ -180,8 +192,13 @@ export async function findAndRankWinningCombinations(
   }
 
   if (validPairs.length === 0) {
-    const err = new Error('No se encontraron combinaciones válidas. Intenta flexibilizar los filtros.');
+    const pctStr = (selectivity.fraction * 100).toFixed(4);
+    const detail = selectivity.isExact
+      ? `Solo ${selectivity.count.toLocaleString('es-ES')} de ${selectivity.total.toLocaleString('es-ES')} combinaciones posibles (${pctStr}%) cumplen estos filtros.`
+      : `Se estima que aproximadamente el ${pctStr}% de las combinaciones posibles cumplen estos filtros.`;
+    const err = new Error(`No se encontraron combinaciones válidas. ${detail} Intenta flexibilizar los filtros.`);
     (err as any).i18nKey = 'generacion.sinCombinacionesValidas';
+    (err as any).selectivity = selectivity;
     throw err;
   }
 
