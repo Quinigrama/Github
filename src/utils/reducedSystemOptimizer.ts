@@ -76,6 +76,7 @@ export function auditReducedBaseCompliance(
 
 export interface OptimizedBaseResult {
   bestPool: number[];
+  bestOrder: number[];
   validCount: number;
   totalBets: number;
   percentage: number;
@@ -103,6 +104,7 @@ export async function optimizeReducedBasePool(
   if (universe.length < countNeeded) {
     return {
       bestPool: universe.slice(0, countNeeded),
+      bestOrder: universe.slice(0, countNeeded),
       validCount: 0,
       totalBets,
       percentage: 0,
@@ -113,14 +115,14 @@ export async function optimizeReducedBasePool(
   const maxNumbers = currentGame?.maxNumbers || 6;
   const targetSumMean = (maxNumbers * ((currentGame?.numberRange || 49) + 1)) / 2;
 
-  // Función de evaluación interna de un pool candidato
-  const evaluateCandidate = (poolSorted: number[]): { validCount: number; qualityScore: number } => {
+  // Función de evaluación interna de un pool candidato respetando el orden de asignación
+  const evaluateCandidate = (poolOrder: number[]): { validCount: number; qualityScore: number } => {
     let valid = 0;
     let sumDevTotal = 0;
 
     for (let m = 0; m < totalBets; m++) {
       const indices = matrix[m];
-      const combo = indices.map(idx => poolSorted[idx]).sort((a, b) => a - b);
+      const combo = indices.map(idx => poolOrder[idx]).sort((a, b) => a - b);
       const ok = isValidCombination(
         combo,
         stars,
@@ -142,12 +144,12 @@ export async function optimizeReducedBasePool(
     return { validCount: valid, qualityScore };
   };
 
-  let bestPool: number[] = [];
+  let bestOrder: number[] = [];
   let bestValid = -1;
   let bestScore = -Infinity;
   let totalAttempts = 0;
 
-  // FASE 1: Exploración Monte Carlo guiada
+  // FASE 1: Exploración Monte Carlo guiada (explora selección y reparto simultáneamente)
   const chunkSize = 150;
   for (let attempt = 1; attempt <= maxRandomAttempts; attempt++) {
     totalAttempts++;
@@ -167,13 +169,16 @@ export async function optimizeReducedBasePool(
       shuffled[j] = tmp;
     }
 
-    const candidate = shuffled.slice(0, countNeeded).sort((a, b) => a - b);
-    const { validCount, qualityScore } = evaluateCandidate(candidate);
+    // IMPORTANTE: no se ordena. Dejar el orden del barajado como "orden de asignación" hace que
+    // cada intento explore a la vez un conjunto de números Y un reparto sobre el patrón — la
+    // garantía matemática del wheeling no depende de este orden, así que no se pierde nada.
+    const candidateOrder = shuffled.slice(0, countNeeded);
+    const { validCount, qualityScore } = evaluateCandidate(candidateOrder);
 
     if (validCount > bestValid || (validCount === bestValid && qualityScore > bestScore)) {
       bestValid = validCount;
       bestScore = qualityScore;
-      bestPool = candidate;
+      bestOrder = candidateOrder;
 
       // Si alcanzamos el 100% de cumplimiento en todos los boletos de la matriz, terminamos anticipadamente
       if (bestValid === totalBets) {
@@ -183,7 +188,7 @@ export async function optimizeReducedBasePool(
   }
 
   // FASE 2: Búsqueda Local (Hill-Climbing) si no se alcanzó el 100%
-  if (bestValid < totalBets && bestPool.length === countNeeded) {
+  if (bestValid < totalBets && bestOrder.length === countNeeded) {
     let improved = true;
     let hillSteps = 0;
     const maxHillSteps = 40;
@@ -196,21 +201,21 @@ export async function optimizeReducedBasePool(
         await new Promise(resolve => setTimeout(resolve, 0));
       }
 
-      const poolSet = new Set(bestPool);
+      const poolSet = new Set(bestOrder);
       const unused = universe.filter(n => !poolSet.has(n));
 
-      // Probar intercambios de 1 número de la base con uno libre
-      for (let i = 0; i < bestPool.length; i++) {
+      // Probar intercambios de 1 número de la base con uno libre (sin reordenar: se mantiene
+      // el resto del orden de asignación tal cual, solo cambia la posición intercambiada)
+      for (let i = 0; i < bestOrder.length; i++) {
         for (let u = 0; u < unused.length; u++) {
-          const neighbor = [...bestPool];
+          const neighbor = [...bestOrder];
           neighbor[i] = unused[u];
-          neighbor.sort((a, b) => a - b);
 
           const { validCount, qualityScore } = evaluateCandidate(neighbor);
           if (validCount > bestValid || (validCount === bestValid && qualityScore > bestScore + 50)) {
             bestValid = validCount;
             bestScore = qualityScore;
-            bestPool = neighbor;
+            bestOrder = neighbor;
             improved = true;
             break;
           }
@@ -221,11 +226,79 @@ export async function optimizeReducedBasePool(
   }
 
   const percentage = totalBets > 0 ? Math.round((bestValid / totalBets) * 100) : 0;
+  const bestPool = [...bestOrder].sort((a, b) => a - b);
   return {
     bestPool,
+    bestOrder,
     validCount: bestValid,
     totalBets,
     percentage,
     attempts: totalAttempts
+  };
+}
+
+export interface OptimizedOrderResult {
+  bestOrder: number[];
+  validCount: number;
+  totalBets: number;
+  percentage: number;
+  improved: boolean;
+}
+
+/**
+ * A partir de una base de números YA elegida (sin cambiar cuáles son), busca el mejor reparto
+ * sobre las posiciones del patrón para maximizar cuántos boletos cumplen los filtros activos.
+ * La garantía matemática no cambia porque no se altera el patrón, solo qué número va en qué hueco.
+ */
+export function optimizeReducedBaseOrder(
+  baseNumbers: number[],
+  matrix: number[][],
+  stars: number[] = [],
+  currentGame: any,
+  filters: any,
+  primes: Set<number> = new Set(),
+  historicalData: { numbers: number[] }[] = [],
+  maxAttempts: number = 3000
+): OptimizedOrderResult {
+  const totalBets = matrix.length;
+
+  const evaluateOrder = (order: number[]): number => {
+    let valid = 0;
+    for (let m = 0; m < totalBets; m++) {
+      const combo = matrix[m].map(idx => order[idx]).sort((a, b) => a - b);
+      if (isValidCombination(combo, stars, currentGame, filters, primes, stars.length === 0, historicalData)) {
+        valid++;
+      }
+    }
+    return valid;
+  };
+
+  const originalOrder = [...baseNumbers].sort((a, b) => a - b);
+  let bestOrder = originalOrder;
+  let bestValid = evaluateOrder(originalOrder);
+  const originalValid = bestValid;
+
+  for (let i = 0; i < maxAttempts && bestValid < totalBets; i++) {
+    const shuffled = [...baseNumbers];
+    for (let j = shuffled.length - 1; j > 0; j--) {
+      const k = Math.floor(secureRandom() * (j + 1));
+      const tmp = shuffled[j];
+      shuffled[j] = shuffled[k];
+      shuffled[k] = tmp;
+    }
+    const validCount = evaluateOrder(shuffled);
+    if (validCount > bestValid) {
+      bestValid = validCount;
+      bestOrder = shuffled;
+    }
+  }
+
+  const percentage = totalBets > 0 ? Math.round((bestValid / totalBets) * 100) : 0;
+  return {
+    bestOrder,
+    validCount: bestValid,
+    totalBets,
+    percentage,
+    improved: bestValid > originalValid
   };
 }

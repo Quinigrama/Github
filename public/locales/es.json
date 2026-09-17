@@ -857,6 +857,7 @@
   "toast.numerosBasePorCobertura": "✨ Base optimizada: {valid} de {total} boletos reducidos ({pct}%) cumplen tus filtros activos.",
   "toast.basePerfectaEncontrada": "🎯 ¡Base 100% perfecta encontrada! Los {total} boletos reducidos ({count} números) cumplen todos tus filtros activos.",
   "toast.comprobacionBaseReducida": "🔍 Comprobación de Base: {valid} de {total} boletos reducidos ({pct}%) cumplen tus filtros activos.",
+  "toast.comprobacionBaseMejorada": "✨ Orden mejorado: {valid} de {total} boletos reducidos ({pct}%) cumplen tus filtros activos (mismos números, mejor reparto).",
   "toast.baseIncompletaParaAuditar": "⚠️ Selecciona los {needed} números base requeridos para comprobar los filtros (llevas {selected}).",
   "toast.mejoresNumerosBase": "✨ Seleccionados los {count} mejores números base según estadísticas históricas.",
   "toast.numerosBaseEquilibrados": "✨ Generados {count} números base equilibrados (Carga datos para un análisis estadístico real).",

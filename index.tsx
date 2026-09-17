@@ -4,7 +4,7 @@
 import { GAMES, GameConfig, getGameConfig, getDefaultFiltersForGame, getAllGames, NATIONAL_FLAGS, GAME_COLORS, SHARED_BALL_COLORS, getGameIconSvg, GameColorPalette } from "./game-configs";
 import { ReducedSystem, REDUCED_SYSTEMS } from "./src/data/reducedSystems";
 import { getGreedyCovering, generateSyntheticCSV } from "./src/utils/generators";
-import { getReducedSystemMatrix, optimizeReducedBasePool, auditReducedBaseCompliance } from "./src/utils/reducedSystemOptimizer";
+import { getReducedSystemMatrix, optimizeReducedBasePool, auditReducedBaseCompliance, optimizeReducedBaseOrder } from "./src/utils/reducedSystemOptimizer";
 import { PRIMITIVA_OPTIMIZED_PATTERNS } from "./src/data/reducedSystemPatterns";
 import { FIVE_NUMBER_OPTIMIZED_PATTERNS } from "./src/data/fiveNumberOptimizedPatterns";
 import { renderCascadeSummaryTable, renderStandardTicketCard, renderMultipleTicketCard } from "./src/utils/ticketTemplates";
@@ -329,6 +329,7 @@ class DataLotto49Advanced {
     isGenerating: boolean;
     lastMultipleStats: { validCount: number, totalCount: number } | null;
     lastReducedBaseStats: { validCount: number, totalBets: number, percentage: number, systemId: string } | null;
+    lastReducedBaseOrder: number[] | null;
     lastDebugInfo: string;
     savedTickets: Ticket[];
     bankrollConfig: BankrollConfig | null;
@@ -451,6 +452,7 @@ class DataLotto49Advanced {
     this.lastDebugInfo = '';
     this.lastMultipleStats = null;
     this.lastReducedBaseStats = null;
+    this.lastReducedBaseOrder = null;
     this.savedTickets = [];
     this.bankrollConfig = null;
     this.controlGroupStats = {};
@@ -3860,6 +3862,7 @@ class DataLotto49Advanced {
         percentage: result.percentage,
         systemId: system.id
       };
+      this.lastReducedBaseOrder = result.bestOrder;
 
       if (result.validCount === totalBets) {
         this.showToast(t('toast.basePerfectaEncontrada', { count: countNeeded, total: totalBets }), 'success');
@@ -3902,9 +3905,10 @@ class DataLotto49Advanced {
 
     const matrix = getReducedSystemMatrix(gameId, system, this.currentGame.maxNumbers);
     const baseStars = Array.from(this.selectedStars).slice(0, this.currentGame.maxStars || 0);
+    const baseForAudit = selectedArr.slice(0, countNeeded);
 
-    const audit = auditReducedBaseCompliance(
-      selectedArr.slice(0, countNeeded),
+    const orderResult = optimizeReducedBaseOrder(
+      baseForAudit,
       matrix,
       baseStars,
       this.currentGame,
@@ -3914,20 +3918,32 @@ class DataLotto49Advanced {
     );
 
     this.lastReducedBaseStats = {
-      validCount: audit.validCount,
-      totalBets: audit.totalBets,
-      percentage: audit.percentage,
+      validCount: orderResult.validCount,
+      totalBets: orderResult.totalBets,
+      percentage: orderResult.percentage,
       systemId: system.id
     };
+    this.lastReducedBaseOrder = orderResult.bestOrder;
 
-    this.showToast(
-      t('toast.comprobacionBaseReducida', {
-        valid: audit.validCount,
-        total: audit.totalBets,
-        pct: audit.percentage
-      }),
-      audit.percentage >= 80 ? 'success' : (audit.percentage >= 50 ? 'info' : 'warning')
-    );
+    if (orderResult.improved) {
+      this.showToast(
+        t('toast.comprobacionBaseMejorada', {
+          valid: orderResult.validCount,
+          total: orderResult.totalBets,
+          pct: orderResult.percentage
+        }),
+        'success'
+      );
+    } else {
+      this.showToast(
+        t('toast.comprobacionBaseReducida', {
+          valid: orderResult.validCount,
+          total: orderResult.totalBets,
+          pct: orderResult.percentage
+        }),
+        orderResult.percentage >= 80 ? 'success' : (orderResult.percentage >= 50 ? 'info' : 'warning')
+      );
+    }
 
     this.updateReducedSystemInfo();
   }
@@ -7034,6 +7050,7 @@ class DataLotto49Advanced {
     document.querySelectorAll('.number-ball.base-reduced').forEach(b => b.classList.remove('base-reduced'));
     this.clearGridHighlights();
     this.lastReducedBaseStats = null;
+    this.lastReducedBaseOrder = null;
     this.updateSelectedDisplay();
     this.updateStats();
     this.updateCorrelationScore();
@@ -7405,7 +7422,21 @@ class DataLotto49Advanced {
           const baseNumbersSorted = Array.from(this.selectedNumbers).sort((a, b) => a - b);
           this.reducedBaseNumbers = new Set(baseNumbersSorted);
           selectedSystemName = system.name;
-          
+
+          // Si ya tenemos un orden optimizado guardado (de "Buscar Números Base" o "Comprobar
+          // Filtros") Y sigue correspondiendo exactamente a los números actualmente seleccionados
+          // y al mismo sistema, lo usamos en vez del orden ascendente por defecto — la garantía
+          // matemática es idéntica en ambos casos, solo cambia qué número ocupa cada hueco.
+          let assignmentOrder = baseNumbersSorted;
+          if (
+            this.lastReducedBaseOrder &&
+            this.lastReducedBaseStats?.systemId === system.id &&
+            this.lastReducedBaseOrder.length === baseNumbersSorted.length &&
+            [...this.lastReducedBaseOrder].sort((a, b) => a - b).every((n, i) => n === baseNumbersSorted[i])
+          ) {
+            assignmentOrder = this.lastReducedBaseOrder;
+          }
+
           const selectedStarsArr = Array.from(this.selectedStars);
           let baseStars: number[] = [];
           if (selectedStarsArr.length >= this.currentGame.maxStars) {
@@ -7415,11 +7446,11 @@ class DataLotto49Advanced {
               const shuffledStars = [...availableStars].sort(() => secureRandom() - 0.5);
               baseStars = shuffledStars.slice(0, this.currentGame.maxStars);
           }
-          
+
           const matrix = getReducedSystemMatrix(gameId, system, this.currentGame.maxNumbers);
           
           combinations = matrix.map(indices => {
-              return indices.map(idx => baseNumbersSorted[idx]).sort((a, b) => a - b);
+              return indices.map(idx => assignmentOrder[idx]).sort((a, b) => a - b);
           });
           
           starsCombinations = combinations.map(() => [...baseStars].sort((a, b) => a - b));

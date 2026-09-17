@@ -857,6 +857,7 @@
   "toast.numerosBasePorCobertura": "✨ Base optimized: {valid} of {total} reduced bets ({pct}%) pass your active filters.",
   "toast.basePerfectaEncontrada": "🎯 100% Perfect base found! All {total} reduced bets ({count} numbers) pass your active filters.",
   "toast.comprobacionBaseReducida": "🔍 Base Verification: {valid} of {total} reduced bets ({pct}%) pass your active filters.",
+  "toast.comprobacionBaseMejorada": "✨ Improved order: {valid} of {total} reduced tickets ({pct}%) meet your active filters (same numbers, better arrangement).",
   "toast.baseIncompletaParaAuditar": "⚠️ Please select the {needed} required base numbers to check filters (currently selected: {selected}).",
   "toast.mejoresNumerosBase": "✨ Selected the {count} best base numbers based on historical statistics.",
   "toast.numerosBaseEquilibrados": "✨ Generated {count} balanced base numbers (Load data for real statistical analysis).",
