@@ -594,10 +594,33 @@
       <div class="multiple-numbers-options" id="reducedOptions" style="display: none; margin-top: 15px;">
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
           <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
-            <label style="font-weight: 600; color: #374151; font-size: 0.95rem;" data-i18n="strategy.seleccionarSistema">Seleccionar Sistema Reducido:</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-weight: 600; color: #374151; font-size: 0.95rem;" data-i18n="strategy.seleccionarSistema">Seleccionar Sistema Reducido:</label>
+              <button id="reducedSystemsCompareInfoBtn" type="button" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; font-weight: 700; line-height: 1; flex-shrink: 0; padding: 0;" title="¿Cómo funcionan nuestros sistemas reducidos?" data-i18n-title="strategy.reducidasCompareInfoTitle">ℹ️</button>
+            </div>
             <select id="reducedSystemSelect" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; background-color: white; color: #1f2937; font-weight: 500; cursor: pointer;">
               <!-- Cargado dinámicamente según el juego activo -->
             </select>
+          </div>
+
+          <div id="reducedSystemsCompareInfoBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; font-size: 0.82rem; color: #1e3a5f; line-height: 1.5; text-align: left;">
+              <p style="margin: 0 0 10px 0;" data-i18n="strategy.reducidasExplicacion">🧮 Un sistema reducido te permite jugar muchos menos boletos que la Apuesta Múltiple completa, sin perder la garantía: si los números ganadores están entre los que elegiste, tienes asegurado el premio indicado — comprobado matemáticamente contra el 100% de los sorteos posibles, no es una estimación.</p>
+              <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem;">
+                      <thead>
+                          <tr style="border-bottom: 2px solid #bfdbfe; color: #1e40af; font-weight: 600;">
+                              <th style="padding: 6px 4px;" data-i18n="strategy.colSistema">Sistema</th>
+                              <th style="padding: 6px 4px; text-align: center;" data-i18n="strategy.colCombTotales">Combinaciones totales</th>
+                              <th style="padding: 6px 4px; text-align: center;" data-i18n="strategy.colCombNuestras">Nuestras combinaciones</th>
+                              <th style="padding: 6px 4px; text-align: center;" data-i18n="strategy.colAhorro">Ahorro</th>
+                              <th style="padding: 6px 4px; text-align: center;" data-i18n="strategy.colCobertura">Cobertura</th>
+                          </tr>
+                      </thead>
+                      <tbody id="reducedSystemsCompareTableBody">
+                          <!-- Rellenado dinámicamente -->
+                      </tbody>
+                  </table>
+              </div>
           </div>
 
           <!-- Cuadro de Información del Sistema -->

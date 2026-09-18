@@ -3726,6 +3726,7 @@ class DataLotto49Advanced {
       option.textContent = 'No hay sistemas reducidos para este juego';
       select.appendChild(option);
       this.updateReducedSystemInfo();
+      this.renderReducedSystemsComparisonTable();
       return;
     }
     
@@ -3737,6 +3738,36 @@ class DataLotto49Advanced {
     });
     
     this.updateReducedSystemInfo();
+    this.renderReducedSystemsComparisonTable();
+  }
+
+  renderReducedSystemsComparisonTable() {
+    const tbody = document.getElementById('reducedSystemsCompareTableBody');
+    if (!tbody) return;
+
+    const systems = REDUCED_SYSTEMS[this.currentGame.id] || [];
+
+    if (systems.length === 0) {
+      tbody.innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = systems.map(system => {
+      const total = this.getMultipleCombinationsCount(system.baseNumbersCount);
+      const savings = total > 0 ? Math.min(99, Math.round((1 - (system.combinationsCount / total)) * 100)) : 0;
+      const match = system.id.match(/reduced-\d+-(\d+)-/);
+      const guaranteeLabel = match ? `(al ${match[1]})` : '';
+      const systemLabel = `${system.baseNumbersCount} núm. ${guaranteeLabel}`.trim();
+      return `
+        <tr style="border-bottom: 1px solid #dbeafe;">
+          <td style="padding: 6px 4px; font-weight: 500;">${systemLabel}</td>
+          <td style="padding: 6px 4px; text-align: center;">${total.toLocaleString('es-ES')}</td>
+          <td style="padding: 6px 4px; text-align: center; font-weight: 600;">${system.combinationsCount.toLocaleString('es-ES')}</td>
+          <td style="padding: 6px 4px; text-align: center; color: #16a34a; font-weight: 600;">-${savings}%</td>
+          <td style="padding: 6px 4px; text-align: center; color: #16a34a; font-weight: 600;">100%</td>
+        </tr>
+      `;
+    }).join('');
   }
   
   updateReducedSystemInfo() {
@@ -5736,6 +5767,10 @@ class DataLotto49Advanced {
     document.getElementById('downloadTxtBtn')?.addEventListener('click', () => this.downloadTicketAsTxt());
     document.getElementById('reducedSystemSelect')?.addEventListener('change', () => {
         this.updateReducedSystemInfo();
+    });
+    document.getElementById('reducedSystemsCompareInfoBtn')?.addEventListener('click', () => {
+        const box = document.getElementById('reducedSystemsCompareInfoBox');
+        if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
     });
     document.getElementById('reducedAiBaseBtn')?.addEventListener('click', () => {
         this.selectAiBase();
