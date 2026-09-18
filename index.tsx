@@ -517,10 +517,18 @@ class DataLotto49Advanced {
     this.loadState();
     // Defer the first grid render to after the browser's initial layout pass — measuring
     // container width too early (right at boot) can yield a smaller-than-final value, making
-    // the number grid render undersized only on this very first paint.
-    requestAnimationFrame(() => {
+    // the number grid render undersized only on this very first paint. We AWAIT this instead
+    // of firing it and moving on: later steps in init() paint ball state onto the grid, and
+    // those run in a microtask that resolves before the next animation frame — without this
+    // await they were racing ahead of grid creation and painting onto a grid that didn't
+    // exist yet, leaving it blank on the very first load (fixed itself on a later game switch,
+    // once the grid had finally been created).
+    await new Promise<void>(resolve => {
       requestAnimationFrame(() => {
-        this.createNumbersGrid();
+        requestAnimationFrame(() => {
+          this.createNumbersGrid();
+          resolve();
+        });
       });
     });
 

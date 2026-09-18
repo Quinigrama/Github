@@ -149,16 +149,16 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-10-4-4',
-      name: '10 Números; garantizados 4 aciertos si caen los 5 (21 apuestas - 31,50 €)',
+      name: '10 Números; garantizados 4 aciertos si caen los 5 (14 apuestas - 21,00 €)',
       baseNumbersCount: 10,
-      combinationsCount: 21,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 números elegidos están los 5 ganadores (1 Clave fija).'
     },
     {
       id: 'reduced-12-4-4',
-      name: '12 Números; garantizados 4 aciertos si caen los 5 (40 apuestas - 60,00 €)',
+      name: '12 Números; garantizados 4 aciertos si caen los 5 (39 apuestas - 58,50 €)',
       baseNumbersCount: 12,
-      combinationsCount: 40,
+      combinationsCount: 39,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 números elegidos están los 5 ganadores (1 Clave fija).'
     },
     {
@@ -193,16 +193,16 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-10-4-4',
-      name: '10 Números; garantizados 4 aciertos si caen los 5 (21 apuestas - 52,50 €)',
+      name: '10 Números; garantizados 4 aciertos si caen los 5 (14 apuestas - 35,00 €)',
       baseNumbersCount: 10,
-      combinationsCount: 21,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 números elegidos están los 5 ganadores (2 estrellas fijas).'
     },
     {
       id: 'reduced-12-4-4',
-      name: '12 Números; garantizados 4 aciertos si caen los 5 (40 apuestas - 100,00 €)',
+      name: '12 Números; garantizados 4 aciertos si caen los 5 (39 apuestas - 97,50 €)',
       baseNumbersCount: 12,
-      combinationsCount: 40,
+      combinationsCount: 39,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 números elegidos están los 5 ganadores (2 estrellas fijas).'
     },
     {
@@ -231,42 +231,42 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
   powerball: [
     {
       id: 'reduced-8-4-4',
-      name: '8 Blancas; garantizados 4 aciertos si caen los 5 (5 apuestas)',
+      name: '8 Blancas; garantizados 4 aciertos si caen los 5 (5 apuestas - $10.00)',
       baseNumbersCount: 8,
       combinationsCount: 5,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 8 números elegidos caen los 5 ganadores.'
     },
     {
       id: 'reduced-10-4-4',
-      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (21 apuestas)',
+      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (14 apuestas - $28.00)',
       baseNumbersCount: 10,
-      combinationsCount: 21,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 números elegidos caen los 5 ganadores.'
     },
     {
       id: 'reduced-12-4-4',
-      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (40 apuestas)',
+      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (39 apuestas - $78.00)',
       baseNumbersCount: 12,
-      combinationsCount: 40,
+      combinationsCount: 39,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 números elegidos caen los 5 ganadores.'
     },
     {
       id: 'reduced-10-3-3',
-      name: '10 Blancas; garantizados 3 aciertos si caen los 5 (2 apuestas)',
+      name: '10 Blancas; garantizados 3 aciertos si caen los 5 (2 apuestas - $4.00)',
       baseNumbersCount: 10,
       combinationsCount: 2,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 10 números elegidos caen los 5 ganadores.'
     },
     {
       id: 'reduced-12-3-3',
-      name: '12 Blancas; garantizados 3 aciertos si caen los 5 (6 apuestas)',
+      name: '12 Blancas; garantizados 3 aciertos si caen los 5 (6 apuestas - $12.00)',
       baseNumbersCount: 12,
       combinationsCount: 6,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 12 números elegidos caen los 5 ganadores.'
     },
     {
       id: 'reduced-15-3-3',
-      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (14 apuestas)',
+      name: '15 Blancas; garantizados 3 aciertos si caen los 5 (14 apuestas - $28.00)',
       baseNumbersCount: 15,
       combinationsCount: 14,
       description: 'Garantiza al menos un premio de 3 aciertos si entre tus 15 números elegidos caen los 5 ganadores.'
@@ -282,16 +282,16 @@ export const REDUCED_SYSTEMS: { [gameId: string]: ReducedSystem[] } = {
     },
     {
       id: 'reduced-10-4-4',
-      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (21 apuestas - $42.00)',
+      name: '10 Blancas; garantizados 4 aciertos si caen los 5 (14 apuestas - $28.00)',
       baseNumbersCount: 10,
-      combinationsCount: 21,
+      combinationsCount: 14,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 10 números elegidos caen los 5 ganadores (1 Mega Ball fija).'
     },
     {
       id: 'reduced-12-4-4',
-      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (40 apuestas - $80.00)',
+      name: '12 Blancas; garantizados 4 aciertos si caen los 5 (39 apuestas - $78.00)',
       baseNumbersCount: 12,
-      combinationsCount: 40,
+      combinationsCount: 39,
       description: 'Garantiza al menos un premio de 4 aciertos si entre tus 12 números elegidos caen los 5 ganadores (1 Mega Ball fija).'
     },
     {
